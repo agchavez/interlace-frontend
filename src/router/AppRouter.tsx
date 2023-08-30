@@ -1,41 +1,38 @@
-import { useEffect } from 'react'
 import { Route, Routes } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../store"
 import { PrivateRoute } from "./PrivateRoute";
-import { login } from "../store/auth";
+import AuthRouter from '../modules/auth/AuthRouter';
+import { useAppDispatch, useAppSelector } from '../store';
+import { useEffect } from "react";
+import { checkToken } from "../store/auth/thunks";
+import HomeRouter from "../modules/home/HomeRouter";
 
 export function AppRouter() {
     const { status } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
+    console.log("status", status)
     useEffect(()=>{
-        setTimeout(() => {
-            dispatch(login({
-                usuario:{
-                    usuarioId:1,
-                    correo: "",
-                    nombre: "abc",
-                    apellido: "def",
-                    grupos:[],
-                    activo:true
-                },
-                success: true,
-                token: "",
-            }))
-        }, 1000);
+        dispatch(checkToken());
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     if (status === 'checking') {
         return <>Loading</>
     }
+    
     return <Routes>
         <Route path="/auth/*" element={
             <PrivateRoute access={status === 'unauthenticated'} path="/">
-                <>hola</>
+                <AuthRouter />
             </PrivateRoute>
         } />
         <Route path="/*" element={
-            <>Home</>
+            <Routes>
+                <Route path="/*" element= {
+                    <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                        <HomeRouter /> 
+                    </PrivateRoute>
+                }/>
+            </Routes>
         } />
         <Route path="*" element={<>Error</>} />
     </Routes>
