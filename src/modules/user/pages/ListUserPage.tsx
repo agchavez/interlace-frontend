@@ -138,9 +138,9 @@ export const ListUserPage = () => {
 
   return (
     <Container maxWidth="lg">
-        <Grid container spacing={3}>
+        <Grid container spacing={1} sx={{ marginTop: 2 }}>
             <Grid item xs={12}>
-                <Typography variant="h5" component="h1" fontWeight={600}>
+                <Typography variant="h5" component="h1" fontWeight={400}>
                     Administrar Usuarios
                 </Typography>
                 <Divider sx={{marginBottom: 0, marginTop: 1}} />

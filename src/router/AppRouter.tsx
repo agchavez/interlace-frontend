@@ -7,18 +7,19 @@ import { useAppDispatch, useAppSelector } from '../store';
 import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
+import Navbar from '../modules/ui/components/Navbar';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 
 export function AppRouter() {
     const { status } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
-    useEffect(()=>{
+    useEffect(() => {
         dispatch(checkToken());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-   
+
     // useEffect(() => {
     //     setTimeout(() => {
     //         dispatch(login({
@@ -92,21 +93,25 @@ export function AppRouter() {
                 <AuthRouter />
             </PrivateRoute>
         } />
-        <Route path="/user/*" element={
-            <PrivateRoute access={status === 'authenticated'} path="/">
-                <LazyLoading Children={
-                    UserRouter
-                } />
-            </PrivateRoute>
-        } />
+
         <Route path="/*" element={
-            <Routes>
-                <Route path="/*" element= {
-                    <PrivateRoute access={status === 'authenticated'} path="/auth/login">
-                        <HomeRouter /> 
-                    </PrivateRoute>
-                }/>
-            </Routes>
+            <>
+                <Navbar />
+                <Routes>
+                    <Route path="/*" element={
+                        <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                            <HomeRouter />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/user/*" element={
+                        <PrivateRoute access={status === 'authenticated'} path="/">
+                            <LazyLoading Children={
+                                UserRouter
+                            } />
+                        </PrivateRoute>
+                    } />
+                </Routes>
+            </>
         } />
         <Route path="*" element={<>Error</>} />
     </Routes>
