@@ -8,15 +8,18 @@ import { AppRouter } from './router/AppRouter';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { BrowserRouter } from 'react-router-dom';
-
+import { maintheme } from './config/theme';
+import { ThemeProvider } from '@emotion/react';
 
 function App() {
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <AppRouter />
-      </BrowserRouter>
-    </Provider>
+    <ThemeProvider theme={maintheme}>
+      <Provider store={store}>
+        <BrowserRouter>
+          <AppRouter />
+        </BrowserRouter>
+      </Provider>
+    </ThemeProvider>
   )
 }
 

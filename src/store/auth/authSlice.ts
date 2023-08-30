@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Usuario, LoginResponse } from "../../interfaces/login";
+import { LoginResponseOk, User } from "../../interfaces/login";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
 
 interface authInterface {
-    user: Usuario | null;
+    user: User | null;
     token: string;
     tokenExpires: Date | null;
     logoutType: LogOutType | null;
@@ -30,10 +30,10 @@ export const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        login: (state, action:PayloadAction<LoginResponse>) => {
-            state.user = action.payload.usuario;
-            state.token = action.payload.token;
-            state.isAuthenticated = action.payload.success;
+        login: (state, action:PayloadAction<LoginResponseOk>) => {
+            state.user = action.payload.user;
+            state.token = action.payload.token.access;
+            state.isAuthenticated = action.payload.user?true:false;
             state.status = "authenticated";
             state.loading = false
         },
@@ -47,9 +47,12 @@ export const authSlice = createSlice({
             state.tokenExpires = null
             localStorage.removeItem("token")
         },
-        updateProfile: (state, action: PayloadAction<Usuario>) =>{
-            state.user = action.payload;
+        updateProfile: (state, action: PayloadAction<LoginResponseOk>) =>{
+            state.user = action.payload.user;
             state.loading = false;
+        },
+        setStatus: (state, action: PayloadAction<AuthStatus>) => {
+            state.status = action.payload
         }
     }
 })
@@ -58,4 +61,5 @@ export const {
     login,
     logout,
     updateProfile,
+    setStatus,
 } = authSlice.actions;
