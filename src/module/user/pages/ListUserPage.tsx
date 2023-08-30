@@ -3,7 +3,7 @@ import { DataGrid, GridCellParams, GridColDef, esES } from '@mui/x-data-grid';
 import { format } from 'date-fns';
 import FilterAltTwoToneIcon from '@mui/icons-material/FilterAltTwoTone';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
+import LockResetTwoToneIcon from '@mui/icons-material/LockResetTwoTone';
 import { useState } from 'react';
 function getRoleChip(group: string[]): JSX.Element {
     return <Chip
@@ -26,21 +26,21 @@ export const ListUserPage = () => {
             field: 'nombre',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'Nombre', width: 150,
+            headerName: 'NOMBRE', width: 150,
             minWidth: 150,
         },
         {
             field: 'apellido',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'Apellido', width: 150,
+            headerName: 'APELLIDO', width: 150,
             minWidth: 150,
         },
         {
             field: 'correo',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'Correo',
+            headerName: 'CORREO',
             width: 200,
             minWidth: 200,
         },
@@ -48,7 +48,7 @@ export const ListUserPage = () => {
             field: 'grupo',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'Grupo',
+            headerName: 'GRUPO',
             width: 150,
             minWidth: 150,
             renderCell: (params: GridCellParams) =>
@@ -59,7 +59,7 @@ export const ListUserPage = () => {
             field: 'fechaCreacion',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'Fecha de creación',
+            headerName: 'FECHA DE CREACIÓN',
             width: 170,
             minWidth: 170,
             valueFormatter: (params) => format(new Date(params.value), 'dd/MM/yyyy'),
@@ -76,7 +76,7 @@ export const ListUserPage = () => {
             field: 'actions',
             flex: 0,
             headerClassName: "base__header",
-            headerName: 'Acciones',
+            headerName: 'ACCIONES',
             width: 100,
             align: 'center',
             renderCell: (params: GridCellParams) => (
@@ -85,6 +85,7 @@ export const ListUserPage = () => {
                         color="default"
                         size="medium"
                         onClick={() => console.log(params.row)}
+                        title='Editar usuario'
                     >
                         <EditTwoToneIcon fontSize="medium" />
                     </IconButton>
@@ -92,8 +93,11 @@ export const ListUserPage = () => {
                         color="default"
                         size="medium"
                         onClick={() => console.log(params.row)}
+                        // mensaje al poner el mouse encima
+                        title="Resetear contraseña"
+                        
                     >
-                        <DeleteTwoToneIcon fontSize="medium" />
+                        <LockResetTwoToneIcon fontSize="medium" />
                     </IconButton>
                 </Box>
             ),
