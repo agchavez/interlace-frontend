@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import { FunctionComponent } from "react";
 
 interface NavbarProps {
@@ -7,8 +8,16 @@ interface NavbarProps {
 const Navbar: FunctionComponent<NavbarProps> = () => {
     return (
         <nav className="home__navbar">
-            <div className="home__user">Nombre de Usuario</div>
-            <div className="home__store">Almacén #123</div>
+            <div className="home__user">
+                <Typography >
+                    Usuario: Gabriel Chavez
+                </Typography>
+            </div>
+            <div className="home__store">
+                <Typography >
+                    Almacén Tegucigalpa
+                </Typography>
+            </div>
         </nav>
     );
 }

@@ -1,8 +1,60 @@
 .home__navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: right;
     align-items: center;
-    background-color: #333;
+    background-color: $color-sidebar-primary;
     color: #fff;
     padding: 10px 20px;
+}
+
+.home__user {
+    margin: 0 1rem;
+}
+.home__store {
+    color: $color-primary;
+}
+
+.sidebar_item__child {
+    display: block;
+    height: 2rem;
+    margin-top: 0.5rem;
+    border-radius: 5px;
+    :hover {
+        background-color: #252e3e;
+        border-radius: 7px;
+    }
+}
+
+.close{
+    display: none;
+}
+
+.sidebar__root {
+    background-color: $color-sidebar-primary;
+    color: $text-sidebar-primary;
+    height: 100vh;
+}
+
+.text_gray {
+    color: $text-sidebar-primary;
+}
+
+.text_white {
+    color: white;
+}
+
+.sidebar_item__main {
+    height: 2rem;
+    line-height: 2rem;
+    border-radius: 5px;
+    :hover {
+        background-color: #252e3e;
+        cursor: pointer;
+    }
+}
+
+.sidebar_item__main_selected{
+    color: white;
+    background-color: #252e3e;
+    line-height: 2rem;
 }

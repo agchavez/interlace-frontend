@@ -1,8 +1,8 @@
-import Navbar from "../../ui/components/Navbar";
+import { Grid } from "@mui/material";
 
 export default function HomePage() {
-    return <>
-        <Navbar />
-        Home Page
-    </>
+    return (
+        <Grid container>
+        </Grid>
+    )
 }

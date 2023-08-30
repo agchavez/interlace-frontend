@@ -2,68 +2,60 @@
 import { useEffect, lazy } from 'react'
 import { Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./PrivateRoute";
-import AuthRouter from '../modules/auth/AuthRouter';
 import { useAppDispatch, useAppSelector } from '../store';
 import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
-import { login } from "../store/auth";
 import { LazyLoading } from '../module/ui/components/LazyLoading';
+import Sidebar from '../modules/ui/components/Sidebar';
+import { Grid } from '@mui/material';
+import Navbar from '../modules/ui/components/Navbar';
 
 const UserRouter = lazy(() => import('../module/user/UserRouter'));
+const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 
 export function AppRouter() {
     const { status } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
-    console.log("status", status)
-    useEffect(()=>{
-        dispatch(checkToken());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-   
     useEffect(() => {
-        setTimeout(() => {
-            dispatch(login({
-                usuario: {
-                    usuarioId: 1,
-                    correo: "",
-                    nombre: "abc",
-                    apellido: "def",
-                    grupos: [],
-                    activo: true
-                },
-                success: true,
-                token: "",
-            }))
-        }, 1000);
+        dispatch(checkToken());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // if (status === 'checking') {
     //     return <>Loading</>
     // }
-    return <Routes>
-        <Route path="/auth/*" element={
-            <PrivateRoute access={status === 'unauthenticated'} path="/">
-                <AuthRouter />
-            </PrivateRoute>
-        } />
-        <Route path="/user/*" element={
-            <PrivateRoute access={status === 'authenticated'} path="/">
-                <LazyLoading Children={
-                    UserRouter
-                } />
-            </PrivateRoute>
-        } />
-        <Route path="/*" element={
-            <Routes>
-                <Route path="/*" element= {
-                    <PrivateRoute access={status === 'authenticated'} path="/auth/login">
-                        <HomeRouter /> 
-                    </PrivateRoute>
-                }/>
-            </Routes>
-        } />
-        <Route path="*" element={<>Error</>} />
-    </Routes>
+    return <>
+        <Grid container >
+            <Sidebar open={true} />
+            <Grid item xs={10}>
+                <Grid container direction="column">
+                    <Navbar />
+                    <Grid item >
+                        <Routes>
+                            <Route path="/auth/*" element={
+                                <PrivateRoute access={status === 'unauthenticated'} path="/">
+                                    <LazyLoading Children={
+                                        AuthRouter
+                                    } />
+                                </PrivateRoute>
+                            } />
+                            <Route path="/user/*" element={
+                                <PrivateRoute access={status === 'authenticated'} path="/">
+                                    <LazyLoading Children={
+                                        UserRouter
+                                    } />
+                                </PrivateRoute>
+                            } />
+                            <Route path="/*" element={
+                                <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                                    <HomeRouter />
+                                </PrivateRoute>
+                            } />
+                            <Route path="*" element={<>Error</>} />
+                        </Routes>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </>
 }
