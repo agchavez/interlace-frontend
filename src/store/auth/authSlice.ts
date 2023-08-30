@@ -21,7 +21,7 @@ const initialState: authInterface = {
     tokenExpires: null,
     token: localStorage.getItem('token') || '',
     isAuthenticated: false,
-    status: 'checking',
+    status: 'authenticated',
     loading: false,
     openLogoutModal: false,
 }
@@ -31,7 +31,6 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action:PayloadAction<LoginResponse>) => {
-            console.log("accion")
             state.user = action.payload.usuario;
             state.token = action.payload.token;
             state.isAuthenticated = action.payload.success;
