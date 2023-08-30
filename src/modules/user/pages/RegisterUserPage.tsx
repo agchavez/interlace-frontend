@@ -14,7 +14,7 @@ export const RegisterUserPage = () => {
     <Container maxWidth="lg">
         <Grid container spacing={2}>
             <Grid item xs={12}>
-                <Typography variant="h5" component="h1" fontWeight={200}>
+            <Typography variant="h5" component="h1" fontWeight={600}>
                     Registrar usuarios
                 </Typography>
                 <Divider sx={{marginBottom: 0, marginTop: 1}} />

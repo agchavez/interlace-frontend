@@ -1,5 +1,11 @@
 // Colors global
-$color-primary: #1e88e5;
+$color-primary: #e7cf0f;
+$color-secondary: #110f0d;
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
 
 .base__header {
     padding: 1rem;

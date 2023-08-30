@@ -1,6 +1,5 @@
 import { Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, CircularProgress } from '@mui/material';
 import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
-import SaveTwoToneIcon from '@mui/icons-material/SaveTwoTone';
 // react hook form
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -183,7 +182,7 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                 variant="contained"
                                 color="primary"
                                 size="small"
-                                startIcon={loading ? <CircularProgress size={20} /> : <SaveTwoToneIcon />}
+                                startIcon={loading ? <CircularProgress size={20} /> : null}
                                 type='submit'
                                 disabled={loading}
                             >

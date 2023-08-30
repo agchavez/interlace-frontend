@@ -140,7 +140,7 @@ export const ListUserPage = () => {
     <Container maxWidth="lg">
         <Grid container spacing={3}>
             <Grid item xs={12}>
-                <Typography variant="h5" component="h1" fontWeight={200}>
+                <Typography variant="h5" component="h1" fontWeight={600}>
                     Administrar Usuarios
                 </Typography>
                 <Divider sx={{marginBottom: 0, marginTop: 1}} />
@@ -149,12 +149,14 @@ export const ListUserPage = () => {
                 <Button 
                     color="primary"
                     size="small"
-                    variant="outlined"
+                    variant="contained"
                     sx={{marginBottom: 1}}
                     onClick={() => console.log('click')}
-                    startIcon={<FilterAltTwoToneIcon />}
+                    startIcon={<FilterAltTwoToneIcon color="inherit" fontSize="small" />}   
                 >
+                    <Typography variant="body2" component="span" fontWeight={200} color={'gray.700'}>
                     Filtrar
+                    </Typography>
                 </Button>
             </Grid>
             <Grid item xs={12}>
