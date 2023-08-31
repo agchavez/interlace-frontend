@@ -22,27 +22,26 @@ interface SideBarItem {
 
 const items: SideBarItem[] = [
     {
-        text: "Usiaros",
+        text: "USUARIO",
         icon: <PeopleOutlineIcon sx={{ width: "30px" }} color="primary" />,
         subItems: [
-            { text: "Crear", href: "/user/register", id: "crear", selected: true },
-            { text: "Gestión", href: "/user/", id: "gestion" }
+            { text: "Registro", href: "/user/register", id: "crear", selected: true },
+            { text: "Administrar", href: "/user/", id: "gestion" }
         ],
         id: "usuarios"
     },
     {
-        text: "Movimientos",
+        text: "SEGUIMIENTO",
         subItems: [
-            { text: "Nuevo", href: "/movimientos/crear", id: "nuevo" },
-            { text: "Historial", href: "/movimientos", id: "historial" },
+            { text: "Seguimiento", href: "/tracker/check", id: "nuevo" },
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "movimientos"
     },
     {
-        text: "Reportes",
+        text: "REPORTE",
         subItems: [
-            { text: "Crear Reporte", href: "/movimientos/crear", id: "nuevo" },
+            { text: "Movimientos", href: "/movimientos/crear", id: "nuevo" },
         ],
         icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "reportes"
@@ -70,8 +69,8 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
                         })
                     }
                 </Grid>
-                <Grid item container sx={{ paddingLeft: "1.2rem", marginBottom: "1rem", paddingRight: "1rem" }}>
-                    <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout}>
+                <Grid item container sx={{ borderTop: "1px solid #e0e0e0" , padding: "0.5rem 0" }}>
+                    <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout} style={{ cursor: "pointer" }}>
                         <Grid item xs={2} textAlign="right">
                             <Grid container alignItems="center" justifyContent="flex-end" height="100%">
                                 <LogoutOutlinedIcon color="primary" />
@@ -79,7 +78,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
                         </Grid>
                         <Grid item flexGrow={1}>
                             <Typography variant="body1" component="h2" fontWeight={200} lineHeight="2rem">
-                                Logout
+                                Cerrar sesión
                             </Typography>
                         </Grid>
                     </Grid>

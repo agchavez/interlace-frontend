@@ -141,7 +141,7 @@ export const ListUserPage = () => {
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
             <Grid item xs={12}>
                 <Typography variant="h5" component="h1" fontWeight={400}>
-                    Administrar Usuarios
+                    Administrar usuarios
                 </Typography>
                 <Divider sx={{marginBottom: 0, marginTop: 1}} />
             </Grid>
