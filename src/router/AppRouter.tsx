@@ -13,6 +13,7 @@ import Navbar from '../modules/ui/components/Navbar';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
+const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
 
 export function AppRouter() {
     const { status } = useAppSelector(state => state.auth);
@@ -92,12 +93,12 @@ export function AppRouter() {
     // }
 
     return <>
-        <Grid container >
+        <div >
             {status === 'authenticated' && <Sidebar open={true} />}
                     <Navbar />
-            <Grid item xs={12}>
-                <Grid container direction="column" className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>
-                    <Grid item >
+            <div>
+                <div className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>
+                    
                         <Routes>
                             <Route path="/auth/*" element={
                                 <PrivateRoute access={status === 'unauthenticated'} path="/">
@@ -113,16 +114,23 @@ export function AppRouter() {
                                     } />
                                 </PrivateRoute>
                             } />
+                            <Route path="/tracker/*" element={
+                                <PrivateRoute access={status === 'authenticated'} path="/">
+                                    <LazyLoading Children={
+                                        TrackerRouter
+                                    } />
+                                </PrivateRoute>
+                            } />
                             <Route path="/*" element={
                                 <PrivateRoute access={status === 'authenticated'} path="/auth/login">
                                     <HomeRouter />
                                 </PrivateRoute>
                             } />
+                            
                             <Route path="*" element={<>Error</>} />
                         </Routes>
-                    </Grid>
-                </Grid>
-            </Grid>
-        </Grid>
+                </div>
+            </div>
+        </div>
     </>
 }

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, FormLabel, InputLabel, Grid } from '@mui/material';
+import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid } from '@mui/material';
 import { useState } from "react";
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
@@ -50,8 +50,10 @@ export function LoginForm() {
                     Ingrese sus credenciales para acceder al sistema
                 </Typography>
             </Container>
-            <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ padding: "1rem" }} autoComplete="off">
-                <Grid container spacing={2}>
+            <form onSubmit={handleSubmit(onSubmit)} noValidate 
+                style={{ padding: "1rem", width: "100%" }}
+                autoComplete="off">
+                <Grid container spacing={2} sx={{ width: "100%" }}>
                     <Grid item xs={12}>
                         <TextField
                             variant="outlined"
@@ -108,7 +110,9 @@ export function LoginForm() {
                     type="submit"
                     sx={{ marginTop: "1rem", marginBottom: "1rem" }}
                 >
+                    <Typography component="body" variant="body1" textAlign="center">
                     Iniciar Sesión
+                    </Typography>
                 </Button>
             </form>
         </Paper>

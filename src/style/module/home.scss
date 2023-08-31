@@ -33,7 +33,7 @@
     background-color: $color-sidebar-primary;
     color: $text-sidebar-primary;
     height: calc(100vh - 3rem);
-    margin-top: 3rem !important;
+    margin-top: 0rem !important;
     position: fixed;
     width: 15rem;
     z-index: 1;
@@ -45,7 +45,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 250px;
+    margin-left: 240px;
     margin-top: 3rem;
     width: calc(100vw - 270px) !important;
     

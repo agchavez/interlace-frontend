@@ -91,8 +91,12 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                     value={watch('group') || ''}
                                 >
                                     <MenuItem value={''}></MenuItem>
-                                    <MenuItem value={1}>Administrador</MenuItem>
-                                    <MenuItem value={2}>Usuario</MenuItem>
+                                    <MenuItem value={1}>
+                                        ADMINISTRADOR
+                                    </MenuItem>
+                                    <MenuItem value={2}>
+                                        SUPERVISOR
+                                    </MenuItem>
 
                                 </Select>
                                 { errors.group &&
@@ -171,7 +175,9 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                 )}
                                 startIcon={<CleaningServicesTwoToneIcon />}
                             >
+                                <Typography variant="button" fontWeight={300}>
                                 Limpiar
+                                </Typography>
                             </Button>
                         </Grid>
                         <Grid item xs={12} md={6} lg={8}>
@@ -186,7 +192,10 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                 type='submit'
                                 disabled={loading}
                             >
+                                <Typography variant="button" fontWeight={300}>
+
                                 Registrar
+                                </Typography>
                             </Button>
                         </Grid>
 
