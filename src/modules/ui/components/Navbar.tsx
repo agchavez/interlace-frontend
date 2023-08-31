@@ -4,7 +4,7 @@ import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
 
 // import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-import {  useAppSelector } from '../../../store';
+import { useAppSelector } from '../../../store';
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
 const Navbar = () => {
@@ -24,7 +24,7 @@ const Navbar = () => {
         handleClose();
     }
 
-
+    console.log(user)
 
     return (
         <Grid container
@@ -64,20 +64,37 @@ const Navbar = () => {
                     alignItems={'center'}
                     flexDirection={'row'}
                 >
-
-                    <Typography
-                        variant="subtitle2"
-                        component="h1"
-                        style={{
-                            color: "black",
-                        }}
-                        fontWeight={400}
-                    >
-                        { user && 
-                            (user.first_name || '').toLowerCase().split(' ')[0].charAt(0).toUpperCase() + (user.first_name || '').toLowerCase().split(' ')[0].slice(1) 
-                            + ' ' + 
-                            (user.last_name || '').toLowerCase().split(' ')[0].charAt(0).toUpperCase() + (user.last_name || '').toLowerCase().split(' ')[0].slice(1) }
-                    </Typography>
+                    <Divider orientation='vertical' flexItem sx={{marginRight:2}}/>
+                    <Grid container flexDirection="column" alignItems="flex-end">
+                        <Grid item>
+                            <Typography
+                                variant="subtitle2"
+                                component="h1"
+                                style={{
+                                    color: "black",
+                                }}
+                                fontWeight={700}
+                            >
+                                {user &&
+                                    (user.first_name || '').toLowerCase().split(' ')[0].charAt(0).toUpperCase() + (user.first_name || '').toLowerCase().split(' ')[0].slice(1)
+                                    + ' ' +
+                                    (user.last_name || '').toLowerCase().split(' ')[0].charAt(0).toUpperCase() + (user.last_name || '').toLowerCase().split(' ')[0].slice(1)}
+                            </Typography>
+                        </Grid>
+                        <Grid item>
+                            <Typography
+                                variant="body2"
+                                component="h1"
+                                style={{
+                                    color: "black",
+                                }}
+                                fontWeight={200}
+                                fontSize={13}
+                            >
+                                {user && (user.centro_distribucion?.toString() || 'DH01 - CD La Granja')}
+                            </Typography>
+                        </Grid>
+                    </Grid>
 
                     <Tooltip title="Configuraciones">
                         <IconButton

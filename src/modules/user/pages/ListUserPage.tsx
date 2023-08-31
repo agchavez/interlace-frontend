@@ -12,7 +12,7 @@ function getRoleChip(group: string[]): JSX.Element {
         color="default"
         size="small"
         sx={{
-            color: (theme) => theme.palette.primary.main,
+            color: (theme) => theme.palette.secondary.main,
             borderColor: (theme) => theme.palette.primary.main + ' !important',
         }}
     />
