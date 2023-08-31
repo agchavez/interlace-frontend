@@ -42,6 +42,25 @@ export const RegisterUserPage = () => {
                 />
                 </Paper>
             </Grid>
+            <Grid item xs={12}>
+                <Paper elevation={1} sx={{ padding: 2 }}>
+                <UserForm
+                    onSubmit={onSubmit}
+                    loading={false}
+                    initialValues={{
+                        fistName: '',
+                        lastName: '',
+                        email: '',
+                        password: '',
+                        confirmPassword: '',
+                        group: ''
+
+                    }}
+                    isEdit={false}
+                />
+                </Paper>
+            </Grid>
+            
             
         </Grid>
 

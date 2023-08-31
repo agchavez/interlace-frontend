@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography } from "@mui/material";
+import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, FormLabel, InputLabel, Grid } from '@mui/material';
 import { useState } from "react";
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
@@ -41,61 +41,66 @@ export function LoginForm() {
     }
     return (
         <Paper elevation={3} className="auth__papaer" sx={{ borderRadius: 5 }}>
-            <Container style={{ paddingLeft: 0 }}>
+            <Container>
                 <Typography component="h1" variant="h5" textAlign="center">
                     Iniciar Sesión
                 </Typography>
-                <Divider />
+                <Divider sx={{ marginTop: "1rem", marginBottom: "1rem" }} />
+                <Typography component="body" variant="body1" textAlign="start">
+                    Ingrese sus credenciales para acceder al sistema
+                </Typography>
             </Container>
             <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ padding: "1rem" }} autoComplete="off">
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <TextField
+                            variant="outlined"
+                            size="medium"
+                            label="Correo"
+                            color="primary"
+                            margin="normal"
 
-                <Typography variant="body1" color="inherit" >
-                    Correo
-                </Typography>
-                <TextField
-                    placeholder="Correo"
-                    variant="outlined"
-                    size="small"    
-                    color="primary"
-                    margin="normal"
-                    fullWidth
-                    id="email"
-                    {...register("email")}
-                    error={errors.email?.message ? true : false}
-                    helperText={errors.email?.message}
-                    className="auth__input"
-                    style={{ marginTop: 0 }}
-                />
-                <Typography variant="body1" color="inherit" >
-                    Contraseña
-                </Typography>
-                <OutlinedInput
-                    id="password"
-                    placeholder="Contraseña"
-                    color="primary"
-                    label="Contraseña"
-                    autoComplete="off"
-                    size="small"
-                    type={showPassword ? "text" : "password"}
-                    fullWidth
-                    {...register('password')}
-                    endAdornment={
-                        <InputAdornment position="end">
-                            <IconButton
-                                aria-label="toggle password visibility"
-                                onClick={() => setShowPassword(!showPassword)}
-                                onMouseDown={() => setShowPassword(!showPassword)}
-                                edge="end"
-                            >
-                                {
-                                    showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />
+                            fullWidth
+                            id="email"
+                            {...register("email")}
+                            error={errors.email?.message ? true : false}
+                            helperText={errors.email?.message}
+                            className="auth__input"
+                            style={{ marginTop: 0 }}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <FormControl variant="outlined" fullWidth error={errors.password?.message ? true : false}>
+                            <InputLabel htmlFor="outlined-adornment-password">
+                                Contraseña
+                            </InputLabel>
+                            <OutlinedInput
+                                id="outlined-adornment-password"
+                                type={showPassword ? "text" : "password"}
+                                {...register('password')}
+                                error={errors.password?.message ? true : false}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            onMouseDown={() => setShowPassword(!showPassword)}
+                                            edge="end"
+                                        >
+                                            {
+                                                showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />
+                                            }
+                                        </IconButton>
+                                    </InputAdornment>
                                 }
-                            </IconButton>
-                        </InputAdornment>
-                    }
-                    error={errors.password?.message ? true : false}
-                    aria-errormessage={errors.password?.message}
-                />
+                                label="Password"
+                            />
+                            <Typography component="body" variant="body2" textAlign="start" color="red">
+                                {errors.password?.message}
+                            </Typography>
+                        </FormControl>
+                    </Grid>
+                </Grid>
                 <Button
                     fullWidth
                     variant="contained"

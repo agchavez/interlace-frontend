@@ -52,8 +52,59 @@ export const authSlice = createSlice({
             state.loading = false;
         },
         setStatus: (state, action: PayloadAction<AuthStatus>) => {
-            state.status = action.payload
-        }
+            state.status = action.payload;
+            state.user= {
+                    "id": "cc9fc03d-2379-476f-b56d-346b15e8f125",
+                    "list_groups": [],
+                    "list_permissions": [
+                        "contenttypes.view_contenttype",
+                        "sessions.add_session",
+                        "maintenance.view_centrodistribucion",
+                        "auth.view_group",
+                        "user.change_detailgroup",
+                        "user.view_usermodel",
+                        "contenttypes.add_contenttype",
+                        "maintenance.delete_centrodistribucion",
+                        "sessions.change_session",
+                        "auth.view_permission",
+                        "user.delete_detailgroup",
+                        "auth.add_permission",
+                        "auth.change_group",
+                        "auth.change_permission",
+                        "auth.delete_group",
+                        "contenttypes.delete_contenttype",
+                        "user.change_usermodel",
+                        "auth.delete_permission",
+                        "maintenance.change_centrodistribucion",
+                        "admin.change_logentry",
+                        "admin.add_logentry",
+                        "user.view_detailgroup",
+                        "user.add_usermodel",
+                        "sessions.view_session",
+                        "user.add_detailgroup",
+                        "admin.view_logentry",
+                        "sessions.delete_session",
+                        "admin.delete_logentry",
+                        "user.delete_usermodel",
+                        "contenttypes.change_contenttype",
+                        "maintenance.add_centrodistribucion",
+                        "auth.add_group"
+                    ],
+                    "centro_distribucion": null,
+                    "last_login": new Date("2023-08-30T06:32:08.853477-06:00"),
+                    "is_superuser": true,
+                    "username": "agchavez",
+                    "is_staff": true,
+                    "is_active": true,
+                    "date_joined": new Date("2023-08-28T20:02:34.782965-06:00"),
+                    "first_name": "GABRIEL",
+                    "last_name": "CHAVEZ",
+                    "email": "agchavez@unah.hn",
+                    "created_at": new Date("2023-08-28T20:02:34.935469-06:00"),
+                    "groups": [],
+                    "user_permissions": []
+                };
+            }
     }
 })
 

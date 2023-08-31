@@ -3,7 +3,7 @@ import { Grid, Tooltip, IconButton, Avatar, Typography, Menu, MenuItem, Divider,
 import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
 
-// import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
+import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import {  useAppSelector } from '../../../store';
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
@@ -43,14 +43,14 @@ const Navbar = () => {
             }}>
             <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'}>
                 {/* Logo */}
-                {/* {status == 'authenticated1' && <IconButton
+                {status == 'authenticated' && <IconButton
                     aria-label="menu"
                     sx={{ mr: 0 }}
                     onClick={() => {
                     }}
                 >
                     <MenuOutlinedIcon fontSize='medium' color='primary' />
-                </IconButton>} */}
+                </IconButton>}
 
                 <div className="nav__img">
                     <img src={logo} alt="img" width={120} className="p-1" />
@@ -91,7 +91,7 @@ const Navbar = () => {
                                 sx={{
                                     width: 32,
                                     height: 32,
-                                    bgcolor: 'secondary.main',
+                                    bgcolor: 'primary.main',
                                     fontSize: '0.8rem',
                                 }}
                             >

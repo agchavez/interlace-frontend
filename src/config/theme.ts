@@ -8,10 +8,11 @@ export const maintheme = createTheme({
     },
     palette: {
         primary: {
-            main:'#dcbb20'
+            main:'#dcbb20',
         },
         secondary: {
-            main: '#110f0d'
-        }
+            main: '#1c2536'
+        },
+
     }
 })

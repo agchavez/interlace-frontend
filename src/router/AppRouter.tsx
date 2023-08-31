@@ -2,18 +2,21 @@
 import { useEffect, lazy } from 'react'
 import { Route, Routes } from "react-router-dom";
 import { PrivateRoute } from "./PrivateRoute";
-import AuthRouter from '../modules/auth/AuthRouter';
 import { useAppDispatch, useAppSelector } from '../store';
 import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
+
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
+import Sidebar from '../modules/ui/components/Sidebar';
+import { Grid } from '@mui/material';
 import Navbar from '../modules/ui/components/Navbar';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
+const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 
 export function AppRouter() {
     const { status } = useAppSelector(state => state.auth);
-    const dispatch = useAppDispatch();
+    const dispatch = useAppDispatch()
     useEffect(() => {
         dispatch(checkToken());
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,32 +90,39 @@ export function AppRouter() {
     // if (status === 'checking') {
     //     return <>Loading</>
     // }
-    return <Routes>
-        <Route path="/auth/*" element={
-            <PrivateRoute access={status === 'unauthenticated'} path="/">
-                <AuthRouter />
-            </PrivateRoute>
-        } />
 
-        <Route path="/*" element={
-            <>
-                <Navbar />
-                <Routes>
-                    <Route path="/*" element={
-                        <PrivateRoute access={status === 'authenticated'} path="/auth/login">
-                            <HomeRouter />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/user/*" element={
-                        <PrivateRoute access={status === 'authenticated'} path="/">
-                            <LazyLoading Children={
-                                UserRouter
+    return <>
+        <Grid container >
+            {status === 'authenticated' && <Sidebar open={true} />}
+                    <Navbar />
+            <Grid item xs={12}>
+                <Grid container direction="column" className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>
+                    <Grid item >
+                        <Routes>
+                            <Route path="/auth/*" element={
+                                <PrivateRoute access={status === 'unauthenticated'} path="/">
+                                    <LazyLoading Children={
+                                        AuthRouter
+                                    } />
+                                </PrivateRoute>
                             } />
-                        </PrivateRoute>
-                    } />
-                </Routes>
-            </>
-        } />
-        <Route path="*" element={<>Error</>} />
-    </Routes>
+                            <Route path="/user/*" element={
+                                <PrivateRoute access={status === 'authenticated'} path="/">
+                                    <LazyLoading Children={
+                                        UserRouter
+                                    } />
+                                </PrivateRoute>
+                            } />
+                            <Route path="/*" element={
+                                <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                                    <HomeRouter />
+                                </PrivateRoute>
+                            } />
+                            <Route path="*" element={<>Error</>} />
+                        </Routes>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+    </>
 }
