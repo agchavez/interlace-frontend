@@ -1,9 +1,11 @@
 import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { authSlice } from './auth'
+import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
 export const store = configureStore({
     reducer: {
-        [authSlice.name]: authSlice.reducer
+        [authSlice.name]: authSlice.reducer,
+        [seguimientoSlice.name]: seguimientoSlice.reducer
     }, 
     devTools: import.meta.env.DEV
 })

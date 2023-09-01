@@ -1,8 +1,10 @@
 import { Container, Typography, Grid, Divider, Box, Tabs, Tab, Button } from '@mui/material';
 import { useState } from 'react';
 import { CheckForm } from '../components/CheckForm';
-
+import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
+import { useAppDispatch, useAppSelector } from '../../../store';
+import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,14 +41,21 @@ function a11yProps(index: number) {
 }
 
 export const CheckPage = () => {
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [value, setValue] = useState(0);
-
+  const { seguimientos } = useAppSelector(state => state.seguimiento)
+  const dispatch = useAppDispatch()
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false)
+  }
+
   return (
     <>
+      <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
@@ -58,13 +67,14 @@ export const CheckPage = () => {
           <Grid item xs={12} md={8} lg={9} xl={10}>
           </Grid>
           <Grid item xs={12} md={4} lg={3} xl={2}
-          style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               variant="outlined"
               color="secondary"
               size="small"
               fullWidth
               startIcon={<PostAddTwoToneIcon color="inherit" fontSize="small" />}
+              onClick={() => setShowCreateModal(true)}
             >
               <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
                 Nueva rastra
@@ -75,20 +85,24 @@ export const CheckPage = () => {
             <Box sx={{ width: '100%' }}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-                  <Tab label="Item One" {...a11yProps(0)} />
-                  <Tab label="Item Two" {...a11yProps(1)} />
-                  <Tab label="Item Three" {...a11yProps(2)} />
+                  {
+                    seguimientos.map((seguimiento) => {
+                      return (
+                        <Tab label={seguimiento.rastra.placa} {...a11yProps(seguimiento.id)} onClick={()=>dispatch(setSeguimientoActual(seguimiento.id))}/>
+                      )
+                    })
+                  }
                 </Tabs>
               </Box>
-              <CustomTabPanel value={value} index={0}>
-                <CheckForm  />
-              </CustomTabPanel>
-              <CustomTabPanel value={value} index={1}>
-                Item Two
-              </CustomTabPanel>
-              <CustomTabPanel value={value} index={2}>
-                Item Three
-              </CustomTabPanel>
+              {
+                seguimientos.map((seguimiento, index) => {
+                  return (
+                    <CustomTabPanel value={value} index={index}>
+                      <CheckForm />
+                    </CustomTabPanel>
+                  )
+                })
+              }
             </Box>
           </Grid>
         </Grid>

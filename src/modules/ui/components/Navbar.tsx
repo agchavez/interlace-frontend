@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Grid, Tooltip, IconButton, Avatar, Typography, Menu, MenuItem, Divider, ListItemIcon } from '@mui/material';
 import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 // import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import { useAppSelector } from '../../../store';
@@ -23,8 +24,6 @@ const Navbar = () => {
     const handleLogout = () => {
         handleClose();
     }
-
-    console.log(user)
 
     return (
         <Grid container
@@ -64,7 +63,7 @@ const Navbar = () => {
                     alignItems={'center'}
                     flexDirection={'row'}
                 >
-                    <Divider orientation='vertical' flexItem sx={{marginRight:2}}/>
+                    <Divider orientation='vertical' flexItem sx={{ marginRight: 2 }} />
                     <Grid container flexDirection="column" alignItems="flex-end">
                         <Grid item>
                             <Typography
@@ -97,24 +96,27 @@ const Navbar = () => {
                     </Grid>
 
                     <Tooltip title="Configuraciones">
-                        <IconButton
-                            onClick={handleClick}
-                            size="small"
-                            aria-controls={open ? 'account-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={open ? 'true' : undefined}
-                        >
-                            <Avatar
-                                sx={{
-                                    width: 32,
-                                    height: 32,
-                                    bgcolor: 'secondary.main',
-                                    fontSize: '0.8rem',
-                                }}
+                        <>
+                            <IconButton
+                                onClick={handleClick}
+                                size="small"
+                                aria-controls={open ? 'account-menu' : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={open ? 'true' : undefined}
                             >
-                                {user && user.first_name.charAt(0).toUpperCase() + user.last_name.charAt(0).toUpperCase()}
-                            </Avatar>
-                        </IconButton>
+                                <Avatar
+                                    sx={{
+                                        width: 32,
+                                        height: 32,
+                                        bgcolor: 'secondary.main',
+                                        fontSize: '0.8rem',
+                                    }}
+                                >
+                                    {user && user.first_name.charAt(0).toUpperCase() + user.last_name.charAt(0).toUpperCase()}
+                                </Avatar>
+                            <KeyboardArrowDownOutlinedIcon />
+                            </IconButton>
+                        </>
                     </Tooltip>
                 </Grid>}
                 <Menu
