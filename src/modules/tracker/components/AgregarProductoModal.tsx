@@ -1,14 +1,9 @@
 import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField,styled } from "@mui/material";
 import { FunctionComponent, useRef, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-// import { Rastra } from '../../../interfaces/tracking';
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-// import { useAppDispatch, useAppSelector } from "../../../store";
-// import { DetalleCargaPalet, addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
 import { productos } from "../../../utils/data";
-import { useAppDispatch } from '../../../store/store';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { addDetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
 import { Producto } from "../../../interfaces/tracking";
 
@@ -32,12 +27,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
-    const schema = yup.object<FormValues>().shape({
-        producto: yup.object<Producto | null>().nullable().required("Este campo es requerido"),
-        cantidad: yup.number().required("Este campo es requerido").min(1, "La cantidad debe ser mayor a 0")
-
-    })
     const dispatch = useAppDispatch();
+    const seguimeintoActual = useAppSelector(state=>state.seguimiento.seguimeintoActual)
 
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -60,7 +51,8 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
             sap: data.producto?.codigo,
             basic: undefined,
             amount: data.cantidad,
-            history: []
+            history: [],
+            index: seguimeintoActual || 0,
         }))
         reset();
         handleClose && handleClose({}, "backdropClick")

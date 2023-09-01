@@ -3,13 +3,12 @@ import { Fragment, useState } from 'react';
 
 // iCONS
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import DriveFileRenameOutlineTwoToneIcon from '@mui/icons-material/DriveFileRenameOutlineTwoTone';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import { useAppDispatch } from '../../../store';
-import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCarga, addDetalleCargaPallet, removeDetalleCargaPallet, updateDetalleCarga, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 
 const localidades = [
@@ -45,7 +44,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     },
 }));
 
-export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
+export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, indice:number }) => {
     const dispatch = useAppDispatch();
     const [open, setopen] = useState(false)
     function updateSeguimientoDatos(datos: DatosGeneralesSeguimiento): unknown {
@@ -55,7 +54,8 @@ export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
             datos: {
                 ...seguimiento.datos,
                 ...datos
-            }
+            },
+            index:indice
         }))
     }
     function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
@@ -65,7 +65,8 @@ export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
             datosOperador: {
                 ...seguimiento.datosOperador,
                 ...datos
-            }
+            },
+            index:indice
         }))
     }
     const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
@@ -371,13 +372,6 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     const { row } = props;
     const [open, setOpen] = useState(false);
     const dispatch = useAppDispatch()
-    const updateProducto = (datos: DetalleCarga) => {
-        if (!props.seguimiento) return;
-        const detalle = props.seguimiento.detalles[props.index]
-        dispatch(updateDetalleCarga({
-            ...detalle, ...datos, index: props.index
-        }))
-    }
     const handleClickAgregar = () => {
         dispatch(addDetalleCargaPallet({
             segIndex: props.seguimiento.id - 1,
@@ -463,7 +457,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                 <TableBody>
                                     {row.history?.map((historyRow, index) => {
                                         return (
-                                            <TableRow key={historyRow.id}>
+                                            <TableRow key={index}>
                                                 <TableCell align="right">
                                                     <TextField
                                                         fullWidth

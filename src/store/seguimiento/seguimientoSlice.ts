@@ -60,7 +60,7 @@ export interface DetalleCarga {
 }
 
 export interface DetalleCargaIdx extends DetalleCarga {
-    index: number
+    index: number,
 }
 
 export interface Seguimiento {
@@ -69,6 +69,10 @@ export interface Seguimiento {
     datos?: DatosGeneralesSeguimiento,
     datosOperador?: DatosOperador,
     detalles: DetalleCarga[]
+}
+
+export interface SeguimientoIDX extends Seguimiento {
+    index:number
 }
 
 interface seguimientoInterface {
@@ -93,42 +97,25 @@ export const seguimientoSlice = createSlice({
         setSeguimientoActual: (state, action: PayloadAction<number>) => {
             state.seguimeintoActual = action.payload
         },
-        updateSeguimiento: (state, action: PayloadAction<Seguimiento>) => {
-            if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
-            const index = state.seguimientos.findIndex((seg) => seg.id === action.payload.id)
-            if (index === -1) throw new Error("Seguimiento no encontrado")
-            state.seguimientos[index] = action.payload
+        updateSeguimiento: (state, action: PayloadAction<SeguimientoIDX>) => {
+            state.seguimientos[action.payload.index] = action.payload
         },
-        addDetalleCarga: (state, action: PayloadAction<DetalleCarga>) => {
+        addDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
             // No se puede agregar un producto que ya existe en el seguimiento validar por codigo sap
-            
-            if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
-            const index1 = state.seguimientos.findIndex((seg) => seg.id === state.seguimeintoActual)
-            if (index1 === -1) throw new Error("Seguimiento no encontrado")
-            if (state.seguimientos[index1].detalles.findIndex((det) => det.sap === action.payload.sap) !== -1) {
+            if (state.seguimientos[action.payload.index].detalles.findIndex((det) => det.sap === action.payload.sap) !== -1) {
                 toast.error("El producto ya existe en el seguimiento")
                 return;
             }
-            state.seguimientos[index1].detalles = [action.payload, ...state.seguimientos[index1].detalles]
-        },
-        updateDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
-            if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
-            const index1 = state.seguimientos.findIndex((seg) => seg.id === state.seguimeintoActual)
-            if (index1 === -1) throw new Error("Seguimiento no encontrado")
-            state.seguimientos[index1].detalles[action.payload.index] = action.payload
+            state.seguimientos[action.payload.index].detalles = [action.payload, ...state.seguimientos[action.payload.index].detalles]
         },
         addDetalleCargaPallet: (state, action: PayloadAction<AddDetalleCargaPalletData>) => {
-            
-            if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
             const {segIndex, detalleIndex} = action.payload
             state.seguimientos[segIndex].detalles[detalleIndex].history = [action.payload, ...state.seguimientos[segIndex].detalles[detalleIndex].history || []]
         },
         updateDetalleCargaPallet: (state, action: PayloadAction<DetalleCargaPaletModifyData>) => {
             const {segIndex, detalleIndex, paletIndex} = action.payload
             const seguimiento = state.seguimientos[segIndex];
-            if (!seguimiento) throw new Error("No se ha seleccionado un Seguimiento");
             const detalle = seguimiento.detalles[detalleIndex];
-            if (!detalle) throw new Error("No se ha seleccionado un Seguimiento");
             if(detalle.history) {
                 detalle.history[paletIndex]= action.payload
             }
@@ -136,9 +123,7 @@ export const seguimientoSlice = createSlice({
         removeDetalleCargaPallet: (state, action: PayloadAction<DetalleCargaPaletRemoveData>) => {
             const {segIndex, detalleIndex, paletIndex} = action.payload
             const seguimiento = state.seguimientos[segIndex];
-            if (!seguimiento) throw new Error("No se ha seleccionado un Seguimiento");
             const detalle = seguimiento.detalles[detalleIndex];
-            if (!detalle) throw new Error("No se ha seleccionado un Seguimiento");
             if(detalle.history) {
                 const cortado = detalle.history.filter((_, indice) => indice !== paletIndex);
                 detalle.history= cortado;
@@ -153,7 +138,6 @@ export const {
     removeSeguimiento,
     updateSeguimiento,
     addDetalleCarga,
-    updateDetalleCarga,
     addDetalleCargaPallet,
     updateDetalleCargaPallet,
     removeDetalleCargaPallet,

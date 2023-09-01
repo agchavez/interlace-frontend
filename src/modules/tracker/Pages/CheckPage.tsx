@@ -5,7 +5,6 @@ import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
-import AgregarProductoModal from '../components/AgregarProductoModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,7 +45,7 @@ export const CheckPage = () => {
   const [value, setValue] = useState(0);
   const { seguimientos } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
@@ -89,7 +88,7 @@ export const CheckPage = () => {
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
-                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(seguimiento.id)} onClick={()=>dispatch(setSeguimientoActual(seguimiento.id))}/>
+                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(index)} onClick={()=>dispatch(setSeguimientoActual(index))}/>
                       )
                     })
                   }
@@ -99,7 +98,7 @@ export const CheckPage = () => {
                 seguimientos.map((seguimiento, index) => {
                   return (
                     <CustomTabPanel value={value} index={index}>
-                      <CheckForm seguimiento={seguimiento}/>
+                      <CheckForm seguimiento={seguimiento} indice={index}/>
                     </CustomTabPanel>
                   )
                 })

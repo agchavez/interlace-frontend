@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { addSeguimiento, setSeguimientoActual } from "../../../store/seguimiento/seguimientoSlice";
 
 interface CreateCheckProps {
     open: boolean;
@@ -80,7 +80,8 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                 id: idSeguimiento,
                 rastra: rastra,
                 detalles: []
-            }))
+            }));
+            dispach(setSeguimientoActual(seguimientos.length))
         }
     }
 
