@@ -348,6 +348,9 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <StyledTableCell align="right">
                                 Total cajas
                             </StyledTableCell>
+                            <StyledTableCell align="right">
+                                Acciones
+                            </StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -417,13 +420,6 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                     >
                         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
-                    <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => dispatch(removeDetalleCarga({segIdx:props.seguimiento.id -1, detalleIdx: props.index}))}
-                    >
-                        <DeleteTwoToneIcon />
-                    </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">
                     {row.sap}
@@ -436,6 +432,16 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 </TableCell>
                 <TableCell align="right">
                     {row.amount}
+                </TableCell>
+                <TableCell align="right">
+
+                <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => dispatch(removeDetalleCarga({segIdx:props.seguimiento.id -1, detalleIdx: props.index}))}
+                    >
+                        <DeleteTwoToneIcon />
+                    </IconButton>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -476,14 +482,19 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                     />
                                                 </TableCell>
                                                 <TableCell component="th" scope="row" align="right">
-                                                    <TextField
+                                                <TextField
                                                         fullWidth
                                                         id="outlined-basic"
                                                         size="small"
                                                         type="date"
                                                         value={historyRow.date?.toISOString().split('T')[0]}
                                                         datatype='date'
-                                                        onChange={(e) => updateProductoPallet({ date: new Date(e.target.value), palletIndex: index })}
+                                                        onChange={(e) => {
+                                                            const inputDate = new Date(e.target.value);
+                                                            if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
+                                                                updateProductoPallet({ date: inputDate, palletIndex: index });
+                                                            }
+                                                        }}
                                                     />
                                                 </TableCell>
                                                 <TableCell align="right">

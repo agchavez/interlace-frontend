@@ -88,7 +88,7 @@ export const CheckPage = () => {
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
-                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(index)} onClick={()=>dispatch(setSeguimientoActual(index))}/>
+                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(index)} onClick={() => dispatch(setSeguimientoActual(index))} />
                       )
                     })
                   }
@@ -98,14 +98,35 @@ export const CheckPage = () => {
                 seguimientos.map((seguimiento, index) => {
                   return (
                     <CustomTabPanel value={value} index={index}>
-                      <CheckForm seguimiento={seguimiento} indice={index}/>
+                      <CheckForm seguimiento={seguimiento} indice={index} />
                     </CustomTabPanel>
                   )
                 })
               }
             </Box>
           </Grid>
+          {
+            seguimientos.length > 0 &&
+            <>
+              <Grid item xs={12}>
+                <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
+              </Grid>
+              <Grid item xs={12} md={8} lg={9} xl={10}>
+
+              </Grid>
+              <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="contained" color="success" size="medium" fullWidth>
+                  <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
+                    Completar seguimiento
+                  </Typography>
+                </Button>
+              </Grid>
+              <Grid item xs={12} sx={{ marginTop: 5 }}>
+              </Grid>
+            </>
+          }
         </Grid>
+
       </Container>
 
     </>

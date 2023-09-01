@@ -94,7 +94,14 @@ export const seguimientoSlice = createSlice({
     initialState,
     reducers: {
         addSeguimiento: (state, action: PayloadAction<Seguimiento>) => {
-            state.seguimientos.push(action.payload)
+            // Si el seguimiento ya existe no se agrega
+            if (state.seguimientos.findIndex((seg) => seg.id === action.payload.id) !== -1) {
+                toast.error("El seguimiento ya existe")
+                return
+            }
+            state.seguimientos.push(action.payload);
+            const seguimientoActualValue = state.seguimientos.length - 1;
+            state.seguimeintoActual = seguimientoActualValue;
         },
         removeSeguimiento: (state, action: PayloadAction<number>) => {
             state.seguimientos = state.seguimientos.filter(seg => seg.id !== action.payload)

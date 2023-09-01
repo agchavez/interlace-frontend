@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { addSeguimiento, setSeguimientoActual } from "../../../store/seguimiento/seguimientoSlice";
+import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
 
 interface CreateCheckProps {
     open: boolean;
@@ -80,7 +80,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                 rastra: rastra,
                 detalles: []
             }));
-            dispach(setSeguimientoActual(seguimientos.length))
+            //dispach(setSeguimientoActual(seguimientos.length))
         }
     }
 
@@ -136,7 +136,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                                             renderInput={(params) => <TextField
                                                 {...params}
                                                 error={errors.rastraId ? true : false}
-                                                label="Producto"
+                                                label="Rastra"
                                                 helperText={errors.rastraId?.message}
                                                 fullWidth />}
                                         />

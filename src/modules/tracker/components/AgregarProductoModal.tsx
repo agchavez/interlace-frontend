@@ -2,10 +2,10 @@ import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogCont
 import { FunctionComponent, useRef, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
-import { productos } from "../../../utils/data";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { addDetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
 import { Producto } from "../../../interfaces/tracking";
+import { productos } from "../../../utils/data";
 
 interface CreateCheckProps {
     open: boolean;
@@ -42,7 +42,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     // FOcus al abrir el modal
     useEffect(() => {
         setTimeout(() => {
-            setFocus("cantidad")
+            setFocus("producto")
         }, 100);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open])
