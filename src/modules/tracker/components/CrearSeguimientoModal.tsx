@@ -26,27 +26,31 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 const rastras: Rastra[] = [
     {
         id: 1,
-        transportista: "El Pangolín",
-        placa: "AHA1234",
-        conductor: "Manuel"
+        transportista: "Rigoberto agui",
+        placa: "C048",
+        tractor: "ICH00",
+        cabezal: "HN-GC00"
     },
     {
         id: 2,
-        transportista: "El Oso",
-        placa: "AHA478",
-        conductor: "Manuel"
+        transportista: "Edwin Mejia",
+        placa: "C066",
+        tractor: "ICH00",
+        cabezal: "HN-GC00"
     },
     {
         id: 3,
-        transportista: "El Gallo",
-        placa: "AHA852",
-        conductor: "Manuel"
+        transportista: "Onan Contreras",
+        placa: "C110",
+        cabezal: "HN-GC00",
+        tractor: "Onan Contreras"
     },
     {
         id: 4,
-        transportista: "El Tigre",
-        placa: "AHA898",
-        conductor: "Manuel"
+        transportista: "Loginhsa",
+        placa: "M11",
+        cabezal: "HN-GC00",
+        tractor: "ILI00"
     }
 ]
 
@@ -61,7 +65,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { control, handleSubmit } = useForm({
+    const { control, handleSubmit, reset } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             rastraId: 0
@@ -82,7 +86,8 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const handleClickCreate = () => {
         formRef.current?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-        handleClose && handleClose({}, "backdropClick")
+        handleClose && handleClose({}, "backdropClick");
+        reset();
     }
 
     return (

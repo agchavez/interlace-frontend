@@ -10,6 +10,7 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import { useAppDispatch } from '../../../store';
 import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCarga, addDetalleCargaPallet, removeDetalleCargaPallet, updateDetalleCarga, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import AgregarProductoModal from './AgregarProductoModal';
 
 const localidades = [
     { label: 'CD COMAYAGUA', id: 1, code: 'DH09' },
@@ -45,7 +46,8 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }));
 
 export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
+    const [open, setopen] = useState(false)
     function updateSeguimientoDatos(datos: DatosGeneralesSeguimiento): unknown {
         if (!seguimiento) return;
         dispatch(updateSeguimiento({
@@ -69,20 +71,11 @@ export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
     const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
     const tiempoSalida = seguimiento?.datosOperador?.tiempoSalida
 
-    const handleClickAgregarProducto = () => {
-        if (!seguimiento) return
-        dispatch(addDetalleCarga({
-            id: 1,
-            name: "",
-            sap: 0,
-            basic: 0,
-            amount: 0,
-            history: []
-        }))
-    }
+    
 
     return (
         <>
+        <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
                     <Card>
@@ -105,20 +98,20 @@ export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Placa
+                                        Tractor
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.placa}
+                                        {seguimiento?.rastra.tractor}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Conductor
+                                        Cabezal
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.conductor}
+                                        {seguimiento?.rastra.cabezal}
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -328,7 +321,9 @@ export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
                 <Grid item xs={12} md={5} lg={2} xl={2}>
                     <Button variant="outlined" size="small" fullWidth color="secondary"
                         startIcon={<AddTwoToneIcon />}
-                        onClick={handleClickAgregarProducto}
+                        onClick={() => {
+                            setopen(true);
+                        }}
                     >
                         Agregar producto
                     </Button>
@@ -430,47 +425,16 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">
-                    <Box width="8rem">
-                        <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            size="small"
-                            type="number"
-                            value={row.sap}
-                            onChange={(e) => updateProducto({ sap: +e.target.value, id: row.id })}
-                        />
-                    </Box>
+                    {row.sap}
                 </TableCell>
                 <TableCell align="right">
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        size="small"
-                        value={row.name}
-                        onChange={(e) => updateProducto({ name: e.target.value, id: row.id })}
-                    />
+                    {row.name}
                 </TableCell>
                 <TableCell align="right">
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        size="small"
-                        type="number"
-                        value={row.basic}
-                        onChange={(e) => updateProducto({ basic: +e.target.value, id: row.id })}
-                    />
+                    {row.basic}
                 </TableCell>
                 <TableCell align="right">
-                    <Box width="6rem">
-                        <TextField
-                            fullWidth
-                            id="outlined-basic"
-                            size="small"
-                            type="number"
-                            value={row.amount}
-                            onChange={(e) => updateProducto({ amount: +e.target.value, id: row.id })}
-                        />
-                    </Box>
+                    {row.amount}
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -524,9 +488,6 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                 <TableCell align="right">
                                                     <IconButton aria-label="delete" size="medium" onClick={()=>removeProductoPallet({palletIndex:index})}>
                                                         <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
-                                                    </IconButton>
-                                                    <IconButton aria-label="edit" size="medium">
-                                                        <DriveFileRenameOutlineTwoToneIcon fontSize="inherit" color='secondary' />
                                                     </IconButton>
                                                     <IconButton aria-label="edit" size="medium">
                                                         <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />

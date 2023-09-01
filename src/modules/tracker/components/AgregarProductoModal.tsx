@@ -1,16 +1,25 @@
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, TableCell, TableRow, TextField, Typography, styled } from "@mui/material";
-import { Fragment, FunctionComponent, useRef, useState } from "react";
+import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField,styled } from "@mui/material";
+import { FunctionComponent, useRef, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-import { Rastra } from '../../../interfaces/tracking';
+// import { Rastra } from '../../../interfaces/tracking';
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAppDispatch, useAppSelector } from "../../../store";
-import { DetalleCargaPalet, addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+// import { useAppDispatch, useAppSelector } from "../../../store";
+// import { DetalleCargaPalet, addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { productos } from "../../../utils/data";
+import { useAppDispatch } from '../../../store/store';
+import { addDetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
+import { Producto } from "../../../interfaces/tracking";
 
 interface CreateCheckProps {
     open: boolean;
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;
+}
+
+interface FormValues {
+    producto: Producto | null;
+    cantidad: number;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -23,27 +32,37 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
-    const [detalles, setDetalles] = useState<DetalleCargaPalet[]>([])
-    const schema = yup.object().shape({
-        name: yup.string().required("Este campo es requerido"),
-        sap: yup.number().required("Este campo es requerido"),
-        amount: yup.number().required("Este campo es requerido"),
-        basic: yup.number().required("Este campo es requerido"),
+    const schema = yup.object<FormValues>().shape({
+        producto: yup.object<Producto | null>().nullable().required("Este campo es requerido"),
+        cantidad: yup.number().required("Este campo es requerido").min(1, "La cantidad debe ser mayor a 0")
+
     })
+    const dispatch = useAppDispatch();
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { handleSubmit, register, formState: { errors } } = useForm({
-        resolver: yupResolver(schema),
+    const { handleSubmit, register, formState: { errors }, setValue, reset, setFocus } = useForm<FormValues>({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         defaultValues: {
-            name: "",
-            sap: 0,
-            amount: 0,
-            basic: 0,
+            producto: null,
+            cantidad: 0
         }
     })
+    // FOcus al abrir el modal
+    useEffect(() => {
+        setFocus("producto")
+    }, [setFocus])
 
-    const handleSubmitForm = (data) => {
+    const handleSubmitForm = (data : FormValues) => {
+        dispatch(addDetalleCarga({
+            id: data.producto?.codigo,
+            name: data.producto?.descripcion,
+            sap: data.producto?.codigo,
+            basic: undefined,
+            amount: data.cantidad,
+            history: []
+        }))
+        reset();
         handleClose && handleClose({}, "backdropClick")
     }
 
@@ -79,49 +98,25 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
                                         <Grid container spacing={2}>
-                                            <Grid item xs={12} md={6} lg={4} xl={3}>
-                                                <TextField
-                                                    fullWidth
-                                                    id="outlined-basic"
-                                                    label="Producto"
-                                                    variant="outlined"
+                                            <Grid item xs={12} md={9}>
+                                                <Autocomplete
+                                                    id="combo-box-demo"
+                                                    options={productos}
+                                                    getOptionLabel={(option) => option.codigo + " - " + option.descripcion}
                                                     size="small"
-                                                    {...register("name")}
-                                                    error={errors.name ? true : false}
-                                                    helperText={errors.name?.message}
-                                                // value={seguimiento?.datos?.placa}
-                                                // onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
+                                                    autoFocus
+                                                    // el id del input es codigo
+                                                    {...register("producto")}
+                                                    onChange={(_e, data) => setValue("producto", data)}
+                                                    
+                                                    renderInput={(params) => <TextField 
+                                                        {...params} 
+                                                        error={errors.producto ? true : false}
+                                                        label="Producto" 
+                                                        helperText={errors.producto?.message}
+                                                        fullWidth />}
                                                 />
-                                            </Grid>
-                                            <Grid item xs={12} md={6} lg={4} xl={3}>
-                                                <TextField
-                                                    fullWidth
-                                                    id="outlined-basic"
-                                                    label="No. SAP"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    type="number"
-                                                    {...register("sap")}
-                                                    error={errors.sap ? true : false}
-                                                    helperText={errors.sap?.message}
-                                                // value={seguimiento?.datos?.placa}
-                                                // onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} md={6} lg={4} xl={3}>
-                                                <TextField
-                                                    fullWidth
-                                                    id="outlined-basic"
-                                                    label="Basic"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    type="number"
-                                                    {...register("basic")}
-                                                    error={errors.basic ? true : false}
-                                                    helperText={errors.basic?.message}
-                                                // onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
-                                                // value={seguimiento?.datos?.nDocumento}
-                                                />
+                                            
                                             </Grid>
                                             <Grid item xs={12} md={6} lg={4} xl={3}>
                                                 <TextField
@@ -131,27 +126,27 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                                     variant="outlined"
                                                     size="small"
                                                     type="number"
-                                                    {...register("amount")}
-                                                    error={errors.amount ? true : false}
-                                                    helperText={errors.amount?.message}
+                                                    {...register("cantidad")}
+                                                    error={errors.cantidad ? true : false}
+                                                    helperText={errors.cantidad?.message}
                                                 // onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
                                                 // value={seguimiento?.datos?.nDocumento}
                                                 />
                                             </Grid>
-                                            <Grid item xs={12} sx={{ marginTop: 4 }}>
+                                            {/* <Grid item xs={12} sx={{ marginTop: 4 }}>
                                                 <Divider >
                                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                                         Pallets
                                                     </Typography>
                                                 </Divider>
-                                            </Grid>
-                                            <Grid item xs={12}>
+                                            </Grid> */}
+                                            {/* <Grid item xs={12}>
                                                 {
                                                     detalles.map(detalle => {
                                                         <DetallePalet detalle={detalle} />
                                                     })
                                                 }
-                                            </Grid>
+                                            </Grid> */}
                                         </Grid>
                                     </form>
                                 </Grid>
@@ -161,7 +156,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={handleClickCreate}>
-                        Crear
+                        Agregar
                     </Button>
                 </DialogActions>
             </BootstrapDialog>
@@ -169,18 +164,18 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     );
 }
 
-interface DetallePaletProps {
-    detalle: DetalleCargaPalet
-}
+// interface DetallePaletProps {
+//     detalle: DetalleCargaPalet
+// }
 
-function DetallePalet({ detalle }: DetallePaletProps) {
-    return (
-        <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-            <TableCell align="right">{detalle.date.toString()}</TableCell>
-            <TableCell align="right">{detalle.amount}</TableCell>
-        </TableRow>
-    )
-}
+// function DetallePalet({ detalle }: DetallePaletProps) {
+//     return (
+//         <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+//             <TableCell align="right">{detalle.date.toString()}</TableCell>
+//             <TableCell align="right">{detalle.amount}</TableCell>
+//         </TableRow>
+//     )
+// }
 
 
 export default AgregarProductoModal;

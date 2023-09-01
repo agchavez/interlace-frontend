@@ -10,12 +10,14 @@ import { store } from './store';
 import { BrowserRouter } from 'react-router-dom';
 import { maintheme } from './config/theme';
 import { ThemeProvider } from '@emotion/react';
+import { Toaster } from 'sonner'
 
 function App() {
   return (
     <ThemeProvider theme={maintheme}>
       <Provider store={store}>
         <BrowserRouter>
+        <Toaster duration={3000} position="top-right" richColors closeButton />
           <AppRouter />
         </BrowserRouter>
       </Provider>

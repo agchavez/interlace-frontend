@@ -5,6 +5,7 @@ import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
+import AgregarProductoModal from '../components/AgregarProductoModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;

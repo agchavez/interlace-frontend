@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Rastra } from "../../interfaces/tracking";
+import { toast } from 'sonner'
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -99,10 +100,16 @@ export const seguimientoSlice = createSlice({
             state.seguimientos[index] = action.payload
         },
         addDetalleCarga: (state, action: PayloadAction<DetalleCarga>) => {
+            // No se puede agregar un producto que ya existe en el seguimiento validar por codigo sap
+            
             if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
             const index1 = state.seguimientos.findIndex((seg) => seg.id === state.seguimeintoActual)
             if (index1 === -1) throw new Error("Seguimiento no encontrado")
-            state.seguimientos[index1].detalles.push(action.payload)
+            if (state.seguimientos[index1].detalles.findIndex((det) => det.sap === action.payload.sap) !== -1) {
+                toast.error("El producto ya existe en el seguimiento")
+                return;
+            }
+            state.seguimientos[index1].detalles = [action.payload, ...state.seguimientos[index1].detalles]
         },
         updateDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
             if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
@@ -111,9 +118,10 @@ export const seguimientoSlice = createSlice({
             state.seguimientos[index1].detalles[action.payload.index] = action.payload
         },
         addDetalleCargaPallet: (state, action: PayloadAction<AddDetalleCargaPalletData>) => {
+            
             if (!state.seguimeintoActual) throw new Error("No se ha seleccionado un Seguimiento")
             const {segIndex, detalleIndex} = action.payload
-            state.seguimientos[segIndex].detalles[detalleIndex].history?.push(action.payload)
+            state.seguimientos[segIndex].detalles[detalleIndex].history = [action.payload, ...state.seguimientos[segIndex].detalles[detalleIndex].history || []]
         },
         updateDetalleCargaPallet: (state, action: PayloadAction<DetalleCargaPaletModifyData>) => {
             const {segIndex, detalleIndex, paletIndex} = action.payload
