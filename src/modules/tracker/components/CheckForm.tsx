@@ -8,9 +8,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
-import { useAppDispatch, useAppSelector } from '../../../store';
-import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
-import AgregarProductoModal from './AgregarProductoModal';
+import { useAppDispatch } from '../../../store';
+import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCarga, addDetalleCargaPallet, removeDetalleCargaPallet, updateDetalleCarga, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
 
 const localidades = [
     { label: 'CD COMAYAGUA', id: 1, code: 'DH09' },
@@ -19,8 +18,6 @@ const localidades = [
     { label: 'CD SAN PEDRO SULA DISTRIBUIDOR', id: 4, code: 'DH00' },
     { label: 'CD ROATAN', id: 5, code: 'DH14' },
 ];
-
-
 
 const conductores = [
     { label: 'Carlos Alberto Bonilla Vasquez', id: 1 },
@@ -47,9 +44,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     },
 }));
 
-export const CheckForm = () => {
-    const [openModal, setOpenModal] = useState(false)
-    const seguimiento = useAppSelector(state => state.seguimiento.seguimeintoActual)
+export const CheckForm = ({ seguimiento }: { seguimiento: Seguimiento }) => {
     const dispatch = useAppDispatch()
     function updateSeguimientoDatos(datos: DatosGeneralesSeguimiento): unknown {
         if (!seguimiento) return;
@@ -73,12 +68,21 @@ export const CheckForm = () => {
     }
     const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
     const tiempoSalida = seguimiento?.datosOperador?.tiempoSalida
-    const handleClose = ()=> {
-        setOpenModal(false)
+
+    const handleClickAgregarProducto = () => {
+        if (!seguimiento) return
+        dispatch(addDetalleCarga({
+            id: 1,
+            name: "",
+            sap: 0,
+            basic: 0,
+            amount: 0,
+            history: []
+        }))
     }
+
     return (
         <>
-            <AgregarProductoModal open={openModal} handleClose={handleClose}/>
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
                     <Card>
@@ -123,14 +127,14 @@ export const CheckForm = () => {
                         </Box>
                     </Card>
                 </Grid>
-                <Grid item xs={12} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Datos generales
                         </Typography>
                     </Divider>
-                </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                    <Grid item xs={12} >
                     <TextField
                         fullWidth
                         id="outlined-basic"
@@ -141,29 +145,29 @@ export const CheckForm = () => {
                         onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={12}>
                     <Autocomplete
                         disablePortal
                         id="combo-box-demo"
-                        value={localidades.find(loc=>loc.label === seguimiento?.datos?.locEnvio) }
+                        value={localidades.find(loc => loc.label === seguimiento?.datos?.locEnvio)}
                         options={localidades}
                         getOptionLabel={(option) => option.label + ' - ' + option.code}
                         renderInput={(params) => <TextField {...params} label="Localidad de Envío" size="small" fullWidth />}
                         onChange={(_, v) => updateSeguimientoDatos({ locEnvio: v?.label })}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={12}>
                     <Autocomplete
                         disablePortal
                         id="combo-box-demo"
                         options={conductores}
-                        value={conductores.find(loc =>loc.label === seguimiento?.datos?.conductor)}
+                        value={conductores.find(loc => loc.label === seguimiento?.datos?.conductor)}
                         getOptionLabel={(option) => option.label}
                         renderInput={(params) => <TextField {...params} label="Conductor" size="small" fullWidth />}
                         onChange={(_, v) => updateSeguimientoDatos({ conductor: v?.label })}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6}>
                     <TextField
                         fullWidth
                         id="outlined-basic"
@@ -175,7 +179,7 @@ export const CheckForm = () => {
                         value={seguimiento?.datos?.nDocumento}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6}>
                     <TextField
                         fullWidth
                         id="outlined-basic"
@@ -187,7 +191,7 @@ export const CheckForm = () => {
                         value={seguimiento?.datos?.nTransporte}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6}>
                     <TextField
                         fullWidth
                         id="outlined-basic"
@@ -199,7 +203,7 @@ export const CheckForm = () => {
                         value={seguimiento?.datos?.nTraslado}
                     />
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6}>
                     <TextField
                         fullWidth
                         id="outlined-basic"
@@ -211,85 +215,106 @@ export const CheckForm = () => {
                         value={seguimiento?.datos?.nDocumentoSalida}
                     />
                 </Grid>
+                    </Grid>
+                </Grid>
+                
 
-                <Grid item xs={12} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Datos operador
                         </Typography>
                     </Divider>
-                </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
-                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                        Tiempo de entrada
-                    </Typography>
-                    <Divider />
-                    <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                        {
-                            tiempoEntrada &&
-                            (
-                                String(tiempoEntrada.getHours()).padStart(2, '0') + ":" +
-                                String(tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
-                                String(tiempoEntrada.getSeconds()).padStart(2, '0')
-                            )
-                            || "00:00:00"
-                        }
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
-                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                        Tiempo de salida
-                    </Typography>
-                    <Divider />
-                    <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                        {
-                            tiempoSalida &&
-                            (
-                                String(tiempoSalida.getHours()).padStart(2, '0') + ":" +
-                                String(tiempoSalida.getMinutes()).padStart(2, '0') + ":" +
-                                String(tiempoSalida.getSeconds()).padStart(2, '0')
-                            )
-                            || "00:00:00"
-                        }
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} md={6} lg={2} xl={2}>
-                    <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false}
-                        onClick={() => {
-                            updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
-                        }}>
-                        Registrar entrada
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} lg={2} xl={2}>
-                    <Button variant="outlined" size="small" fullWidth color="error" disabled={tiempoEntrada === undefined || tiempoSalida !== undefined}
-                        onClick={() => {
-                            updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
-                        }}>
-                        Registrar salida
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} lg={6} xl={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="OPM #1"
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => { updateSeguimientoDatosOperador({ opm1: e.target.value }) }}
-                        value={seguimiento?.datosOperador?.opm1}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6} lg={6} xl={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="OPM #2"
-                        variant="outlined"
-                        size="small"
-                        onChange={(e) => { updateSeguimientoDatosOperador({ opm2: e.target.value }) }}
-                        value={seguimiento?.datosOperador?.opm2}
-                    />
+                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                Tiempo de entrada
+                            </Typography>
+                            <Divider />
+                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                {
+                                    tiempoEntrada &&
+                                    (
+                                        String(tiempoEntrada.getHours()).padStart(2, '0') + ":" +
+                                        String(tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
+                                        String(tiempoEntrada.getSeconds()).padStart(2, '0')
+                                    )
+                                    || "00:00:00"
+                                }
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                Tiempo de salida
+                            </Typography>
+                            <Divider />
+                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                {
+                                    tiempoSalida &&
+                                    (
+                                        String(tiempoSalida.getHours()).padStart(2, '0') + ":" +
+                                        String(tiempoSalida.getMinutes()).padStart(2, '0') + ":" +
+                                        String(tiempoSalida.getSeconds()).padStart(2, '0')
+                                    )
+                                    || "00:00:00"
+                                }
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                Tiempo invertido
+                            </Typography>
+                            <Divider />
+                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                {
+                                    tiempoSalida && tiempoEntrada ?
+                                    (
+                                        String(tiempoSalida.getHours() - tiempoEntrada.getHours()).padStart(2, '0') + ":" + 
+                                        String(tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
+                                        String(tiempoSalida.getSeconds() - tiempoEntrada.getSeconds()).padStart(2, '0')
+                                    ) : "--:--:--"
+                                }
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false}
+                                onClick={() => {
+                                    updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
+                                }}>
+                                Registrar entrada
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Button variant="outlined" size="small" fullWidth color="error" disabled={tiempoEntrada === undefined || tiempoSalida !== undefined}
+                                onClick={() => {
+                                    updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
+                                }}>
+                                Registrar salida
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} >
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="OPM #1"
+                                variant="outlined"
+                                size="small"
+                                onChange={(e) => { updateSeguimientoDatosOperador({ opm1: e.target.value }) }}
+                                value={seguimiento?.datosOperador?.opm1}
+                            />
+                        </Grid>
+                        <Grid item xs={12} >
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="OPM #2"
+                                variant="outlined"
+                                size="small"
+                                onChange={(e) => { updateSeguimientoDatosOperador({ opm2: e.target.value }) }}
+                                value={seguimiento?.datosOperador?.opm2}
+                            />
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12} sx={{ marginTop: 4 }}>
                     <Divider >
@@ -303,7 +328,7 @@ export const CheckForm = () => {
                 <Grid item xs={12} md={5} lg={2} xl={2}>
                     <Button variant="outlined" size="small" fullWidth color="secondary"
                         startIcon={<AddTwoToneIcon />}
-                        onClick={()=>setOpenModal(true)}
+                        onClick={handleClickAgregarProducto}
                     >
                         Agregar producto
                     </Button>
@@ -331,9 +356,9 @@ export const CheckForm = () => {
                     </TableHead>
                     <TableBody>
                         {
-                            seguimiento?.detalles.map(detalle => {
+                            seguimiento?.detalles.map((detalle, index) => {
                                 return (
-                                    <Row key={detalle.name} row={detalle} />
+                                    <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} />
                                 )
                             })
                         }
@@ -347,10 +372,51 @@ export const CheckForm = () => {
     )
 }
 
-function Row(props: { row: DetalleCarga }) {
+function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number }) {
     const { row } = props;
-
     const [open, setOpen] = useState(false);
+    const dispatch = useAppDispatch()
+    const updateProducto = (datos: DetalleCarga) => {
+        if (!props.seguimiento) return;
+        const detalle = props.seguimiento.detalles[props.index]
+        dispatch(updateDetalleCarga({
+            ...detalle, ...datos, index: props.index
+        }))
+    }
+    const handleClickAgregar = () => {
+        dispatch(addDetalleCargaPallet({
+            segIndex: props.seguimiento.id - 1,
+            detalleIndex: props.index, id: 1,
+            pallets: 0, date: new Date(),
+            amount: 0
+        }))
+    }
+    const updateProductoPallet = (datos: DetalleCargaPaletIdx): unknown => {
+        if (!props.seguimiento) return;
+        const detalle = props.seguimiento.detalles[props.index]
+        if (!detalle) return;
+        let prev = {}
+        if (detalle.history) {
+            prev = detalle.history[datos.palletIndex]
+        }
+        dispatch(updateDetalleCargaPallet({
+            ...prev,
+            segIndex: props.seguimiento.id - 1,
+            paletIndex: datos.palletIndex,
+            ...datos,
+            detalleIndex: props.index,
+        }))
+    }
+    const removeProductoPallet = (datos: {palletIndex:number}): unknown => {
+        if (!props.seguimiento) return;
+        const detalle = props.seguimiento.detalles[props.index]
+        if (!detalle) return;
+        dispatch(removeDetalleCargaPallet({
+            segIndex: props.seguimiento.id - 1,
+            paletIndex: datos.palletIndex,
+            detalleIndex: props.index,
+        }))
+    }
     return (
         <Fragment>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
@@ -364,11 +430,48 @@ function Row(props: { row: DetalleCarga }) {
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">
-                    {row.sap}
+                    <Box width="8rem">
+                        <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            size="small"
+                            type="number"
+                            value={row.sap}
+                            onChange={(e) => updateProducto({ sap: +e.target.value, id: row.id })}
+                        />
+                    </Box>
                 </TableCell>
-                <TableCell align="right">{row.name}</TableCell>
-                <TableCell align="right">{row.basic}</TableCell>
-                <TableCell align="right">{row.amount}</TableCell>
+                <TableCell align="right">
+                    <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        size="small"
+                        value={row.name}
+                        onChange={(e) => updateProducto({ name: e.target.value, id: row.id })}
+                    />
+                </TableCell>
+                <TableCell align="right">
+                    <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        size="small"
+                        type="number"
+                        value={row.basic}
+                        onChange={(e) => updateProducto({ basic: +e.target.value, id: row.id })}
+                    />
+                </TableCell>
+                <TableCell align="right">
+                    <Box width="6rem">
+                        <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            size="small"
+                            type="number"
+                            value={row.amount}
+                            onChange={(e) => updateProducto({ amount: +e.target.value, id: row.id })}
+                        />
+                    </Box>
+                </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -377,6 +480,14 @@ function Row(props: { row: DetalleCarga }) {
                             <Typography variant="h6" gutterBottom component="div">
                                 Detalles
                             </Typography>
+                            <Grid item xs={12} md={5} lg={2} xl={2}>
+                                <Button variant="outlined" size="small" fullWidth color="secondary"
+                                    startIcon={<AddTwoToneIcon />}
+                                    onClick={handleClickAgregar}
+                                >
+                                    Agregar
+                                </Button>
+                            </Grid>
                             <Table size="small" aria-label="purchases">
                                 <TableHead>
                                     <TableRow>
@@ -386,29 +497,44 @@ function Row(props: { row: DetalleCarga }) {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {row.history.map((historyRow) => (
-                                        <TableRow key={historyRow.date.toString()}>
-
-                                            <TableCell align="right">{historyRow.amount}</TableCell>
-                                            <TableCell component="th" scope="row" align="right">
-                                                {historyRow.date.toString()}
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <IconButton aria-label="delete" size="medium">
-                                                    <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
-                                                </IconButton>
-                                                <IconButton aria-label="edit" size="medium">
-                                                    <DriveFileRenameOutlineTwoToneIcon fontSize="inherit" color='secondary' />
-                                                </IconButton>
-                                                <IconButton aria-label="edit" size="medium">
-                                                    <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
-                                                </IconButton>
-
-
-                                            </TableCell>
-
-                                        </TableRow>
-                                    ))}
+                                    {row.history?.map((historyRow, index) => {
+                                        return (
+                                            <TableRow key={historyRow.id}>
+                                                <TableCell align="right">
+                                                    <TextField
+                                                        fullWidth
+                                                        id="outlined-basic"
+                                                        size="small"
+                                                        type='number'
+                                                        value={historyRow.pallets}
+                                                        onChange={(e) => updateProductoPallet({ pallets: +e.target.value, palletIndex: index })}
+                                                    />
+                                                </TableCell>
+                                                <TableCell component="th" scope="row" align="right">
+                                                    <TextField
+                                                        fullWidth
+                                                        id="outlined-basic"
+                                                        size="small"
+                                                        type="date"
+                                                        value={historyRow.date?.toISOString().split('T')[0]}
+                                                        datatype='date'
+                                                        onChange={(e) => updateProductoPallet({ date: new Date(e.target.value), palletIndex: index })}
+                                                    />
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <IconButton aria-label="delete" size="medium" onClick={()=>removeProductoPallet({palletIndex:index})}>
+                                                        <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
+                                                    </IconButton>
+                                                    <IconButton aria-label="edit" size="medium">
+                                                        <DriveFileRenameOutlineTwoToneIcon fontSize="inherit" color='secondary' />
+                                                    </IconButton>
+                                                    <IconButton aria-label="edit" size="medium">
+                                                        <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
                                 </TableBody>
                             </Table>
                         </Box>

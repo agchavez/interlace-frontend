@@ -86,9 +86,9 @@ export const CheckPage = () => {
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                   {
-                    seguimientos.map((seguimiento) => {
+                    seguimientos.map((seguimiento, index) => {
                       return (
-                        <Tab label={seguimiento.rastra.placa} {...a11yProps(seguimiento.id)} onClick={()=>dispatch(setSeguimientoActual(seguimiento.id))}/>
+                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(seguimiento.id)} onClick={()=>dispatch(setSeguimientoActual(seguimiento.id))}/>
                       )
                     })
                   }
@@ -98,7 +98,7 @@ export const CheckPage = () => {
                 seguimientos.map((seguimiento, index) => {
                   return (
                     <CustomTabPanel value={value} index={index}>
-                      <CheckForm />
+                      <CheckForm seguimiento={seguimiento}/>
                     </CustomTabPanel>
                   )
                 })

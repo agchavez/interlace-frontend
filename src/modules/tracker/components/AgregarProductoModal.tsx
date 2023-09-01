@@ -1,12 +1,12 @@
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, styled } from "@mui/material";
-import { FunctionComponent, useRef } from "react";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Grid, IconButton, TableCell, TableRow, TextField, Typography, styled } from "@mui/material";
+import { Fragment, FunctionComponent, useRef, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { Rastra } from '../../../interfaces/tracking';
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { DetalleCargaPalet, addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
 
 interface CreateCheckProps {
     open: boolean;
@@ -22,66 +22,33 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const rastras: Rastra[] = [
-    {
-        id: 1,
-        transportista: "El Pangolín",
-        placa: "AHA1234",
-        conductor: "Manuel"
-    },
-    {
-        id: 2,
-        transportista: "El Oso",
-        placa: "AHA478",
-        conductor: "Manuel"
-    },
-    {
-        id: 3,
-        transportista: "El Gallo",
-        placa: "AHA852",
-        conductor: "Manuel"
-    },
-    {
-        id: 4,
-        transportista: "El Tigre",
-        placa: "AHA898",
-        conductor: "Manuel"
-    }
-]
-
 const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
+    const [detalles, setDetalles] = useState<DetalleCargaPalet[]>([])
     const schema = yup.object().shape({
-        rastraId: yup.number().required("Este campo es requerido").min(1, "Seleccione una rastra")
+        name: yup.string().required("Este campo es requerido"),
+        sap: yup.number().required("Este campo es requerido"),
+        amount: yup.number().required("Este campo es requerido"),
+        basic: yup.number().required("Este campo es requerido"),
     })
-
-    const {seguimientos} = useAppSelector(state=>state.seguimiento)
-
-    const dispach = useAppDispatch()
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { control, handleSubmit } = useForm({
+    const { handleSubmit, register, formState: { errors } } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
-            rastraId: 0
+            name: "",
+            sap: 0,
+            amount: 0,
+            basic: 0,
         }
     })
 
-    const handleSubmitForm = (data: { rastraId: number }) => {
-        const rastra = rastras.find(rastra => rastra.id === data.rastraId)
-        if (rastra) {
-            const idSeguimiento = Math.max(...seguimientos.map(s=>s.id), -1) +1
-            dispach(addSeguimiento({
-                id: idSeguimiento,
-                rastra: rastra,
-                detalles:[]
-            }))
-        }
+    const handleSubmitForm = (data) => {
+        handleClose && handleClose({}, "backdropClick")
     }
 
     const handleClickCreate = () => {
         formRef.current?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
-        handleClose && handleClose({}, "backdropClick")
     }
 
     return (
@@ -111,6 +78,81 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12} md={6} lg={4} xl={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    id="outlined-basic"
+                                                    label="Producto"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    {...register("name")}
+                                                    error={errors.name ? true : false}
+                                                    helperText={errors.name?.message}
+                                                // value={seguimiento?.datos?.placa}
+                                                // onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={6} lg={4} xl={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    id="outlined-basic"
+                                                    label="No. SAP"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="number"
+                                                    {...register("sap")}
+                                                    error={errors.sap ? true : false}
+                                                    helperText={errors.sap?.message}
+                                                // value={seguimiento?.datos?.placa}
+                                                // onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={6} lg={4} xl={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    id="outlined-basic"
+                                                    label="Basic"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="number"
+                                                    {...register("basic")}
+                                                    error={errors.basic ? true : false}
+                                                    helperText={errors.basic?.message}
+                                                // onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
+                                                // value={seguimiento?.datos?.nDocumento}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} md={6} lg={4} xl={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    id="outlined-basic"
+                                                    label="Cantidad"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="number"
+                                                    {...register("amount")}
+                                                    error={errors.amount ? true : false}
+                                                    helperText={errors.amount?.message}
+                                                // onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
+                                                // value={seguimiento?.datos?.nDocumento}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sx={{ marginTop: 4 }}>
+                                                <Divider >
+                                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                                        Pallets
+                                                    </Typography>
+                                                </Divider>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                {
+                                                    detalles.map(detalle => {
+                                                        <DetallePalet detalle={detalle} />
+                                                    })
+                                                }
+                                            </Grid>
+                                        </Grid>
                                     </form>
                                 </Grid>
                             </Grid>
@@ -126,5 +168,19 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
         </>
     );
 }
+
+interface DetallePaletProps {
+    detalle: DetalleCargaPalet
+}
+
+function DetallePalet({ detalle }: DetallePaletProps) {
+    return (
+        <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+            <TableCell align="right">{detalle.date.toString()}</TableCell>
+            <TableCell align="right">{detalle.amount}</TableCell>
+        </TableRow>
+    )
+}
+
 
 export default AgregarProductoModal;
