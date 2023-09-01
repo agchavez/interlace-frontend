@@ -8,7 +8,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import { useAppDispatch } from '../../../store';
-import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 
 const localidades = [
@@ -416,6 +416,13 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                         onClick={() => setOpen(!open)}
                     >
                         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                    <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => dispatch(removeDetalleCarga({segIdx:props.seguimiento.id -1, detalleIdx: props.index}))}
+                    >
+                        <DeleteTwoToneIcon />
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">

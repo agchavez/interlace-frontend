@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField,styled } from "@mui/material";
+import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
 import { FunctionComponent, useRef, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
@@ -28,7 +28,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
     const dispatch = useAppDispatch();
-    const seguimeintoActual = useAppSelector(state=>state.seguimiento.seguimeintoActual)
+    const seguimeintoActual = useAppSelector(state => state.seguimiento.seguimeintoActual)
 
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -41,10 +41,13 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     })
     // FOcus al abrir el modal
     useEffect(() => {
-        setFocus("producto")
-    }, [setFocus])
+        setTimeout(() => {
+            setFocus("cantidad")
+        }, 100);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
 
-    const handleSubmitForm = (data : FormValues) => {
+    const handleSubmitForm = (data: FormValues) => {
         dispatch(addDetalleCarga({
             id: data.producto?.codigo,
             name: data.producto?.descripcion,
@@ -92,7 +95,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                         <Grid container spacing={2}>
                                             <Grid item xs={12} md={9}>
                                                 <Autocomplete
-                                                    id="combo-box-demo"
+                                                    id="producto"
                                                     options={productos}
                                                     getOptionLabel={(option) => option.codigo + " - " + option.descripcion}
                                                     size="small"
@@ -100,15 +103,13 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                                     // el id del input es codigo
                                                     {...register("producto")}
                                                     onChange={(_e, data) => setValue("producto", data)}
-                                                    
-                                                    renderInput={(params) => <TextField 
-                                                        {...params} 
+                                                    renderInput={(params) => <TextField
+                                                        {...params}
                                                         error={errors.producto ? true : false}
-                                                        label="Producto" 
+                                                        label="Producto"
                                                         helperText={errors.producto?.message}
                                                         fullWidth />}
                                                 />
-                                            
                                             </Grid>
                                             <Grid item xs={12} md={6} lg={4} xl={3}>
                                                 <TextField
@@ -121,24 +122,8 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                                     {...register("cantidad")}
                                                     error={errors.cantidad ? true : false}
                                                     helperText={errors.cantidad?.message}
-                                                // onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
-                                                // value={seguimiento?.datos?.nDocumento}
                                                 />
                                             </Grid>
-                                            {/* <Grid item xs={12} sx={{ marginTop: 4 }}>
-                                                <Divider >
-                                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                                        Pallets
-                                                    </Typography>
-                                                </Divider>
-                                            </Grid> */}
-                                            {/* <Grid item xs={12}>
-                                                {
-                                                    detalles.map(detalle => {
-                                                        <DetallePalet detalle={detalle} />
-                                                    })
-                                                }
-                                            </Grid> */}
                                         </Grid>
                                     </form>
                                 </Grid>
@@ -147,7 +132,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={handleClickCreate}>
+                    <Button onClick={handleClickCreate}>
                         Agregar
                     </Button>
                 </DialogActions>

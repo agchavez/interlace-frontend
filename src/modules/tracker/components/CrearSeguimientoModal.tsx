@@ -1,8 +1,7 @@
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, styled } from "@mui/material";
-import { FunctionComponent, useRef } from "react";
+import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
+import { FunctionComponent, useEffect, useRef } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { Rastra } from '../../../interfaces/tracking';
-import { RastraSelect } from "./RastraSelect";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -65,7 +64,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { control, handleSubmit, reset } = useForm({
+    const { handleSubmit, reset, setFocus, register, setValue, formState: { errors } } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             rastraId: 0
@@ -90,6 +89,13 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
         handleClose && handleClose({}, "backdropClick");
         reset();
     }
+
+    useEffect(() => {
+        setTimeout(() => {
+            setFocus("rastraId")
+        }, 100);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open])
 
     return (
         <>
@@ -118,7 +124,22 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
-                                        <RastraSelect rastras={rastras} control={control} name="rastraId" />
+                                        <Autocomplete
+                                            id="producto"
+                                            options={rastras}
+                                            getOptionLabel={(option) => option.placa}
+                                            size="small"
+                                            autoFocus
+                                            // el id del input es codigo
+                                            {...register("rastraId")}
+                                            onChange={(_e, data) => setValue("rastraId", data?.id || 0)}
+                                            renderInput={(params) => <TextField
+                                                {...params}
+                                                error={errors.rastraId ? true : false}
+                                                label="Producto"
+                                                helperText={errors.rastraId?.message}
+                                                fullWidth />}
+                                        />
                                     </form>
                                 </Grid>
                             </Grid>
@@ -126,7 +147,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button autoFocus onClick={handleClickCreate}>
+                    <Button onClick={handleClickCreate}>
                         Crear
                     </Button>
                 </DialogActions>

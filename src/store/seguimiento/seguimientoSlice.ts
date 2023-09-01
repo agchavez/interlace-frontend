@@ -50,6 +50,11 @@ interface AddDetalleCargaPalletData extends DetalleCargaPalet {
     detalleIndex: number;
 }
 
+interface RemoveDetalle {
+    segIdx: number;
+    detalleIdx: number;
+}
+
 export interface DetalleCarga {
     id?: number;
     name?: string;
@@ -108,6 +113,12 @@ export const seguimientoSlice = createSlice({
             }
             state.seguimientos[action.payload.index].detalles = [action.payload, ...state.seguimientos[action.payload.index].detalles]
         },
+        removeDetalleCarga:(state, action: PayloadAction<RemoveDetalle>) => {
+            const {segIdx, detalleIdx} = action.payload
+            const seguimiento = state.seguimientos[segIdx];
+            const cortado = seguimiento.detalles.filter((_, indice) => indice !== detalleIdx)
+            seguimiento.detalles = cortado
+        },
         addDetalleCargaPallet: (state, action: PayloadAction<AddDetalleCargaPalletData>) => {
             const {segIndex, detalleIndex} = action.payload
             state.seguimientos[segIndex].detalles[detalleIndex].history = [action.payload, ...state.seguimientos[segIndex].detalles[detalleIndex].history || []]
@@ -141,4 +152,5 @@ export const {
     addDetalleCargaPallet,
     updateDetalleCargaPallet,
     removeDetalleCargaPallet,
+    removeDetalleCarga,
 } = seguimientoSlice.actions;
