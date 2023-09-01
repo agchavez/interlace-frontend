@@ -98,7 +98,7 @@ export const CheckPage = () => {
                 seguimientos.map((seguimiento, index) => {
                   return (
                     <CustomTabPanel value={value} index={index}>
-                      <CheckForm />
+                      <CheckForm seguimiento={seguimiento}/>
                     </CustomTabPanel>
                   )
                 })
