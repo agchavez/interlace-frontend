@@ -310,10 +310,10 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sx={{ marginTop: 4 }}>
+                <Grid item xs={6} sx={{ marginTop: 4 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                            Detalles de la carga
+                            Entrada de producto
                         </Typography>
                     </Divider>
                 </Grid>
@@ -329,6 +329,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         Agregar producto
                     </Button>
                 </Grid>
+                <Grid item xs={6}>
                 <Table size="small" aria-label="a dense table" sx={{ marginTop: 2 }}>
                     <TableHead>
                         <TableRow>
@@ -341,10 +342,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <StyledTableCell align="right">
                                 Producto
                             </StyledTableCell>
-                            <StyledTableCell align="right">
-                                BASIC
-                            </StyledTableCell>
-
                             <StyledTableCell align="right">
                                 Total cajas
                             </StyledTableCell>
@@ -363,6 +360,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         }
                     </TableBody>
                 </Table>
+                </Grid>
 
 
             </Grid>
@@ -426,9 +424,6 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 </TableCell>
                 <TableCell align="right">
                     {row.name}
-                </TableCell>
-                <TableCell align="right">
-                    {row.basic}
                 </TableCell>
                 <TableCell align="right">
                     {row.amount}

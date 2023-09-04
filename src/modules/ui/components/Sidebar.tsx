@@ -31,9 +31,9 @@ const items: SideBarItem[] = [
         id: "usuarios"
     },
     {
-        text: "SEGUIMIENTO",
+        text: "T1",
         subItems: [
-            { text: "Seguimiento", href: "/tracker/check", id: "nuevo" },
+            { text: "En Atención", href: "/tracker/check", id: "nuevo" },
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "movimientos"

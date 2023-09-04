@@ -3,7 +3,7 @@ import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid } from '@mui/material';
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { setStatus } from "../../../store/auth";
@@ -27,7 +27,7 @@ interface LoginData {
 
 export function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
+    const { register, handleSubmit, formState: { errors }, watch } = useForm<LoginData>({
         defaultValues: {
             email: '',
             password: ''
@@ -39,6 +39,12 @@ export function LoginForm() {
         data
         dispatch(setStatus("authenticated"))
     }
+
+    // Estar pendiente del cambio de la contraseña
+    useEffect(() => {
+        console.log(watch('password'))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [watch('password')])
     return (
         <Paper elevation={3} className="auth__papaer" sx={{ borderRadius: 5 }}>
             <Container>

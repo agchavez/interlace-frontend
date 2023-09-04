@@ -1,4 +1,11 @@
-import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
+import { 
+    Autocomplete, 
+    Box, 
+    Button, 
+    Container, 
+    Dialog, 
+    DialogActions, 
+    DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
 import { FunctionComponent, useRef, useEffect } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
@@ -33,7 +40,6 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     const formRef = useRef<HTMLFormElement>(null);
 
     const { handleSubmit, register, formState: { errors }, setValue, reset, setFocus } = useForm<FormValues>({
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         defaultValues: {
             producto: null,
             cantidad: 0
@@ -44,8 +50,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
         setTimeout(() => {
             setFocus("producto")
         }, 100);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open])
+    }, [open, setFocus])
 
     const handleSubmitForm = (data: FormValues) => {
         dispatch(addDetalleCarga({

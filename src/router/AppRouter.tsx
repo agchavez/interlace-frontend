@@ -8,7 +8,6 @@ import HomeRouter from "../modules/home/HomeRouter";
 
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
 import Sidebar from '../modules/ui/components/Sidebar';
-import { Grid } from '@mui/material';
 import Navbar from '../modules/ui/components/Navbar';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));

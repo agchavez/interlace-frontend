@@ -166,9 +166,9 @@ export const ListUserPage = () => {
                         columns={columns}
                         rows={[{
                             id: 1,
-                            nombre: 'Juan',
-                            apellido: 'Perez',
-                            correo: 'juanperez@test.com',
+                            nombre: 'RICARDO',
+                            apellido: 'SALINAS',
+                            correo: 'ricardo.salinas@ab-inbev.com',
                             grupo: ['ADMINISTRADOR'],
                             fechaCreacion: '2021-10-10',
                             estado: true,

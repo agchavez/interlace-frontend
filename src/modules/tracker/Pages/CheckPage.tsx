@@ -60,7 +60,7 @@ export const CheckPage = () => {
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
             <Typography variant="h5" component="h1" fontWeight={400}>
-              Seguimiento
+              T1 - En Atención
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
@@ -117,7 +117,7 @@ export const CheckPage = () => {
               <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button variant="contained" color="success" size="medium" fullWidth>
                   <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
-                    Completar seguimiento
+                    Completar
                   </Typography>
                 </Button>
               </Grid>
