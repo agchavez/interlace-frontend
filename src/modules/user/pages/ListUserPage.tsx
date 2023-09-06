@@ -1,10 +1,12 @@
-import { Container, Divider, Grid, IconButton, Typography, Button, Chip, Box } from '@mui/material';
+import { Container, Divider, Grid, IconButton, Typography, Chip, Box } from '@mui/material';
 import { DataGrid, GridCellParams, GridColDef, esES } from '@mui/x-data-grid';
 import { format } from 'date-fns';
-import FilterAltTwoToneIcon from '@mui/icons-material/FilterAltTwoTone';
 import EditTwoToneIcon from '@mui/icons-material/EditTwoTone';
 import LockResetTwoToneIcon from '@mui/icons-material/LockResetTwoTone';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { User, UserQuerySearch } from '../../../interfaces/user';
+import { useGetUserQuery } from '../../../store/user/userApi';
+import { CustomSearch } from '../../ui/components/CustomSearch';
 function getRoleChip(group: string[]): JSX.Element {
     return <Chip
         label={group[0]}
@@ -21,23 +23,34 @@ function getRoleChip(group: string[]): JSX.Element {
 
 export const ListUserPage = () => {
 
-    const columns: GridColDef[] = [
+    const [query, setquery] = useState<UserQuerySearch>({
+        limit: 15,
+        offset: 0,
+        search: '',
+    });
+
+    const {
+        data, isLoading, refetch
+    } = useGetUserQuery(query)
+
+    const columns: GridColDef<User>[] = [
         {
-            field: 'nombre',
+            field: 'first_name',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'NOMBRE', width: 150,
+            headerName: 'NOMBRE', 
+            width: 150,
             minWidth: 150,
         },
         {
-            field: 'apellido',
+            field: 'last_name',
             flex: 1,
             headerClassName: "base__header",
             headerName: 'APELLIDO', width: 150,
             minWidth: 150,
         },
         {
-            field: 'correo',
+            field: 'email',
             flex: 1,
             headerClassName: "base__header",
             headerName: 'CORREO',
@@ -45,7 +58,7 @@ export const ListUserPage = () => {
             minWidth: 200,
         },
         {
-            field: 'grupo',
+            field: 'list_groups',
             flex: 1,
             headerClassName: "base__header",
             headerName: 'GRUPO',
@@ -56,7 +69,7 @@ export const ListUserPage = () => {
 
         },
         {
-            field: 'fechaCreacion',
+            field: 'created_at',
             flex: 1,
             headerClassName: "base__header",
             headerName: 'FECHA DE CREACIÓN',
@@ -136,6 +149,21 @@ export const ListUserPage = () => {
         page: 0,
     });
 
+    useEffect(() => {
+        setquery({
+            ...query,
+            limit: paginationModel.pageSize,
+            offset: paginationModel.page,
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [paginationModel])
+
+
+    useEffect(() => {
+        refetch()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query])
+
   return (
     <Container maxWidth="lg">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
@@ -145,38 +173,26 @@ export const ListUserPage = () => {
                 </Typography>
                 <Divider sx={{marginBottom: 0, marginTop: 1}} />
             </Grid>
-            <Grid item xs={12} sx={{display: 'flex', justifyContent: 'flex-end'}}>
-                <Button 
-                    color="primary"
-                    size="small"
-                    variant="contained"
-                    sx={{marginBottom: 1}}
+            <Grid item xs={12}>
+                <CustomSearch
+                    placeholder="Buscar usuario"
+                    value={query.search}
+                    onChange={(e) => setquery({...query, search: e.target.value})}
                     onClick={() => console.log('click')}
-                    startIcon={<FilterAltTwoToneIcon color="inherit" fontSize="small" />}   
-                >
-                    <Typography variant="body2" component="span" fontWeight={200} color={'gray.700'}>
-                    Filtrar
-                    </Typography>
-                </Button>
+                />
             </Grid>
             <Grid item xs={12}>
                 <div style={{ height: 400, width: '100%' }}>
                     <DataGrid
                         {...tableBase}
                         columns={columns}
-                        rows={[{
-                            id: 1,
-                            nombre: 'RICARDO',
-                            apellido: 'SALINAS',
-                            correo: 'ricardo.salinas@ab-inbev.com',
-                            grupo: ['ADMINISTRADOR'],
-                            fechaCreacion: '2021-10-10',
-                            estado: true,
-                        }]}
+                        rows={data?.results || []}
+                        rowCount={data?.count || 0}                        
                         pagination
                         paginationMode="server"
                         paginationModel={paginationModel}
                         onPaginationModelChange={setPaginationModel}
+                        loading={isLoading}
                     />
                 </div>
             </Grid>

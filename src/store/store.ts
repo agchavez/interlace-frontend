@@ -3,15 +3,17 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { authSlice } from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
 import { authApi } from "./auth/authApi";
+import { userApi } from './user/userApi';
 export const store = configureStore({
     reducer: {
         [authSlice.name]: authSlice.reducer,
         [seguimientoSlice.name]: seguimientoSlice.reducer,
-        authApi: authApi.reducer
+        authApi: authApi.reducer,
+        [userApi.reducerPath]: userApi.reducer
     }, 
-    devTools: import.meta.env.DEV,
-    middleware: (getDefaultMiddleware) => 
-        getDefaultMiddleware().concat(authApi.middleware)
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+        .concat(userApi.middleware).concat(authApi.middleware),
+    devTools: true
 })
 
 export type RootState = ReturnType<typeof store.getState>;
