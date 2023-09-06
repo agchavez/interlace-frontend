@@ -91,16 +91,15 @@ export const authSlice = createSlice({
                         "auth.add_group"
                     ],
                     "centro_distribucion": null,
-                    "last_login": new Date("2023-08-30T06:32:08.853477-06:00"),
                     "is_superuser": true,
                     "username": "agchavez",
                     "is_staff": true,
                     "is_active": true,
-                    "date_joined": new Date("2023-08-28T20:02:34.782965-06:00"),
+                    "date_joined": null,
                     "first_name": "RICARDO",
                     "last_name": "SALINAS",
                     "email": "agchavez@unah.hn",
-                    "created_at": new Date("2023-08-28T20:02:34.935469-06:00"),
+                    "created_at": null,
                     "groups": [],
                     "user_permissions": []
                 };

@@ -2,12 +2,16 @@ import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { authSlice } from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
+import { userApi } from './user/userApi';
 export const store = configureStore({
     reducer: {
         [authSlice.name]: authSlice.reducer,
-        [seguimientoSlice.name]: seguimientoSlice.reducer
+        [seguimientoSlice.name]: seguimientoSlice.reducer,
+        [userApi.reducerPath]: userApi.reducer
     }, 
-    devTools: import.meta.env.DEV
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+        .concat(userApi.middleware),
+    devTools: true
 })
 
 export type RootState = ReturnType<typeof store.getState>;

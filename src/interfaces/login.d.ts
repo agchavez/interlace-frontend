@@ -29,16 +29,15 @@ export interface User {
     list_groups:         string[];
     list_permissions:    string[];
     centro_distribucion: number | null;
-    last_login:          Date;
     is_superuser:        boolean;
     username:            string;
     is_staff:            boolean;
     is_active:           boolean;
-    date_joined:         Date;
+    date_joined:         Date | null;
     first_name:          string;
     last_name:           string;
     email:               string;
-    created_at:          Date;
+    created_at:          Date | null;
     groups:              number[];
     user_permissions:    string[];
 }
