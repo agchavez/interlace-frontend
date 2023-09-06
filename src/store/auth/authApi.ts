@@ -4,7 +4,7 @@ import { LoginResponseOk, LoginBody } from '../../interfaces/login';
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.BACKEND_URL + '/api',
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
         prepareHeaders: (headers, {getState}) => {
             const token = (getState() as RootState).auth.token;
             if (token) {
@@ -29,11 +29,22 @@ export const authApi = createApi({
             query: (data) => {
                 return (
                     {
-                        url: '/auth/login',
+                        url: '/auth/login/',
                         method: 'POST',
                         body: {
                             ...data
                         }
+                    }
+                )
+            }
+        }),
+        logout: builder.mutation<LoginResponseOk, unknown>({
+            query: () => {
+                return (
+                    {
+                        url: '/auth/logout/',
+                        method: 'POST',
+                        body: {}
                     }
                 )
             }
@@ -43,5 +54,6 @@ export const authApi = createApi({
 
 export const {
     useLoginMutation,
-    useRefreshTokenQuery
+    useRefreshTokenQuery,
+    useLogoutMutation,
 } = authApi;

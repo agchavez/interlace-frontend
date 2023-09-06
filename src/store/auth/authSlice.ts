@@ -31,6 +31,7 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action:PayloadAction<LoginResponseOk>) => {
+            localStorage.setItem("token", action.payload.token.refresh)
             state.user = action.payload.user;
             state.token = action.payload.token.access;
             state.isAuthenticated = action.payload.user?true:false;
