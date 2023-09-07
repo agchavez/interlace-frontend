@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Rastra } from "../../interfaces/tracking";
 import { toast } from 'sonner'
+import { Trailer } from '../../interfaces/maintenance';
+import { CheckFormType, Product } from '../../interfaces/tracking';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -55,12 +56,8 @@ interface RemoveDetalle {
     detalleIdx: number;
 }
 
-export interface DetalleCarga {
-    id?: number;
-    name?: string;
-    sap?: number;
-    basic?: number;
-    amount?: number;
+export interface DetalleCarga extends Product {
+    amount: number;
     history?: DetalleCargaPalet[]
 }
 
@@ -70,8 +67,8 @@ export interface DetalleCargaIdx extends DetalleCarga {
 
 export interface Seguimiento {
     id: number,
-    rastra: Rastra,
-    datos?: DatosGeneralesSeguimiento,
+    rastra: Trailer,
+    data?: CheckFormType,
     datosOperador?: DatosOperador,
     detalles: DetalleCarga[]
 }
@@ -95,8 +92,8 @@ export const seguimientoSlice = createSlice({
     reducers: {
         addSeguimiento: (state, action: PayloadAction<Seguimiento>) => {
             // Si el seguimiento ya existe no se agrega
-            if (state.seguimientos.findIndex((seg) => seg.id === action.payload.id) !== -1) {
-                toast.error("El seguimiento ya existe")
+            if (state.seguimientos.findIndex((seg) => seg.rastra.code === action.payload.rastra.code) !== -1) {
+                toast.error("Ya existe un seguimiento con este codigo de rastra");
                 return
             }
             state.seguimientos.push(action.payload);
@@ -114,7 +111,7 @@ export const seguimientoSlice = createSlice({
         },
         addDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
             // No se puede agregar un producto que ya existe en el seguimiento validar por codigo sap
-            if (state.seguimientos[action.payload.index].detalles.findIndex((det) => det.sap === action.payload.sap) !== -1) {
+            if (state.seguimientos[action.payload.index].detalles.findIndex((det) => det.id === action.payload.id) !== -1) {
                 toast.error("El producto ya existe en el seguimiento")
                 return;
             }

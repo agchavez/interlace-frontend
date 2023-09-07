@@ -88,7 +88,7 @@ export const CheckPage = () => {
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
-                        <Tab key={index} label={seguimiento.rastra.placa} {...a11yProps(index)} onClick={() => dispatch(setSeguimientoActual(index))} />
+                        <Tab key={index} label={seguimiento.rastra.code} {...a11yProps(index)} onClick={() => dispatch(setSeguimientoActual(index))} />
                       )
                     })
                   }

@@ -1,18 +1,17 @@
 import { 
-    Autocomplete, 
     Box, 
     Button, 
     Container, 
     Dialog, 
     DialogActions, 
     DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
-import { FunctionComponent, useRef, useEffect } from 'react';
+import { FunctionComponent, useRef, useEffect, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { addDetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
-import { Producto } from "../../../interfaces/tracking";
-import { productos } from "../../../utils/data";
+import { Product } from '../../../interfaces/tracking';
+import { ProductSelect } from "../../ui/components/ProductSelect";
 
 interface CreateCheckProps {
     open: boolean;
@@ -20,7 +19,7 @@ interface CreateCheckProps {
 }
 
 interface FormValues {
-    producto: Producto | null;
+    producto: Product | null;
     cantidad: number;
 }
 
@@ -39,7 +38,9 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { handleSubmit, register, formState: { errors }, setValue, reset, setFocus } = useForm<FormValues>({
+    const [product, setproduct] = useState<Product | null>(null);
+
+    const { handleSubmit, register, formState: { errors }, reset, setFocus, control } = useForm<FormValues>({
         defaultValues: {
             producto: null,
             cantidad: 0
@@ -53,11 +54,9 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     }, [open, setFocus])
 
     const handleSubmitForm = (data: FormValues) => {
+        if (!product) return
         dispatch(addDetalleCarga({
-            id: data.producto?.codigo,
-            name: data.producto?.descripcion,
-            sap: data.producto?.codigo,
-            basic: undefined,
+            ...product,
             amount: data.cantidad,
             history: [],
             index: seguimeintoActual || 0,
@@ -69,6 +68,11 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     const handleClickCreate = () => {
         formRef.current?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
     }
+
+    const handleSelectProduct = (value: Product | null) => {
+        setproduct(value)
+    }
+
 
     return (
         <>
@@ -99,22 +103,12 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12} md={9}>
-                                                <Autocomplete
-                                                    id="producto"
-                                                    options={productos}
-                                                    getOptionLabel={(option) => option.codigo + " - " + option.descripcion}
-                                                    size="small"
-                                                    autoFocus
-                                                    // el id del input es codigo
-                                                    {...register("producto")}
-                                                    onChange={(_e, data) => setValue("producto", data)}
-                                                    renderInput={(params) => <TextField
-                                                        {...params}
-                                                        error={errors.producto ? true : false}
-                                                        label="Producto"
-                                                        helperText={errors.producto?.message}
-                                                        fullWidth />}
-                                                />
+                                                <ProductSelect
+                                                    control={control}
+                                                    name="producto"
+                                                    onChange={handleSelectProduct}
+                                                    placeholder="Producto"
+                                                    />
                                             </Grid>
                                             <Grid item xs={12} md={6} lg={4} xl={3}>
                                                 <TextField

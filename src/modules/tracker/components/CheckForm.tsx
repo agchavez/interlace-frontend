@@ -1,5 +1,5 @@
-import { Autocomplete, Box, Button, Card, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material'
-import { Fragment, useState } from 'react';
+import { Box, Button, Card, Collapse, Divider, FormControl, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses, InputLabel, Select, MenuItem } from '@mui/material';
+import { Fragment, useEffect, useState } from 'react';
 
 // iCONS
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
@@ -7,32 +7,17 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
+import FlipTwoToneIcon from '@mui/icons-material/FlipTwoTone';
+
 import { useAppDispatch } from '../../../store';
-import { DatosGeneralesSeguimiento, DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
-
-const localidades = [
-    { label: 'CD COMAYAGUA', id: 1, code: 'DH09' },
-    { label: 'PLANTA CERVEZA', id: 2, code: 'BH01' },
-    { label: 'CD LA GRANJA', id: 3, code: 'DH01' },
-    { label: 'CD SAN PEDRO SULA DISTRIBUIDOR', id: 4, code: 'DH00' },
-    { label: 'CD ROATAN', id: 5, code: 'DH14' },
-];
-
-const conductores = [
-    { label: 'Carlos Alberto Bonilla Vasquez', id: 1 },
-    { label: 'Carlos Alberto Escobar', id: 2 },
-    { label: 'Carlos Alberto Rodríguez George', id: 3 },
-    { label: 'Carlos Jose Sanchez', id: 4 },
-    { label: 'Nelson Yovanni Lagos', id: 5 },
-    { label: 'Florencio Yairsinio Velasquez', id: 6 },
-    { label: 'Alexis Maldonado Ramos', id: 7 },
-    { label: 'Dagoberto Rivera Alba', id: 8 },
-    { label: 'Manuel Garcia Mejia', id: 9 },
-    { label: 'Ely Martinez Castillo', id: 10 },
-    { label: 'Alex Esau Aranda Leiva', id: 11 },
-    { label: 'Santos Enrrique Hernandez Bonilla', id: 12 },
-];
+import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
+import { useAppSelector } from '../../../store/store';
+import { useForm } from 'react-hook-form';
+import { CheckFormType } from '../../../interfaces/tracking';
+import { OperatorSelect } from '../../ui/components/OperatorSelect';
+import { DriverSelect } from '../../ui/components';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -44,39 +29,52 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     },
 }));
 
-export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, indice:number }) => {
+export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, indice: number }) => {
     const dispatch = useAppDispatch();
-    const [open, setopen] = useState(false)
-    function updateSeguimientoDatos(datos: DatosGeneralesSeguimiento): unknown {
-        if (!seguimiento) return;
-        dispatch(updateSeguimiento({
-            ...seguimiento,
-            datos: {
-                ...seguimiento.datos,
-                ...datos
-            },
-            index:indice
-        }))
-    }
+    const [open, setopen] = useState(false);
+    const { disctributionCenters } = useAppSelector(state => state.maintenance);
     function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
         if (!seguimiento) return;
+        
         dispatch(updateSeguimiento({
             ...seguimiento,
             datosOperador: {
                 ...seguimiento.datosOperador,
                 ...datos
             },
-            index:indice
+            index: indice
         }))
     }
+    const { control, reset, getValues, register, watch } = useForm<CheckFormType>({
+        defaultValues: {
+            ...seguimiento?.data,
+        }
+    });
     const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
     const tiempoSalida = seguimiento?.datosOperador?.tiempoSalida
 
-    
+    useEffect(() => {
+        reset({
+            ...seguimiento?.data,
+        })
+    }, [seguimiento?.data, reset]);
+
+    // Actualizar redux con los datos del formulario
+    useEffect(() => {
+        const data = getValues();
+        dispatch(updateSeguimiento({
+            ...seguimiento,
+            data,
+            index: indice
+        }))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber')]);
+
+
 
     return (
         <>
-        <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
+            <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
                     <Card>
@@ -94,7 +92,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.transportista}
+                                        {seguimiento?.rastra.transporter.name}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
@@ -103,7 +101,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.tractor}
+                                        {seguimiento?.rastra.transporter.tractor}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
@@ -112,7 +110,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.cabezal}
+                                        {seguimiento?.rastra.transporter.head}
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -128,90 +126,89 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Typography>
                     </Divider>
                     <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    <Grid item xs={12} >
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Numero de placa"
-                        variant="outlined"
-                        size="small"
-                        value={seguimiento?.datos?.placa}
-                        onChange={(e) => updateSeguimientoDatos({ placa: e.target.value })}
-                    />
-                </Grid>
-                <Grid item xs={12} md={12}>
-                    <Autocomplete
-                        disablePortal
-                        id="combo-box-demo"
-                        value={localidades.find(loc => loc.label === seguimiento?.datos?.locEnvio)}
-                        options={localidades}
-                        getOptionLabel={(option) => option.label + ' - ' + option.code}
-                        renderInput={(params) => <TextField {...params} label="Localidad de Envío" size="small" fullWidth />}
-                        onChange={(_, v) => updateSeguimientoDatos({ locEnvio: v?.label })}
-                    />
-                </Grid>
-                <Grid item xs={12} md={12}>
-                    <Autocomplete
-                        disablePortal
-                        id="combo-box-demo"
-                        options={conductores}
-                        value={conductores.find(loc => loc.label === seguimiento?.datos?.conductor)}
-                        getOptionLabel={(option) => option.label}
-                        renderInput={(params) => <TextField {...params} label="Conductor" size="small" fullWidth />}
-                        onChange={(_, v) => updateSeguimientoDatos({ conductor: v?.label })}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="N° de documento"
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        onChange={(e) => updateSeguimientoDatos({ nDocumento: +e.target.value })}
-                        value={seguimiento?.datos?.nDocumento}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="N° de Transporte"
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        onChange={(e) => updateSeguimientoDatos({ nTransporte: +e.target.value })}
-                        value={seguimiento?.datos?.nTransporte}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="N° de Traslado"
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        onChange={(e) => updateSeguimientoDatos({ nTraslado: +e.target.value })}
-                        value={seguimiento?.datos?.nTraslado}
-                    />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="N° de Doc. Salida"
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        onChange={(e) => updateSeguimientoDatos({ nDocumentoSalida: +e.target.value })}
-                        value={seguimiento?.datos?.nDocumentoSalida}
-                    />
-                </Grid>
+                        <Grid item xs={12} >
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="Numero de placa"
+                                variant="outlined"
+                                size="small"
+                                {...register('plateNumber')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+                            {/* <Autocomplete
+                                disablePortal
+                                id="combo-box-demo"
+                                value={localidades.find(loc => loc.label === seguimiento?.datos?.locEnvio)}
+                                options={localidades}
+                                getOptionLabel={(option) => option.label + ' - ' + option.code}
+                                renderInput={(params) => <TextField {...params} label="Localidad de Envío" size="small" fullWidth />}
+                                onChange={(_, v) => updateSeguimientoDatos({ locEnvio: v?.label })}
+                            /> */}
+                            <AutoCompleteBase
+                                control={control}
+                                name='originLocation'
+                                placeholder='Localidad de Envío'
+                                options={disctributionCenters.map((d) => ({ label: d.name, id: d.id.toString() }))}
+                                />
+                                
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+                            <DriverSelect
+                                control={control}
+                                name='driver'
+                                placeholder='Conductor'
+                                driver={watch('driver')}
+                                />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de documento"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('documentNumber')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de Transporte"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('transportNumber')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de Traslado"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('transferNumber')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de Doc. Salida"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('documentNumberExit')}
+                            />
+                        </Grid>
                     </Grid>
                 </Grid>
-                
+
 
                 <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
                     <Divider >
@@ -262,11 +259,11 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
                                 {
                                     tiempoSalida && tiempoEntrada ?
-                                    (
-                                        String(tiempoSalida.getHours() - tiempoEntrada.getHours()).padStart(2, '0') + ":" + 
-                                        String(tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
-                                        String(tiempoSalida.getSeconds() - tiempoEntrada.getSeconds()).padStart(2, '0')
-                                    ) : "--:--:--"
+                                        (
+                                            String(tiempoSalida.getHours() - tiempoEntrada.getHours()).padStart(2, '0') + ":" +
+                                            String(tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
+                                            String(tiempoSalida.getSeconds() - tiempoEntrada.getSeconds()).padStart(2, '0')
+                                        ) : "--:--:--"
                                 }
                             </Typography>
                         </Grid>
@@ -287,25 +284,25 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             </Button>
                         </Grid>
                         <Grid item xs={12} >
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="OPM #1"
-                                variant="outlined"
-                                size="small"
-                                onChange={(e) => { updateSeguimientoDatosOperador({ opm1: e.target.value }) }}
-                                value={seguimiento?.datosOperador?.opm1}
+                            <OperatorSelect
+                                control={control}
+                                distributionCenterId={1}
+                                name='opm1'
+                                label='Operador #1'
+                                operatorId={watch('opm1')}
+                                invalidId={watch('opm2')}
+                                 
                             />
                         </Grid>
                         <Grid item xs={12} >
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="OPM #2"
-                                variant="outlined"
-                                size="small"
-                                onChange={(e) => { updateSeguimientoDatosOperador({ opm2: e.target.value }) }}
-                                value={seguimiento?.datosOperador?.opm2}
+                        <OperatorSelect
+                                control={control}
+                                distributionCenterId={1}
+                                name='opm2'
+                                label='Operador #2'
+                                operatorId={watch('opm2')}
+                                invalidId={watch('opm1')}
+                                 
                             />
                         </Grid>
                     </Grid>
@@ -316,51 +313,88 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             Entrada de producto
                         </Typography>
                     </Divider>
+                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                        <Grid item xs={12} md={12} lg={4} xl={4}>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={4}>
+                            <Button variant="outlined" size="small" fullWidth color="secondary"
+                                startIcon={<FlipTwoToneIcon />}
+                                onClick={() => {
+                                    setopen(true);
+                                }}
+                            >
+                                Escanear producto
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={4}>
+                            <Button variant="outlined" size="small" fullWidth color="secondary"
+                                startIcon={<AddTwoToneIcon />}
+                                onClick={() => {
+                                    setopen(true);
+                                }}
+                            >
+                                Agregar producto
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Table size="small" aria-label="a dense table" sx={{ marginTop: 2 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell>
+                                            Detalle
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            No. SAP
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            Producto
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            Total cajas
+                                        </StyledTableCell>
+                                        <StyledTableCell align="right">
+                                            Acciones
+                                        </StyledTableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {
+                                        seguimiento?.detalles.map((detalle, index) => {
+                                            return (
+                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} />
+                                            )
+                                        })
+                                    }
+                                </TableBody>
+                            </Table>
+                        </Grid>
                 </Grid>
-                <Grid item xs={12} md={7} lg={10} xl={10}>
                 </Grid>
-                <Grid item xs={12} md={5} lg={2} xl={2}>
-                    <Button variant="outlined" size="small" fullWidth color="secondary"
-                        startIcon={<AddTwoToneIcon />}
-                        onClick={() => {
-                            setopen(true);
-                        }}
-                    >
-                        Agregar producto
-                    </Button>
+                <Grid item xs={6} sx={{ marginTop: 4 }}>
+                    <Divider >
+                        <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                            Salida de producto
+                        </Typography>
+                    </Divider>
+                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
+                        <Grid item xs={12}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel id="demo-simple-select-label">Tipo de salida</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    // value={tipoSalida}
+                                    label="Tipo de salida"
+                                    // onChange={(e) => { setTipoSalida(e.target.value as string) }}
+                                >
+                                    <MenuItem value={"1"}>Salida de producto</MenuItem>
+                                    <MenuItem value={"2"}>Salida de producto con devolución</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                    </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                <Table size="small" aria-label="a dense table" sx={{ marginTop: 2 }}>
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell>
-                                Detalle
-                            </StyledTableCell>
-                            <StyledTableCell align="right">
-                                No. SAP
-                            </StyledTableCell>
-                            <StyledTableCell align="right">
-                                Producto
-                            </StyledTableCell>
-                            <StyledTableCell align="right">
-                                Total cajas
-                            </StyledTableCell>
-                            <StyledTableCell align="right">
-                                Acciones
-                            </StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {
-                            seguimiento?.detalles.map((detalle, index) => {
-                                return (
-                                    <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} />
-                                )
-                            })
-                        }
-                    </TableBody>
-                </Table>
-                </Grid>
+
 
 
             </Grid>
@@ -397,7 +431,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
             detalleIndex: props.index,
         }))
     }
-    const removeProductoPallet = (datos: {palletIndex:number}): unknown => {
+    const removeProductoPallet = (datos: { palletIndex: number }): unknown => {
         if (!props.seguimiento) return;
         const detalle = props.seguimiento.detalles[props.index]
         if (!detalle) return;
@@ -420,7 +454,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">
-                    {row.sap}
+                    {row.sap_code}
                 </TableCell>
                 <TableCell align="right">
                     {row.name}
@@ -430,10 +464,10 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 </TableCell>
                 <TableCell align="right">
 
-                <IconButton
+                    <IconButton
                         aria-label="expand row"
                         size="small"
-                        onClick={() => dispatch(removeDetalleCarga({segIdx:props.seguimiento.id -1, detalleIdx: props.index}))}
+                        onClick={() => dispatch(removeDetalleCarga({ segIdx: props.seguimiento.id - 1, detalleIdx: props.index }))}
                     >
                         <DeleteTwoToneIcon />
                     </IconButton>
@@ -477,7 +511,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                     />
                                                 </TableCell>
                                                 <TableCell component="th" scope="row" align="right">
-                                                <TextField
+                                                    <TextField
                                                         fullWidth
                                                         id="outlined-basic"
                                                         size="small"
@@ -493,7 +527,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                     />
                                                 </TableCell>
                                                 <TableCell align="right">
-                                                    <IconButton aria-label="delete" size="medium" onClick={()=>removeProductoPallet({palletIndex:index})}>
+                                                    <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index })}>
                                                         <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
                                                     </IconButton>
                                                     <IconButton aria-label="edit" size="medium">
