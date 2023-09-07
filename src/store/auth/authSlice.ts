@@ -21,7 +21,7 @@ const initialState: authInterface = {
     tokenExpires: null,
     token: localStorage.getItem('token') || '',
     isAuthenticated: false,
-    status: 'authenticated',
+    status: 'checking',
     loading: false,
     openLogoutModal: false,
 }

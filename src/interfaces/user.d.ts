@@ -23,7 +23,7 @@ export interface CreateUserResponse {
     date_joined:         Date;
     last_login:          null;
     created_at:          Date;
-    centro_distribucion: null;
+    centro_distribucion: number;
     is_superuser:        boolean;
     username:            string;
     is_staff:            boolean;
@@ -37,7 +37,7 @@ export interface CreateUserResponse {
 }
 
 export interface CreateUserBody {
-    centro_distribucion: string;
+    centro_distribucion: number;
     password: string;
     is_superuser: boolean;
     username: string;
@@ -47,6 +47,7 @@ export interface CreateUserBody {
     last_name: string;
     email:string;
     codigo_empleado: number;
+    group: number;
 }
 
 export type User = {
@@ -73,4 +74,11 @@ export interface UserQuerySearch {
     limit?: number;
     offset?: number;
     search?: string;
+}
+
+export interface GetDistributionCenterResponse {
+    id: number,
+    name: string,
+    direction: string,
+    country_code: number
 }

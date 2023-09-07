@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { RegisterUserForm } from '../../../interfaces/user';
 import { FC } from 'react';
+import { useAppSelector } from '../../../store';
 
 
 
@@ -39,6 +40,8 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
         setResetForm && setResetForm(false)
         setFocus("fistName")
     }
+
+    const { distributionCenters } = useAppSelector(state=>state.distributionCenters)
     
   return (
     <>
@@ -124,13 +127,19 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                     label="Centro de distribución"
                                     {...register("cd")}
                                     error={errors.cd ? true : false}
-                                    value={watch('cd') || ''}
+                                    value={watch('cd') || 0}
                                 >
-                                    <MenuItem value={''}></MenuItem>
-                                    <MenuItem value={'DH01'}>DH01 - CD La Granja</MenuItem>
-                                    <MenuItem value={'DH09'}>DH09 - CD Comayagua
-                                </MenuItem>
-
+                                    <MenuItem value={0}></MenuItem>
+                                    {
+                                        distributionCenters.map((distributionCenter)=>{
+                                            return <MenuItem 
+                                                key={distributionCenter.id} 
+                                                value={distributionCenter.id}
+                                            >
+                                                {distributionCenter.name}
+                                            </MenuItem>
+                                        })
+                                    }
                                 </Select>
                                 { errors.cd &&
                                     <Typography variant="caption" component="p" style={{color: '#f44336'}}>

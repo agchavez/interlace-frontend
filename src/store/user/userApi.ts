@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
-import { UserResponse, UserQuerySearch, CreateUserResponse, CreateUserBody } from '../../interfaces/user';
+import { UserResponse, UserQuerySearch, CreateUserResponse, CreateUserBody, GetDistributionCenterResponse } from '../../interfaces/user';
 
 export const userApi = createApi({
     reducerPath: 'userApi',
@@ -28,15 +28,22 @@ export const userApi = createApi({
             query: (data) => ({
                 url: `/users/`,
                 method: 'POST',
-                body: data
+                body: {...data, groups:[data.group]}
             }),
             invalidatesTags: (data)=> [{type: 'Users', id:data?.email}]
         }),
+        getDistributionCenter: builder.query<GetDistributionCenterResponse[], unknown>({
+            query: () => ({
+                url:`/distribution-center/`,
+                method: 'GET',
+            })
+        })
     })
 })
 
 export const { 
     useGetUserQuery,
-    useInsertUserMutation
+    useInsertUserMutation,
+    useGetDistributionCenterQuery
 } = userApi
 

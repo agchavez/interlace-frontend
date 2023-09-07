@@ -9,6 +9,7 @@ import HomeRouter from "../modules/home/HomeRouter";
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
 import Sidebar from '../modules/ui/components/Sidebar';
 import Navbar from '../modules/ui/components/Navbar';
+import { getDistributionCenters } from '../store/user';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -22,7 +23,12 @@ export function AppRouter() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-
+    useEffect(()=>{
+        if(status === "authenticated") {
+            dispatch(getDistributionCenters())
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status])
     // useEffect(() => {
     //     setTimeout(() => {
     //         dispatch(login({
@@ -90,6 +96,8 @@ export function AppRouter() {
     // if (status === 'checking') {
     //     return <>Loading</>
     // }
+
+    if(status === 'checking') return <></>
 
     return <>
         <div >

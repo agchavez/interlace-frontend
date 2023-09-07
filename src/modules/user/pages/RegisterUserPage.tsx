@@ -12,33 +12,33 @@ export const RegisterUserPage = () => {
     const [resetForm, setResetForm] = useState(false)
     const { data, status, error } = resultInsertUser;
     const onSubmit = async (data: RegisterUserForm) => {
-        await insertUser({ 
-            centro_distribucion: undefined, 
+        await insertUser({
+            centro_distribucion: + (data.cd || 0),
             password: data.password,
             email: data.email,
             first_name: data.fistName,
-            // group
+            group: data.group,
             last_name: data.lastName,
-            is_staff:false,
+            is_staff: false,
             is_superuser: false,
-            username: `u${Math.ceil(Math.random()*1000)}`,
+            username: data.email,
             is_active: true,
-            codigo_empleado: Math.ceil(Math.random()*1000)
+            codigo_empleado: Math.ceil(Math.random() * 1000)
         })
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         if (status === QueryStatus.fulfilled) {
             setResetForm(true)
             toast.success("Usuario Registrado con éxito")
-        } else if(error) {
-            if("data" in error){
+        } else if (error) {
+            if ("data" in error) {
                 toast.error(`Error: ${JSON.stringify(error.data)}`)
             } else if ("error" in error) {
                 toast.error(`Error: ${JSON.stringify(error.error)}`)
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, error])
 
     return (

@@ -4,12 +4,14 @@ import { authSlice } from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
 import { authApi } from "./auth/authApi";
 import { userApi } from './user/userApi';
+import { userSlice } from "./user/userSlice";
 export const store = configureStore({
     reducer: {
         [authSlice.name]: authSlice.reducer,
         [seguimientoSlice.name]: seguimientoSlice.reducer,
         authApi: authApi.reducer,
-        [userApi.reducerPath]: userApi.reducer
+        [userApi.reducerPath]: userApi.reducer,
+        [userSlice.name]: userSlice.reducer
     }, 
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware).concat(authApi.middleware),
