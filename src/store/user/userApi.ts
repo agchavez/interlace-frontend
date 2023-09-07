@@ -30,7 +30,7 @@ export const userApi = createApi({
                 method: 'POST',
                 body: data
             }),
-            invalidatesTags: ['Users']
+            invalidatesTags: (data)=> [{type: 'Users', id:data?.email}]
         }),
     })
 })
