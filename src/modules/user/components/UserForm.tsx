@@ -24,15 +24,22 @@ interface UserFormProps {
     loading: boolean;
     initialValues?: RegisterUserForm;
     isEdit?: boolean;
+    resetForm?:boolean,
+    setResetForm?:(value:boolean)=>unknown
 }
 
-export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit }) => {
-    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<RegisterUserForm>({
+export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit, resetForm, setResetForm }) => {
+    const { register, handleSubmit, formState: { errors }, reset, watch, setFocus } = useForm<RegisterUserForm>({
         defaultValues: initialValues,
         resolver: yupResolver(schema)
     });
 
-
+    if(resetForm){
+        reset(initialValues);
+        setResetForm && setResetForm(false)
+        setFocus("fistName")
+    }
+    
   return (
     <>
         <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
