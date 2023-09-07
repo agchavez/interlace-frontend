@@ -90,7 +90,7 @@ const Navbar = () => {
                                 fontWeight={200}
                                 fontSize={13}
                             >
-                                {user && (user.centro_distribucion?.toString() || 'DH01 - CD La Granja')}
+                                {user && (user.centro_distribucion_name || '')}
                             </Typography>
                         </Grid>
                     </Grid>

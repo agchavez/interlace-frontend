@@ -30,6 +30,7 @@ export interface User {
     list_permissions:    string[];
     centro_distribucion: number | null;
     is_superuser:        boolean;
+    centro_distribucion_name: string;
     username:            string;
     is_staff:            boolean;
     is_active:           boolean;

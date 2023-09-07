@@ -16,7 +16,8 @@ export const store = configureStore({
         [seguimientoSlice.name]: seguimientoSlice.reducer,
         authApi: authApi.reducer,
         [userApi.reducerPath]: userApi.reducer,
-        [userSlice.name]: userSlice.reducer
+        [userSlice.name]: userSlice.reducer,
+        [maintenanceApi.reducerPath]: maintenanceApi.reducer,
     }, 
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)

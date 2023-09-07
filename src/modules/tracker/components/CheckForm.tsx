@@ -33,6 +33,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const dispatch = useAppDispatch();
     const [open, setopen] = useState(false);
     const { disctributionCenters } = useAppSelector(state => state.maintenance);
+    const centro_distribucion = useAppSelector(state => state.auth.user?.centro_distribucion);
     function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
         if (!seguimiento) return;
         
@@ -286,7 +287,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         <Grid item xs={12} >
                             <OperatorSelect
                                 control={control}
-                                distributionCenterId={1}
+                                distributionCenterId={centro_distribucion || null}
                                 name='opm1'
                                 label='Operador #1'
                                 operatorId={watch('opm1')}
@@ -297,7 +298,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         <Grid item xs={12} >
                         <OperatorSelect
                                 control={control}
-                                distributionCenterId={1}
+                                distributionCenterId={centro_distribucion || null}
                                 name='opm2'
                                 label='Operador #2'
                                 operatorId={watch('opm2')}

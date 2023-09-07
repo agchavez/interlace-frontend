@@ -15,7 +15,7 @@ interface OperatorSelectProps<
   placeholder?: string;
   //options?: o[];
   invalidId?: number;
-  distributionCenterId: number;
+  distributionCenterId: number | null;
   disabled?: boolean;
   onChange?: (value: Operator | null) => void;
   operatorId?: number;
@@ -35,7 +35,7 @@ export const OperatorSelect = <
     offset: 0,
     search: "",
     id: props.operatorId,
-    distributorCenter: props.distributionCenterId
+    distributorCenter: props.distributionCenterId ? props.distributionCenterId : undefined
   });
 
   const {
