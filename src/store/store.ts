@@ -4,17 +4,25 @@ import { authSlice } from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
 import { authApi } from "./auth/authApi";
 import { userApi } from './user/userApi';
+
 import { userSlice } from "./user/userSlice";
+import { maintenanceApi } from './maintenance/maintenanceApi';
+import { maintenanceSlice } from './maintenance/maintenanceSlice';
+
 export const store = configureStore({
     reducer: {
         [authSlice.name]: authSlice.reducer,
+        [maintenanceSlice.name]: maintenanceSlice.reducer,
         [seguimientoSlice.name]: seguimientoSlice.reducer,
         authApi: authApi.reducer,
         [userApi.reducerPath]: userApi.reducer,
         [userSlice.name]: userSlice.reducer
     }, 
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
-        .concat(userApi.middleware).concat(authApi.middleware),
+        .concat(userApi.middleware)
+        .concat(authApi.middleware)
+        .concat(maintenanceApi.middleware)
+        ,
     devTools: true
 })
 

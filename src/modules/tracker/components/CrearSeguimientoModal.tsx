@@ -1,12 +1,13 @@
-import { Autocomplete, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
-import { FunctionComponent, useEffect, useRef } from "react";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, styled } from "@mui/material";
+import { FunctionComponent, useEffect, useRef, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
-import { Rastra } from '../../../interfaces/tracking';
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { TrailerSelect } from "../../ui/components";
+import { Trailer } from '../../../interfaces/maintenance';
 
 interface CreateCheckProps {
     open: boolean;
@@ -22,62 +23,40 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const rastras: Rastra[] = [
-    {
-        id: 1,
-        transportista: "Rigoberto agui",
-        placa: "C048",
-        tractor: "ICH00",
-        cabezal: "HN-GC00"
-    },
-    {
-        id: 2,
-        transportista: "Edwin Mejia",
-        placa: "C066",
-        tractor: "ICH00",
-        cabezal: "HN-GC00"
-    },
-    {
-        id: 3,
-        transportista: "Onan Contreras",
-        placa: "C110",
-        cabezal: "HN-GC00",
-        tractor: "Onan Contreras"
-    },
-    {
-        id: 4,
-        transportista: "Loginhsa",
-        placa: "M11",
-        cabezal: "HN-GC00",
-        tractor: "ILI00"
-    }
-]
 
 const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
     const schema = yup.object().shape({
         rastraId: yup.number().required("Este campo es requerido").min(1, "Seleccione una rastra")
     })
 
+    const [trailer, settrailer] = useState<Trailer | null>(null)
     const { seguimientos } = useAppSelector(state => state.seguimiento)
 
     const dispach = useAppDispatch()
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { handleSubmit, reset, setFocus, register, setValue, formState: { errors } } = useForm({
+    const { handleSubmit, reset, setFocus, control } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             rastraId: 0
         }
     })
 
-    const handleSubmitForm = (data: { rastraId: number }) => {
-        const rastra = rastras.find(rastra => rastra.id === data.rastraId)
-        if (rastra) {
+    const handleChangeTrailer = (value: Trailer | null) => {
+        if (value) {
+            settrailer(value)
+        }
+    }
+
+
+    const handleSubmitForm = () => {
+        
+        if (trailer) {
             const idSeguimiento = Math.max(...seguimientos.map(s => s.id), 0) + 1
             dispach(addSeguimiento({
                 id: idSeguimiento,
-                rastra: rastra,
+                rastra: trailer,
                 detalles: []
             }));
             //dispach(setSeguimientoActual(seguimientos.length))
@@ -124,22 +103,12 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
-                                        <Autocomplete
-                                            id="producto"
-                                            options={rastras}
-                                            getOptionLabel={(option) => option.placa}
-                                            size="small"
-                                            autoFocus
-                                            // el id del input es codigo
-                                            {...register("rastraId")}
-                                            onChange={(_e, data) => setValue("rastraId", data?.id || 0)}
-                                            renderInput={(params) => <TextField
-                                                {...params}
-                                                error={errors.rastraId ? true : false}
-                                                label="Rastra"
-                                                helperText={errors.rastraId?.message}
-                                                fullWidth />}
-                                        />
+                                        <TrailerSelect
+                                            control={control}
+                                            name="rastraId"
+                                            placeholder="Seleccione una rastra"
+                                            onChange={handleChangeTrailer}
+                                            />
                                     </form>
                                 </Grid>
                             </Grid>
