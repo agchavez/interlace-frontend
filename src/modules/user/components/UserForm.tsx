@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { RegisterUserForm } from '../../../interfaces/user';
 import { FC } from 'react';
+import { useAppSelector } from '../../../store';
 
 
 
@@ -24,15 +25,24 @@ interface UserFormProps {
     loading: boolean;
     initialValues?: RegisterUserForm;
     isEdit?: boolean;
+    resetForm?:boolean,
+    setResetForm?:(value:boolean)=>unknown
 }
 
-export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit }) => {
-    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<RegisterUserForm>({
+export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit, resetForm, setResetForm }) => {
+    const { register, handleSubmit, formState: { errors }, reset, watch, setFocus } = useForm<RegisterUserForm>({
         defaultValues: initialValues,
         resolver: yupResolver(schema)
     });
 
+    if(resetForm){
+        reset(initialValues);
+        setResetForm && setResetForm(false)
+        setFocus("fistName")
+    }
 
+    const { distributionCenters } = useAppSelector(state=>state.distributionCenters)
+    
   return (
     <>
         <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -117,13 +127,19 @@ export const UserForm:FC<UserFormProps> = ({ onSubmit, loading, initialValues, i
                                     label="Centro de distribución"
                                     {...register("cd")}
                                     error={errors.cd ? true : false}
-                                    value={watch('cd') || ''}
+                                    value={watch('cd') || 0}
                                 >
-                                    <MenuItem value={''}></MenuItem>
-                                    <MenuItem value={'DH01'}>DH01 - CD La Granja</MenuItem>
-                                    <MenuItem value={'DH09'}>DH09 - CD Comayagua
-                                </MenuItem>
-
+                                    <MenuItem value={0}></MenuItem>
+                                    {
+                                        distributionCenters.map((distributionCenter)=>{
+                                            return <MenuItem 
+                                                key={distributionCenter.id} 
+                                                value={distributionCenter.id}
+                                            >
+                                                {distributionCenter.name}
+                                            </MenuItem>
+                                        })
+                                    }
                                 </Select>
                                 { errors.cd &&
                                     <Typography variant="caption" component="p" style={{color: '#f44336'}}>

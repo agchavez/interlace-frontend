@@ -9,6 +9,8 @@ import HomeRouter from "../modules/home/HomeRouter";
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
 import Sidebar from '../modules/ui/components/Sidebar';
 import Navbar from '../modules/ui/components/Navbar';
+
+import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
@@ -20,11 +22,16 @@ export function AppRouter() {
     const dispatch = useAppDispatch()
     useEffect(() => {
         dispatch(checkToken());
-        dispatch(getMaintenanceData());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-
+    useEffect(()=>{
+        if(status === "authenticated") {
+            dispatch(getDistributionCenters())
+            dispatch(getMaintenanceData());
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [status])
     // useEffect(() => {
     //     setTimeout(() => {
     //         dispatch(login({
@@ -92,6 +99,8 @@ export function AppRouter() {
     // if (status === 'checking') {
     //     return <>Loading</>
     // }
+
+    if(status === 'checking') return <></>
 
     return <>
         <div >

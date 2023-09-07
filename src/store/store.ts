@@ -2,19 +2,25 @@ import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { authSlice } from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
+import { authApi } from "./auth/authApi";
 import { userApi } from './user/userApi';
+
+import { userSlice } from "./user/userSlice";
 import { maintenanceApi } from './maintenance/maintenanceApi';
 import { maintenanceSlice } from './maintenance/maintenanceSlice';
+
 export const store = configureStore({
     reducer: {
         [authSlice.name]: authSlice.reducer,
         [maintenanceSlice.name]: maintenanceSlice.reducer,
         [seguimientoSlice.name]: seguimientoSlice.reducer,
+        authApi: authApi.reducer,
         [userApi.reducerPath]: userApi.reducer,
-        [maintenanceApi.reducerPath]: maintenanceApi.reducer
+        [userSlice.name]: userSlice.reducer
     }, 
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
+        .concat(authApi.middleware)
         .concat(maintenanceApi.middleware)
         ,
     devTools: true

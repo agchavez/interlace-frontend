@@ -8,6 +8,7 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { useDispatch } from "react-redux";
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
+import { useLogoutMutation } from "../../../store/auth/authApi";
 interface SidebarProps {
     open: boolean
 }
@@ -49,8 +50,10 @@ const items: SideBarItem[] = [
 ]
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
+    const [logoutAPI] = useLogoutMutation();
     const dispatch = useDispatch()
     const handleClickLogout = ()=>{
+        logoutAPI(undefined)
         dispatch(logout())
     }
     const location = useLocation()

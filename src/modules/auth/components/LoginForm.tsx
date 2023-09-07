@@ -1,12 +1,15 @@
+import { useEffect } from 'react'
 import { useForm } from "react-hook-form"
 import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid } from '@mui/material';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { setStatus } from "../../../store/auth";
+import { useLoginMutation } from "../../../store/auth/authApi";
+import { Navigate } from "react-router-dom";
+import { login } from "../../../store/auth";
 const schema = yup.object().shape({
     email: yup.string()
         .required('Campo requerido')
@@ -27,24 +30,29 @@ interface LoginData {
 
 export function LoginForm() {
     const [showPassword, setShowPassword] = useState(false)
-    const { register, handleSubmit, formState: { errors }, watch } = useForm<LoginData>({
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
         defaultValues: {
             email: '',
             password: ''
         },
         resolver: yupResolver(schema)
     })
+    const [loginAPI, resultLogin] = useLoginMutation()
     const dispatch = useDispatch()
-    const onSubmit = (data: LoginData) => {
-        data
-        dispatch(setStatus("authenticated"))
+    const onSubmit = async (data: LoginData) => {
+        await loginAPI(data)
     }
-
-    // Estar pendiente del cambio de la contraseña
     useEffect(() => {
-        console.log(watch('password'))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watch('password')])
+        if (resultLogin.error) {
+            alert("aa")
+        }
+    }, [resultLogin.error])
+
+    if (resultLogin.isSuccess) {
+        dispatch(login(resultLogin.data))
+        return <Navigate to="/" />
+    } 
+    
     return (
         <Paper elevation={3} className="auth__papaer" sx={{ borderRadius: 5 }}>
             <Container>
@@ -56,7 +64,7 @@ export function LoginForm() {
                     Ingrese sus credenciales para acceder al sistema
                 </Typography>
             </Container>
-            <form onSubmit={handleSubmit(onSubmit)} noValidate 
+            <form onSubmit={handleSubmit(onSubmit)} noValidate
                 style={{ padding: "1rem", width: "100%" }}
                 autoComplete="off">
                 <Grid container spacing={2} sx={{ width: "100%" }}>
@@ -117,7 +125,7 @@ export function LoginForm() {
                     sx={{ marginTop: "1rem", marginBottom: "1rem" }}
                 >
                     <Typography component="body" variant="body1" textAlign="center">
-                    Iniciar Sesión
+                        Iniciar Sesión
                     </Typography>
                 </Button>
             </form>
