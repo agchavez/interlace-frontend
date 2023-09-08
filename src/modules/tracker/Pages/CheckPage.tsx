@@ -4,7 +4,7 @@ import { CheckForm } from '../components/CheckForm';
 import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
-import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
+import { removeSeguimiento, setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -42,9 +42,11 @@ function a11yProps(index: number) {
 
 export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [value, setValue] = useState(0);
-  const { seguimientos } = useAppSelector(state => state.seguimiento)
+  const { seguimientos, seguimeintoActual } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
+
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
@@ -53,6 +55,9 @@ export const CheckPage = () => {
     setShowCreateModal(false)
   }
 
+  const handleClickDelete = () => {
+    seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
+  }
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
@@ -84,7 +89,7 @@ export const CheckPage = () => {
           <Grid item xs={12}>
             <Box sx={{ width: '100%' }}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tabs value={seguimeintoActual||0} onChange={handleChange} aria-label="basic tabs example">
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
@@ -97,7 +102,7 @@ export const CheckPage = () => {
               {
                 seguimientos.map((seguimiento, index) => {
                   return (
-                    <CustomTabPanel value={value} index={index}>
+                    <CustomTabPanel value={seguimeintoActual||0} index={index}>
                       <CheckForm seguimiento={seguimiento} indice={index} />
                     </CustomTabPanel>
                   )
@@ -111,7 +116,14 @@ export const CheckPage = () => {
               <Grid item xs={12}>
                 <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
               </Grid>
-              <Grid item xs={12} md={8} lg={9} xl={10}>
+              <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="contained" color="error" size="medium" fullWidth onClick={handleClickDelete}>
+                  <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
+                    Eliminar
+                  </Typography>
+                </Button>
+              </Grid>
+              <Grid item xs={12} md={4} lg={6} xl={8}>
 
               </Grid>
               <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
