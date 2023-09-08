@@ -42,6 +42,7 @@ function a11yProps(index: number) {
 
 export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [value, setValue] = useState(0);
   const { seguimientos, seguimeintoActual } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
@@ -88,7 +89,7 @@ export const CheckPage = () => {
           <Grid item xs={12}>
             <Box sx={{ width: '100%' }}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+                <Tabs value={seguimeintoActual||0} onChange={handleChange} aria-label="basic tabs example">
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
@@ -101,7 +102,7 @@ export const CheckPage = () => {
               {
                 seguimientos.map((seguimiento, index) => {
                   return (
-                    <CustomTabPanel value={value} index={index}>
+                    <CustomTabPanel value={seguimeintoActual||0} index={index}>
                       <CheckForm seguimiento={seguimiento} indice={index} />
                     </CustomTabPanel>
                   )
