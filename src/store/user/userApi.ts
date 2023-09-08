@@ -24,6 +24,12 @@ export const userApi = createApi({
                 params
             })
         }),
+        getAUser: builder.query<UserResponse, number>({
+            query: (id) => ({
+                url: `/users/${id}/`,
+                method: 'GET'
+            })
+        }),
         insertUser: builder.mutation<CreateUserResponse, CreateUserBody>({
             query: (data) => ({
                 url: `/users/`,
@@ -31,6 +37,14 @@ export const userApi = createApi({
                 body: {...data, groups:[data.group]}
             }),
             invalidatesTags: (data)=> [{type: 'Users', id:data?.email}]
+        }),
+        patchUser: builder.mutation<CreateUserResponse, {id:number, user:Partial<CreateUserBody>}>({
+            query: (user) => ({
+                url: `/users/${user.id}/`,
+                method: 'PATCH',
+                body: {...user.user, groups:[user.user.group]}
+            }),
+            invalidatesTags: (data)=> [{type: 'Users', id:data?.id}]
         }),
         getDistributionCenter: builder.query<GetDistributionCenterResponse[], unknown>({
             query: () => ({
@@ -43,7 +57,9 @@ export const userApi = createApi({
 
 export const { 
     useGetUserQuery,
+    useGetAUserQuery,
     useInsertUserMutation,
-    useGetDistributionCenterQuery
+    useGetDistributionCenterQuery,
+    usePatchUserMutation,
 } = userApi
 
