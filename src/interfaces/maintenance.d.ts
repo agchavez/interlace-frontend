@@ -75,6 +75,15 @@ export interface DriverQuerySearch extends BaseQueryParams {
     id?: number;
 }
 
+export interface LocationType {
+    id:                       number;
+    distributor_center_name?: string;
+    created_at_date:          Date;
+    created_at_time:          string;
+    name:                     string;
+    code:                     string;
+    distributor_center:       number | null;
+}
 
 //groups
 
@@ -111,6 +120,11 @@ export enum AppLabel {
     Sessions = "sessions",
     Tracker = "tracker",
     User = "user",
+}
+
+export interface LocationTypeQuerySearch extends BaseQueryParams {
+    search?: string;
+    id?: number;
 }
 
 

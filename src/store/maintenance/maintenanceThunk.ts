@@ -1,7 +1,9 @@
 import backendApi from '../../config/apiConfig';
 import { AppThunk } from '../store';
-import { DistributionCenter, GroupsResponse, } from '../../interfaces/maintenance';
-import { setDistributionCenters, setGroups } from './maintenanceSlice';
+import { DistributionCenter, BaseaAPIResponse, GroupsResponse, } from '../../interfaces/maintenance';
+import { setDistributionCenters, setOutputType, setGroups } from './maintenanceSlice';
+import { OutputType } from '../../interfaces/tracking';
+import { toast } from 'sonner';
 
 
 // listar data inicial de mantenimiento
@@ -11,7 +13,9 @@ export const getMaintenanceData = (): AppThunk => async (dispatch) => {
         dispatch(setDistributionCenters(dataDistributionCenters));
         const { data:dataGroups } = await backendApi.get<GroupsResponse>('/groups/');
         dispatch(setGroups(dataGroups.results));
+        const { data: dataOutput } = await backendApi.get<BaseaAPIResponse<OutputType>>('/output-type/');
+        dispatch(setOutputType(dataOutput.results));
     } catch (error) {
-        console.log(error);
+        toast.error('Error al cargar los datos de mantenimiento');
     }
 }

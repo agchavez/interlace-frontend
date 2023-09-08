@@ -1,4 +1,4 @@
-import { Box, Button, Card, Collapse, Divider, FormControl, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Button, Card, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
 import { Fragment, useEffect, useState } from 'react';
 
 // iCONS
@@ -18,8 +18,11 @@ import { useForm } from 'react-hook-form';
 import { CheckFormType } from '../../../interfaces/tracking';
 import { OperatorSelect } from '../../ui/components/OperatorSelect';
 import { DriverSelect } from '../../ui/components';
+import { LocationSelect } from '../../ui/components/LocationSelect';
+import AgregarProductoSalida from './AgregarProductoSalida';
+import { OutPutDetail } from './OutPutDetail';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
+export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
         backgroundColor: theme.palette.secondary.main,
         color: theme.palette.common.white,
@@ -32,11 +35,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, indice: number }) => {
     const dispatch = useAppDispatch();
     const [open, setopen] = useState(false);
-    const { disctributionCenters } = useAppSelector(state => state.maintenance);
+    const { outputType } = useAppSelector(state => state.maintenance);
     const centro_distribucion = useAppSelector(state => state.auth.user?.centro_distribucion);
     function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
         if (!seguimiento) return;
-        
+
         dispatch(updateSeguimiento({
             ...seguimiento,
             datosOperador: {
@@ -69,12 +72,13 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
             index: indice
         }))
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber')]);
+    }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber'), watch('outputLocation'), watch('outputType')]);
 
 
-
+    const [openOutput, setopenOutput] = useState(false);
     return (
         <>
+            <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
             <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
@@ -120,7 +124,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Box>
                     </Card>
                 </Grid>
-                <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Datos generales
@@ -147,13 +151,17 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 renderInput={(params) => <TextField {...params} label="Localidad de Envío" size="small" fullWidth />}
                                 onChange={(_, v) => updateSeguimientoDatos({ locEnvio: v?.label })}
                             /> */}
-                            <AutoCompleteBase
+                            <LocationSelect
                                 control={control}
                                 name='originLocation'
-                                placeholder='Localidad de Envío'
-                                options={disctributionCenters.map((d) => ({ label: d.name, id: d.id.toString() }))}
-                                />
-                                
+                                placeholder='Localidad de Origen'
+                                locationId={watch('originLocation')}
+                                label='Localidad de Origen'
+                            />
+
+                        </Grid>
+                        <Grid item xs={12} md={12}>
+
                         </Grid>
                         <Grid item xs={12} md={12}>
                             <DriverSelect
@@ -161,7 +169,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 name='driver'
                                 placeholder='Conductor'
                                 driver={watch('driver')}
-                                />
+                            />
                         </Grid>
                         <Grid item xs={12} md={6}>
                             <TextField
@@ -211,7 +219,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                 </Grid>
 
 
-                <Grid item xs={12} md={6} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Datos operador
@@ -292,23 +300,23 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label='Operador #1'
                                 operatorId={watch('opm1')}
                                 invalidId={watch('opm2')}
-                                 
+
                             />
                         </Grid>
                         <Grid item xs={12} >
-                        <OperatorSelect
+                            <OperatorSelect
                                 control={control}
                                 distributionCenterId={centro_distribucion || null}
                                 name='opm2'
                                 label='Operador #2'
                                 operatorId={watch('opm2')}
                                 invalidId={watch('opm1')}
-                                 
+
                             />
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={6} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Entrada de producto
@@ -369,31 +377,51 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 </TableBody>
                             </Table>
                         </Grid>
+                    </Grid>
                 </Grid>
-                </Grid>
-                <Grid item xs={6} sx={{ marginTop: 4 }}>
+                <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Salida de producto
                         </Typography>
                     </Divider>
-                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                        <Grid item xs={12}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel id="demo-simple-select-label">Tipo de salida</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    // value={tipoSalida}
-                                    label="Tipo de salida"
-                                    // onChange={(e) => { setTipoSalida(e.target.value as string) }}
-                                >
-                                    <MenuItem value={"1"}>Salida de producto</MenuItem>
-                                    <MenuItem value={"2"}>Salida de producto con devolución</MenuItem>
-                                </Select>
-                            </FormControl>
+                    <Grid container spacing={1} sx={{ marginTop: 2 }}>
+                        <Grid item xs={12} md={6}>
+                            <LocationSelect
+                                control={control}
+                                name='outputLocation'
+                                placeholder='Localidad de Envío'
+                                locationId={watch('outputLocation')}
+                                label='Localidad de Envío'
+                            />
                         </Grid>
+                        <Grid item xs={12} md={5}>
+                            <AutoCompleteBase
+                                control={control}
+                                name='outputType'
+                                placeholder='Unidad Cargada con'
+                                options={outputType.map((d) => ({ label: d.name, id: d.id.toString() }))}
+                            />
+                        </Grid>
+
+                        {
+                            outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
+                            <>
+                                <Grid item xs={12} md={1}>
+                                    <IconButton aria-label="delete" size="medium" onClick={() => {
+                                        setopenOutput(true);
+                                    }
+                                    }>
+                                        <AddTwoToneIcon color="primary" />
+                                    </IconButton>
+                                </Grid>
+                                <OutPutDetail seguimiento={seguimiento} />
+
+                            </>
+
+                        }
                     </Grid>
+
                 </Grid>
 
 
@@ -442,16 +470,25 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
             detalleIndex: props.index,
         }))
     }
+
+    const isValid = (): boolean => {
+        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0 ) => a + b, 0) !== Math.ceil(row.amount / row.boxes_pre_pallet)
+    }
     return (
-        <Fragment>
+        <Fragment>  
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <IconButton
                         aria-label="expand row"
                         size="small"
                         onClick={() => setOpen(!open)}
+                        sx={{
+                            backgroundColor: isValid() ? 'red' : 'inherit   '
+                        }}
                     >
-                        {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        {open ? <KeyboardArrowUpIcon 
+                        /> : <KeyboardArrowDownIcon
+                        />}
                     </IconButton>
                 </TableCell>
                 <TableCell component="th" align="right">
@@ -481,14 +518,29 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                             <Typography variant="h6" gutterBottom component="div">
                                 Detalles
                             </Typography>
-                            <Grid item xs={12} md={5} lg={2} xl={2}>
-                                <Button variant="outlined" size="small" fullWidth color="secondary"
+                            <Grid item sx={{
+                                display: 'flex', justifyContent: 'space-between    ', alignItems: 'center', marginTop: 1, marginBottom: 1
+                            }} xs={12}>
+                                <Button variant="outlined" size="small" color="secondary"
                                     startIcon={<AddTwoToneIcon />}
                                     onClick={handleClickAgregar}
                                 >
                                     Agregar
                                 </Button>
+                                <Typography variant="body1" component="h1" fontWeight={400} color={
+                                    isValid() ? 'red' : 'gray.500'
+                                }>
+                                    Total de Pallets: {"  "}
+                                    {row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0)}
+                                    {" "} de {" "}
+                                    {
+                                        Math.ceil(row.amount / row.boxes_pre_pallet)
+                                    }
+                                </Typography>
                             </Grid>
+                            <Grid item xs={12} md={5} lg={2} xl={2}>
+                            </Grid>
+
                             <Table size="small" aria-label="purchases">
                                 <TableHead>
                                     <TableRow>

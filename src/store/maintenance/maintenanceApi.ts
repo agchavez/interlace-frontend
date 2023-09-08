@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch } from '../../interfaces/maintenance';
+import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch, LocationType, LocationTypeQuerySearch } from '../../interfaces/maintenance';
 import { Product, ProductQuerySearch } from '../../interfaces/tracking';
 
 export const maintenanceApi = createApi({
@@ -54,6 +54,14 @@ export const maintenanceApi = createApi({
             }),
             keepUnusedDataFor: 120000
         }),
+        getLocations: builder.query<BaseApiResponse<LocationType>, LocationTypeQuerySearch>({
+            query: (params) => ({
+                url: `/location/`,
+                method: 'GET',
+                params
+            }),
+            keepUnusedDataFor: 120000
+        }),
 
 
     })
@@ -63,6 +71,6 @@ export const {
     useGetTrailerQuery,
     useGetOperatorByDistributionCenterQuery,
     useGetDriverQuery,
-    useGetProductQuery
-    
+    useGetProductQuery,
+    useGetLocationsQuery
 } = maintenanceApi
