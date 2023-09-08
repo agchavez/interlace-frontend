@@ -9,6 +9,7 @@ import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
+import { RoutePermissionsDirectory } from '../../../config/directory'
 interface SidebarProps {
     open: boolean
 }
@@ -31,18 +32,11 @@ const items: SideBarItem[] = [
                 text: "Registro",
                 href: "/user/register",
                 id: "crear",
-                permissions: [
-                    "user.add_usermodel",
-                    "user.change_usermodel"
-                ]
             },
             {
                 text: "Administrar",
-                href: "/user/",
+                href: "/user",
                 id: "gestion",
-                permissions: [
-                    "user.view_usermodel"
-                ]
             }
         ],
         id: "usuarios",
@@ -54,15 +48,6 @@ const items: SideBarItem[] = [
                 text: "En Atención",
                 href: "/tracker/check",
                 id: "nuevo",
-                permissions: [
-                    "maintenance.view_transportermodel",
-                    "maintenance.view_operatormodel",
-                    "maintenance.view_locationmodel",
-                    "maintenance.view_drivermodel",
-                    "maintenance.view_trailermodel",
-                    "maintenance.view_productmodel",
-                    "maintenance.view_distributorcenter",
-                ]
             },
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
@@ -77,6 +62,8 @@ const items: SideBarItem[] = [
         id: "reportes",
     }
 ]
+
+items.forEach(item => item.subItems.forEach(sub=>sub.permissions = RoutePermissionsDirectory[sub.href || -1]))
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
     const user = useAppSelector(state => state.auth.user)
@@ -103,12 +90,12 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
     const sidebarItems = useMemo(() => {
         return sidebarSelected.map(item => {
             const subitems = item.subItems.map(sub => {
-                sub.visible = !sub.permissions ?
+                sub.visible = sub.permissions?.includes("any") ?
                     true 
                     :
                     sub.permissions?.every(perm => {
-                        return user?.list_permissions.some(usrperm => usrperm === perm)
-                            || user?.user_permissions.some(usrperm => usrperm === perm)
+                        return user?.list_permissions.includes(perm)
+                            || user?.user_permissions.includes(perm)
                     })
                 return sub
             })

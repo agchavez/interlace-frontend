@@ -106,7 +106,8 @@ export const seguimientoSlice = createSlice({
             state.seguimeintoActual = seguimientoActualValue;
         },
         removeSeguimiento: (state, action: PayloadAction<number>) => {
-            state.seguimientos = state.seguimientos.filter(seg => seg.id !== action.payload)
+            state.seguimientos.splice(action.payload, 1)
+            state.seguimeintoActual = 0
         },
         setSeguimientoActual: (state, action: PayloadAction<number>) => {
             state.seguimeintoActual = action.payload
