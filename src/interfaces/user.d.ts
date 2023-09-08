@@ -37,7 +37,7 @@ export interface CreateUserResponse {
 }
 
 export interface CreateUserBody {
-    centro_distribucion: number;
+    centro_distribucion?: number;
     password: string;
     is_superuser: boolean;
     username: string;
@@ -54,7 +54,7 @@ export type User = {
     id?:                 number;
     listGroups?:         string[];
     listPermissions?:    string[];
-    centroDistribucion?: null;
+    centroDistribucion?: number;
     lastLogin?:          Date;
     isSuperuser?:        boolean;
     username?:           string;
@@ -66,7 +66,7 @@ export type User = {
     email?:              string;
     codigoEmpleado?:     null;
     createdAt?:          Date;
-    groups?:             string[];
+    groups?:             number[];
     userPermissions?:    string[];
 }
 
@@ -81,4 +81,25 @@ export interface GetDistributionCenterResponse {
     name: string,
     direction: string,
     country_code: number
+}
+
+export interface GetAUserResponse {
+    id:                       number;
+    list_groups:              string[];
+    list_permissions:         string[];
+    date_joined:              Date;
+    last_login:               null;
+    created_at:               Date;
+    centro_distribucion:      number;
+    centro_distribucion_name: string;
+    is_superuser:             boolean;
+    username:                 string;
+    is_staff:                 boolean;
+    is_active:                boolean;
+    first_name:               string;
+    last_name:                string;
+    email:                    string;
+    codigo_empleado:          number;
+    groups:                   number[];
+    user_permissions:         any[];
 }

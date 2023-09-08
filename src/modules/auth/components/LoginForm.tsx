@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../../../store/auth/authApi";
 import { Navigate } from "react-router-dom";
 import { login } from "../../../store/auth";
+import { toast } from 'sonner';
 const schema = yup.object().shape({
     email: yup.string()
         .required('Campo requerido')
@@ -44,7 +45,8 @@ export function LoginForm() {
     }
     useEffect(() => {
         if (resultLogin.error) {
-            alert("aa")
+            toast.error("Correo o Contraseña incorrecto") 
+            
         }
     }, [resultLogin.error])
 

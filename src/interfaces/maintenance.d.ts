@@ -85,6 +85,42 @@ export interface LocationType {
     distributor_center:       number | null;
 }
 
+//groups
+
+export interface Group {
+    id:               number;
+    group:            GroupClass;
+    requiered_access: boolean;
+}
+
+export interface GroupClass {
+    id:          number;
+    permissions: Permission[];
+    name:        string;
+}
+
+export interface Permission {
+    id:           number;
+    content_type: ContentType;
+    name:         string;
+    codename:     string;
+}
+
+export interface ContentType {
+    id:        number;
+    app_label: AppLabel;
+    model:     string;
+}
+
+export enum AppLabel {
+    Admin = "admin",
+    Auth = "auth",
+    Contenttypes = "contenttypes",
+    Maintenance = "maintenance",
+    Sessions = "sessions",
+    Tracker = "tracker",
+    User = "user",
+}
 
 export interface LocationTypeQuerySearch extends BaseQueryParams {
     search?: string;
@@ -92,3 +128,10 @@ export interface LocationTypeQuerySearch extends BaseQueryParams {
 }
 
 
+//gorups response
+export interface GroupsResponse {
+    count:    number;
+    next:     Group | null;
+    previous: Group | null;
+    results:  Result[];
+}

@@ -2,30 +2,80 @@ import { Container, Divider, Grid, Paper, Typography } from '@mui/material';
 
 import { RegisterUserForm } from '../../../interfaces/user';
 import { UserForm } from '../components/UserForm';
-import { useInsertUserMutation } from '../../../store/user/userApi'
-import { useEffect, useState } from 'react'
+import { useInsertUserMutation, usePatchUserMutation } from '../../../store/user/userApi'
+import { useEffect, useMemo, useState } from 'react'
 import { QueryStatus } from '@reduxjs/toolkit/dist/query';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../../../store';
+import { getAUser } from '../../../store/user';
 
 export const RegisterUserPage = () => {
+    const [searchParams] = useSearchParams()
+    const edit = searchParams.get("edit")
     const [insertUser, resultInsertUser] = useInsertUserMutation()
+    const [patchUser, resultPatchUser] = usePatchUserMutation()
     const [resetForm, setResetForm] = useState(false)
     const { data, status, error } = resultInsertUser;
+    const editingUser = useAppSelector(state => state.distributionCenters.editingUser)
+    const dispatch = useAppDispatch()
     const onSubmit = async (data: RegisterUserForm) => {
-        await insertUser({
-            centro_distribucion: + (data.cd || 0),
-            password: data.password,
-            email: data.email,
-            first_name: data.fistName,
-            group: data.group,
-            last_name: data.lastName,
-            is_staff: false,
-            is_superuser: false,
-            username: data.email,
-            is_active: true,
-            codigo_empleado: Math.ceil(Math.random() * 1000)
-        })
+        if (edit) {
+            await patchUser({
+                id: +(edit || 0),
+                user: {
+                    centro_distribucion: +(data.cd || 0) || undefined,
+                    email: data.email,
+                    first_name: data.fistName,
+                    group: +data.group,
+                    last_name: data.lastName,
+                    username: data.email,
+                }
+            })
+        } else {
+            await insertUser({
+                centro_distribucion: +(data.cd || 0) || undefined,
+                password: data.password,
+                email: data.email,
+                first_name: data.fistName,
+                group: +data.group,
+                last_name: data.lastName,
+                is_staff: false,
+                is_superuser: false,
+                username: data.email,
+                is_active: true,
+                codigo_empleado: Math.ceil(Math.random() * 1000)
+            })
+        }
+
     }
+
+    useEffect(() => {
+        if (edit) {
+            dispatch(getAUser(+edit))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [edit])
+
+    const initialValues = useMemo(()=>{
+        return edit ? {
+            fistName: editingUser?.firstName || "",
+            lastName: editingUser?.lastName || '',
+            email: editingUser?.email || '',
+            password: '',
+            confirmPassword: '',
+            group: `${editingUser?.groups?.[0] || ''}`,
+            cd:`${editingUser?.centroDistribucion}`
+        } : {
+            fistName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            group: ''
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [edit, editingUser]) 
 
     useEffect(() => {
         if (status === QueryStatus.fulfilled) {
@@ -40,6 +90,19 @@ export const RegisterUserPage = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, error])
+
+    useEffect(() => {
+        if (resultPatchUser.status === QueryStatus.fulfilled) {
+            toast.success("Usuario Actualizado con éxito")
+        } else if (resultPatchUser.error) {
+            if ("data" in resultPatchUser.error) {
+                toast.error(`Error: ${JSON.stringify(resultPatchUser.error.data)}`)
+            } else if ("error" in resultPatchUser.error) {
+                toast.error(`Error: ${JSON.stringify(resultPatchUser.error.error)}`)
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resultPatchUser.data, resultPatchUser.error])
 
     return (
         <>
@@ -61,16 +124,8 @@ export const RegisterUserPage = () => {
                             <UserForm
                                 onSubmit={onSubmit}
                                 loading={false}
-                                initialValues={{
-                                    fistName: '',
-                                    lastName: '',
-                                    email: '',
-                                    password: '',
-                                    confirmPassword: '',
-                                    group: ''
-
-                                }}
-                                isEdit={false}
+                                initialValues={initialValues}
+                                isEdit={edit ? true : false}
                                 resetForm={resetForm}
                                 setResetForm={setResetForm}
                             />

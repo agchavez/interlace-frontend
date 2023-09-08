@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { User, UserQuerySearch } from '../../../interfaces/user';
 import { useGetUserQuery } from '../../../store/user/userApi';
 import { CustomSearch } from '../../ui/components/CustomSearch';
+import { Link } from 'react-router-dom';
 function getRoleChip(group: string[]): JSX.Element {
     return <Chip
         label={group[0]}
@@ -92,16 +93,19 @@ export const ListUserPage = () => {
             headerName: 'ACCIONES',
             width: 100,
             align: 'center',
-            renderCell: (params: GridCellParams) => (
+            renderCell: (params: GridCellParams) => {
+                return(
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <IconButton
-                        color="default"
-                        size="medium"
-                        onClick={() => console.log(params.row)}
-                        title='Editar usuario'
-                    >
-                        <EditTwoToneIcon fontSize="medium" />
-                    </IconButton>
+                    <Link to={`/user/register?edit=${params.row.id}`}>
+                        <IconButton
+                            color="default"
+                            size="medium"
+                            onClick={() => console.log(params.row)}
+                            title='Editar usuario'
+                        >
+                            <EditTwoToneIcon fontSize="medium" />
+                        </IconButton>
+                    </Link>
                     <IconButton
                         color="default"
                         size="medium"
@@ -113,7 +117,7 @@ export const ListUserPage = () => {
                         <LockResetTwoToneIcon fontSize="medium" />
                     </IconButton>
                 </Box>
-            ),
+            )},
         },
         // {
         //     field: 'reset',
