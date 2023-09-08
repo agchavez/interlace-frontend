@@ -61,6 +61,10 @@ export interface DetalleCarga extends Product {
     history?: DetalleCargaPalet[]
 }
 
+export interface DetalleCargaSalida extends Product {
+    amount: number;
+}
+
 export interface DetalleCargaIdx extends DetalleCarga {
     index: number,
 }
@@ -71,6 +75,7 @@ export interface Seguimiento {
     data?: CheckFormType,
     datosOperador?: DatosOperador,
     detalles: DetalleCarga[]
+    detallesSalida?: DetalleCargaSalida[]
 }
 
 export interface SeguimientoIDX extends Seguimiento {
@@ -143,7 +148,33 @@ export const seguimientoSlice = createSlice({
                 const cortado = detalle.history.filter((_, indice) => indice !== paletIndex);
                 detalle.history= cortado;
             }
+        },
+        addDetalleCargaSalida: (state, action: PayloadAction<{segIndex: number, product: Product, amount: number}>) => {
+            const {segIndex, product, amount} = action.payload
+            const seguimiento = state.seguimientos[segIndex];
+            if(seguimiento.detallesSalida) {
+                const index = seguimiento.detallesSalida.findIndex((det) => det.id === product.id)
+                if(index !== -1) {
+                    seguimiento.detallesSalida[index].amount = amount
+                } else {
+                    seguimiento.detallesSalida.push({...product, amount})
+                }
+            } else {
+                seguimiento.detallesSalida = [{...product, amount}]
+            }
+            toast.success("Producto de salida agregado")
+        },
+        removeDetalleCargaSalida: (state, action: PayloadAction<{segIndex: number, product: Product}>) => {
+            const {segIndex, product} = action.payload
+            const seguimiento = state.seguimientos[segIndex];
+            if(seguimiento.detallesSalida) {
+                const cortado = seguimiento.detallesSalida.filter((det) => det.id !== product.id);
+                seguimiento.detallesSalida = cortado;
+            }
         }
+
+
+            
     }
 })
 
@@ -157,4 +188,6 @@ export const {
     updateDetalleCargaPallet,
     removeDetalleCargaPallet,
     removeDetalleCarga,
+    addDetalleCargaSalida,
+    removeDetalleCargaSalida
 } = seguimientoSlice.actions;

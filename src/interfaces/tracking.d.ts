@@ -25,17 +25,32 @@ export interface ProductQuerySearch extends BaseQueryParams {
     bar_code?: string;
 }
 
+export interface OutputType {
+  id:               number;
+  created_at_date:  Date;
+  created_at_time:  string;
+  name:             string;
+  required_details: boolean;
+}
+
+
+export interface OutputTypeQuerySearch extends BaseQueryParams {
+  search?: string;
+}
+
 
   
 
   interface CheckFormType {
     plateNumber: string;
-    originLocation: string;
+    originLocation: number;
+    outputLocation: number;
     driver?: number;
     documentNumber: number;
     transportNumber: number;
     transferNumber: number;
     documentNumberExit: number;
+    outputType: number;
     timeStart: Date | null;
     timeEnd: Date | null;
     opm1?: number;

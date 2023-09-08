@@ -3,86 +3,89 @@ import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
-import { OperatorQuerySearch, Operator } from '../../../interfaces/maintenance';
-import { useGetOperatorByDistributionCenterQuery } from "../../../store/maintenance/maintenanceApi";
+import { LocationTypeQuerySearch, LocationType } from '../../../interfaces/maintenance';
+import { useGetLocationsQuery } from "../../../store/maintenance/maintenanceApi";
 
-interface OperatorSelectProps<
-  TField extends FieldValues
-
-> {
+interface LocationSelectProps<
+    TField extends FieldValues
+    
+    > {
   control: Control<TField>;
   name: Path<TField>;
   placeholder?: string;
   //options?: o[];
-  invalidId?: number;
-  distributionCenterId: number | null;
   disabled?: boolean;
-  onChange?: (value: Operator | null) => void;
-  operatorId?: number;
+  onChange?: (value: LocationType | null) => void;
+  locationId?: number;
   label?: string;
 }
 
-export const OperatorSelect = <
-  TField extends FieldValues
+export const LocationSelect = <
+TField extends FieldValues
 >(
-  {
-    label = "Operador",
-    ...props
-  }: OperatorSelectProps<TField>
+props: LocationSelectProps<TField>
 ) => {
-  const [query, setQuery] = useState<OperatorQuerySearch>({
+  const [query, setQuery] = useState<LocationTypeQuerySearch>({
     limit: 10,
     offset: 0,
     search: "",
-    id: props.operatorId,
-    distributorCenter: props.distributionCenterId ? props.distributionCenterId : undefined
+    id: props.locationId
   });
-
+  
   const {
     data: categorias,
     refetch,
     isFetching,
     isLoading
-  } = useGetOperatorByDistributionCenterQuery(query);
-
-  useEffect(() => {
-    if(query.search && query.search.length > 2 || query.id){
-      refetch();
-    }
-    refetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-
+  } = useGetLocationsQuery(query);
+  
   const handleInputChange = (newInputValue: string) => {
     if (newInputValue.length > 2) {
-      setQuery({
-        ...query,
-        search: newInputValue
-      });
+      // DIVIDIR SI TIENE " - "
+      const splitted = newInputValue.split(" - ");
+      if (splitted.length > 1){
+
+        setQuery({
+          ...query,
+          search: splitted[0],
+        });
+      } else {
+        setQuery({
+          ...query,
+          search: newInputValue,
+        });
+      }
+      
     }
   };
 
+  useEffect(() => {
+    if (query.search && query.search.length > 2){
+      refetch();
+    }
+  }, [query, refetch]);
+
   return (
     <Controller
-      name={props.name}
-      control={props.control}
-      rules={{
-        required: "Este campo es requerido"
-      }}
-      render={({ field, fieldState: { error } }) => {
+    name={props.name}
+    control={props.control}
+    rules={{
+      required: "Este campo es requerido"
+    }}
+    render={({ field, fieldState: { error } }) => {
         const { value } = field;
         const { onChange } = field as (typeof field) & { onChange: (value: number | null) => void };
         return (<>
           <Autocomplete
-            value={value ? categorias?.results?.find((option: Operator) => value === option.id) ?? null : null}
-            getOptionDisabled={(option) => option.id === props.invalidId}
-            getOptionLabel={(option) => option.first_name + " " + option.last_name}
+            value={value ? categorias?.results?.find((option : LocationType) => value === option.id) ?? null : null}
+            getOptionLabel={(option) => option.name + " - " + option.code}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
             disabled={props.disabled}
             onChange={(_, newValue) => {
-              if (newValue === null) {
+              if (newValue === null){
                 setQuery({
                   ...query,
-                  id: undefined,
+                  id: undefined, 
                   search: ""
                 })
               }
@@ -102,17 +105,16 @@ export const OperatorSelect = <
               (params) => (
                 <TextField
                   {...params}
-                  label={label}
+                  label={props.label ?? "Localidad"}
                   variant="outlined"
                   placeholder={props.placeholder}
                   error={!!error}
                   helperText={error ? error.message : null}
                 />
-              )}
+              ) }
           />
         </>
-        )
-      }}
+      )}}
     />
   );
 };
