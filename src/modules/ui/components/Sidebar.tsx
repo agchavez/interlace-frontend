@@ -1,14 +1,14 @@
 import { Grid, Typography } from "@mui/material";
-import { FunctionComponent, ReactNode } from "react";
+import { FunctionComponent, ReactNode, useMemo } from "react";
 import SidebarItem, { SideBarSubItems } from "./SidebarItem";
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { useDispatch } from "react-redux";
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
+import { useAppDispatch, useAppSelector } from "../../../store";
 interface SidebarProps {
     open: boolean
 }
@@ -19,6 +19,7 @@ interface SideBarItem {
     icon?: ReactNode;
     id: string;
     link?: string;
+    visible?: boolean;
 }
 
 const items: SideBarItem[] = [
@@ -26,18 +27,46 @@ const items: SideBarItem[] = [
         text: "USUARIO",
         icon: <PeopleOutlineIcon sx={{ width: "30px" }} color="primary" />,
         subItems: [
-            { text: "Registro", href: "/user/register", id: "crear", selected: true },
-            { text: "Administrar", href: "/user/", id: "gestion" }
+            {
+                text: "Registro",
+                href: "/user/register",
+                id: "crear",
+                permissions: [
+                    "user.add_usermodel",
+                    "user.change_usermodel"
+                ]
+            },
+            {
+                text: "Administrar",
+                href: "/user/",
+                id: "gestion",
+                permissions: [
+                    "user.view_usermodel"
+                ]
+            }
         ],
-        id: "usuarios"
+        id: "usuarios",
     },
     {
         text: "T1",
         subItems: [
-            { text: "En Atención", href: "/tracker/check", id: "nuevo" },
+            {
+                text: "En Atención",
+                href: "/tracker/check",
+                id: "nuevo",
+                permissions: [
+                    "maintenance.view_transportermodel",
+                    "maintenance.view_operatormodel",
+                    "maintenance.view_locationmodel",
+                    "maintenance.view_drivermodel",
+                    "maintenance.view_trailermodel",
+                    "maintenance.view_productmodel",
+                    "maintenance.view_distributorcenter",
+                ]
+            },
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
-        id: "movimientos"
+        id: "movimientos",
     },
     {
         text: "REPORTE",
@@ -45,34 +74,66 @@ const items: SideBarItem[] = [
             { text: "Movimientos", href: "/movimientos/crear", id: "nuevo" },
         ],
         icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
-        id: "reportes"
+        id: "reportes",
     }
 ]
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
+    const user = useAppSelector(state => state.auth.user)
     const [logoutAPI] = useLogoutMutation();
-    const dispatch = useDispatch()
-    const handleClickLogout = ()=>{
+    const dispatch = useAppDispatch()
+    const handleClickLogout = () => {
         logoutAPI(undefined)
         dispatch(logout())
     }
     const location = useLocation()
-    items.forEach(item => {
-        item.subItems.forEach(item => item.selected = item.href === location.pathname)
-    });
+    
+    const sidebarSelected = useMemo(()=>{
+        return items.map(item => {
+            const subitems = item.subItems.map(sub => {
+                sub.selected = sub.href === location.pathname;
+                return sub;
+            })
+            item.subItems = subitems;
+            return item;
+        })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, location.pathname]);
+
+    const sidebarItems = useMemo(() => {
+        return sidebarSelected.map(item => {
+            const subitems = item.subItems.map(sub => {
+                sub.visible = !sub.permissions ?
+                    true 
+                    :
+                    sub.permissions?.every(perm => {
+                        return user?.list_permissions.some(usrperm => usrperm === perm)
+                            || user?.user_permissions.some(usrperm => usrperm === perm)
+                    })
+                return sub
+            })
+            item.subItems = subitems
+            item.visible = subitems.some(sub => sub.visible)
+            return item
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     return (
         <Grid item display={open ? "flex" : "none"} xs={2} className="sidebar__root">
             <Grid container direction="column" justifyContent="space-between">
                 <Grid>
                     {
-                        items.map((item) => {
-                            return (
-                                <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id}/>
-                            )
+                        sidebarItems.map((item) => {
+                            if (item.visible) {
+                                return (
+                                    <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                )
+                            }
                         })
                     }
                 </Grid>
-                <Grid item container sx={{ borderTop: "1px solid #e0e0e0" , padding: "0.5rem 0" }}>
+                <Grid item container sx={{ borderTop: "1px solid #e0e0e0", padding: "0.5rem 0" }}>
                     <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout} style={{ cursor: "pointer" }}>
                         <Grid item xs={2} textAlign="right">
                             <Grid container alignItems="center" justifyContent="flex-end" height="100%">
