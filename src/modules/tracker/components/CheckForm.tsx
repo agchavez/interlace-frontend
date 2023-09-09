@@ -7,7 +7,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
-import FlipTwoToneIcon from '@mui/icons-material/FlipTwoTone';
 
 import { useAppDispatch } from '../../../store';
 import { DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
@@ -49,7 +48,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
             index: indice
         }))
     }
-    const { control, reset, getValues, register, watch } = useForm<CheckFormType>({
+    const { control, getValues, register, watch } = useForm<CheckFormType>({
         defaultValues: {
             ...seguimiento?.data,
         }
@@ -57,11 +56,12 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
     const tiempoSalida = seguimiento?.datosOperador?.tiempoSalida
 
-    useEffect(() => {
-        reset({
-            ...seguimiento?.data,
-        })
-    }, [seguimiento?.data, reset]);
+    // useEffect(() => {
+    //     reset({
+    //         ...seguimiento?.data,
+    //     });
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [reset, indice]);
 
     // Actualizar redux con los datos del formulario
     useEffect(() => {
@@ -326,14 +326,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         <Grid item xs={12} md={12} lg={4} xl={4}>
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
-                            <Button variant="outlined" size="small" fullWidth color="secondary"
-                                startIcon={<FlipTwoToneIcon />}
-                                onClick={() => {
-                                    setopen(true);
-                                }}
-                            >
-                                Escanear producto
-                            </Button>
+                            
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
                             <Button variant="outlined" size="small" fullWidth color="secondary"

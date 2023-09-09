@@ -85,10 +85,12 @@ export interface SeguimientoIDX extends Seguimiento {
 interface seguimientoInterface {
     seguimientos: Seguimiento[]
     seguimeintoActual?: number;
+    loading: boolean;
 }
 
 const initialState: seguimientoInterface = {
     seguimientos: [],
+    loading: false,
 }
 
 export const seguimientoSlice = createSlice({
@@ -118,10 +120,16 @@ export const seguimientoSlice = createSlice({
         addDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
             // No se puede agregar un producto que ya existe en el seguimiento validar por codigo sap
             if (state.seguimientos[action.payload.index].detalles.findIndex((det) => det.id === action.payload.id) !== -1) {
-                toast.error("El producto ya existe en el seguimiento")
-                return;
+                // Aumentar la cantidad del producto
+                const detalle = state.seguimientos[action.payload.index].detalles.find((det) => det.id === action.payload.id)
+                if (detalle) {
+                    detalle.amount = Number(detalle.amount) + Number(action.payload.amount)
+                }
+                
+            }else{
+
+                state.seguimientos[action.payload.index].detalles = [action.payload, ...state.seguimientos[action.payload.index].detalles]
             }
-            state.seguimientos[action.payload.index].detalles = [action.payload, ...state.seguimientos[action.payload.index].detalles]
         },
         removeDetalleCarga:(state, action: PayloadAction<RemoveDetalle>) => {
             const {segIdx, detalleIdx} = action.payload
@@ -172,7 +180,11 @@ export const seguimientoSlice = createSlice({
                 const cortado = seguimiento.detallesSalida.filter((det) => det.id !== product.id);
                 seguimiento.detallesSalida = cortado;
             }
+        },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload
         }
+
 
 
             
@@ -190,5 +202,6 @@ export const {
     removeDetalleCargaPallet,
     removeDetalleCarga,
     addDetalleCargaSalida,
-    removeDetalleCargaSalida
+    removeDetalleCargaSalida,
+    setLoading
 } = seguimientoSlice.actions;

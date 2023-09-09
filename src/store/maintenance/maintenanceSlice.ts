@@ -27,12 +27,17 @@ export const maintenanceSlice = createSlice({
         },
         setOutputType: (state, action: PayloadAction<OutputType[]>) => {
             state.outputType = action.payload;
+        },
+        setLoadingMain: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
         }
+
     }
 })
 
 export const { 
   setOutputType,
   setDistributionCenters, 
-  setGroups 
+  setGroups ,
+  setLoadingMain
 } = maintenanceSlice.actions;
