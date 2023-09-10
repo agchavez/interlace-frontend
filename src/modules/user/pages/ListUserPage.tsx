@@ -8,6 +8,8 @@ import { User, UserQuerySearch } from '../../../interfaces/user';
 import { useGetUserQuery } from '../../../store/user/userApi';
 import { CustomSearch } from '../../ui/components/CustomSearch';
 import { Link } from 'react-router-dom';
+import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import { useMemo } from 'react'
 function getRoleChip(group: string[]): JSX.Element {
     return <Chip
         label={group[0]}
@@ -30,6 +32,9 @@ export const ListUserPage = () => {
         search: '',
     });
 
+    const [openChangePassWord, setOpenChangePassWord] = useState(false)
+    const [selectedUser, setSelectedUser] = useState(0)
+
     const {
         data, isLoading, refetch
     } = useGetUserQuery(query)
@@ -39,7 +44,7 @@ export const ListUserPage = () => {
             field: 'first_name',
             flex: 1,
             headerClassName: "base__header",
-            headerName: 'NOMBRE', 
+            headerName: 'NOMBRE',
             width: 150,
             minWidth: 150,
         },
@@ -94,49 +99,35 @@ export const ListUserPage = () => {
             width: 100,
             align: 'center',
             renderCell: (params: GridCellParams) => {
-                return(
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <Link to={`/user/register?edit=${params.row.id}`}>
+                return (
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Link to={`/user/register?edit=${params.row.id}`}>
+                            <IconButton
+                                color="default"
+                                size="medium"
+                                onClick={() => console.log(params.row)}
+                                title='Editar usuario'
+                            >
+                                <EditTwoToneIcon fontSize="medium" />
+                            </IconButton>
+                        </Link>
                         <IconButton
                             color="default"
                             size="medium"
-                            onClick={() => console.log(params.row)}
-                            title='Editar usuario'
-                        >
-                            <EditTwoToneIcon fontSize="medium" />
-                        </IconButton>
-                    </Link>
-                    <IconButton
-                        color="default"
-                        size="medium"
-                        onClick={() => console.log(params.row)}
-                        // mensaje al poner el mouse encima
-                        title="Resetear contraseña"
-                        
-                    >
-                        <LockResetTwoToneIcon fontSize="medium" />
-                    </IconButton>
-                </Box>
-            )},
-        },
-        // {
-        //     field: 'reset',
-        //     flex: 0,
-        //     headerClassName: "base__header",
-        //     headerName: 'Resetear Contraseña',
-        //     align: 'center',
-        //     width: 100,
-        //     renderCell: (params: GridCellParams) => (
-        //         <IconButton
-        //             color="primary"
-        //             size="medium"
-        //             onClick={() => handleResetPassword(params.row.usuarioId as number)}
-        //         >
-        //             <LockResetIcon fontSize="medium" />
-        //         </IconButton>
-        //     ),
+                            onClick={() => {
+                                setSelectedUser(params.row.id);
+                                setOpenChangePassWord(true);
+                            }}
+                            // mensaje al poner el mouse encima
+                            title="Resetear contraseña"
 
-        // }
+                        >
+                            <LockResetTwoToneIcon fontSize="medium" />
+                        </IconButton>
+                    </Box>
+                )
+            },
+        },
     ];
     const tableBase = {
         localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -149,7 +140,7 @@ export const ListUserPage = () => {
     }
 
     const [paginationModel, setPaginationModel] = useState<{ pageSize: number; page: number }>({
-        pageSize:  15,
+        pageSize: 15,
         page: 0,
     });
 
@@ -168,40 +159,49 @@ export const ListUserPage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query])
 
-  return (
-    <Container maxWidth="lg">
-        <Grid container spacing={1} sx={{ marginTop: 2 }}>
-            <Grid item xs={12}>
-                <Typography variant="h5" component="h1" fontWeight={400}>
-                    Administrar usuarios
-                </Typography>
-                <Divider sx={{marginBottom: 0, marginTop: 1}} />
-            </Grid>
-            <Grid item xs={12}>
-                <CustomSearch
-                    placeholder="Buscar usuario"
-                    value={query.search}
-                    onChange={(e) => setquery({...query, search: e.target.value})}
-                    onClick={() => console.log('click')}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <div style={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        {...tableBase}
-                        columns={columns}
-                        rows={data?.results || []}
-                        rowCount={data?.count || 0}                        
-                        pagination
-                        paginationMode="server"
-                        paginationModel={paginationModel}
-                        onPaginationModelChange={setPaginationModel}
-                        loading={isLoading}
-                    />
-                </div>
-            </Grid>
-        </Grid>
+    const handelCloseChangePassword = () => {
+        setOpenChangePassWord(false)
+    }
 
-    </Container>
-  )
+    const userModalChangePassword = useMemo(()=>{
+        return data?.results?.find(user => user.id === selectedUser)
+    }, [data?.results, selectedUser])
+
+    return (
+        <Container maxWidth="lg">
+            <ChangePasswordModal open={openChangePassWord} user={userModalChangePassword} handleClose={handelCloseChangePassword} />
+            <Grid container spacing={1} sx={{ marginTop: 2 }}>
+                <Grid item xs={12}>
+                    <Typography variant="h5" component="h1" fontWeight={400}>
+                        Administrar usuarios
+                    </Typography>
+                    <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
+                </Grid>
+                <Grid item xs={12}>
+                    <CustomSearch
+                        placeholder="Buscar usuario"
+                        value={query.search}
+                        onChange={(e) => setquery({ ...query, search: e.target.value })}
+                        onClick={() => console.log('click')}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <div style={{ height: 400, width: '100%' }}>
+                        <DataGrid
+                            {...tableBase}
+                            columns={columns}
+                            rows={data?.results || []}
+                            rowCount={data?.count || 0}
+                            pagination
+                            paginationMode="server"
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                            loading={isLoading}
+                        />
+                    </div>
+                </Grid>
+            </Grid>
+
+        </Container>
+    )
 }
