@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { getAUser } from '../../../store/user';
+import { errorApiHandler } from '../../../utils/error';
 
 export const RegisterUserPage = () => {
     const [searchParams] = useSearchParams()
@@ -30,6 +31,8 @@ export const RegisterUserPage = () => {
                     group: +data.group,
                     last_name: data.lastName,
                     username: data.email,
+                    employee_number: data.employee_number
+                    
                 }
             })
         } else {
@@ -44,7 +47,7 @@ export const RegisterUserPage = () => {
                 is_superuser: false,
                 username: data.email,
                 is_active: true,
-                codigo_empleado: Math.ceil(Math.random() * 1000)
+                employee_number: data.employee_number
             })
         }
 
@@ -65,14 +68,16 @@ export const RegisterUserPage = () => {
             password: '',
             confirmPassword: '',
             group: `${editingUser?.groups?.[0] || ''}`,
-            cd:`${editingUser?.centroDistribucion}`
+            cd:`${editingUser?.centroDistribucion}`,
+            employee_number: editingUser?.employee_number || undefined
         } : {
             fistName: '',
             lastName: '',
             email: '',
             password: '',
             confirmPassword: '',
-            group: ''
+            group: '',
+            employee_number: undefined
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [edit, editingUser]) 
@@ -82,11 +87,7 @@ export const RegisterUserPage = () => {
             setResetForm(true)
             toast.success("Usuario Registrado con éxito")
         } else if (error) {
-            if ("data" in error) {
-                toast.error(`Error: ${JSON.stringify(error.data)}`)
-            } else if ("error" in error) {
-                toast.error(`Error: ${JSON.stringify(error.error)}`)
-            }
+            errorApiHandler(error, "Error al registrar el usuario")
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data, error])
@@ -95,11 +96,7 @@ export const RegisterUserPage = () => {
         if (resultPatchUser.status === QueryStatus.fulfilled) {
             toast.success("Usuario Actualizado con éxito")
         } else if (resultPatchUser.error) {
-            if ("data" in resultPatchUser.error) {
-                toast.error(`Error: ${JSON.stringify(resultPatchUser.error.data)}`)
-            } else if ("error" in resultPatchUser.error) {
-                toast.error(`Error: ${JSON.stringify(resultPatchUser.error.error)}`)
-            }
+            errorApiHandler(resultPatchUser.error, "Error al actualizar el usuario")
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resultPatchUser.data, resultPatchUser.error])

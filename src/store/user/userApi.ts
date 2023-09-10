@@ -34,7 +34,7 @@ export const userApi = createApi({
             query: (data) => ({
                 url: `/users/`,
                 method: 'POST',
-                body: {...data, groups:[data.group]}
+                body: {...data, groups:[data.group], employee_number: data.employee_number || null} 
             }),
             invalidatesTags: (data)=> [{type: 'Users', id:data?.email}]
         }),
@@ -42,7 +42,7 @@ export const userApi = createApi({
             query: (user) => ({
                 url: `/users/${user.id}/`,
                 method: 'PATCH',
-                body: {...user.user, groups:[user.user.group]}
+                body: {...user.user, groups:[user.user.group], employee_number: user.user.employee_number || null}
             }),
             invalidatesTags: (data)=> [{type: 'Users', id:data?.id}]
         }),

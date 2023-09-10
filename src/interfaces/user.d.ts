@@ -6,6 +6,7 @@ export interface RegisterUserForm {
     confirmPassword: string;
     group: string;
     cd?: string;
+    employee_number?: number;
 }
 
 
@@ -18,7 +19,7 @@ export type UserResponse = {
 
 export interface CreateUserResponse {
     id:                  number;
-    list_groups:         any[];
+    list_groups:         string[];
     list_permissions:    string[];
     date_joined:         Date;
     last_login:          null;
@@ -31,9 +32,9 @@ export interface CreateUserResponse {
     first_name:          string;
     last_name:           string;
     email:               string;
-    codigo_empleado:     number;
-    groups:              any[];
-    user_permissions:    any[];
+    employee_number:     number;
+    groups:              string[];
+    user_permissions:    string[];
 }
 
 export interface CreateUserBody {
@@ -46,7 +47,7 @@ export interface CreateUserBody {
     first_name: string;
     last_name: string;
     email:string;
-    codigo_empleado: number;
+    employee_number?: number;
     group: number;
 }
 
@@ -64,7 +65,7 @@ export type User = {
     firstName?:          string;
     lastName?:           string;
     email?:              string;
-    codigoEmpleado?:     null;
+    employee_number?:     null;
     createdAt?:          Date;
     groups?:             number[];
     userPermissions?:    string[];
@@ -101,5 +102,5 @@ export interface GetAUserResponse {
     email:                    string;
     codigo_empleado:          number;
     groups:                   number[];
-    user_permissions:         any[];
+    user_permissions:         string[];
 }

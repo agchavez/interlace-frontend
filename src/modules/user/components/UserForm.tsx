@@ -87,11 +87,12 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                             margin="dense"
                             size='small'
                             {...register("lastName")}
+                            value={watch('lastName')}
                             error={errors.lastName ? true : false}
                             helperText={errors.lastName?.message}
                         />
                     </Grid>
-                    <Grid item xs={12} md={12}>
+                    <Grid item xs={12} md={6}>
                         <TextField
                             fullWidth
                             autoComplete='off'
@@ -105,6 +106,21 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                             helperText={errors.email?.message}
                         />
                     </Grid>
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            fullWidth
+                            autoComplete='off'
+                            label="Numero de empleado"
+                            variant="outlined"
+                            margin="dense"
+                            size='small'
+                            {...register("employee_number")}
+                            value={watch('employee_number') || ''}
+                            error={errors.employee_number ? true : false}
+                            helperText={errors.employee_number?.message}
+                        />
+
+                        </Grid>
                     <Grid item xs={12} md={6}>
                         <FormControl fullWidth margin="dense" size='small' variant="outlined" >
                             <InputLabel id='role-label' component="legend" style={{ marginBottom: 5 }}>
