@@ -60,8 +60,10 @@ export const EliminarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ 
             </Box>
         </DialogContent>
         <DialogActions>
-            <Button onClick={handleClickDelete}>
-                Eliminar
+            <Button variant="contained" color="error" size="medium" onClick={handleClickDelete}>
+                <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
+                    Eliminar
+                </Typography>
             </Button>
         </DialogActions>
     </BootstrapDialog>
