@@ -4,7 +4,8 @@ import { CheckForm } from '../components/CheckForm';
 import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
-import { removeSeguimiento, setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
+import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
+import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -43,7 +44,8 @@ function a11yProps(index: number) {
 export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [value, setValue] = useState(0);
+  const [, setValue] = useState(0);
+  const [eliminarOpen, setEliminarOpen] = useState(false)
   const { seguimientos, seguimeintoActual } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
 
@@ -55,12 +57,18 @@ export const CheckPage = () => {
     setShowCreateModal(false)
   }
 
+  const handleCloseDeleteModal = () => {
+    setEliminarOpen(false)
+  }
+
   const handleClickDelete = () => {
-    seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
+    setEliminarOpen(true);
+    // seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
   }
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
+      <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} />
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
