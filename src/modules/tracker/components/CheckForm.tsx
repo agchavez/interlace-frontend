@@ -1,5 +1,5 @@
 import { Box, Button, Card, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, FunctionComponent, useEffect, useState } from 'react';
 
 // iCONS
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
@@ -9,7 +9,7 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DatosOperador, DetalleCarga, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { DatosOperador, DetalleCarga, DetalleCargaPalet, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
@@ -20,6 +20,8 @@ import { DriverSelect } from '../../ui/components';
 import { LocationSelect } from '../../ui/components/LocationSelect';
 import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
+import PrintComponent from '../../../utils/componentPrinter';
+import PalletPrint from './PalletPrint';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -326,7 +328,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         <Grid item xs={12} md={12} lg={4} xl={4}>
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
-                            
+
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
                             <Button variant="outlined" size="small" fullWidth color="secondary"
@@ -465,10 +467,10 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     }
 
     const isValid = (): boolean => {
-        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0 ) => a + b, 0) !== Math.ceil(row.amount / row.boxes_pre_pallet)
+        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0) !== Math.ceil(row.amount / row.boxes_pre_pallet)
     }
     return (
-        <Fragment>  
+        <Fragment>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <IconButton
@@ -479,7 +481,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                             backgroundColor: isValid() ? 'red' : 'inherit   '
                         }}
                     >
-                        {open ? <KeyboardArrowUpIcon 
+                        {open ? <KeyboardArrowUpIcon
                         /> : <KeyboardArrowDownIcon
                         />}
                     </IconButton>
@@ -545,42 +547,13 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                 <TableBody>
                                     {row.history?.map((historyRow, index) => {
                                         return (
-                                            <TableRow key={index}>
-                                                <TableCell align="right">
-                                                    <TextField
-                                                        fullWidth
-                                                        id="outlined-basic"
-                                                        size="small"
-                                                        type='number'
-                                                        value={historyRow.pallets}
-                                                        onChange={(e) => updateProductoPallet({ pallets: +e.target.value, palletIndex: index })}
-                                                    />
-                                                </TableCell>
-                                                <TableCell component="th" scope="row" align="right">
-                                                    <TextField
-                                                        fullWidth
-                                                        id="outlined-basic"
-                                                        size="small"
-                                                        type="date"
-                                                        value={historyRow.date?.toISOString().split('T')[0]}
-                                                        datatype='date'
-                                                        onChange={(e) => {
-                                                            const inputDate = new Date(e.target.value);
-                                                            if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                                                                updateProductoPallet({ date: inputDate, palletIndex: index });
-                                                            }
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index })}>
-                                                        <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
-                                                    </IconButton>
-                                                    <IconButton aria-label="edit" size="medium">
-                                                        <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
+                                            <HistoryRow
+                                                key={index}
+                                                historyRow={historyRow}
+                                                index={index}
+                                                updateProductoPallet={updateProductoPallet}
+                                                removeProductoPallet={removeProductoPallet}
+                                            />
                                         )
                                     })}
                                 </TableBody>
@@ -591,4 +564,71 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
             </TableRow>
         </Fragment>
     );
+}
+
+interface HistoryRowProps {
+    index: number;
+    historyRow: DetalleCargaPalet;
+    updateProductoPallet: (datos: DetalleCargaPaletIdx) => unknown
+    removeProductoPallet: (datos: {
+        palletIndex: number;
+    }) => unknown
+}
+
+const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet }) => {
+    const printing = () => {
+        const red = [];
+        for (let i = 0; i < (historyRow.pallets || 0); i++) {
+            red.push(<PalletPrint />)
+            if((i+1) % 2 === 0) {
+                red.push(<div style={{ pageBreakBefore: "always" }}></div>)
+            }
+        }
+        return <>
+            <Grid container>
+                {red}
+            </Grid>
+        </>
+    }
+    const print = PrintComponent({
+        pageOrientation: "landscape",
+        component: printing()
+    })
+    return <TableRow key={index}>
+        {print.component}
+        <TableCell align="right">
+            <TextField
+                fullWidth
+                id="outlined-basic"
+                size="small"
+                type='number'
+                value={historyRow.pallets}
+                onChange={(e) => updateProductoPallet({ pallets: +e.target.value, palletIndex: index })}
+            />
+        </TableCell>
+        <TableCell component="th" scope="row" align="right">
+            <TextField
+                fullWidth
+                id="outlined-basic"
+                size="small"
+                type="date"
+                value={historyRow.date?.toISOString().split('T')[0]}
+                datatype='date'
+                onChange={(e) => {
+                    const inputDate = new Date(e.target.value);
+                    if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
+                        updateProductoPallet({ date: inputDate, palletIndex: index });
+                    }
+                }}
+            />
+        </TableCell>
+        <TableCell align="right">
+            <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index })}>
+                <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
+            </IconButton>
+            <IconButton aria-label="edit" size="medium" onClick={() => print.print()}>
+                <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
+            </IconButton>
+        </TableCell>
+    </TableRow>
 }
