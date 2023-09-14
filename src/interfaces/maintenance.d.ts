@@ -12,7 +12,6 @@ export interface BaseQueryParams {
 
 export interface Trailer {
     id:            number;
-    transporter:   Transporter;
     createdAtDate: Date;
     createdAtTime: string;
     code:          string;
@@ -22,6 +21,10 @@ export interface Trailer {
 export interface TrailerQuerySearch extends BaseQueryParams {
     search?: string;
     transporter?: number;
+    id?: number;
+}
+export interface TransporterQuerySearch extends BaseQueryParams {
+    search?: string;
     id?: number;
 }
 export interface Transporter {

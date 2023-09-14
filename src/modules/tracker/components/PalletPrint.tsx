@@ -25,7 +25,7 @@ interface PalletPrintContentProps {
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     return (
         <ThemeProvider theme={THEME}>
-            <Grid xs={6} component="div" paddingRight="2pt">
+            <Grid xs={6} component="div" paddingRight="8pt">
                 <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#ddd" }}>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
                         <Typography component="h1" fontSize={25} color="white" margin="3pt">
@@ -78,7 +78,8 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                             </Grid>
                             <Grid item xs={4} container direction="column" margin="auto">
                                 <Typography fontSize={13}>
-                                    CAJAS X PALLET
+                                    CAJAS X <br/> 
+                                    PALLET
                                 </Typography>
                                 <Typography fontSize={40} fontWeight={900}>
                                     {pallet?.cajasPallet}
@@ -143,7 +144,17 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Grid>
                         <Grid item xs={8} container margin="auto">
                             <Grid item xs={5}>
-                                <QRCodeSVG value={`${import.meta.env.VITE_JS_APP_API_URL}/tracker/check`} />
+                                <QRCodeSVG value={`${import.meta.env.VITE_JS_APP_API_URL}/tracker/check`} 
+                                    imageSettings={{
+                                        src: "../../../../public/logo-qr.png",
+                                        x: undefined,
+                                        y: undefined,
+                                        height: 40,
+                                        width: 40,
+                                        excavate: true,
+                                      }}
+                                      level='Q'
+                                />
                             </Grid>
                             <Grid item xs={7} margin="auto">
                                 <Typography fontSize={15} textAlign="center">

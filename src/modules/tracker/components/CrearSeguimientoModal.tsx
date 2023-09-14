@@ -6,8 +6,8 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
-import { TrailerSelect } from "../../ui/components";
-import { Trailer } from '../../../interfaces/maintenance';
+import { TrailerSelect, TransporterSelect } from "../../ui/components";
+import { Trailer, Transporter } from '../../../interfaces/maintenance';
 
 interface CreateCheckProps {
     open: boolean;
@@ -26,10 +26,12 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
     const schema = yup.object().shape({
-        rastraId: yup.number().required("Este campo es requerido").min(1, "Seleccione una rastra")
+        rastraId: yup.number().required("Este campo es requerido").min(1, "Seleccione una rastra"),
+        transporter: yup.number().required("Este campo es requerido").min(1, "Seleccione un transportista")
     })
 
     const [trailer, settrailer] = useState<Trailer | null>(null)
+    const [transporter, setTransporter] = useState<Transporter | null>(null)
     const { seguimientos } = useAppSelector(state => state.seguimiento)
 
     const dispach = useAppDispatch()
@@ -39,7 +41,8 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
     const { handleSubmit, reset, setFocus, control } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
-            rastraId: 0
+            rastraId: 0,
+            transporter: 0
         }
     })
 
@@ -49,14 +52,20 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
         }
     }
 
+    const handleChangeTDriver = (value: Transporter | null) => {
+        if (value) {
+            setTransporter(value)
+        }
+    }
+
 
     const handleSubmitForm = () => {
-        
-        if (trailer) {
+        if (trailer && transporter) {
             const idSeguimiento = Math.max(...seguimientos.map(s => s.id), 0) + 1
             dispach(addSeguimiento({
                 id: idSeguimiento,
                 rastra: trailer,
+                transporter: transporter,
                 detalles: []
             }));
             //dispach(setSeguimientoActual(seguimientos.length))
@@ -103,12 +112,24 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                             <Grid container spacing={3}>
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
-                                        <TrailerSelect
-                                            control={control}
-                                            name="rastraId"
-                                            placeholder="Seleccione una rastra"
-                                            onChange={handleChangeTrailer}
-                                            />
+                                        <Grid container>
+                                            <Grid item xs={6}>
+                                                <TrailerSelect
+                                                    control={control}
+                                                    name="rastraId"
+                                                    placeholder="Seleccione una rastra"
+                                                    onChange={handleChangeTrailer}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <TransporterSelect
+                                                    control={control}
+                                                    name="transporter"
+                                                    placeholder="Seleccione un transportista"
+                                                    onChange={handleChangeTDriver}
+                                                />
+                                            </Grid>
+                                        </Grid>
                                     </form>
                                 </Grid>
                             </Grid>
