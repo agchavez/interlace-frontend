@@ -1,13 +1,28 @@
 import { Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { QRCodeSVG } from 'qrcode.react';
+import { getM } from '../../../utils/common';
 const THEME = createTheme({
     typography: {
         fontFamily: 'Bahnschrift, sans-serif', // Usa el nombre de fuente definido en @font-face o 'sans-serif' como alternativa
     },
 });
 
-const PalletPrintContent: FunctionComponent = () => {
+interface PalletPrintContentProps {
+    pallet?: {
+        numeroSap: number;
+        rastra: string;
+        nDocEntrada: number;
+        fechaVencimiento?: Date;
+        nPallets: number;
+        cajasPallet: number;
+        origen: string;
+        trimestre: "A" | "B" | "C" | "D";
+    }
+}
+
+const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="2pt">
@@ -20,16 +35,16 @@ const PalletPrintContent: FunctionComponent = () => {
                     <Grid item xs={12} container padding="3pt">
                         <Grid item xs={4} sx={{ backgroundColor: "green", textAlign: "center", borderRadius: "5pt" }}>
                             <Typography component="h1" fontSize={170} color="white" fontWeight={800} lineHeight="1em">
-                                A
+                                {pallet?.trimestre}
                             </Typography>
                         </Grid>
                         <Grid item xs={8} sx={{ textAlign: "center" }} margin="auto">
                             <Grid item>
                                 <Typography fontSize={18}>
-                                    Origen: SH01 - Planta de Refresco CSD
+                                    Origen: {pallet?.origen}
                                 </Typography>
                                 <Typography fontSize={120} lineHeight="1em" fontWeight={800}>
-                                    13958
+                                    {pallet?.numeroSap}
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -43,12 +58,12 @@ const PalletPrintContent: FunctionComponent = () => {
                         <Grid item container direction="column" xs={5} sx={{ textAlign: "center", marginTop: "5pt" }}>
                             <Grid item sx={{ backgroundColor: "black", color: "white" }}>
                                 <Typography fontSize={43}>
-                                    MR25
+                                    {pallet?.rastra}
                                 </Typography>
                             </Grid>
                             <Grid item >
                                 <Typography fontWeight={500} fontSize={20}>
-                                    750896538
+                                    {pallet?.nDocEntrada}
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -58,7 +73,7 @@ const PalletPrintContent: FunctionComponent = () => {
                                     # PALLETS INGRESADOS
                                 </Typography>
                                 <Typography fontSize={40} fontWeight={900}>
-                                    10
+                                    {pallet?.nPallets}
                                 </Typography>
                             </Grid>
                             <Grid item xs={4} container direction="column" margin="auto">
@@ -66,7 +81,7 @@ const PalletPrintContent: FunctionComponent = () => {
                                     CAJAS X PALLET
                                 </Typography>
                                 <Typography fontSize={40} fontWeight={900}>
-                                    120
+                                    {pallet?.cajasPallet}
                                 </Typography>
                             </Grid>
                             <Grid item xs={4} container direction="column" alignItems="center" margin="auto">
@@ -85,7 +100,9 @@ const PalletPrintContent: FunctionComponent = () => {
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginTop: "5pt", marginBottom: "5pt" }} orientation='horizontal' />
                     <Grid item xs={12}>
                         <Typography fontSize={60} textAlign="center" fontWeight={600}>
-                            21-DIC-2023
+                            {
+                                `${pallet?.fechaVencimiento?.getDate()}-${getM(pallet?.fechaVencimiento?.getMonth() || 0)}-${pallet?.fechaVencimiento?.getFullYear()}`
+                            }
                         </Typography>
                     </Grid>
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginBottom: "5pt" }} orientation='horizontal' />
@@ -126,7 +143,7 @@ const PalletPrintContent: FunctionComponent = () => {
                         </Grid>
                         <Grid item xs={8} container margin="auto">
                             <Grid item xs={5}>
-                                <img src='/logo-tracker.ico' width="150pt" />
+                                <QRCodeSVG value={`${import.meta.env.VITE_JS_APP_API_URL}/tracker/check`} />
                             </Grid>
                             <Grid item xs={7} margin="auto">
                                 <Typography fontSize={15} textAlign="center">
