@@ -81,7 +81,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     return (
         <>
             <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
-            <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
+            {open && <AgregarProductoModal open={open} handleClose={() => setopen(false)} />}
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
                     <Card>
