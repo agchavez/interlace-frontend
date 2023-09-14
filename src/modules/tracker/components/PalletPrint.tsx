@@ -2,7 +2,7 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QRCodeSVG } from 'qrcode.react';
-import { getM } from '../../../utils/common';
+import { appendLeftZeros, formatDate, formatTime, getM } from '../../../utils/common';
 const THEME = createTheme({
     typography: {
         fontFamily: 'Bahnschrift, sans-serif', // Usa el nombre de fuente definido en @font-face o 'sans-serif' como alternativa
@@ -19,17 +19,21 @@ interface PalletPrintContentProps {
         cajasPallet: number;
         origen: string;
         trimestre: "A" | "B" | "C" | "D";
+        trackingId: number;
+        detalle_pallet_id: number;
+        tracker_detail: number;
     }
 }
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
+    const track = appendLeftZeros(pallet?.trackingId || 0, 9);
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
                 <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#ddd" }}>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
                         <Typography component="h1" fontSize={25} color="white" margin="3pt">
-                            TRK-750896538
+                            TRK-{track}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} container padding="3pt">
@@ -90,10 +94,10 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                                     TA
                                 </Typography>
                                 <Typography fontSize={15}>
-                                    1-SEPT-23
+                                    {formatDate(new Date())}
                                 </Typography>
                                 <Typography fontSize={15}>
-                                    15:45:23 PM
+                                    {formatTime(new Date())}
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -144,7 +148,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Grid>
                         <Grid item xs={8} container margin="auto">
                             <Grid item xs={5}>
-                                <QRCodeSVG value={`${import.meta.env.VITE_JS_APP_API_URL}/tracker/check`} 
+                                <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
                                     imageSettings={{
                                         src: "../../../../public/logo-qr.png",
                                         x: undefined,

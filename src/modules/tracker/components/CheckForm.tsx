@@ -596,7 +596,10 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     nPallets: historyRow.pallets || 0,
                     cajasPallet: detalle.boxes_pre_pallet,
                     origen: seguimiento.data?.originLocation,
-                    trimestre: "A"
+                    trimestre: "A",
+                    trackingId: seguimiento.id,
+                    detalle_pallet_id: historyRow.id||0,
+                    tracker_detail: detalle.id
                 }} />)
             if (((i + 1) % 2 === 0) && (i + 1 < max)) {
                 red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
