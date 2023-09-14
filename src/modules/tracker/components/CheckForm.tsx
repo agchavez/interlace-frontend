@@ -99,7 +99,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.transporter.name}
+                                        {seguimiento?.transporter.name}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
@@ -108,7 +108,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.transporter.tractor}
+                                        {seguimiento?.transporter.tractor}
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
@@ -117,7 +117,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                        {seguimiento?.rastra.transporter.head}
+                                        {seguimiento?.transporter.head}
                                     </Typography>
                                 </Grid>
                             </Grid>

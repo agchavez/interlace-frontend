@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from 'sonner'
-import { Trailer } from '../../interfaces/maintenance';
+import { Trailer, Transporter } from '../../interfaces/maintenance';
 import { CheckFormType, Product } from '../../interfaces/tracking';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
@@ -72,6 +72,7 @@ export interface DetalleCargaIdx extends DetalleCarga {
 export interface Seguimiento {
     id: number,
     rastra: Trailer,
+    transporter: Transporter,
     data?: CheckFormType,
     datosOperador?: DatosOperador,
     detalles: DetalleCarga[]
