@@ -551,6 +551,8 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                 key={index}
                                                 historyRow={historyRow}
                                                 index={index}
+                                                detalle={row}
+                                                seguimiento={props.seguimiento}
                                                 updateProductoPallet={updateProductoPallet}
                                                 removeProductoPallet={removeProductoPallet}
                                             />
@@ -569,33 +571,55 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
 interface HistoryRowProps {
     index: number;
     historyRow: DetalleCargaPalet;
-    updateProductoPallet: (datos: DetalleCargaPaletIdx) => unknown
+    updateProductoPallet: (datos: DetalleCargaPaletIdx) => unknown;
+    detalle: DetalleCarga;
+    seguimiento: Seguimiento;
     removeProductoPallet: (datos: {
         palletIndex: number;
     }) => unknown
 }
 
-const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet }) => {
-    const printing = () => {
+const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento }) => {
+    const [willPrint, setWillPrint] = useState(false)
+    const [componenPrint, setComponentPrint] = useState(<></>)
+    
+    const onclickPrint = () => {
         const red = [];
-        for (let i = 0; i < (historyRow.pallets || 0); i++) {
-            red.push(<PalletPrint />)
-            if((i+1) % 2 === 0) {
-                red.push(<div style={{ pageBreakBefore: "always" }}></div>)
+        const max = (historyRow.pallets || 0)
+        for (let i = 0; i < max; i++) {
+            red.push(<PalletPrint
+                pallet={{
+                    numeroSap: +detalle.sap_code,
+                    rastra: seguimiento.rastra.code,
+                    nDocEntrada: seguimiento.data?.documentNumber || 0,
+                    fechaVencimiento: historyRow.date,
+                    nPallets: historyRow.pallets || 0,
+                    cajasPallet: detalle.boxes_pre_pallet,
+                    origen: seguimiento.data?.originLocation,
+                    trimestre: "A"
+                }} />)
+            if (((i + 1) % 2 === 0) && (i + 1 < max)) {
+                red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
             }
         }
-        return <>
-            <Grid container>
-                {red}
-            </Grid>
-        </>
+        setComponentPrint(<Grid container>{red}</Grid>)
+        setWillPrint(true);
     }
+
     const print = PrintComponent({
         pageOrientation: "landscape",
-        component: printing()
+        component: componenPrint
     })
+
+    useEffect(() => {
+        if (willPrint) {
+            setWillPrint(false);
+            print.print()
+        }
+    }, [print, willPrint])
+
     return <TableRow key={index}>
-        {print.component}
+        {willPrint && print.component}
         <TableCell align="right">
             <TextField
                 fullWidth
@@ -626,7 +650,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
             <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index })}>
                 <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
-            <IconButton aria-label="edit" size="medium" onClick={() => print.print()}>
+            <IconButton aria-label="edit" size="medium" onClick={onclickPrint}>
                 <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
         </TableCell>
