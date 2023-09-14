@@ -25,6 +25,7 @@ const PrintComponent = ({ component, pageSize = "letter", margin = 0, padding = 
                     height: initial !important;
                     overflow: initial !important;
                     -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                 }
             }
         `,

@@ -2,6 +2,12 @@
 $color-primary: #e7cf0f;
 $color-secondary: #110f0d;
 
+
+@font-face {
+    font-family: 'Bahnschrift';
+    src: url('/public/BAHNSCHRIFT.TTF') format('truetype');
+}
+
 * {
     box-sizing: border-box;
     margin: 0;

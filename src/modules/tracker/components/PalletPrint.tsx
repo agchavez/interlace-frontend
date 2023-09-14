@@ -3,9 +3,9 @@ import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 const THEME = createTheme({
     typography: {
-        fontFamily: `"Bahnschrift", url('/BAHSCHRIFT.TTF')`
-    }
-})
+        fontFamily: 'Bahnschrift, sans-serif', // Usa el nombre de fuente definido en @font-face o 'sans-serif' como alternativa
+    },
+});
 
 const PalletPrintContent: FunctionComponent = () => {
     return (
