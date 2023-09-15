@@ -5,6 +5,7 @@ import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import DashboardTwoToneIcon from '@mui/icons-material/DashboardTwoTone';
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
@@ -24,6 +25,18 @@ interface SideBarItem {
 }
 
 const items: SideBarItem[] = [
+    {
+        text: "Inicio",
+        icon: <DashboardTwoToneIcon sx={{ width: "30px" }} color="primary" />,
+        subItems: [
+            {
+                text: "Dashboard",
+                href: "/",
+                id: "dashboard",
+            },
+        ],
+        id: "inicio",
+    },
     {
         text: "USUARIO",
         icon: <PeopleOutlineIcon sx={{ width: "30px" }} color="primary" />,

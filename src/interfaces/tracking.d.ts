@@ -39,24 +39,22 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 
 
 
-
-interface CheckFormType {
-  plateNumber: string;
-  originLocation: number;
-  outputLocation: number;
-  driver?: number | null;
-  documentNumber: number;
-  transportNumber: number;
-  transferNumber: number;
-  documentNumberExit: number;
-  outputType: number;
-  timeStart: Date | null;
-  timeEnd: Date | null;
-  opm1?: number;
-  opm2?: number;
-
-}
-
+  interface CheckFormType {
+    plateNumber: string;
+    originLocation: number;
+    outputLocation: number;
+    driver?: number;
+    documentNumber: number;
+    transportNumber: number;
+    transferNumber: number;
+    documentNumberExit: number;
+    outputType: number;
+    timeStart: Date | null;
+    timeEnd: Date | null;
+    opm1?: number;
+    opm2?: number;
+    accounted: number | null;
+  }
 
 // Tracker
 export interface Tracker {

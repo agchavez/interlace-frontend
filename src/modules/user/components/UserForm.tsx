@@ -41,7 +41,7 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
         setFocus("fistName")
     }
 
-    const { distributionCenters } = useAppSelector(state => state.distributionCenters)
+    const { distributionCenters } = useAppSelector(state => state.user)
     const { groups } = useAppSelector(state => state.maintenance)
     const groupId = +watch("group")
     const selectedGroup = useMemo(() => {
@@ -167,7 +167,7 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                                 >
                                     <MenuItem value={0}></MenuItem>
                                     {
-                                        distributionCenters.map(distributionCenter =>
+                                        distributionCenters?.map(distributionCenter =>
                                             <MenuItem
                                                 key={distributionCenter.id}
                                                 value={distributionCenter.id}

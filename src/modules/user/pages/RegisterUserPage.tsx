@@ -15,10 +15,13 @@ export const RegisterUserPage = () => {
     const [searchParams] = useSearchParams()
     const edit = searchParams.get("edit")
     const [insertUser, resultInsertUser] = useInsertUserMutation()
-    const [patchUser, resultPatchUser] = usePatchUserMutation()
+    const [patchUser, 
+        resultPatchUser
+    ] = usePatchUserMutation()
     const [resetForm, setResetForm] = useState(false)
-    const { data, status, error } = resultInsertUser;
-    const editingUser = useAppSelector(state => state.distributionCenters.editingUser)
+    const { data, status, error, isLoading } = resultInsertUser;
+    const {isLoading: isLoadingPatch} = resultPatchUser
+    const editingUser = useAppSelector(state => state.user.editingUser)
     const dispatch = useAppDispatch()
     const onSubmit = async (data: RegisterUserForm) => {
         if (edit) {
@@ -120,7 +123,7 @@ export const RegisterUserPage = () => {
                         <Paper elevation={1} sx={{ padding: 2 }}>
                             <UserForm
                                 onSubmit={onSubmit}
-                                loading={false}
+                                loading={isLoading || isLoadingPatch}
                                 initialValues={initialValues}
                                 isEdit={edit ? true : false}
                                 resetForm={resetForm}
