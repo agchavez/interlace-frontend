@@ -84,7 +84,9 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
             {open && <AgregarProductoModal open={open} handleClose={() => setopen(false)} />}
             <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
                 <Grid item xs={12}>
-                    <Card>
+                    <Card sx={{
+                        borderRadius: 2,
+                    }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
                             <Typography variant="h6" component="h1" fontWeight={400} color={'gray.500'}>
                                 Datos de la rastra
@@ -98,7 +100,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                         Transportista
                                     </Typography>
                                     <Divider />
-                                    <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
                                         {seguimiento?.transporter.name}
                                     </Typography>
                                 </Grid>
@@ -107,7 +109,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                         Tractor
                                     </Typography>
                                     <Divider />
-                                    <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
                                         {seguimiento?.transporter.tractor}
                                     </Typography>
                                 </Grid>
@@ -116,7 +118,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                         Cabezal
                                     </Typography>
                                     <Divider />
-                                    <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
                                         {seguimiento?.transporter.head}
                                     </Typography>
                                 </Grid>
@@ -126,6 +128,12 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Box>
                     </Card>
                 </Grid>
+                <Grid item xs={12} >
+                            <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
+                                TRK-{seguimiento.id.toString().padStart(8, '0')}
+                            </Typography>
+                        </Grid>
+                        
                 <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
@@ -163,9 +171,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
 
                         </Grid>
                         <Grid item xs={12} md={12}>
-
-                        </Grid>
-                        <Grid item xs={12} md={12}>
                             <DriverSelect
                                 control={control}
                                 name='driver'
@@ -177,46 +182,26 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <TextField
                                 fullWidth
                                 id="outlined-basic"
-                                label="N° de documento"
+                                label="Tranferencia de entrada"
                                 variant="outlined"
                                 size="small"
                                 type="number"
                                 {...register('documentNumber')}
                             />
                         </Grid>
+                        
                         <Grid item xs={12} md={6}>
                             <TextField
                                 fullWidth
                                 id="outlined-basic"
-                                label="N° de Transporte"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                {...register('transportNumber')}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="N° de Traslado"
+                                label="N° de Traslado 5001"
                                 variant="outlined"
                                 size="small"
                                 type="number"
                                 {...register('transferNumber')}
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="N° de Doc. Salida"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                {...register('documentNumberExit')}
-                            />
-                        </Grid>
+                       
                     </Grid>
                 </Grid>
 
@@ -278,7 +263,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 }
                             </Typography>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} md={6} sx={{ marginTop: "4px" }} >
                             <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false}
                                 onClick={() => {
                                     updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
@@ -286,7 +271,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 Registrar entrada
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
                             <Button variant="outlined" size="small" fullWidth color="error" disabled={tiempoEntrada === undefined || tiempoSalida !== undefined}
                                 onClick={() => {
                                     updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
@@ -316,6 +301,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
 
                             />
                         </Grid>
+                       
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
@@ -354,7 +340,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                             Producto
                                         </StyledTableCell>
                                         <StyledTableCell align="right">
-                                            Total cajas
+                                            Total pallets
                                         </StyledTableCell>
                                         <StyledTableCell align="right">
                                             Acciones
@@ -381,6 +367,28 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Typography>
                     </Divider>
                     <Grid container spacing={1} sx={{ marginTop: 2 }}>
+                    <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de Doc. Salida"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('documentNumberExit')}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="Contabilizado"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('documentNumberExit')}
+                            />
+                        </Grid>
                         <Grid item xs={12} md={6}>
                             <LocationSelect
                                 control={control}
@@ -390,7 +398,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label='Localidad de Envío'
                             />
                         </Grid>
-                        <Grid item xs={12} md={5}>
+                        <Grid item xs={12} md={6}>
                             <AutoCompleteBase
                                 control={control}
                                 name='outputType'
@@ -402,13 +410,16 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         {
                             outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
                             <>
-                                <Grid item xs={12} md={1}>
-                                    <IconButton aria-label="delete" size="medium" onClick={() => {
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                <Button variant="outlined" size="small" fullWidth color="secondary"
+                                    startIcon={<AddTwoToneIcon />} onClick={() => {
                                         setopenOutput(true);
                                     }
-                                    }>
-                                        <AddTwoToneIcon color="primary" />
-                                    </IconButton>
+                                    }
+                                    
+                                    >
+                                       Agregar producto de salida
+                                    </Button>
                                 </Grid>
                                 <OutPutDetail seguimiento={seguimiento} />
 
@@ -467,7 +478,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     }
 
     const isValid = (): boolean => {
-        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0) !== Math.ceil(row.amount / row.boxes_pre_pallet)
+        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0) !== +row.amount
     }
     return (
         <Fragment>
@@ -529,7 +540,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                     {row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0)}
                                     {" "} de {" "}
                                     {
-                                        Math.ceil(row.amount / row.boxes_pre_pallet)
+                                        row.amount 
                                     }
                                 </Typography>
                             </Grid>

@@ -66,7 +66,10 @@ export const maintenanceApi = createApi({
             query: (params) => ({
                 url: `/location/`,
                 method: 'GET',
-                params
+                params: {
+                    ...params,
+                    id: params.id ? params.id : undefined,
+                }
             }),
             keepUnusedDataFor: 120000
         }),
