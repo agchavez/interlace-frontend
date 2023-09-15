@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from 'sonner'
-import { Trailer, Transporter } from '../../interfaces/maintenance';
-import { CheckFormType, Product } from '../../interfaces/tracking';
+import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -71,16 +70,27 @@ export interface DetalleCargaIdx extends DetalleCarga {
 
 export interface Seguimiento {
     id: number,
-    rastra: Trailer,
-    transporter: Transporter,
-    data?: CheckFormType,
-    datosOperador?: DatosOperador,
+    rastra: TarilerData,
+    transporter: TransporterData,
+    plateNumber: string;
+    originLocation?: number;
+    outputLocation?: number;
+    driver?: number| null;
+    documentNumber: number;
+    transportNumber: number;
+    transferNumber: number;
+    documentNumberExit: number;
+    outputType: number;
+    timeStart: Date | null;
+    timeEnd: Date | null;
+    opm1?: number;
+    opm2?: number;
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
 }
 
-export interface SeguimientoIDX extends Seguimiento {
-    index:number
+export interface SeguimientoIDX extends Partial<Seguimiento> {
+    index: number
 }
 
 interface seguimientoInterface {
@@ -116,7 +126,7 @@ export const seguimientoSlice = createSlice({
             state.seguimeintoActual = action.payload
         },
         updateSeguimiento: (state, action: PayloadAction<SeguimientoIDX>) => {
-            state.seguimientos[action.payload.index] = action.payload
+            state.seguimientos[action.payload.index] = { ...state.seguimientos[action.payload.index], ...action.payload }
         },
         addDetalleCarga: (state, action: PayloadAction<DetalleCargaIdx>) => {
             // No se puede agregar un producto que ya existe en el seguimiento validar por codigo sap
@@ -126,58 +136,58 @@ export const seguimientoSlice = createSlice({
                 if (detalle) {
                     detalle.amount = Number(detalle.amount) + Number(action.payload.amount)
                 }
-                
-            }else{
+
+            } else {
 
                 state.seguimientos[action.payload.index].detalles = [action.payload, ...state.seguimientos[action.payload.index].detalles]
             }
         },
-        removeDetalleCarga:(state, action: PayloadAction<RemoveDetalle>) => {
-            const {segIdx, detalleIdx} = action.payload
+        removeDetalleCarga: (state, action: PayloadAction<RemoveDetalle>) => {
+            const { segIdx, detalleIdx } = action.payload
             const seguimiento = state.seguimientos[segIdx];
             const cortado = seguimiento.detalles.filter((_, indice) => indice !== detalleIdx)
             seguimiento.detalles = cortado
         },
         addDetalleCargaPallet: (state, action: PayloadAction<AddDetalleCargaPalletData>) => {
-            const {segIndex, detalleIndex} = action.payload
+            const { segIndex, detalleIndex } = action.payload
             state.seguimientos[segIndex].detalles[detalleIndex].history = [action.payload, ...state.seguimientos[segIndex].detalles[detalleIndex].history || []]
         },
         updateDetalleCargaPallet: (state, action: PayloadAction<DetalleCargaPaletModifyData>) => {
-            const {segIndex, detalleIndex, paletIndex} = action.payload
+            const { segIndex, detalleIndex, paletIndex } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             const detalle = seguimiento.detalles[detalleIndex];
-            if(detalle.history) {
-                detalle.history[paletIndex]= action.payload
+            if (detalle.history) {
+                detalle.history[paletIndex] = action.payload
             }
         },
         removeDetalleCargaPallet: (state, action: PayloadAction<DetalleCargaPaletRemoveData>) => {
-            const {segIndex, detalleIndex, paletIndex} = action.payload
+            const { segIndex, detalleIndex, paletIndex } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             const detalle = seguimiento.detalles[detalleIndex];
-            if(detalle.history) {
+            if (detalle.history) {
                 const cortado = detalle.history.filter((_, indice) => indice !== paletIndex);
-                detalle.history= cortado;
+                detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{segIndex: number, product: Product, amount: number}>) => {
-            const {segIndex, product, amount} = action.payload
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number }>) => {
+            const { segIndex, product, amount } = action.payload
             const seguimiento = state.seguimientos[segIndex];
-            if(seguimiento.detallesSalida) {
+            if (seguimiento.detallesSalida) {
                 const index = seguimiento.detallesSalida.findIndex((det) => det.id === product.id)
-                if(index !== -1) {
+                if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({...product, amount})
+                    seguimiento.detallesSalida.push({ ...product, amount })
                 }
             } else {
-                seguimiento.detallesSalida = [{...product, amount}]
+                seguimiento.detallesSalida = [{ ...product, amount }]
             }
             toast.success("Producto de salida agregado")
         },
-        removeDetalleCargaSalida: (state, action: PayloadAction<{segIndex: number, product: Product}>) => {
-            const {segIndex, product} = action.payload
+        removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
+            const { segIndex, product } = action.payload
             const seguimiento = state.seguimientos[segIndex];
-            if(seguimiento.detallesSalida) {
+            if (seguimiento.detallesSalida) {
                 const cortado = seguimiento.detallesSalida.filter((det) => det.id !== product.id);
                 seguimiento.detallesSalida = cortado;
             }
@@ -188,7 +198,7 @@ export const seguimientoSlice = createSlice({
 
 
 
-            
+
     }
 })
 

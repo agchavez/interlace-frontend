@@ -4,10 +4,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useAppDispatch, useAppSelector } from "../../../store";
-import { addSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { useAppDispatch } from "../../../store";
 import { TrailerSelect, TransporterSelect } from "../../ui/components";
 import { Trailer, Transporter } from '../../../interfaces/maintenance';
+import { createTracking } from "../../../store/seguimiento/trackerThunk";
 
 interface CreateCheckProps {
     open: boolean;
@@ -32,7 +32,6 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const [trailer, settrailer] = useState<Trailer | null>(null)
     const [transporter, setTransporter] = useState<Transporter | null>(null)
-    const { seguimientos } = useAppSelector(state => state.seguimiento)
 
     const dispach = useAppDispatch()
 
@@ -61,13 +60,7 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const handleSubmitForm = () => {
         if (trailer && transporter) {
-            const idSeguimiento = Math.max(...seguimientos.map(s => s.id), 0) + 1
-            dispach(addSeguimiento({
-                id: idSeguimiento,
-                rastra: trailer,
-                transporter: transporter,
-                detalles: []
-            }));
+            dispach(createTracking({trailer:trailer.id, transporter:transporter.id}));
             //dispach(setSeguimientoActual(seguimientos.length))
         }
     }

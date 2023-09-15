@@ -1,11 +1,12 @@
 import { Container, Typography, Grid, Divider, Box, Tabs, Tab, Button } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckForm } from '../components/CheckForm';
 import CreateCheckModal from '../components/CrearSeguimientoModal';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
 import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal';
+import { getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,7 +47,7 @@ export const CheckPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false)
-  const { seguimientos, seguimeintoActual } = useAppSelector(state => state.seguimiento)
+  const { seguimientos, seguimeintoActual, loading } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -65,6 +66,11 @@ export const CheckPage = () => {
     setEliminarOpen(true);
     // seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
   }
+  useEffect(() => {
+    // get pending trackings 
+    dispatch(getOpenTrackings())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
@@ -94,10 +100,11 @@ export const CheckPage = () => {
               </Typography>
             </Button>
           </Grid>
+
           <Grid item xs={12}>
             <Box sx={{ width: '100%' }}>
               <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                <Tabs value={seguimeintoActual||0} onChange={handleChange} aria-label="basic tabs example">
+                <Tabs value={seguimeintoActual || 0} onChange={handleChange} aria-label="basic tabs example">
                   {
                     seguimientos.map((seguimiento, index) => {
                       return (
@@ -105,12 +112,13 @@ export const CheckPage = () => {
                       )
                     })
                   }
+                  {loading && <p>Cargando...</p>}
                 </Tabs>
               </Box>
               {
                 seguimientos.map((seguimiento, index) => {
                   return (
-                    <CustomTabPanel value={seguimeintoActual||0} index={index}>
+                    <CustomTabPanel value={seguimeintoActual || 0} index={index}>
                       <CheckForm seguimiento={seguimiento} indice={index} />
                     </CustomTabPanel>
                   )
