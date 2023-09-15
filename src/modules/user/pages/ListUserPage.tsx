@@ -10,6 +10,7 @@ import { CustomSearch } from '../../ui/components/CustomSearch';
 import { Link } from 'react-router-dom';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
 import { useMemo } from 'react'
+import { useAppSelector } from '../../../store/store';
 function getRoleChip(group: string[]): JSX.Element {
     return <Chip
         label={group[0]}
@@ -31,6 +32,7 @@ export const ListUserPage = () => {
         offset: 0,
         search: '',
     });
+    const { user } = useAppSelector(state => state.auth)
 
     const [openChangePassWord, setOpenChangePassWord] = useState(false)
     const [selectedUser, setSelectedUser] = useState(0)
@@ -99,6 +101,7 @@ export const ListUserPage = () => {
             width: 100,
             align: 'center',
             renderCell: (params: GridCellParams) => {
+                if (user?.id === params.row.id) return null
                 return (
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Link to={`/user/register?edit=${params.row.id}`}>
@@ -163,7 +166,7 @@ export const ListUserPage = () => {
         setOpenChangePassWord(false)
     }
 
-    const userModalChangePassword = useMemo(()=>{
+    const userModalChangePassword = useMemo(() => {
         return data?.results?.find(user => user.id === selectedUser)
     }, [data?.results, selectedUser])
 
