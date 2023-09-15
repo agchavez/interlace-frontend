@@ -386,7 +386,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 type="number"
-                                {...register('documentNumberExit')}
+                                {...register('accounted')}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -606,11 +606,11 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     fechaVencimiento: historyRow.date,
                     nPallets: historyRow.pallets || 0,
                     cajasPallet: detalle.boxes_pre_pallet,
-                    origen: seguimiento.data?.originLocation,
+                    origen: seguimiento.data?.originLocation?.toString() || "",
                     trimestre: "A",
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id||0,
-                    tracker_detail: detalle.id
+                    tracker_detail: detalle.id,
                 }} />)
             if (((i + 1) % 2 === 0) && (i + 1 < max)) {
                 red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)

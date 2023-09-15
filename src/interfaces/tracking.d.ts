@@ -55,5 +55,6 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
     timeEnd: Date | null;
     opm1?: number;
     opm2?: number;
+    accounted: number | null;
 
   }
