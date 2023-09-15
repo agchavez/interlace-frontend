@@ -63,11 +63,15 @@ export const maintenanceApi = createApi({
             keepUnusedDataFor: 120000
         }),
         getLocations: builder.query<BaseApiResponse<LocationType>, LocationTypeQuerySearch>({
-            query: (params) => ({
+            query: (params) =>{
+                return ({
                 url: `/location/`,
                 method: 'GET',
-                params
-            }),
+                params: {
+                    ...params, 
+                    id: params.id
+                }
+            })},
             keepUnusedDataFor: 120000
         }),
 
