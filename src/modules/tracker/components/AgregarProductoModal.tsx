@@ -10,10 +10,10 @@ import { FunctionComponent, useRef, useEffect, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
-import { addDetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
 import { Product } from '../../../interfaces/tracking';
 import { ProductSelect } from "../../ui/components/ProductSelect";
 import { getArticlesByBarcode } from '../../../store/maintenance/maintenanceThunk';
+import { addDetalle } from "../../../store/seguimiento/trackerThunk";
 
 interface CreateCheckProps {
     open: boolean;
@@ -58,12 +58,16 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
 
     const handleSubmitForm = (data: FormValues) => {
         if (!product) return
-        dispatch(addDetalleCarga({
-            ...product,
-            amount: data.cantidad,
-            history: [],
-            index: seguimeintoActual || 0,
+        dispatch(addDetalle(seguimeintoActual || 0, {
+            quantity: data.cantidad,
+            product: product
         }))
+        // dispatch(addDetalleCarga({
+        //     ...product,
+        //     amount: data.cantidad,
+        //     history: [],
+        //     index: seguimeintoActual || 0,
+        // }))
         reset();
         handleClose && handleClose({}, "backdropClick")
     }

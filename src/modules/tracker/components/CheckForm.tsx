@@ -9,12 +9,12 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DatosOperador, DetalleCarga, DetalleCargaPalet, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet, updateSeguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
 import { useForm } from 'react-hook-form';
-import { CheckFormType } from '../../../interfaces/tracking';
+import { CheckFormType, Tracker } from '../../../interfaces/tracking';
 import { OperatorSelect } from '../../ui/components/OperatorSelect';
 import { DriverSelect } from '../../ui/components';
 import { LocationSelect } from '../../ui/components/LocationSelect';
@@ -22,6 +22,7 @@ import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
 import PrintComponent from '../../../utils/componentPrinter';
 import PalletPrint from './PalletPrint';
+import { updateTracking } from '../../../store/seguimiento/trackerThunk';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -38,25 +39,26 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const [open, setopen] = useState(false);
     const { outputType } = useAppSelector(state => state.maintenance);
     const centro_distribucion = useAppSelector(state => state.auth.user?.centro_distribucion);
-    function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
-        if (!seguimiento) return;
+    // function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
+    //     if (!seguimiento) return;
 
-        dispatch(updateSeguimiento({
-            ...seguimiento,
-            datosOperador: {
-                ...seguimiento.datosOperador,
-                ...datos
-            },
-            index: indice
-        }))
-    }
-    const { control, getValues, register, watch } = useForm<CheckFormType>({
+    //     dispatch(updateSeguimiento({
+    //         ...seguimiento,
+    //         datosOperador: {
+    //             ...seguimiento.datosOperador,
+    //             ...datos
+    //         },
+    //         index: indice
+    //     }))
+    // }
+    const { control, register, watch, } = useForm<CheckFormType>({
         defaultValues: {
-            ...seguimiento?.data,
+            ...seguimiento,
         }
     });
-    const tiempoEntrada = seguimiento?.datosOperador?.tiempoEntrada
-    const tiempoSalida = seguimiento?.datosOperador?.tiempoSalida
+    const tiempoEntrada = seguimiento?.timeStart
+    const tiempoSalida = seguimiento?.timeEnd
+
 
     // useEffect(() => {
     //     reset({
@@ -66,16 +68,19 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     // }, [reset, indice]);
 
     // Actualizar redux con los datos del formulario
-    useEffect(() => {
-        const data = getValues();
-        dispatch(updateSeguimiento({
-            ...seguimiento,
-            data,
-            index: indice
-        }))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber'), watch('outputLocation'), watch('outputType')]);
+    // useEffect(() => {
+    //     const data = getValues();
+    //     dispatch(updateSeguimiento({
+    //         ...seguimiento,
+    //         data,
+    //         index: indice
+    //     }))
+    //     // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber'), watch('outputLocation'), watch('outputType')]);
 
+    async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
+        dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
+    }
 
     const [openOutput, setopenOutput] = useState(false);
     return (
@@ -123,8 +128,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     </Typography>
                                 </Grid>
                             </Grid>
-
-
                         </Box>
                     </Card>
                 </Grid>
@@ -149,6 +152,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 {...register('plateNumber')}
+                                onBlur={(e) => sendDataToBackend("plate_number", e.target.value)}
                             />
                         </Grid>
                         <Grid item xs={12} md={12}>
@@ -167,6 +171,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 placeholder='Localidad de Origen'
                                 locationId={watch('originLocation')}
                                 label='Localidad de Origen'
+                                onChange={(e) => sendDataToBackend("origin_location", e?.id || -1)}
                             />
 
                         </Grid>
@@ -175,7 +180,8 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 control={control}
                                 name='driver'
                                 placeholder='Conductor'
-                                driver={watch('driver')}
+                                driver={watch('driver') || undefined}
+                                onChange={e => sendDataToBackend("driver", e?.id)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -187,6 +193,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('documentNumber')}
+                                onBlur={e => sendDataToBackend("input_document_number", e.target.value)}
                             />
                         </Grid>
                         
@@ -199,9 +206,22 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('transferNumber')}
+                                onBlur={e => sendDataToBackend("transfer_number", e.target.value)}
                             />
                         </Grid>
-                       
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+                                id="outlined-basic"
+                                label="N° de Doc. Salida"
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                {...register('documentNumberExit')}
+                                onBlur={e => sendDataToBackend("output_document_number", e.target.value)}
+                            />
+                        </Grid>
+
                     </Grid>
                 </Grid>
 
@@ -220,7 +240,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <Divider />
                             <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
                                 {
-                                    tiempoEntrada &&
+                                    tiempoEntrada && tiempoEntrada !== null &&
                                     (
                                         String(tiempoEntrada.getHours()).padStart(2, '0') + ":" +
                                         String(tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
@@ -237,7 +257,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <Divider />
                             <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
                                 {
-                                    tiempoSalida &&
+                                    tiempoSalida && tiempoSalida !== null &&
                                     (
                                         String(tiempoSalida.getHours()).padStart(2, '0') + ":" +
                                         String(tiempoSalida.getMinutes()).padStart(2, '0') + ":" +
@@ -254,7 +274,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             <Divider />
                             <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
                                 {
-                                    tiempoSalida && tiempoEntrada ?
+                                    tiempoSalida && tiempoEntrada && tiempoEntrada !== null ?
                                         (
                                             String(tiempoSalida.getHours() - tiempoEntrada.getHours()).padStart(2, '0') + ":" +
                                             String(tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
@@ -263,18 +283,23 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 }
                             </Typography>
                         </Grid>
+
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }} >
                             <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false}
+
                                 onClick={() => {
-                                    updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
+                                    sendDataToBackend("input_date", (new Date()).toISOString())
+                                    // updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
                                 }}>
                                 Registrar entrada
                             </Button>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
                             <Button variant="outlined" size="small" fullWidth color="error" disabled={tiempoEntrada === undefined || tiempoSalida !== undefined}
+
                                 onClick={() => {
-                                    updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
+                                    sendDataToBackend("output_date", (new Date()).toISOString())
+                                    // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
                                 }}>
                                 Registrar salida
                             </Button>
@@ -287,7 +312,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label='Operador #1'
                                 operatorId={watch('opm1')}
                                 invalidId={watch('opm2')}
-
+                                onChange={e => sendDataToBackend("operator_1", e?.id || 0)}
                             />
                         </Grid>
                         <Grid item xs={12} >
@@ -298,7 +323,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label='Operador #2'
                                 operatorId={watch('opm2')}
                                 invalidId={watch('opm1')}
-
+                                onChange={e => sendDataToBackend("operator_2", e?.id || 0)}
                             />
                         </Grid>
                        
@@ -351,7 +376,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     {
                                         seguimiento?.detalles.map((detalle, index) => {
                                             return (
-                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} />
+                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice}/>
                                             )
                                         })
                                     }
@@ -396,6 +421,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 placeholder='Localidad de Envío'
                                 locationId={watch('outputLocation')}
                                 label='Localidad de Envío'
+                                onChange={e => sendDataToBackend("destination_location", e?.id)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -404,9 +430,9 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 name='outputType'
                                 placeholder='Unidad Cargada con'
                                 options={outputType.map((d) => ({ label: d.name, id: d.id.toString() }))}
+                                onChange={e => sendDataToBackend("output_type", e)}
                             />
                         </Grid>
-
                         {
                             outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
                             <>
@@ -424,27 +450,21 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 <OutPutDetail seguimiento={seguimiento} />
 
                             </>
-
                         }
                     </Grid>
-
                 </Grid>
-
-
-
             </Grid>
-
         </>
     )
 }
 
-function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number }) {
+function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number }) {
     const { row } = props;
     const [open, setOpen] = useState(false);
     const dispatch = useAppDispatch()
     const handleClickAgregar = () => {
         dispatch(addDetalleCargaPallet({
-            segIndex: props.seguimiento.id - 1,
+            segIndex: props.indexSeguimiento,
             detalleIndex: props.index, id: 1,
             pallets: 0, date: new Date(),
             amount: 0
@@ -460,7 +480,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
         }
         dispatch(updateDetalleCargaPallet({
             ...prev,
-            segIndex: props.seguimiento.id - 1,
+            segIndex: props.indexSeguimiento,
             paletIndex: datos.palletIndex,
             ...datos,
             detalleIndex: props.index,
@@ -471,7 +491,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
         const detalle = props.seguimiento.detalles[props.index]
         if (!detalle) return;
         dispatch(removeDetalleCargaPallet({
-            segIndex: props.seguimiento.id - 1,
+            segIndex: props.indexSeguimiento,
             paletIndex: datos.palletIndex,
             detalleIndex: props.index,
         }))
@@ -593,7 +613,7 @@ interface HistoryRowProps {
 const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento }) => {
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
-    
+
     const onclickPrint = () => {
         const red = [];
         const max = (historyRow.pallets || 0)
@@ -602,15 +622,16 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 pallet={{
                     numeroSap: +detalle.sap_code,
                     rastra: seguimiento.rastra.code,
-                    nDocEntrada: seguimiento.data?.documentNumber || 0,
+                    nDocEntrada: seguimiento.documentNumber || 0,
                     fechaVencimiento: historyRow.date,
                     nPallets: historyRow.pallets || 0,
                     cajasPallet: detalle.boxes_pre_pallet,
-                    origen: seguimiento.data?.originLocation?.toString() || "",
+                    // es solo el id debe ser texto lo que se muestra
+                    origen: seguimiento.originLocation?.toString() || "",
                     trimestre: "A",
                     trackingId: seguimiento.id,
-                    detalle_pallet_id: historyRow.id||0,
-                    tracker_detail: detalle.id,
+                    detalle_pallet_id: historyRow.id || 0,
+                    tracker_detail: detalle.id
                 }} />)
             if (((i + 1) % 2 === 0) && (i + 1 < max)) {
                 red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
