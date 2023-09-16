@@ -3,7 +3,7 @@ import { AddDetalleBody, AddDetalleData, CreateTrackingBody, Tracker, TrackerDet
 import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addSeguimiento, setLoading, updateSeguimiento } from './seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addSeguimiento, setLoading, setSeguimientos, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
 
 
@@ -17,10 +17,9 @@ export const getOpenTrackings = (): AppThunk => async (dispatch, getState) => {
                 Authorization: `Bearer ${token}`
             }
         })
-        for (let i = 0; i < data.length; i++) {
-            const tracker = data[i];
-            dispatch(addSeguimiento(parseTrackerSeguimiento(tracker)))
-        }
+        const seguimientos = data.map(tracker => parseTrackerSeguimiento(tracker))
+        console.log("seguimientos", seguimientos)
+        dispatch(setSeguimientos(seguimientos))
     } catch (error) {
         toast.error('Error al cargar los trackings');
     } finally {
@@ -77,39 +76,32 @@ export const addDetalle = (index: number, data: AddDetalleData): AppThunk => asy
         if (!tracker) {
             return;
         }
+        const seguimiento = seguimientos[seguimeintoActual]
+        const detalle = seguimiento.detalles.find(detalle => detalle.sap_code === data.product.sap_code)
+        const quantityToEndpoint = + data.quantity + (detalle?.amount || 0);
         const body: AddDetalleBody = {
-            quantity: data.quantity,
+            quantity: quantityToEndpoint,
             product: data.product.id,
             tracker: tracker.id
         }
-        const { data: detail, status } = await backendApi.post<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/`, body, {
+        const { data: detail } = await backendApi.post<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/`, body, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-        if (status === 201) {
-            dispatch(addDetalleCarga({
-                //  index seguimiento
-                index: index,
-                amount: detail.quantity,
-                id: detail.id,
-                created_at: detail.created_at,
-                name: detail.product_data.name,
-                sap_code: detail.product_data.sap_code,
-                brand: detail.product_data.brand,
-                boxes_pre_pallet: detail.product_data.boxes_pre_pallet,
-                useful_life: detail.product_data.useful_life,
-                bar_code: detail.product_data.bar_code
-            }))
-        } else if (status === 200) {
-            const seguimiento = seguimientos[seguimeintoActual]
-            const detalle = seguimiento.detalles.find(detalle => detalle.sap_code === data.product.sap_code)
-            if (!detalle) return;
+        if (detalle) {
             dispatch(addDetalleCarga({
                 index: index,
                 ...detalle,
                 amount: data.quantity
             }))
+        } else {
+            dispatch(addDetalleCarga(
+                {
+                    //  index seguimiento
+                    index: index,
+                    ...parseDetail(detail),
+                }))
         }
     } catch (error) {
         toast.error('Error al cargar los trackings');

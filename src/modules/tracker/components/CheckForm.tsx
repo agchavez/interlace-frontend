@@ -506,7 +506,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                     <IconButton
                         aria-label="expand row"
                         size="small"
-                        onClick={() => dispatch(removeDetalleCarga({ segIdx: props.seguimiento.id - 1, detalleIdx: props.index }))}
+                        onClick={() => dispatch(removeDetalleCarga({ segIdx: props.indexSeguimiento, detalleIdx: props.index }))}
                     >
                         <DeleteTwoToneIcon />
                     </IconButton>
@@ -606,7 +606,8 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     trimestre: "A",
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id || 0,
-                    tracker_detail: detalle.id
+                    tracker_detail: detalle.id,
+                    nombre_producto: detalle.name
                 }} />)
             if (((i + 1) % 2 === 0) && (i + 1 < max)) {
                 red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
