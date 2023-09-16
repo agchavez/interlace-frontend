@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from 'sonner'
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
+import { LocationType } from "../../interfaces/maintenance";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -87,6 +88,7 @@ export interface Seguimiento {
     opm2?: number;
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
+    originLocationData: LocationType;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -117,6 +119,11 @@ export const seguimientoSlice = createSlice({
             state.seguimientos.push(action.payload);
             const seguimientoActualValue = state.seguimientos.length - 1;
             state.seguimeintoActual = seguimientoActualValue;
+        },
+        setSeguimientos: (state, action: PayloadAction<Seguimiento[]>) => {
+            console.log(action.payload)
+            state.seguimientos = action.payload
+            state.seguimeintoActual = 0
         },
         removeSeguimiento: (state, action: PayloadAction<number>) => {
             state.seguimientos.splice(action.payload, 1)
@@ -214,5 +221,6 @@ export const {
     removeDetalleCarga,
     addDetalleCargaSalida,
     removeDetalleCargaSalida,
-    setLoading
+    setLoading,
+    setSeguimientos
 } = seguimientoSlice.actions;

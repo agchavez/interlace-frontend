@@ -46,7 +46,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     const { handleSubmit, register, formState: { errors }, reset, setFocus, control, setValue } = useForm<FormValues>({
         defaultValues: {
             producto: null,
-            cantidad: 0
+            cantidad: null
         }
     })
     // FOcus al abrir el modal
