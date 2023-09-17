@@ -54,6 +54,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const { control, register, watch, } = useForm<CheckFormType>({
         defaultValues: {
             ...seguimiento,
+            driver: (seguimiento.driver !== null)? seguimiento.driver: undefined
         }
     });
     const tiempoEntrada = seguimiento?.timeStart
@@ -152,7 +153,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 {...register('plateNumber')}
-                                onBlur={(e) => sendDataToBackend("plate_number", e.target.value)}
+                                onBlur={(e) => sendDataToBackend("plate_number", e.target.value || null)}
                             />
                         </Grid>
                         <Grid item xs={12} md={12}>
@@ -171,7 +172,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 placeholder='Localidad de Origen'
                                 locationId={watch('originLocation')}
                                 label='Localidad de Origen'
-                                onChange={(e) => sendDataToBackend("origin_location", e?.id || -1)}
+                                onChange={(e) => sendDataToBackend("origin_location", e?.id || null)}
                             />
 
                         </Grid>
@@ -181,7 +182,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 name='driver'
                                 placeholder='Conductor'
                                 driver={watch('driver') || undefined}
-                                onChange={e => sendDataToBackend("driver", e?.id)}
+                                onChange={e => sendDataToBackend("driver", e?.id || null)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -193,7 +194,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('documentNumber')}
-                                onBlur={e => sendDataToBackend("input_document_number", e.target.value)}
+                                onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
                             />
                         </Grid>
                         
@@ -206,22 +207,9 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('transferNumber')}
-                                onBlur={e => sendDataToBackend("transfer_number", e.target.value)}
+                                onBlur={e => sendDataToBackend("transfer_number", e.target.value || null)}
                             />
                         </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="N° de Doc. Salida"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                {...register('documentNumberExit')}
-                                onBlur={e => sendDataToBackend("output_document_number", e.target.value)}
-                            />
-                        </Grid>
-
                     </Grid>
                 </Grid>
 
@@ -401,6 +389,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('documentNumberExit')}
+                                onBlur={e => sendDataToBackend("output_document_number", e.target.value || null)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -412,6 +401,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('accounted')}
+                                onBlur={e=> sendDataToBackend("accounted", e.target.value || null)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -427,7 +417,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         <Grid item xs={12} md={6}>
                             <AutoCompleteBase
                                 control={control}
-                                name='outputType'
+                                name="outputType"
                                 placeholder='Unidad Cargada con'
                                 options={outputType.map((d) => ({ label: d.name, id: d.id.toString() }))}
                                 onChange={e => sendDataToBackend("output_type", e)}
@@ -627,7 +617,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     nPallets: historyRow.pallets || 0,
                     cajasPallet: detalle.boxes_pre_pallet,
                     // es solo el id debe ser texto lo que se muestra
-                    origen: seguimiento.originLocation?.toString() || "",
+                    origen: `${seguimiento.originLocationData?.code} - ${seguimiento.originLocationData?.name}`,
                     trimestre: "A",
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id || 0,

@@ -18,7 +18,6 @@ export const getOpenTrackings = (): AppThunk => async (dispatch, getState) => {
             }
         })
         const seguimientos = data.map(tracker => parseTrackerSeguimiento(tracker))
-        console.log("seguimientos", seguimientos)
         dispatch(setSeguimientos(seguimientos))
     } catch (error) {
         toast.error('Error al cargar los trackings');
@@ -126,9 +125,11 @@ const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0) : null,
         timeEnd: tracker.output_date !== null ? new Date(tracker.output_date || 0) : null,
         driver: tracker.driver,
+        originLocationData: tracker.location_data,
+        originLocation: tracker.origin_location || undefined,
+        accounted: tracker.accounted
     }
     tracker.destination_location !== null && (seguimiento.outputLocation = tracker.destination_location);
-    tracker.origin_location !== null && (seguimiento.originLocation = tracker.origin_location);
     tracker.operator_1 !== null && (seguimiento.opm1 = tracker.operator_1);
     tracker.operator_2 !== null && (seguimiento.opm2 = tracker.operator_2);
     return seguimiento;

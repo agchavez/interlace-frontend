@@ -22,7 +22,7 @@ interface CreateCheckProps {
 
 interface FormValues {
     producto: Product | null;
-    cantidad: number;
+    cantidad: number | null;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -59,7 +59,7 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     const handleSubmitForm = (data: FormValues) => {
         if (!product) return
         dispatch(addDetalle(seguimeintoActual || 0, {
-            quantity: data.cantidad,
+            quantity: data.cantidad || 0,
             product: product
         }))
         // dispatch(addDetalleCarga({

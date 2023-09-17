@@ -1,4 +1,4 @@
-import { BaseQueryParams } from './maintenance';
+import { BaseQueryParams, LocationType } from './maintenance';
 export interface Rastra {
   id: number;
   transportista: string;
@@ -84,6 +84,7 @@ export interface Tracker {
   operator_2: number | null;
   driver: number | null;
   output_type: number;
+  location_data: LocationType | null;
 }
 
 export interface DistributorCenterData {

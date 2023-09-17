@@ -88,7 +88,8 @@ export interface Seguimiento {
     opm2?: number;
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
-    originLocationData: LocationType;
+    originLocationData: LocationType | null;
+    accounted: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -121,7 +122,6 @@ export const seguimientoSlice = createSlice({
             state.seguimeintoActual = seguimientoActualValue;
         },
         setSeguimientos: (state, action: PayloadAction<Seguimiento[]>) => {
-            console.log(action.payload)
             state.seguimientos = action.payload
             state.seguimeintoActual = 0
         },
