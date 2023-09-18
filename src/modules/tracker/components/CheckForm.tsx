@@ -425,7 +425,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
-                            {watch("outputType")}
                             <AutoCompleteBase
                                 control={control}
                                 name='outputType'
