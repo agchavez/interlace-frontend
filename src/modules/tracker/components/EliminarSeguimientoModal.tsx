@@ -3,7 +3,7 @@ import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTit
 import { FunctionComponent } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch } from "../../../store";
-import { removeSeguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import { removeTracking } from "../../../store/seguimiento/trackerThunk";
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -19,13 +19,14 @@ interface DeleteCheckProps {
     index: number;
     open: boolean;
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;
+    seguimientoId: number
 }
 
-export const EliminarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ open, handleClose, index }) => {
+export const EliminarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ open, handleClose, index, seguimientoId }) => {
     const dispatch = useAppDispatch()
     const handleClickDelete = () => {
         handleClose && handleClose({}, "backdropClick");
-        dispatch(removeSeguimiento(index))
+        dispatch(removeTracking(index, seguimientoId))
     }
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">

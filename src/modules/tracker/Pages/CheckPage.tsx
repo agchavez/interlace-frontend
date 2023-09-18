@@ -74,7 +74,7 @@ export const CheckPage = () => {
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
-      <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} />
+      <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id}/>
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>

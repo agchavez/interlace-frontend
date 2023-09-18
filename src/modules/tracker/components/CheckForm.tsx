@@ -9,7 +9,7 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, removeDetalleCarga, removeDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento, removeDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
@@ -22,7 +22,7 @@ import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
 import PrintComponent from '../../../utils/componentPrinter';
 import PalletPrint from './PalletPrint';
-import { addDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
+import { addDetallePallet, removeDetalle, removeDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -457,7 +457,9 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
             )
         )
     }
-    const removeProductoPallet = (datos: { palletIndex: number }): unknown => {
+    const removeProductoPallet = (datos: { palletIndex: number, id:number }): void => {
+        const {indexSeguimiento, index} = props;
+        dispatch(removeDetallePallet(indexSeguimiento, index, datos.palletIndex, datos.id))
         if (!props.seguimiento) return;
         const detalle = props.seguimiento.detalles[props.index]
         if (!detalle) return;
@@ -502,7 +504,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                     <IconButton
                         aria-label="expand row"
                         size="small"
-                        onClick={() => dispatch(removeDetalleCarga({ segIdx: props.indexSeguimiento, detalleIdx: props.index }))}
+                        onClick={() => dispatch(removeDetalle(props.indexSeguimiento, props.index, row.id ))}
                     >
                         <DeleteTwoToneIcon />
                     </IconButton>
@@ -578,6 +580,7 @@ interface HistoryRowProps {
     seguimiento: Seguimiento;
     removeProductoPallet: (datos: {
         palletIndex: number;
+        id: number
     }) => void
 }
 
@@ -662,7 +665,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
             />
         </TableCell>
         <TableCell align="right">
-            <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index })}>
+            <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index, id: historyRow.id || 0 })}>
                 <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
             <IconButton aria-label="edit" size="medium" onClick={onclickPrint}>

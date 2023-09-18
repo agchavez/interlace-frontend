@@ -3,7 +3,7 @@ import { AddDetalleBody, AddDetalleData, AddDetallePalletData, AddDetallePalletR
 import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addSeguimiento, setLoading, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
 import { format } from 'date-fns';
 
@@ -37,6 +37,7 @@ export const createTracking = (body: CreateTrackingBody): AppThunk => async (dis
             }
         })
         dispatch(addSeguimiento(parseTrackerSeguimiento(tracker)))
+        toast.success('Seguimiento creado exitosamente');
     } catch (error) {
         toast.error('Error al cargar los trackings');
     } finally {
@@ -58,7 +59,27 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
             ...parseTrackerSeguimiento(tracker)
         }))
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        toast.error('Error al actualizar el seguimiento');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeTracking = (indexSeguimiento: number, trackingId: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { status} = await backendApi.delete<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackingId}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204)
+        dispatch(removeSeguimiento(indexSeguimiento))
+        dispatch(setSeguimientoActual(0))
+        toast.success('Seguimiento eliminado');
+    } catch (error) {
+        toast.error('Error al eliminar el Seguimiento');
     } finally {
         dispatch(setLoading(false))
     }
@@ -110,6 +131,30 @@ export const addDetalle = (index: number, data: AddDetalleData): AppThunk => asy
     }
 }
 
+export const removeDetalle = (segIdx:number, detalleIdx:number, id: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos, seguimeintoActual } = getState().seguimiento;
+        if (seguimeintoActual === undefined) return;
+        if (!seguimientos) return;
+        const tracker = seguimientos[seguimeintoActual || 0]
+        if (!tracker) return;
+        const { status } = await backendApi.delete<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204) {
+            dispatch(removeDetalleCarga({segIdx, detalleIdx }))
+        }
+    } catch (error) {
+        toast.error('Error al eliminar el detale');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
 export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDetallePalletData): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
@@ -129,7 +174,7 @@ export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDe
             detalleIndex: indexDet
         }))
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        toast.error('Error al agregar');
     } finally {
         dispatch(setLoading(false))
     }
@@ -155,7 +200,33 @@ export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPal
             paletIndex: indexPallet,
         }))
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        toast.error('Error al actualizar');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeDetallePallet = (indexSeg: number, indexDet: number, indexPallet: number, id: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { status } = await backendApi.delete<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204) dispatch(removeDetalleCargaPallet({
+            segIndex: indexSeg,
+            detalleIndex: indexDet,
+            paletIndex: indexPallet,
+        }))
+        toast.error('Eliminado correctamente');
+    } catch (error) {
+        toast.error('Error al eliminar');
     } finally {
         dispatch(setLoading(false))
     }
