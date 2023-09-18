@@ -321,8 +321,8 @@ const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         transportNumber: 1,
         documentNumberExit: tracker.output_document_number,
         outputType: tracker.output_type,
-        timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0) : null,
-        timeEnd: tracker.output_date !== null ? new Date(tracker.output_date || 0) : null,
+        timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0).toISOString() : null,
+        timeEnd: tracker.output_date !== null ? new Date(tracker.output_date || 0).toISOString() : null,
         driver: tracker.driver,
         originLocationData: tracker.location_data,
         originLocation: tracker.origin_location || undefined,
@@ -355,7 +355,9 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
 const parseProductDetail = (tracker_detail: TrackerProductDetail): DetalleCargaPalet => {
     const seguimiento_detalle_pallet: DetalleCargaPalet = {
         amount: tracker_detail.quantity,
-        date: tracker_detail.expiration_date,
+
+        date: new Date(tracker_detail.expiration_date).toISOString(),
+
         id: tracker_detail.id,
         pallets: tracker_detail.quantity
     }

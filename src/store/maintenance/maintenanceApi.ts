@@ -73,6 +73,7 @@ export const maintenanceApi = createApi({
                 }
             })},
             keepUnusedDataFor: 120000
+
         }),
     })
 })

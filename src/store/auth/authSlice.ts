@@ -7,7 +7,8 @@ export type LogOutType = 'timeout' | 'logout';
 interface authInterface {
     user: User | null;
     token: string;
-    tokenExpires: Date | null;
+    expiredIn: string | null;
+    tokenExpires: number | null;
     logoutType: LogOutType | null;
     isAuthenticated: boolean;
     status: AuthStatus;
@@ -17,6 +18,7 @@ interface authInterface {
 
 const initialState: authInterface = {
     user: null,
+    expiredIn: null,
     logoutType: null,
     tokenExpires: null,
     token: localStorage.getItem('token') || '',
@@ -34,6 +36,8 @@ export const authSlice = createSlice({
             localStorage.setItem("token", action.payload.token.refresh)
             state.user = action.payload.user;
             state.token = action.payload.token.access;
+            state.tokenExpires = action.payload.token.exp;
+            state.expiredIn = new Date(action.payload.token.exp * 1000).toISOString();
             state.isAuthenticated = action.payload.user?true:false;
             state.status = "authenticated";
             state.loading = false
@@ -55,7 +59,17 @@ export const authSlice = createSlice({
         setStatus: (state, action: PayloadAction<AuthStatus>) => {
             state.status = action.payload;
             
-            }
+            },
+        setLoadingAuth: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
+        },
+        closeLogoutModal: (state) => {
+            state.openLogoutModal = false;
+        },
+        openTimeoutModal: (state) => {
+            state.openLogoutModal = true;
+            state.logoutType = 'timeout';
+        },
     }
 })
 
@@ -64,4 +78,7 @@ export const {
     logout,
     updateProfile,
     setStatus,
+    setLoadingAuth,
+    closeLogoutModal,
+    openTimeoutModal,
 } = authSlice.actions;

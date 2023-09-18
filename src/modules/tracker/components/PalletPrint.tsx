@@ -29,6 +29,8 @@ interface PalletPrintContentProps {
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
     const fechaVencimiento = new Date(pallet?.fechaVencimiento || 0)
+    const date: Date = new Date(pallet?.fechaVencimiento || "");
+
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
@@ -108,7 +110,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     <Grid item xs={12}>
                         <Typography fontSize={60} textAlign="center" fontWeight={600}>
                             {
-                                `${fechaVencimiento?.getDate()+1}-${getM(fechaVencimiento?.getMonth() || 0)}-${fechaVencimiento?.getFullYear()}`
+                                `${date.getDate()}-${getM(date.getMonth() || 0)}-${date.getFullYear()}`
                             }
                         </Typography>
                     </Grid>

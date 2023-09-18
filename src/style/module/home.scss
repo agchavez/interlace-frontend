@@ -40,6 +40,26 @@
     transition: 0.5s;
     overflow-x: hidden;
     padding-top: 1rem;
+    display: none;
+    @media screen and (min-width: ($md-breackpoint + 1)) {
+        display: flex;
+        opacity: 1;
+    }
+}
+
+.ui__sidebar_open {
+    display: flex;
+}
+
+.ui__sidebar_close {
+    display: none;
+}
+
+.ui__nav_bar__menu_button {
+    display: none;
+    @media screen and (max-width: $md-breackpoint) {
+        display: block;
+    }
 }
 .ui__container {
     display: flex;
@@ -48,8 +68,19 @@
     margin-left: 240px;
     margin-top: 3rem;
     width: calc(100vw - 270px) !important;
-    
+    @media screen and (max-width: $md-breackpoint) {
+        display: flex;
+        margin-left: 0;
+        width: 100vw !important;
+    }
 }
+
+.navbar__logo {
+    @media screen and (max-width: $sm-breackpoint) {
+        display: none !important;
+    }
+}
+
 .ui__container__auth{
     height: 100vh;
     width: 100vw;

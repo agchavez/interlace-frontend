@@ -76,7 +76,7 @@ const items: SideBarItem[] = [
     }
 ]
 
-items.forEach(item => item.subItems.forEach(sub=>sub.permissions = RoutePermissionsDirectory[sub.href || -1]))
+items.forEach(item => item.subItems.forEach(sub => sub.permissions = RoutePermissionsDirectory[sub.href || -1]))
 
 const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
     const user = useAppSelector(state => state.auth.user)
@@ -87,8 +87,8 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
         dispatch(logout())
     }
     const location = useLocation()
-    
-    const sidebarSelected = useMemo(()=>{
+
+    const sidebarSelected = useMemo(() => {
         return items.map(item => {
             const subitems = item.subItems.map(sub => {
                 sub.selected = sub.href === location.pathname;
@@ -97,14 +97,14 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
             item.subItems = subitems;
             return item;
         })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, location.pathname]);
 
     const sidebarItems = useMemo(() => {
         return sidebarSelected.map(item => {
             const subitems = item.subItems.map(sub => {
                 sub.visible = sub.permissions?.includes("any") ?
-                    true 
+                    true
                     :
                     sub.permissions?.every(perm => {
                         return user?.list_permissions.includes(perm)
@@ -120,35 +120,66 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
     }, [])
 
     return (
-        <Grid item display={open ? "flex" : "none"} xs={2} className="sidebar__root">
-            <Grid container direction="column" justifyContent="space-between">
-                <Grid>
-                    {
-                        sidebarItems.map((item) => {
-                            if (item.visible) {
-                                return (
-                                    <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
-                                )
-                            }
-                        })
-                    }
-                </Grid>
-                <Grid item container sx={{ borderTop: "1px solid #e0e0e0", padding: "0.5rem 0" }}>
-                    <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout} style={{ cursor: "pointer" }}>
-                        <Grid item xs={2} textAlign="right">
-                            <Grid container alignItems="center" justifyContent="flex-end" height="100%">
-                                <LogoutOutlinedIcon color="primary" />
+        <>
+            <Grid item xs={2} className={`sidebar__root`}>
+                <Grid container direction="column" justifyContent="space-between">
+                    <Grid>
+                        {
+                            sidebarItems.map((item) => {
+                                if (item.visible) {
+                                    return (
+                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                    )
+                                }
+                            })
+                        }
+                    </Grid>
+                    <Grid item container sx={{ borderTop: "1px solid #e0e0e0", padding: "0.5rem 0" }}>
+                        <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout} style={{ cursor: "pointer" }}>
+                            <Grid item xs={2} textAlign="right">
+                                <Grid container alignItems="center" justifyContent="flex-end" height="100%">
+                                    <LogoutOutlinedIcon color="primary" />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid item flexGrow={1}>
-                            <Typography variant="body1" component="h2" fontWeight={200} lineHeight="2rem">
-                                Cerrar sesión
-                            </Typography>
+                            <Grid item flexGrow={1}>
+                                <Typography variant="body1" component="h2" fontWeight={200} lineHeight="2rem">
+                                    Cerrar sesión
+                                </Typography>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
             </Grid>
-        </Grid>
+            <Grid item xs={2} sx={{display: open? "flex":"none"}} className={`sidebar__root ui__sidebar_open`}>
+                <Grid container direction="column" justifyContent="space-between">
+                    <Grid>
+                        {
+                            sidebarItems.map((item) => {
+                                if (item.visible) {
+                                    return (
+                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                    )
+                                }
+                            })
+                        }
+                    </Grid>
+                    <Grid item container sx={{ borderTop: "1px solid #e0e0e0", padding: "0.5rem 0" }}>
+                        <Grid container borderRadius={2} alignItems="center" className={`sidebar_item__main text_gray`} onClick={handleClickLogout} style={{ cursor: "pointer" }}>
+                            <Grid item xs={2} textAlign="right">
+                                <Grid container alignItems="center" justifyContent="flex-end" height="100%">
+                                    <LogoutOutlinedIcon color="primary" />
+                                </Grid>
+                            </Grid>
+                            <Grid item flexGrow={1}>
+                                <Typography variant="body1" component="h2" fontWeight={200} lineHeight="2rem">
+                                    Cerrar sesión
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </>
     );
 }
 

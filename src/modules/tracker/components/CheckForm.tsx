@@ -57,8 +57,8 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
             driver: (seguimiento.driver !== null) ? seguimiento.driver : undefined
         }
     });
-    const tiempoEntrada = seguimiento?.timeStart
-    const tiempoSalida = seguimiento?.timeEnd
+    const tiempoEntrada = seguimiento?.timeStart ? new Date(seguimiento?.timeStart) : null;
+    const tiempoSalida = seguimiento?.timeEnd? new Date(seguimiento?.timeEnd) : null;
 
     async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
@@ -441,6 +441,12 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 }
             )
         )
+        dispatch(addDetalleCargaPallet({
+            segIndex: props.indexSeguimiento,
+            detalleIndex: props.index, id: 1,
+            pallets: 0, date: new Date().toISOString(),
+            amount: 0
+        }))
     }
 
     const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
@@ -649,6 +655,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 size="small"
                 type="date"
                 value={date?.toISOString().split('T')[0]}
+
                 datatype='date'
                 onChange={(e) => {
                     const inputDate = new Date(e.target.value);
@@ -660,6 +667,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     const inputDate = new Date(e.target.value);
                     if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
                         updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });
+
                     }
                 }}
             />

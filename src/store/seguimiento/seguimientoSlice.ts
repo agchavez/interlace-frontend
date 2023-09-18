@@ -17,8 +17,8 @@ export interface DatosGeneralesSeguimiento {
 }
 
 export interface DatosOperador {
-    tiempoEntrada?: Date;
-    tiempoSalida?: Date;
+    tiempoEntrada?: string;
+    tiempoSalida?: string;
     opm1?: string;
     opm2?: string;
 }
@@ -83,8 +83,8 @@ export interface Seguimiento {
     transferNumber: number;
     documentNumberExit: number;
     outputType: number;
-    timeStart: Date | null;
-    timeEnd: Date | null;
+    timeStart: string | null;
+    timeEnd: string | null;
     opm1?: number;
     opm2?: number;
     detalles: DetalleCarga[]
