@@ -48,7 +48,7 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
     transportNumber: number;
     transferNumber: number;
     documentNumberExit: number;
-    outputType: number;
+    outputType: string;
     timeStart: string| null;
     timeEnd: string| null;
     opm1?: number;

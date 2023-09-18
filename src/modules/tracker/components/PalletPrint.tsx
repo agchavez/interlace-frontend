@@ -28,7 +28,6 @@ interface PalletPrintContentProps {
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
-    const fechaVencimiento = new Date(pallet?.fechaVencimiento || 0)
     const date: Date = new Date(pallet?.fechaVencimiento || "");
 
     return (

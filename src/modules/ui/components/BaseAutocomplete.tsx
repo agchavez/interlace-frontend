@@ -32,6 +32,8 @@ export const AutoCompleteBase = <
             render={({ field, fieldState: { error } }) => {
                 const {  value, ref } = field;
                 const { onChange } = field as (typeof field) & { onChange: (value: string | null) => void };
+                
+                
                 return (
                     <>
                         <Autocomplete

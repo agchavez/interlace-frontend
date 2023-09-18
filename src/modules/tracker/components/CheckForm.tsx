@@ -54,6 +54,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const { control, register, watch, } = useForm<CheckFormType>({
         defaultValues: {
             ...seguimiento,
+            outputType: seguimiento.outputType.toString(),
             driver: (seguimiento.driver !== null) ? seguimiento.driver : undefined
         }
     });
@@ -64,6 +65,10 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
 
+    console.log({
+        watch: watch('outputType')
+    });
+    
     const [openOutput, setopenOutput] = useState(false);
     return (
         <>
@@ -441,12 +446,12 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 }
             )
         )
-        dispatch(addDetalleCargaPallet({
-            segIndex: props.indexSeguimiento,
-            detalleIndex: props.index, id: 1,
-            pallets: 0, date: new Date().toISOString(),
-            amount: 0
-        }))
+        // dispatch(addDetalleCargaPallet({
+        //     segIndex: props.indexSeguimiento,
+        //     detalleIndex: props.index, id: 1,
+        //     pallets: 0, date: new Date().toISOString(),
+        //     amount: 0
+        // }))
     }
 
     const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
