@@ -1,5 +1,5 @@
 
-import { useEffect, lazy, useMemo } from 'react'
+import { useEffect, lazy, useMemo, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { PrivateRoute } from "./PrivateRoute";
 import { useAppDispatch, useAppSelector } from '../store';
@@ -111,15 +111,15 @@ export function AppRouter() {
             user?.user_permissions.includes(r_perm)
         )
     }, [location.pathname, user?.list_permissions, user?.user_permissions])
-
+    const [openMobileSidebar, setOpenMobileSidebar] = useState(false)
     if (status === 'checking') return <></>
 
     if (!permitedRoute) return <Navigate to="/"/>
 
     return <>
         <div >
-            {status === 'authenticated' && <Sidebar open={true} />}
-            <Navbar />
+            {status === 'authenticated' && <Sidebar open={openMobileSidebar} />}
+            <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
             <LogOutTimer />
             <div>
                 <div className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>

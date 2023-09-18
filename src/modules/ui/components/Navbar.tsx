@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { Grid, Tooltip, IconButton, Avatar, Typography, Menu, MenuItem, Divider, ListItemIcon } from '@mui/material';
+import { Grid, Tooltip, IconButton, Avatar, Typography, Menu, MenuItem, Divider, ListItemIcon, Button } from '@mui/material';
 import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
-
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 // import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import { useAppSelector } from '../../../store';
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
-const Navbar = () => {
-
+interface NavbarProps {
+    sidebarOpen?: boolean;
+    setSidebaOpen?: (value: boolean)=>void
+}
+const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -40,7 +44,12 @@ const Navbar = () => {
                 left: 0,
                 zIndex: 3
             }}>
-            <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'}>
+            <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
+                <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
+                    { sidebarOpen ? <CloseIcon />: <MenuIcon />}
+                </Button>
+            </Grid>
+            <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
                 {/* Logo */}
                 {/* {status == 'authenticated1' && <IconButton
                     aria-label="menu"
