@@ -255,8 +255,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             </Button>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
-                            <Button variant="outlined" size="small" fullWidth color="error" disabled={tiempoEntrada === undefined || tiempoSalida !== undefined}
-
+                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !==null)}
                                 onClick={() => {
                                     sendDataToBackend("output_date", (new Date()).toISOString())
                                     // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
