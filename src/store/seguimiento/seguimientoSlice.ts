@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toast } from 'sonner'
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
+import { LocationType } from "../../interfaces/maintenance";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -62,6 +63,7 @@ export interface DetalleCarga extends Product {
 
 export interface DetalleCargaSalida extends Product {
     amount: number;
+    idDetalle: number;
 }
 
 export interface DetalleCargaIdx extends DetalleCarga {
@@ -87,6 +89,8 @@ export interface Seguimiento {
     opm2?: number;
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
+    originLocationData: LocationType | null;
+    accounted: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -117,6 +121,10 @@ export const seguimientoSlice = createSlice({
             state.seguimientos.push(action.payload);
             const seguimientoActualValue = state.seguimientos.length - 1;
             state.seguimeintoActual = seguimientoActualValue;
+        },
+        setSeguimientos: (state, action: PayloadAction<Seguimiento[]>) => {
+            state.seguimientos = action.payload
+            state.seguimeintoActual = 0
         },
         removeSeguimiento: (state, action: PayloadAction<number>) => {
             state.seguimientos.splice(action.payload, 1)
@@ -169,18 +177,18 @@ export const seguimientoSlice = createSlice({
                 detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number }>) => {
-            const { segIndex, product, amount } = action.payload
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number }>) => {
+            const { segIndex, product, amount, idDetalle } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             if (seguimiento.detallesSalida) {
                 const index = seguimiento.detallesSalida.findIndex((det) => det.id === product.id)
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle})
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle }]
             }
             toast.success("Producto de salida agregado")
         },
@@ -214,5 +222,6 @@ export const {
     removeDetalleCarga,
     addDetalleCargaSalida,
     removeDetalleCargaSalida,
-    setLoading
+    setLoading,
+    setSeguimientos
 } = seguimientoSlice.actions;

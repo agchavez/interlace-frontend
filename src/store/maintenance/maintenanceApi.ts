@@ -71,9 +71,9 @@ export const maintenanceApi = createApi({
                     ...params,
                     id: params.id ? params.id : undefined,
                 }
-            })
-        },
-            keepUnusedDataFor: 12000
+            })},
+            keepUnusedDataFor: 120000
+
         }),
     })
 })

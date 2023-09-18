@@ -1,10 +1,11 @@
 import backendApi from '../../config/apiConfig';
-import { AddDetalleBody, AddDetalleData, CreateTrackingBody, Tracker, TrackerDetailResponse, TrackerProductDetail } from '../../interfaces/tracking';
+import { AddDetalleBody, AddDetalleData, AddDetallePalletData, AddDetallePalletResponse, AddOutProductBody, AddOutProductData, CreateTrackingBody, Tracker, TrackerDeailOutput, TrackerDetailResponse, TrackerProductDetail, UpdateDetallePalletData } from '../../interfaces/tracking';
 import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addSeguimiento, setLoading, updateSeguimiento } from './seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
+import { format } from 'date-fns';
 
 
 // listar data inicial de mantenimiento
@@ -17,10 +18,8 @@ export const getOpenTrackings = (): AppThunk => async (dispatch, getState) => {
                 Authorization: `Bearer ${token}`
             }
         })
-        for (let i = 0; i < data.length; i++) {
-            const tracker = data[i];
-            dispatch(addSeguimiento(parseTrackerSeguimiento(tracker)))
-        }
+        const seguimientos = data.map(tracker => parseTrackerSeguimiento(tracker))
+        dispatch(setSeguimientos(seguimientos))
     } catch (error) {
         toast.error('Error al cargar los trackings');
     } finally {
@@ -38,6 +37,7 @@ export const createTracking = (body: CreateTrackingBody): AppThunk => async (dis
             }
         })
         dispatch(addSeguimiento(parseTrackerSeguimiento(tracker)))
+        toast.success('Seguimiento creado exitosamente');
     } catch (error) {
         toast.error('Error al cargar los trackings');
     } finally {
@@ -59,7 +59,27 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
             ...parseTrackerSeguimiento(tracker)
         }))
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        toast.error('Error al actualizar el seguimiento');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeTracking = (indexSeguimiento: number, trackingId: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { status } = await backendApi.delete<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackingId}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204)
+            dispatch(removeSeguimiento(indexSeguimiento))
+        dispatch(setSeguimientoActual(0))
+        toast.success('Seguimiento eliminado');
+    } catch (error) {
+        toast.error('Error al eliminar el Seguimiento');
     } finally {
         dispatch(setLoading(false))
     }
@@ -77,42 +97,212 @@ export const addDetalle = (index: number, data: AddDetalleData): AppThunk => asy
         if (!tracker) {
             return;
         }
+        const seguimiento = seguimientos[seguimeintoActual]
+        const detalle = seguimiento.detalles.find(detalle => detalle.sap_code === data.product.sap_code)
+        const quantityToEndpoint = + data.quantity + (detalle?.amount || 0);
         const body: AddDetalleBody = {
-            quantity: data.quantity,
+            quantity: quantityToEndpoint,
             product: data.product.id,
             tracker: tracker.id
         }
-        const { data: detail, status } = await backendApi.post<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/`, body, {
+        const { data: detail } = await backendApi.post<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/`, body, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         })
-        if (status === 201) {
-            dispatch(addDetalleCarga({
-                //  index seguimiento
-                index: index,
-                amount: detail.quantity,
-                id: detail.id,
-                created_at: detail.created_at,
-                name: detail.product_data.name,
-                sap_code: detail.product_data.sap_code,
-                brand: detail.product_data.brand,
-                boxes_pre_pallet: detail.product_data.boxes_pre_pallet,
-                useful_life: detail.product_data.useful_life,
-                bar_code: detail.product_data.bar_code
-            }))
-        } else if (status === 200) {
-            const seguimiento = seguimientos[seguimeintoActual]
-            const detalle = seguimiento.detalles.find(detalle => detalle.sap_code === data.product.sap_code)
-            if (!detalle) return;
+        if (detalle) {
             dispatch(addDetalleCarga({
                 index: index,
                 ...detalle,
                 amount: data.quantity
             }))
+        } else {
+            dispatch(addDetalleCarga(
+                {
+                    //  index seguimiento
+                    index: index,
+                    ...parseDetail(detail),
+                }))
         }
     } catch (error) {
         toast.error('Error al cargar los trackings');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeDetalle = (segIdx: number, detalleIdx: number, id: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos, seguimeintoActual } = getState().seguimiento;
+        if (seguimeintoActual === undefined) return;
+        if (!seguimientos) return;
+        const tracker = seguimientos[seguimeintoActual || 0]
+        if (!tracker) return;
+        const { status } = await backendApi.delete<TrackerDetailResponse, AxiosResponse<TrackerDetailResponse>>(`/tracker-detail/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204) {
+            dispatch(removeDetalleCarga({ segIdx, detalleIdx }))
+        }
+    } catch (error) {
+        toast.error('Error al eliminar el detale');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDetallePalletData): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { data: detailProduct } = await backendApi.post<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        dispatch(addDetalleCargaPallet({
+            ...parseProductDetail(detailProduct),
+            segIndex: indexSeg,
+            detalleIndex: indexDet
+        }))
+    } catch (error) {
+        toast.error('Error al agregar');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPallet: number, data: UpdateDetallePalletData): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? format(data.expiration_date, "yyyy-MM-dd") : null }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        dispatch(updateDetalleCargaPallet({
+            ...parseProductDetail(detailProduct),
+            segIndex: indexSeg,
+            detalleIndex: indexDet,
+            paletIndex: indexPallet,
+        }))
+    } catch (error) {
+        toast.error('Error al actualizar');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeDetallePallet = (indexSeg: number, indexDet: number, indexPallet: number, id: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { status } = await backendApi.delete<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 204) dispatch(removeDetalleCargaPallet({
+            segIndex: indexSeg,
+            detalleIndex: indexDet,
+            paletIndex: indexPallet,
+        }))
+        toast.success('Eliminado correctamente');
+    } catch (error) {
+        toast.error('Error al eliminar');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+
+export const completeTracker = (): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token, } = getState().auth;
+        const { seguimientos, seguimeintoActual } = getState().seguimiento
+        if (seguimeintoActual === undefined) return;
+        const seguimiento = seguimientos[seguimeintoActual];
+        if (!seguimiento) return;
+        const idSeguimiento = seguimiento.id;
+        const { status } = await backendApi.post(`/tracker/${idSeguimiento}/complete/`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 200) {
+            dispatch(removeSeguimiento(seguimeintoActual))
+        }
+        toast.success("Seguimiento marcado como completado")
+    } catch (err) {
+        toast.error("Error al completar el seguimiento")
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const addOutProduct = (indexSeguimiento: number, data:AddOutProductData ): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const body: AddOutProductBody = {
+            tracker: data.tracker,
+            quantity: data.quantity,
+            product: data.product.id
+        }
+        const { status, data: trackerDetail } = await backendApi.post<TrackerDeailOutput, AxiosResponse<TrackerDeailOutput>>(`/tracker-detail-output/`, body, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status === 201) {
+            dispatch(addDetalleCargaSalida({
+                segIndex: indexSeguimiento, 
+                product:data.product, 
+                amount: data.quantity,
+                idDetalle: trackerDetail.id
+            }))
+        }
+        toast.success("Producto de salida agregado")
+    } catch (err) {
+        toast.error("Error al agregar producto de salida")
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeOutProduct = (indexSeguimiento: number, detalle:DetalleCargaSalida ): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { status } = await backendApi.delete(`/tracker-detail-output/${detalle.idDetalle}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        if (status < 400) {
+            dispatch(removeDetalleCargaSalida({segIndex: indexSeguimiento, product: detalle}))
+        }
+        toast.success("Producto de salida quitado")
+    } catch (err) {
+        toast.error("Error al eliminar producto de salida")
     } finally {
         dispatch(setLoading(false))
     }
@@ -122,7 +312,7 @@ const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
         rastra: tracker.tariler_data,
-        detalles: tracker.tracker_detail.map(det => parseDetail(det)),
+        detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
         transporter: tracker.transporter_data,
         plateNumber: tracker.plate_number,
         documentNumber: tracker.input_document_number,
@@ -134,9 +324,12 @@ const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0).toISOString() : null,
         timeEnd: tracker.output_date !== null ? new Date(tracker.output_date || 0).toISOString() : null,
         driver: tracker.driver,
+        originLocationData: tracker.location_data,
+        originLocation: tracker.origin_location || undefined,
+        accounted: tracker.accounted,
+        detallesSalida: tracker.tracker_detail_output.map(out => parseOutputDetailSalida(out))
     }
     tracker.destination_location !== null && (seguimiento.outputLocation = tracker.destination_location);
-    tracker.origin_location !== null && (seguimiento.originLocation = tracker.origin_location);
     tracker.operator_1 !== null && (seguimiento.opm1 = tracker.operator_1);
     tracker.operator_2 !== null && (seguimiento.opm2 = tracker.operator_2);
     return seguimiento;
@@ -154,7 +347,7 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
         sap_code: tracker_detail.product_data.sap_code,
         boxes_pre_pallet: tracker_detail.product_data.boxes_pre_pallet,
         useful_life: tracker_detail.product_data.useful_life,
-        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det))
+        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det)).reverse()
     }
     return seguimiento_detalle;
 }
@@ -162,11 +355,24 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
 const parseProductDetail = (tracker_detail: TrackerProductDetail): DetalleCargaPalet => {
     const seguimiento_detalle_pallet: DetalleCargaPalet = {
         amount: tracker_detail.quantity,
+
         date: new Date(tracker_detail.expiration_date).toISOString(),
+
         id: tracker_detail.id,
         pallets: tracker_detail.quantity
     }
     return seguimiento_detalle_pallet;
+}
+
+const parseOutputDetailSalida = (tracker_detail: TrackerDeailOutput): DetalleCargaSalida => {
+    const detalleSalida: DetalleCargaSalida = {
+        ...tracker_detail.product_data,
+        id: tracker_detail.id,
+        amount: tracker_detail.quantity,
+        created_at: tracker_detail.created_at,
+        idDetalle: tracker_detail.id
+    }
+    return detalleSalida;
 }
 
 // const parseSeguimientoTracker = (seguimiento: Seguimiento):Tracker  => {

@@ -22,12 +22,15 @@ interface PalletPrintContentProps {
         trackingId: number;
         detalle_pallet_id: number;
         tracker_detail: number;
+        nombre_producto: string;
     }
 }
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
+    const fechaVencimiento = new Date(pallet?.fechaVencimiento || 0)
     const date: Date = new Date(pallet?.fechaVencimiento || "");
+
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
@@ -55,8 +58,8 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Grid>
                     </Grid>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
-                        <Typography fontSize={45}>
-                            COCA COLA 500 ML PET
+                        <Typography fontSize={35}>
+                            {pallet?.nombre_producto.slice(0, 25)}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} container sx={{ textAlign: "center" }}>

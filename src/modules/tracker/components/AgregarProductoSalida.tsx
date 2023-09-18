@@ -9,9 +9,9 @@ import { FunctionComponent, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
-import { addDetalleCargaSalida } from "../../../store/seguimiento/seguimientoSlice";
 import { Product } from '../../../interfaces/tracking';
 import { ProductSelect } from "../../ui/components/ProductSelect";
+import { addOutProduct } from "../../../store/seguimiento/trackerThunk";
 
 interface CreateCheckProps {
     open: boolean;
@@ -35,7 +35,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
     const dispatch = useAppDispatch();
     const seguimeintoActual = useAppSelector(state => state.seguimiento.seguimeintoActual)
-
+    const seguimientos = useAppSelector(state => state.seguimiento.seguimientos)
     const [product, setproduct] = useState<Product | null>(null);
 
     const { handleSubmit, register, formState: { errors }, reset, control, setFocus } = useForm<FormValues>({
@@ -46,12 +46,17 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
     })
 
     const handleSubmitForm = (data: FormValues) => {
-        if (!product) return
-        dispatch(addDetalleCargaSalida({
-            product,
-            amount: data.cantidad,
-            segIndex: seguimeintoActual || 0
+        if (!product || seguimeintoActual === undefined) return
+        dispatch(addOutProduct(seguimeintoActual || 0, {
+            tracker: seguimientos[seguimeintoActual].id,
+            product: product,
+            quantity: data.cantidad
         }))
+        // dispatch(addDetalleCargaSalida({
+        //     product,
+        //     amount: data.cantidad,
+        //     segIndex: seguimeintoActual || 0
+        // }))
         reset();
         setFocus("producto")
     }

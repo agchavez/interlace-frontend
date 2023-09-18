@@ -1,4 +1,4 @@
-import { BaseQueryParams } from './maintenance';
+import { BaseQueryParams, LocationType } from './maintenance';
 export interface Rastra {
   id: number;
   transportista: string;
@@ -84,8 +84,17 @@ export interface Tracker {
   operator_2: number | null;
   driver: number | null;
   output_type: number;
+  location_data: LocationType | null;
+  tracker_detail_output: TrackerDeailOutput[]
 }
-
+export interface TrackerDeailOutput {
+  id:           number;
+  product_data: ProductData;
+  created_at:   string; 
+  quantity:     number;
+  tracker:      number;
+  product:      number;
+}
 export interface DistributorCenterData {
   id: number;
   name: string;
@@ -124,6 +133,25 @@ export interface AddDetalleData {
   product: Product
 }
 
+export interface AddDetallePalletData {
+    expiration_date: Date | null,
+    quantity: number | null,
+    tracker_detail: number | null
+}
+
+export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
+  id: number,
+  tracker_detail: number
+}
+
+export interface AddDetallePalletResponse {
+  id: number,
+  created_at: string,
+  expiration_date: string,
+  quantity: number,
+  tracker_detail: number
+}
+
 export interface TrackerDetailResponse {
   id:                     number;
   tracker_product_detail: TrackerProductDetail[];
@@ -151,4 +179,16 @@ export interface TrackerProductDetail {
   expiration_date: string;
   quantity:        number;
   tracker_detail:  number;
+}
+
+export interface AddOutProductData {
+  tracker: number;
+  product: Product;
+  quantity: number;
+}
+
+export interface AddOutProductBody {
+  tracker: number;
+  product: number;
+  quantity: number;
 }
