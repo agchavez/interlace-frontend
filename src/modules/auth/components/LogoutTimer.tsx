@@ -12,12 +12,9 @@ export const LogOutTimer = () => {
     
     useEffect(() => {
       if (!expiredIn) return;
-      console.log(expiredIn);
       const currentTime = new Date();
       const expiresInMilliseconds = new Date(expiredIn);
       const dif = differenceInMilliseconds(expiresInMilliseconds, currentTime);
-      console.log(expiresInMilliseconds); 
-        
         const interval = setInterval(() => {
             dispatch(openTimeoutModal())
             clearInterval(interval);
