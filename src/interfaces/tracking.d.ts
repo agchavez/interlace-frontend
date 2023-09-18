@@ -9,7 +9,7 @@ export interface Rastra {
 
 export interface Product {
   id: number;
-  created_at: Date;
+  created_at: string;
   name: string;
   sap_code: string;
   brand: string;
@@ -26,7 +26,7 @@ export interface ProductQuerySearch extends BaseQueryParams {
 
 export interface OutputType {
   id: number;
-  created_at_date: Date;
+  created_at_date: string;
   created_at_time: string;
   name: string;
   required_details: boolean;
@@ -43,14 +43,14 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
     plateNumber: string;
     originLocation: number;
     outputLocation: number;
-    driver?: number;
+    driver?: number | null;
     documentNumber: number;
     transportNumber: number;
     transferNumber: number;
     documentNumberExit: number;
     outputType: number;
-    timeStart: Date | null;
-    timeEnd: Date | null;
+    timeStart: string| null;
+    timeEnd: string| null;
     opm1?: number;
     opm2?: number;
     accounted: number | null;
@@ -64,7 +64,7 @@ export interface Tracker {
   distributor_center_data: DistributorCenterData;
   user_name: string;
   tracker_detail: TrackerDetailResponse[];
-  created_at: Date;
+  created_at: string;
   plate_number: string;
   input_document_number: number;
   output_document_number: number;
@@ -95,7 +95,7 @@ export interface DistributorCenterData {
 
 export interface TarilerData {
   id: number;
-  created_at: Date | null;
+  created_at: string| null;
   code: string;
 }
 
@@ -128,7 +128,7 @@ export interface TrackerDetailResponse {
   id:                     number;
   tracker_product_detail: TrackerProductDetail[];
   product_data:           ProductData;
-  created_at:             Date;
+  created_at:             string;
   quantity:               number;
   tracker:                number;
   product:                number;
@@ -147,8 +147,8 @@ export interface ProductData {
 
 export interface TrackerProductDetail {
   id:              number;
-  created_at:      Date;
-  expiration_date: Date;
+  created_at:      string;
+  expiration_date: string;
   quantity:        number;
   tracker_detail:  number;
 }

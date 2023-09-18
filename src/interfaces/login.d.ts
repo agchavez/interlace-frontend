@@ -34,11 +34,11 @@ export interface User {
     username:            string;
     is_staff:            boolean;
     is_active:           boolean;
-    date_joined:         Date | null;
+    date_joined:         string | null;
     first_name:          string;
     last_name:           string;
     email:               string;
-    created_at:          Date | null;
+    created_at:          string | null;
     groups:              number[];
     user_permissions:    string[];
 }

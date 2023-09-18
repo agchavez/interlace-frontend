@@ -14,7 +14,7 @@ interface PalletPrintContentProps {
         numeroSap: number;
         rastra: string;
         nDocEntrada: number;
-        fechaVencimiento?: Date;
+        fechaVencimiento?: string;
         nPallets: number;
         cajasPallet: number;
         origen: string;
@@ -27,6 +27,7 @@ interface PalletPrintContentProps {
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
+    const date: Date = new Date(pallet?.fechaVencimiento || "");
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
@@ -106,7 +107,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     <Grid item xs={12}>
                         <Typography fontSize={60} textAlign="center" fontWeight={600}>
                             {
-                                `${pallet?.fechaVencimiento?.getDate()}-${getM(pallet?.fechaVencimiento?.getMonth() || 0)}-${pallet?.fechaVencimiento?.getFullYear()}`
+                                `${date.getDate()}-${getM(date.getMonth() || 0)}-${date.getFullYear()}`
                             }
                         </Typography>
                     </Grid>

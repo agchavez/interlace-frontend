@@ -13,6 +13,7 @@ import Navbar from '../modules/ui/components/Navbar';
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
 import { RoutePermissionsDirectory } from '../config/directory';
+import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
@@ -119,6 +120,7 @@ export function AppRouter() {
         <div >
             {status === 'authenticated' && <Sidebar open={true} />}
             <Navbar />
+            <LogOutTimer />
             <div>
                 <div className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>
 

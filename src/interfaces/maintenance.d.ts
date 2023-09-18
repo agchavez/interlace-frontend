@@ -12,7 +12,7 @@ export interface BaseQueryParams {
 
 export interface Trailer {
     id:            number;
-    createdAtDate: Date;
+    createdAtDate: string;
     createdAtTime: string;
     code:          string;
 }
@@ -29,7 +29,7 @@ export interface TransporterQuerySearch extends BaseQueryParams {
 }
 export interface Transporter {
     id:            number;
-    createdAtDate: Date;
+    createdAtDate: string;
     createdAtTime: string;
     name:          string;
     code:          string;
@@ -47,7 +47,7 @@ export interface DistributionCenter {
 export interface Operator {
     id:                      number;
     distributor_center_name: string;
-    created_at_date:         Date;
+    created_at_date:         string;
     created_at_time:         string;
     first_name:              string;
     last_name:               string;
@@ -64,7 +64,7 @@ export interface OperatorQuerySearch extends BaseQueryParams {
 
 export interface Driver {
     id:              number;
-    created_at_date: Date;
+    created_at_date: string;
     created_at_time: string;
     first_name:      string;
     last_name:       string;
@@ -81,7 +81,7 @@ export interface DriverQuerySearch extends BaseQueryParams {
 export interface LocationType {
     id:                       number;
     distributor_center_name?: string;
-    created_at_date:          Date;
+    created_at_date:         string;
     created_at_time:          string;
     name:                     string;
     code:                     string;

@@ -56,8 +56,8 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
             ...seguimiento,
         }
     });
-    const tiempoEntrada = seguimiento?.timeStart
-    const tiempoSalida = seguimiento?.timeEnd
+    const tiempoEntrada = seguimiento?.timeStart ? new Date(seguimiento?.timeStart) : null;
+    const tiempoSalida = seguimiento?.timeEnd? new Date(seguimiento?.timeEnd) : null;
 
 
     // useEffect(() => {
@@ -466,7 +466,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
         dispatch(addDetalleCargaPallet({
             segIndex: props.indexSeguimiento,
             detalleIndex: props.index, id: 1,
-            pallets: 0, date: new Date(),
+            pallets: 0, date: new Date().toISOString(),
             amount: 0
         }))
     }
@@ -671,12 +671,12 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 id="outlined-basic"
                 size="small"
                 type="date"
-                value={historyRow.date?.toISOString().split('T')[0]}
+                value={historyRow.date?.split('T')[0]}
                 datatype='date'
                 onChange={(e) => {
                     const inputDate = new Date(e.target.value);
                     if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                        updateProductoPallet({ date: inputDate, palletIndex: index });
+                        updateProductoPallet({ date: inputDate.toISOString(), palletIndex: index });
                     }
                 }}
             />
