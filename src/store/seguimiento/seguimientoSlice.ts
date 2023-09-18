@@ -63,6 +63,7 @@ export interface DetalleCarga extends Product {
 
 export interface DetalleCargaSalida extends Product {
     amount: number;
+    idDetalle: number;
 }
 
 export interface DetalleCargaIdx extends DetalleCarga {
@@ -176,18 +177,18 @@ export const seguimientoSlice = createSlice({
                 detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number }>) => {
-            const { segIndex, product, amount } = action.payload
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number }>) => {
+            const { segIndex, product, amount, idDetalle } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             if (seguimiento.detallesSalida) {
                 const index = seguimiento.detallesSalida.findIndex((det) => det.id === product.id)
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle})
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle }]
             }
             toast.success("Producto de salida agregado")
         },

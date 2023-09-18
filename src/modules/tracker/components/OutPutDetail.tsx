@@ -1,23 +1,20 @@
 import { Grid, IconButton, Table, TableBody, TableHead, TableRow } from "@mui/material"
 import { StyledTableCell } from './CheckForm';
-import { Seguimiento, removeDetalleCargaSalida } from '../../../store/seguimiento/seguimientoSlice';
+import { DetalleCargaSalida, Seguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import { FC } from "react";
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import { Product } from '../../../interfaces/tracking';
 import { useAppDispatch, useAppSelector } from '../../../store/store';
+import { removeOutProduct } from "../../../store/seguimiento/trackerThunk";
 interface OutPutDetailProps {
     seguimiento: Seguimiento
 }
 export const OutPutDetail:FC<OutPutDetailProps> = ({seguimiento}) => {
     const seguimeintoActual = useAppSelector(state => state.seguimiento.seguimeintoActual)
     const dispatch = useAppDispatch();
-    const handleDelete = (product: Product) => {
-        dispatch(removeDetalleCargaSalida({
-            product,
-            segIndex: seguimeintoActual || 0
-        }))
+    const handleDelete = (detalle: DetalleCargaSalida) => {
+        if (seguimeintoActual === undefined) return;
+        dispatch(removeOutProduct(seguimeintoActual, detalle))
     }
-
 
     return (
         <>

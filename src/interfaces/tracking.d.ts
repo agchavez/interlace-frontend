@@ -9,7 +9,7 @@ export interface Rastra {
 
 export interface Product {
   id: number;
-  created_at: Date;
+  created_at: string;
   name: string;
   sap_code: string;
   brand: string;
@@ -85,8 +85,16 @@ export interface Tracker {
   driver: number | null;
   output_type: number;
   location_data: LocationType | null;
+  tracker_detail_output: TrackerDeailOutput[]
 }
-
+export interface TrackerDeailOutput {
+  id:           number;
+  product_data: ProductData;
+  created_at:   string; 
+  quantity:     number;
+  tracker:      number;
+  product:      number;
+}
 export interface DistributorCenterData {
   id: number;
   name: string;
@@ -148,7 +156,7 @@ export interface TrackerDetailResponse {
   id:                     number;
   tracker_product_detail: TrackerProductDetail[];
   product_data:           ProductData;
-  created_at:             Date;
+  created_at:             string;
   quantity:               number;
   tracker:                number;
   product:                number;
@@ -171,4 +179,16 @@ export interface TrackerProductDetail {
   expiration_date: string;
   quantity:        number;
   tracker_detail:  number;
+}
+
+export interface AddOutProductData {
+  tracker: number;
+  product: Product;
+  quantity: number;
+}
+
+export interface AddOutProductBody {
+  tracker: number;
+  product: number;
+  quantity: number;
 }

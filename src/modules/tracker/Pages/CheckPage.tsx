@@ -6,7 +6,7 @@ import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
 import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal';
-import { getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
+import { completeTracker, getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -71,10 +71,14 @@ export const CheckPage = () => {
     dispatch(getOpenTrackings())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleClickCompletar = () => {
+    dispatch(completeTracker())
+  }
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
-      <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id}/>
+      <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id} />
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
@@ -143,7 +147,7 @@ export const CheckPage = () => {
 
               </Grid>
               <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" color="success" size="medium" fullWidth>
+                <Button variant="contained" color="success" size="medium" fullWidth onClick={handleClickCompletar}>
                   <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
                     Completar
                   </Typography>
