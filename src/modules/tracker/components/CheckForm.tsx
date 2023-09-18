@@ -9,7 +9,7 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DetalleCarga, DetalleCargaPalet, DetalleCargaPaletIdx, Seguimiento, addDetalleCargaPallet, removeDetalleCarga, removeDetalleCargaPallet, updateDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento, removeDetalleCarga, removeDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
@@ -22,7 +22,7 @@ import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
 import PrintComponent from '../../../utils/componentPrinter';
 import PalletPrint from './PalletPrint';
-import { updateTracking } from '../../../store/seguimiento/trackerThunk';
+import { addDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -54,30 +54,11 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const { control, register, watch, } = useForm<CheckFormType>({
         defaultValues: {
             ...seguimiento,
-            driver: (seguimiento.driver !== null)? seguimiento.driver: undefined
+            driver: (seguimiento.driver !== null) ? seguimiento.driver : undefined
         }
     });
     const tiempoEntrada = seguimiento?.timeStart
     const tiempoSalida = seguimiento?.timeEnd
-
-
-    // useEffect(() => {
-    //     reset({
-    //         ...seguimiento?.data,
-    //     });
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [reset, indice]);
-
-    // Actualizar redux con los datos del formulario
-    // useEffect(() => {
-    //     const data = getValues();
-    //     dispatch(updateSeguimiento({
-    //         ...seguimiento,
-    //         data,
-    //         index: indice
-    //     }))
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [watch('documentNumber'), watch('driver'), watch('documentNumberExit'), watch('opm1'), watch('opm2'), watch('originLocation'), watch('timeEnd'), watch('timeStart'), watch('transferNumber'), watch('transportNumber'), watch('plateNumber'), watch('outputLocation'), watch('outputType')]);
 
     async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
@@ -133,11 +114,11 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                     </Card>
                 </Grid>
                 <Grid item xs={12} >
-                            <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
-                                TRK-{seguimiento.id.toString().padStart(8, '0')}
-                            </Typography>
-                        </Grid>
-                        
+                    <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
+                        TRK-{seguimiento.id.toString().padStart(8, '0')}
+                    </Typography>
+                </Grid>
+
                 <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
@@ -157,15 +138,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             />
                         </Grid>
                         <Grid item xs={12} md={12}>
-                            {/* <Autocomplete
-                                disablePortal
-                                id="combo-box-demo"
-                                value={localidades.find(loc => loc.label === seguimiento?.datos?.locEnvio)}
-                                options={localidades}
-                                getOptionLabel={(option) => option.label + ' - ' + option.code}
-                                renderInput={(params) => <TextField {...params} label="Localidad de Envío" size="small" fullWidth />}
-                                onChange={(_, v) => updateSeguimientoDatos({ locEnvio: v?.label })}
-                            /> */}
                             <LocationSelect
                                 control={control}
                                 name='originLocation'
@@ -197,7 +169,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
                             />
                         </Grid>
-                        
+
                         <Grid item xs={12} md={6}>
                             <TextField
                                 fullWidth
@@ -314,7 +286,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 onChange={e => sendDataToBackend("operator_2", e?.id || 0)}
                             />
                         </Grid>
-                       
+
                     </Grid>
                 </Grid>
                 <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
@@ -364,7 +336,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     {
                                         seguimiento?.detalles.map((detalle, index) => {
                                             return (
-                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice}/>
+                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} />
                                             )
                                         })
                                     }
@@ -380,7 +352,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Typography>
                     </Divider>
                     <Grid container spacing={1} sx={{ marginTop: 2 }}>
-                    <Grid item xs={12} md={6}>
+                        <Grid item xs={12} md={6}>
                             <TextField
                                 fullWidth
                                 id="outlined-basic"
@@ -401,7 +373,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 size="small"
                                 type="number"
                                 {...register('accounted')}
-                                onBlur={e=> sendDataToBackend("accounted", e.target.value || null)}
+                                onBlur={e => sendDataToBackend("accounted", e.target.value || null)}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -427,14 +399,14 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
                             <>
                                 <Grid item xs={12} md={6} lg={4} xl={4}>
-                                <Button variant="outlined" size="small" fullWidth color="secondary"
-                                    startIcon={<AddTwoToneIcon />} onClick={() => {
-                                        setopenOutput(true);
-                                    }
-                                    }
-                                    
+                                    <Button variant="outlined" size="small" fullWidth color="secondary"
+                                        startIcon={<AddTwoToneIcon />} onClick={() => {
+                                            setopenOutput(true);
+                                        }
+                                        }
+
                                     >
-                                       Agregar producto de salida
+                                        Agregar producto de salida
                                     </Button>
                                 </Grid>
                                 <OutPutDetail seguimiento={seguimiento} />
@@ -447,34 +419,44 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
         </>
     )
 }
+interface UpdateProductoPalletParams {
+    palletIndex: number,
+    date: Date | null,
+    pallets: number,
+    id: number
+}
 
 function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number }) {
     const { row } = props;
     const [open, setOpen] = useState(false);
     const dispatch = useAppDispatch()
     const handleClickAgregar = () => {
-        dispatch(addDetalleCargaPallet({
-            segIndex: props.indexSeguimiento,
-            detalleIndex: props.index, id: 1,
-            pallets: 0, date: new Date(),
-            amount: 0
-        }))
+        dispatch(
+            addDetallePallet(
+                props.indexSeguimiento,
+                props.index,
+                {
+                    expiration_date: null,
+                    quantity: 0,
+                    tracker_detail: row.id,
+                }
+            )
+        )
     }
-    const updateProductoPallet = (datos: DetalleCargaPaletIdx): unknown => {
-        if (!props.seguimiento) return;
-        const detalle = props.seguimiento.detalles[props.index]
-        if (!detalle) return;
-        let prev = {}
-        if (detalle.history) {
-            prev = detalle.history[datos.palletIndex]
-        }
-        dispatch(updateDetalleCargaPallet({
-            ...prev,
-            segIndex: props.indexSeguimiento,
-            paletIndex: datos.palletIndex,
-            ...datos,
-            detalleIndex: props.index,
-        }))
+
+    const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
+        dispatch(
+            updateDetallePallet(
+                props.indexSeguimiento,
+                props.index, datos.palletIndex,
+                {
+                    expiration_date: datos.date,
+                    quantity: datos.pallets,
+                    id: datos.id || 0,
+                    tracker_detail: row.id
+                }
+            )
+        )
     }
     const removeProductoPallet = (datos: { palletIndex: number }): unknown => {
         if (!props.seguimiento) return;
@@ -550,7 +532,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                     {row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0)}
                                     {" "} de {" "}
                                     {
-                                        row.amount 
+                                        row.amount
                                     }
                                 </Typography>
                             </Grid>
@@ -569,7 +551,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                     {row.history?.map((historyRow, index) => {
                                         return (
                                             <HistoryRow
-                                                key={index}
+                                                key={historyRow.id}
                                                 historyRow={historyRow}
                                                 index={index}
                                                 detalle={row}
@@ -592,18 +574,19 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
 interface HistoryRowProps {
     index: number;
     historyRow: DetalleCargaPalet;
-    updateProductoPallet: (datos: DetalleCargaPaletIdx) => unknown;
+    updateProductoPallet: (datos: UpdateProductoPalletParams) => unknown;
     detalle: DetalleCarga;
     seguimiento: Seguimiento;
     removeProductoPallet: (datos: {
         palletIndex: number;
-    }) => unknown
+    }) => void
 }
 
 const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento }) => {
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
-
+    const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
+    const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date) : new Date())
     const onclickPrint = () => {
         const red = [];
         const max = (historyRow.pallets || 0)
@@ -652,8 +635,9 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 id="outlined-basic"
                 size="small"
                 type='number'
-                value={historyRow.pallets}
-                onChange={(e) => updateProductoPallet({ pallets: +e.target.value, palletIndex: index })}
+                value={pallets}
+                onChange={e => setPallets(+e.target.value)}
+                onBlur={e => updateProductoPallet({ date: date || null, pallets: +e.target.value, palletIndex: index, id: historyRow.id || 0 })}
             />
         </TableCell>
         <TableCell component="th" scope="row" align="right">
@@ -662,12 +646,18 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 id="outlined-basic"
                 size="small"
                 type="date"
-                value={historyRow.date?.toISOString().split('T')[0]}
+                value={date?.toISOString().split('T')[0]}
                 datatype='date'
                 onChange={(e) => {
                     const inputDate = new Date(e.target.value);
                     if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                        updateProductoPallet({ date: inputDate, palletIndex: index });
+                        setDate(new Date(e.target.value))
+                    }
+                }}
+                onBlur={e => {
+                    const inputDate = new Date(e.target.value);
+                    if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
+                        updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });
                     }
                 }}
             />

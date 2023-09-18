@@ -125,6 +125,25 @@ export interface AddDetalleData {
   product: Product
 }
 
+export interface AddDetallePalletData {
+    expiration_date: Date | null,
+    quantity: number | null,
+    tracker_detail: number | null
+}
+
+export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
+  id: number,
+  tracker_detail: number
+}
+
+export interface AddDetallePalletResponse {
+  id: number,
+  created_at: string,
+  expiration_date: string,
+  quantity: number,
+  tracker_detail: number
+}
+
 export interface TrackerDetailResponse {
   id:                     number;
   tracker_product_detail: TrackerProductDetail[];
@@ -148,8 +167,8 @@ export interface ProductData {
 
 export interface TrackerProductDetail {
   id:              number;
-  created_at:      Date;
-  expiration_date: Date;
+  created_at:      string;
+  expiration_date: string;
   quantity:        number;
   tracker_detail:  number;
 }

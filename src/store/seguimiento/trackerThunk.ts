@@ -1,10 +1,11 @@
 import backendApi from '../../config/apiConfig';
-import { AddDetalleBody, AddDetalleData, CreateTrackingBody, Tracker, TrackerDetailResponse, TrackerProductDetail } from '../../interfaces/tracking';
+import { AddDetalleBody, AddDetalleData, AddDetallePalletData, AddDetallePalletResponse, CreateTrackingBody, Tracker, TrackerDetailResponse, TrackerProductDetail, UpdateDetallePalletData } from '../../interfaces/tracking';
 import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addSeguimiento, setLoading, setSeguimientos, updateSeguimiento } from './seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addSeguimiento, setLoading, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
+import { format } from 'date-fns';
 
 
 // listar data inicial de mantenimiento
@@ -109,11 +110,62 @@ export const addDetalle = (index: number, data: AddDetalleData): AppThunk => asy
     }
 }
 
+export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDetallePalletData): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { data: detailProduct } = await backendApi.post<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        dispatch(addDetalleCargaPallet({
+            ...parseProductDetail(detailProduct),
+            segIndex: indexSeg,
+            detalleIndex: indexDet
+        }))
+    } catch (error) {
+        toast.error('Error al cargar los trackings');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPallet: number, data: UpdateDetallePalletData): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos } = getState().seguimiento;
+        if (!seguimientos) return;
+        const seguimiento = seguimientos[indexSeg]
+        if (!seguimiento) return;
+        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, {...data, expiration_date: data.expiration_date ? format(data.expiration_date, "yyyy-MM-dd") : null }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        dispatch(updateDetalleCargaPallet({
+            ...parseProductDetail(detailProduct),
+            segIndex: indexSeg,
+            detalleIndex: indexDet,
+            paletIndex: indexPallet,
+        }))
+    } catch (error) {
+        toast.error('Error al cargar los trackings');
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
 const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
         rastra: tracker.tariler_data,
-        detalles: tracker.tracker_detail.map(det => parseDetail(det)),
+        detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
         transporter: tracker.transporter_data,
         plateNumber: tracker.plate_number,
         documentNumber: tracker.input_document_number,
@@ -147,7 +199,7 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
         sap_code: tracker_detail.product_data.sap_code,
         boxes_pre_pallet: tracker_detail.product_data.boxes_pre_pallet,
         useful_life: tracker_detail.product_data.useful_life,
-        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det))
+        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det)).reverse()
     }
     return seguimiento_detalle;
 }
@@ -155,7 +207,7 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
 const parseProductDetail = (tracker_detail: TrackerProductDetail): DetalleCargaPalet => {
     const seguimiento_detalle_pallet: DetalleCargaPalet = {
         amount: tracker_detail.quantity,
-        date: new Date(tracker_detail.expiration_date),
+        date: tracker_detail.expiration_date,
         id: tracker_detail.id,
         pallets: tracker_detail.quantity
     }

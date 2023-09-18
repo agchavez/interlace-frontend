@@ -26,7 +26,7 @@ export interface DatosOperador {
 export interface DetalleCargaPalet {
     id?: number;
     pallets?: number;
-    date?: Date;
+    date?: string;
     amount?: number
 }
 
