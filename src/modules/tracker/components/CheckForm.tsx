@@ -9,7 +9,7 @@ import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento, removeDetalleCargaPallet } from '../../../store/seguimiento/seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, Seguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
@@ -471,14 +471,6 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     const removeProductoPallet = (datos: { palletIndex: number, id:number }): void => {
         const {indexSeguimiento, index} = props;
         dispatch(removeDetallePallet(indexSeguimiento, index, datos.palletIndex, datos.id))
-        if (!props.seguimiento) return;
-        const detalle = props.seguimiento.detalles[props.index]
-        if (!detalle) return;
-        dispatch(removeDetalleCargaPallet({
-            segIndex: props.indexSeguimiento,
-            paletIndex: datos.palletIndex,
-            detalleIndex: props.index,
-        }))
     }
 
     const isValid = (): boolean => {
