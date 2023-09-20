@@ -31,7 +31,7 @@ export const FilterManage: FC<FilterManageProps> = ({ open, handleClose, handleF
     const { control, register, watch, setValue, getValues } = useForm<FormFilterTrack>({
         defaultValues: {
             search: manageQueryParams.search,
-            trailer: manageQueryParams.trailer? manageQueryParams.trailer[0] : undefined,
+            trailer: manageQueryParams?.trailer?.[0],
             transporter: manageQueryParams.transporter? manageQueryParams.transporter[0] : undefined,
             date_after: manageQueryParams.date_after,
             date_before: manageQueryParams.date_before,
@@ -101,7 +101,8 @@ export const FilterManage: FC<FilterManageProps> = ({ open, handleClose, handleF
             setValue('date_range', manageQueryParams.filter_date!)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, manageQueryParams])
+    }, [open])
+    
     return (
         <>
             <Drawer anchor="right" open={open} onClose={handleClose}>

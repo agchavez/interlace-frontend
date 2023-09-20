@@ -22,7 +22,10 @@ export const maintenanceApi = createApi({
             query: (params) => ({
                 url: `/trailer/`,
                 method: 'GET',
-                params
+                params: {
+                    ...params,
+                    id: params.id ? params.id : undefined,
+                }
             }),
             keepUnusedDataFor: 120000
         }),
@@ -30,7 +33,10 @@ export const maintenanceApi = createApi({
             query: (params) => ({
                 url: `/transporter/`,
                 method: 'GET',
-                params
+                params: {
+                    ...params,
+                    id: params.id ? params.id : undefined,
+                }
             }),
             keepUnusedDataFor: 120000
         }),
