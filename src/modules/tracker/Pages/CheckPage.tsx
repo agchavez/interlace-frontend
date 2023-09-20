@@ -122,7 +122,7 @@ export const CheckPage = () => {
               {
                 seguimientos.map((seguimiento, index) => {
                   return (
-                    <CustomTabPanel value={seguimeintoActual || 0} index={index}>
+                    <CustomTabPanel value={seguimeintoActual || 0} index={index} key={seguimiento.id}>
                       <CheckForm seguimiento={seguimiento} indice={index} disable={false} />
                     </CustomTabPanel>
                   )
