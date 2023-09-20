@@ -6,7 +6,8 @@ import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlice';
 import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal';
-import { completeTracker, getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
+import { getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
+import { CompletarSeguimientoModal } from '../components/CompletarSeguimientoModal';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -47,6 +48,7 @@ export const CheckPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false)
+  const [ completarOpen, setCompletarOpen ] = useState(false)
   const { seguimientos, seguimeintoActual, loading } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
 
@@ -62,6 +64,10 @@ export const CheckPage = () => {
     setEliminarOpen(false)
   }
 
+  const handleCloseCompleteModal = () => {
+    setCompletarOpen(false)
+  }
+
   const handleClickDelete = () => {
     setEliminarOpen(true);
     // seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
@@ -71,14 +77,16 @@ export const CheckPage = () => {
     dispatch(getOpenTrackings())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
+ 
   const handleClickCompletar = () => {
-    dispatch(completeTracker())
+    setCompletarOpen(true);
+    // dispatch(completeTracker())
   }
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
       <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id} />
+      <CompletarSeguimientoModal open={completarOpen} handleClose={handleCloseCompleteModal} />
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
