@@ -56,7 +56,7 @@ export function LoginForm() {
     } 
     
     return (
-        <Paper elevation={3} className="auth__papaer" sx={{ borderRadius: 5, width:{xs:"80vw", sm:"70vw", md:"50vw", lg:"40vw", xl:"30vw"} }}>
+        <Paper elevation={3} className="auth__papaer" sx={{ borderRadius: 5, width:{xs:"80vw", sm:"60vw", md:"40vw", lg:"33vw", xl:"30vw"} }}>
             <Container>
                 <Typography component="h1" variant="h5" textAlign="center">
                     Iniciar Sesión
