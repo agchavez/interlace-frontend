@@ -8,15 +8,37 @@ export interface Rastra {
 }
 
 export interface Product {
-  id: number;
-  created_at: string;
-  name: string;
-  sap_code: string;
-  brand: string;
-  boxes_pre_pallet: number;
-  useful_life: number;
-  bar_code: string;
+    id:                      number;
+    created_at:              string;
+    name:                    string;
+    sap_code:                string;
+    brand:                   string;
+    boxes_pre_pallet:        number;
+    useful_life:             number;
+    bar_code:                string;
+    standard_cost:           string;
+    pre_block:               number;
+    block:                   number;
+    pre_block_days:          number;
+    pre_block_days_next:     number;
+    block_days:              number;
+    code_feature:            string;
+    division:                string;
+    class_product:           string;
+    size:                    string;
+    packaging:               string;
+    helectrolitos:           string;
+    hl_per_unit:             string;
+    concadenated_type:       string;
+    cost:                    string;
+    description_sap:         string;
+    lib_to_ton:              string;
+    weight:                  string;
+    ton:                     string;
+    block_t1:                number;
+    days_not_accept_product: number;
 }
+
 
 export interface ProductQuerySearch extends BaseQueryParams {
   search?: string;
@@ -192,6 +214,28 @@ export interface ProductData {
   boxes_pre_pallet: number;
   useful_life:      number;
   bar_code:         string;
+  standard_cost:           string;
+  pre_block:               number;
+  block:                   number;
+  pre_block_days:          number;
+  pre_block_days_next:     number;
+  block_days:              number;
+  code_feature:            string;
+  division:                string;
+  class_product:           string;
+  size:                    string;
+  packaging:               string;
+  helectrolitos:           string;
+  hl_per_unit:             string;
+  concadenated_type:       string;
+  cost:                    string;
+  description_sap:         string;
+  lib_to_ton:              string;
+  weight:                  string;
+  ton:                     string;
+  block_t1:                number;
+  days_not_accept_product: number;
+  
 }
 
 export interface TrackerProductDetail {

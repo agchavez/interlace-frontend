@@ -351,7 +351,28 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
         sap_code: tracker_detail.product_data.sap_code,
         boxes_pre_pallet: tracker_detail.product_data.boxes_pre_pallet,
         useful_life: tracker_detail.product_data.useful_life,
-        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det)).reverse()
+        history: tracker_detail.tracker_product_detail.map(det => parseProductDetail(det)).reverse(),
+        block: tracker_detail.product_data.block,
+        block_days: tracker_detail.product_data.block_days,
+        block_t1: tracker_detail.product_data.block_t1,
+        class_product: tracker_detail.product_data.class_product,
+        code_feature: tracker_detail.product_data.code_feature,
+        concadenated_type: tracker_detail.product_data.concadenated_type,
+        cost: tracker_detail.product_data.cost,
+        days_not_accept_product: tracker_detail.product_data.days_not_accept_product,
+        description_sap: tracker_detail.product_data.description_sap,
+        division: tracker_detail.product_data.division,
+        helectrolitos: tracker_detail.product_data.helectrolitos,
+        hl_per_unit: tracker_detail.product_data.hl_per_unit,
+        lib_to_ton: tracker_detail.product_data.lib_to_ton,
+        packaging: tracker_detail.product_data.packaging,
+        pre_block: tracker_detail.product_data.pre_block,
+        pre_block_days: tracker_detail.product_data.pre_block_days,
+        pre_block_days_next: tracker_detail.product_data.pre_block_days_next,
+        size: tracker_detail.product_data.size,
+        standard_cost: tracker_detail.product_data.standard_cost,
+        ton: tracker_detail.product_data.ton,
+        weight: tracker_detail.product_data.weight
     }
     return seguimiento_detalle;
 }

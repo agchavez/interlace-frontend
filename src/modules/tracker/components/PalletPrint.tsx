@@ -2,7 +2,10 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QRCodeSVG } from 'qrcode.react';
-import { appendLeftZeros, formatDate, formatTime, getM } from '../../../utils/common';
+import { appendLeftZeros } from '../../../utils/common';
+import { format, parseISO, subDays } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 const THEME = createTheme({
     typography: {
         fontFamily: 'Bahnschrift, sans-serif', // Usa el nombre de fuente definido en @font-face o 'sans-serif' como alternativa
@@ -14,7 +17,7 @@ interface PalletPrintContentProps {
         numeroSap: number;
         rastra: string;
         nDocEntrada: number;
-        fechaVencimiento?: string;
+        fechaVencimiento: string;
         nPallets: number;
         cajasPallet: number;
         origen: string;
@@ -23,13 +26,17 @@ interface PalletPrintContentProps {
         detalle_pallet_id: number;
         tracker_detail: number;
         nombre_producto: string;
+        pre_block: number;
+        block: number;
     }
 }
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
-    const date: Date = new Date(pallet?.fechaVencimiento || "");
-
+    const parsedDate = parseISO(pallet?.fechaVencimiento.split("T")[0] || "");
+    // Evitar la conversión de fechas ponerl la fecha en formato yyyy-MM-dd
+    
+    
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
@@ -97,10 +104,10 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                                     TA
                                 </Typography>
                                 <Typography fontSize={15}>
-                                    {formatDate(new Date())}
+                                    {format(new Date(), "dd-MMM-yyyy",{ locale: es }).toUpperCase()}
                                 </Typography>
                                 <Typography fontSize={15}>
-                                    {formatTime(new Date())}
+                                    {format(new Date(), "HH:mm:ss")}
                                 </Typography>
                             </Grid>
                         </Grid>
@@ -109,7 +116,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     <Grid item xs={12}>
                         <Typography fontSize={60} textAlign="center" fontWeight={600}>
                             {
-                                `${date.getDate()}-${getM(date.getMonth() || 0)}-${date.getFullYear()}`
+                                format(parsedDate, "dd-MMM-yyyy",{ locale: es }).toUpperCase()
                             }
                         </Typography>
                     </Grid>
@@ -130,12 +137,18 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     <Grid item container xs={12}>
                         <Grid item xs={6}>
                             <Typography fontSize={30} textAlign="center" fontWeight={700}>
-                                21-NOV-2023
+                                {/* 
+                                    FECHA DE VENCIMIENTO MENOS dias de pre-bloqueo
+                                */}
+                                {format(subDays(parsedDate, pallet?.pre_block || 0), "dd-MMM-yyyy",{ locale: es }).toUpperCase()}
                             </Typography>
                         </Grid>
                         <Grid item xs={6}>
                             <Typography fontSize={30} textAlign="center" fontWeight={700}>
-                                01-DIC-2023
+                                {/*
+                                    FECHA DE VENCIMIENTO MENOS dias de bloqueo
+                                */}
+                                {format(subDays(parsedDate, pallet?.block || 0), "dd-MMM-yyyy",{ locale: es }).toUpperCase()}
                             </Typography>
                         </Grid>
                     </Grid>

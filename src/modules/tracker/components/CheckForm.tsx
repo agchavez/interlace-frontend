@@ -67,7 +67,6 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
     async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
-    
     const [openOutput, setopenOutput] = useState(false);
     return (
         <>
@@ -344,7 +343,8 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                         </Typography>
                     </Divider>
                     <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    {!disable && <> <Grid item xs={12} md={12} lg={4} xl={4}>
+                    {!disable &&
+                    <> <Grid item xs={12} md={12} lg={4} xl={4}>
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
 
@@ -352,7 +352,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                          <Grid item xs={12} md={6} lg={4} xl={4}>
                             <Button variant="outlined" size="small" fullWidth color="secondary"
                                 startIcon={<AddTwoToneIcon />}
-                                
+                                disabled={watch('originLocation') === undefined || watch('originLocation') === null || watch('transferNumber').toString() === ""}
                                 onClick={() => {
                                     setopen(true);
                                 }}
@@ -480,7 +480,7 @@ interface UpdateProductoPalletParams {
     date: Date | null,
     pallets: number,
     id: number, 
-    disable: boolean
+    disable?: boolean
 }
 
 function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number, disable: boolean }) {
@@ -508,6 +508,8 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     }
 
     const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
+        console.log(datos.date);
+        
         dispatch(
             updateDetallePallet(
                 props.indexSeguimiento,
@@ -659,7 +661,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     numeroSap: +detalle.sap_code,
                     rastra: seguimiento.rastra.code,
                     nDocEntrada: seguimiento.documentNumber || 0,
-                    fechaVencimiento: historyRow.date,
+                    fechaVencimiento: historyRow.date || new Date().toISOString(),
                     nPallets: historyRow.pallets || 0,
                     cajasPallet: detalle.boxes_pre_pallet,
                     // es solo el id debe ser texto lo que se muestra
@@ -668,7 +670,9 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id || 0,
                     tracker_detail: detalle.id,
-                    nombre_producto: detalle.name
+                    nombre_producto: detalle.name,
+                    block: detalle.block_days,
+                    pre_block: detalle.pre_block_days_next,
                 }} />)
             if (((i + 1) % 2 === 0) && (i + 1 < max)) {
                 red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
@@ -689,6 +693,8 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
             print.print()
         }
     }, [print, willPrint])
+
+    
 
     return <TableRow key={index}>
         {willPrint && print.component}
@@ -715,13 +721,29 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
 
                 datatype='date'
                 onChange={(e) => {
-                    const inputDate = new Date(e.target.value);
-                    if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                        setDate(new Date(e.target.value))
+                    // Obtén la cadena de fecha sin realizar cambios de zona horaria
+                    const inputDateStr = e.target.value;
+                    
+                    // Parsea manualmente la cadena de fecha en sus componentes (año, mes, día)
+                    const [year, month, day] = inputDateStr.split('-').map(Number);
+                    
+                    // Crea una fecha con los componentes y sin cambios de zona horaria
+                    const inputDate = new Date(year, month - 1, day);
+                
+                    if (!isNaN(inputDate.getTime())) {
+                        setDate(inputDate);
                     }
                 }}
                 onBlur={e => {
-                    const inputDate = new Date(e.target.value);
+                    const inputDateStr = e.target.value;
+                    
+                    // Parsea manualmente la cadena de fecha en sus componentes (año, mes, día)
+                    const [year, month, day] = inputDateStr.split('-').map(Number);
+                    
+                    // Crea una fecha con los componentes y sin cambios de zona horaria
+                    const inputDate = new Date(year, month - 1, day);
+                
+
                     if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
                         updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });
 
