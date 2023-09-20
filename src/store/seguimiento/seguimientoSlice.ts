@@ -74,13 +74,18 @@ export interface Seguimiento {
     id: number,
     rastra: TarilerData,
     transporter: TransporterData,
+    userName?: string;
+    completed?: string;
     plateNumber: string;
+    completed_date: string | null;
     originLocation?: number;
     outputLocation?: number;
     driver?: number| null;
     documentNumber: number;
+    status: string;
     transportNumber: number;
     transferNumber: number;
+    created_at: string;
     documentNumberExit: number;
     outputType: number;
     timeStart: string | null;

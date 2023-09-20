@@ -10,6 +10,7 @@ interface AutoCompleteBaseProps<
     control: Control<TField>;
     name: Path<TField>;
     options: O[];
+    disabled?: boolean;
     placeholder?: string;
     onChange?: (value: string | null) => void;
 }
@@ -26,6 +27,7 @@ export const AutoCompleteBase = <
         <Controller
             name={name}
             control={control}
+            
             rules={{
                 required: "Este campo es requerido",
             }}
@@ -47,6 +49,7 @@ export const AutoCompleteBase = <
                             getOptionLabel={(option) => {
                                 return option.label;
                             }}
+                            disabled={props.disabled}
                             onChange={(_, newValue) => {
                                 const resolvedId = newValue ? newValue.id : null;
                                 onChange(resolvedId);

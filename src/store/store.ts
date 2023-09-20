@@ -8,6 +8,7 @@ import { userApi } from './user/userApi';
 import { userSlice } from "./user/userSlice";
 import { maintenanceApi } from './maintenance/maintenanceApi';
 import { maintenanceSlice } from './maintenance/maintenanceSlice';
+import { trackerApi } from './seguimiento/trackerApi';
 
 export const store = configureStore({
     reducer: {
@@ -18,11 +19,13 @@ export const store = configureStore({
         [userApi.reducerPath]: userApi.reducer,
         [userSlice.name]: userSlice.reducer,
         [maintenanceApi.reducerPath]: maintenanceApi.reducer,
+        [trackerApi.reducerPath]: trackerApi.reducer
     }, 
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
         .concat(authApi.middleware)
         .concat(maintenanceApi.middleware)
+        .concat(trackerApi.middleware)
         ,
     devTools: true
 })

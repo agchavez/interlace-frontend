@@ -29,6 +29,30 @@ const permisions = [
         ]
     },
     {
+        url: "/tracker/check/:id",
+        permissions: [
+            "maintenance.view_transportermodel",
+            "maintenance.view_operatormodel",
+            "maintenance.view_locationmodel",
+            "maintenance.view_drivermodel",
+            "maintenance.view_trailermodel",
+            "maintenance.view_productmodel",
+            "maintenance.view_distributorcenter",
+        ]
+    },
+    {
+        url: "/tracker/manage",
+        permissions: [
+            "maintenance.view_transportermodel",
+            "maintenance.view_operatormodel",
+            "maintenance.view_locationmodel",
+            "maintenance.view_drivermodel",
+            "maintenance.view_trailermodel",
+            "maintenance.view_productmodel",
+            "maintenance.view_distributorcenter",
+        ]
+    },
+    {
         url: "/movimientos/crear",
         permissions: [
             "any"

@@ -308,7 +308,7 @@ export const removeOutProduct = (indexSeguimiento: number, detalle:DetalleCargaS
     }
 }
 
-const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
+export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
         rastra: tracker.tariler_data,
@@ -317,6 +317,10 @@ const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         plateNumber: tracker.plate_number,
         documentNumber: tracker.input_document_number,
         transferNumber: tracker.transfer_number,
+        created_at: tracker.created_at,
+        userName: tracker.user_name,
+        completed_date: tracker.completed_date,
+        status: tracker.status,
         // no se recibe
         transportNumber: 1,
         documentNumberExit: tracker.output_document_number,

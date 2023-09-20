@@ -6,8 +6,8 @@ export interface BaseaAPIResponse<T> {
 }
 
 export interface BaseQueryParams {
-    limit?: number;
-    offset?: number;   
+    limit: number;
+    offset: number;   
 }
 
 export interface Trailer {

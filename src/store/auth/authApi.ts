@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import { RootState } from '..'
-import { LoginResponseOk, LoginBody } from '../../interfaces/login';
+import { LoginResponseOk, LoginBody, DashboardResponse, DashboardQueryParams } from '../../interfaces/login';
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
@@ -48,7 +48,19 @@ export const authApi = createApi({
                     }
                 )
             }
-        })
+        }),
+        getdashboard: builder.query<DashboardResponse, DashboardQueryParams>({
+            query: (params) => {
+                return (
+                    {
+                        url: '/tracker/dashboard/',
+                        method: 'GET',
+                        params
+                    }
+                )
+            }
+        }),
+
     })
 })
 
@@ -56,4 +68,5 @@ export const {
     useLoginMutation,
     useRefreshTokenQuery,
     useLogoutMutation,
+    useGetdashboardQuery
 } = authApi;

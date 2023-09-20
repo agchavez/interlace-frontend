@@ -39,6 +39,7 @@ export const LogoutModal = () => {
         if (!openLogoutModal) {
             clearTimeout(timerRef.current);
             setSeconds(30);
+            
         }
 
         return () => clearTimeout(timerRef.current);

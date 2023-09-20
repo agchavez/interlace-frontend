@@ -84,9 +84,23 @@ export interface Tracker {
   operator_2: number | null;
   driver: number | null;
   output_type: number;
+  completed_date: string | null;
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[]
 }
+
+export interface TrackerQueryParams extends BaseQueryParams {
+  search?: string;
+  id?: number;
+  transporter? : number[];
+  trailer?: number[];
+  distributor_center?: number[];
+  user?: number[];
+  date_after?: string;
+  date_before?: string;
+  status?: string;
+}
+
 export interface TrackerDeailOutput {
   id:           number;
   product_data: ProductData;

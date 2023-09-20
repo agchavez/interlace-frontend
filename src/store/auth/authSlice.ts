@@ -40,7 +40,8 @@ export const authSlice = createSlice({
             state.expiredIn = new Date(action.payload.token.exp * 1000).toISOString();
             state.isAuthenticated = action.payload.user?true:false;
             state.status = "authenticated";
-            state.loading = false
+            state.loading = false;
+            state.openLogoutModal = false;
         },
         logout: (state) => {
             state.user = null
@@ -51,6 +52,7 @@ export const authSlice = createSlice({
             state.logoutType = null
             state.tokenExpires = null
             localStorage.removeItem("token")
+            state.openLogoutModal = false;
         },
         updateProfile: (state, action: PayloadAction<LoginResponseOk>) =>{
             state.user = action.payload.user;

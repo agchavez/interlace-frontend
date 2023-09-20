@@ -1,4 +1,4 @@
-import { Box, Button, Card, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
+import { Box, Button, Card, Chip, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
 import { Fragment, FunctionComponent, useEffect, useState } from 'react';
 
 // iCONS
@@ -23,6 +23,9 @@ import { OutPutDetail } from './OutPutDetail';
 import PrintComponent from '../../../utils/componentPrinter';
 import PalletPrint from './PalletPrint';
 import { addDetallePallet, removeDetalle, removeDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { format } from 'date-fns/esm';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -34,7 +37,7 @@ export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     },
 }));
 
-export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, indice: number }) => {
+export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Seguimiento, indice: number, disable: boolean }) => {
     const dispatch = useAppDispatch();
     const [open, setopen] = useState(false);
     const { outputType } = useAppSelector(state => state.maintenance);
@@ -54,7 +57,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     const { control, register, watch, } = useForm<CheckFormType>({
         defaultValues: {
             ...seguimiento,
-            outputType: seguimiento.outputType.toString(),
+            outputType: seguimiento.outputType?.toString(),
             driver: (seguimiento.driver !== null) ? seguimiento.driver : undefined
         }
     });
@@ -64,10 +67,6 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
     async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
-
-    console.log({
-        watch: watch('outputType')
-    });
     
     const [openOutput, setopenOutput] = useState(false);
     return (
@@ -81,7 +80,13 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                     }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
                             <Typography variant="h6" component="h1" fontWeight={400} color={'gray.500'}>
-                                Datos de la rastra
+                                Datos principales
+                            </Typography>
+                            <Typography>
+                                {
+                                    disable? "Revisado:": "Tiempo en revision:"
+                                }
+                                 <Chip label={formatDistanceToNow(new Date(seguimiento?.created_at), { addSuffix: true, locale: es})} />
                             </Typography>
                         </Box>
                         <Divider />
@@ -114,13 +119,45 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                         {seguimiento?.transporter.head}
                                     </Typography>
                                 </Grid>
+                               {disable && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                        Revisado por:
+                                    </Typography>
+                                    <Divider />
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
+                                        {seguimiento?.userName}
+                                    </Typography>
+                                </Grid>}
+                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                        Completado el:
+                                    </Typography>
+                                    <Divider />
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
+                                        {format(new Date(seguimiento?.completed_date), 'dd/MM/yyyy')}
+                                    </Typography>
+                                </Grid>}
+                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                        Estado:
+                                    </Typography>
+                                    <Divider />
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
+                                        <Chip
+                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : 'Incompleto'}
+                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : 'error'}
+                                            size="small"
+                                            variant="outlined"
+                                        />
+                                    </Typography>
+                                </Grid>}
                             </Grid>
                         </Box>
                     </Card>
                 </Grid>
                 <Grid item xs={12} >
                     <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
-                        TRK-{seguimiento.id.toString().padStart(8, '0')}
+                        TRK-{seguimiento.id?.toString().padStart(8, '0')}
                     </Typography>
                 </Grid>
 
@@ -138,6 +175,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label="Numero de placa"
                                 variant="outlined"
                                 size="small"
+                                disabled={disable}
                                 {...register('plateNumber')}
                                 onBlur={(e) => sendDataToBackend("plate_number", e.target.value || null)}
                             />
@@ -149,6 +187,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 placeholder='Localidad de Origen'
                                 locationId={watch('originLocation')}
                                 label='Localidad de Origen'
+                                disabled={disable}
                                 onChange={(e) => sendDataToBackend("origin_location", e?.id || null)}
                             />
 
@@ -158,6 +197,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 control={control}
                                 name='driver'
                                 placeholder='Conductor'
+                                disabled={disable}
                                 driver={watch('driver') || undefined}
                                 onChange={e => sendDataToBackend("driver", e?.id || null)}
                             />
@@ -170,6 +210,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 type="number"
+                                disabled={disable}
                                 {...register('documentNumber')}
                                 onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
                             />
@@ -182,6 +223,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 label="N° de Traslado 5001"
                                 variant="outlined"
                                 size="small"
+                                disabled={disable}
                                 type="number"
                                 {...register('transferNumber')}
                                 onBlur={e => sendDataToBackend("transfer_number", e.target.value || null)}
@@ -250,7 +292,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Grid>
 
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }} >
-                            <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false}
+                            <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false || disable}
 
                                 onClick={() => {
                                     sendDataToBackend("input_date", (new Date()).toISOString())
@@ -260,7 +302,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                             </Button>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
-                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !==null)}
+                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !==null) || disable}
                                 onClick={() => {
                                     sendDataToBackend("output_date", (new Date()).toISOString())
                                     // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
@@ -275,6 +317,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 name='opm1'
                                 label='Operador #1'
                                 operatorId={watch('opm1')}
+                                disabled={disable}
                                 invalidId={watch('opm2')}
                                 onChange={e => sendDataToBackend("operator_1", e?.id || 0)}
                             />
@@ -284,6 +327,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 control={control}
                                 distributionCenterId={centro_distribucion || null}
                                 name='opm2'
+                                disabled={disable}
                                 label='Operador #2'
                                 operatorId={watch('opm2')}
                                 invalidId={watch('opm1')}
@@ -300,14 +344,15 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                         </Typography>
                     </Divider>
                     <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                        <Grid item xs={12} md={12} lg={4} xl={4}>
+                    {!disable && <> <Grid item xs={12} md={12} lg={4} xl={4}>
                         </Grid>
                         <Grid item xs={12} md={6} lg={4} xl={4}>
 
                         </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={4}>
+                         <Grid item xs={12} md={6} lg={4} xl={4}>
                             <Button variant="outlined" size="small" fullWidth color="secondary"
                                 startIcon={<AddTwoToneIcon />}
+                                
                                 onClick={() => {
                                     setopen(true);
                                 }}
@@ -315,8 +360,10 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 Agregar producto
                             </Button>
                         </Grid>
+                        </>}
+                        
                         <Grid item xs={12}>
-                            <Table size="small" aria-label="a dense table" sx={{ marginTop: 2 }}>
+                            <Table size="small" aria-label="a dense table" >
                                 <TableHead>
                                     <TableRow>
                                         <StyledTableCell>
@@ -340,7 +387,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     {
                                         seguimiento?.detalles.map((detalle, index) => {
                                             return (
-                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} />
+                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} disable={disable} />
                                             )
                                         })
                                     }
@@ -364,6 +411,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 type="number"
+                                disabled={disable}
                                 {...register('documentNumberExit')}
                                 onBlur={e => sendDataToBackend("output_document_number", e.target.value || null)}
                             />
@@ -376,6 +424,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 variant="outlined"
                                 size="small"
                                 type="number"
+                                disabled={disable}
                                 {...register('accounted')}
                                 onBlur={e => sendDataToBackend("accounted", e.target.value || null)}
                             />
@@ -387,6 +436,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 placeholder='Localidad de Envío'
                                 locationId={watch('outputLocation')}
                                 label='Localidad de Envío'
+                                disabled={disable}
                                 onChange={e => sendDataToBackend("destination_location", e?.id)}
                             />
                         </Grid>
@@ -395,14 +445,15 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                 control={control}
                                 name="outputType"
                                 placeholder='Unidad Cargada con'
-                                options={outputType.map((d) => ({ label: d.name, id: d.id.toString() }))}
+                                disabled={disable}
+                                options={outputType.map((d) => ({ label: d.name, id: d.id?.toString() }))}
                                 onChange={e => sendDataToBackend("output_type", e)}
                             />
                         </Grid>
                         {
                             outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
                             <>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                {!disable &&<Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Button variant="outlined" size="small" fullWidth color="secondary"
                                         startIcon={<AddTwoToneIcon />} onClick={() => {
                                             setopenOutput(true);
@@ -412,7 +463,7 @@ export const CheckForm = ({ seguimiento, indice }: { seguimiento: Seguimiento, i
                                     >
                                         Agregar producto de salida
                                     </Button>
-                                </Grid>
+                                </Grid>}
                                 <OutPutDetail seguimiento={seguimiento} />
 
                             </>
@@ -427,10 +478,11 @@ interface UpdateProductoPalletParams {
     palletIndex: number,
     date: Date | null,
     pallets: number,
-    id: number
+    id: number, 
+    disable: boolean
 }
 
-function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number }) {
+function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number, disable: boolean }) {
     const { row } = props;
     const [open, setOpen] = useState(false);
     const dispatch = useAppDispatch()
@@ -510,16 +562,18 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 <TableCell align="right">
                     {row.amount}
                 </TableCell>
-                <TableCell align="right">
+                
+                {!props.disable && <TableCell align="right">
 
                     <IconButton
                         aria-label="expand row"
                         size="small"
+                        disabled={props.disable}
                         onClick={() => dispatch(removeDetalle(props.indexSeguimiento, props.index, row.id ))}
                     >
                         <DeleteTwoToneIcon />
                     </IconButton>
-                </TableCell>
+                </TableCell>}
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -531,12 +585,13 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                             <Grid item sx={{
                                 display: 'flex', justifyContent: 'space-between    ', alignItems: 'center', marginTop: 1, marginBottom: 1
                             }} xs={12}>
-                                <Button variant="outlined" size="small" color="secondary"
+                                {!props.disable && 
+                                    <Button variant="outlined" size="small" color="secondary"
                                     startIcon={<AddTwoToneIcon />}
                                     onClick={handleClickAgregar}
                                 >
                                     Agregar
-                                </Button>
+                                </Button>}
                                 <Typography variant="body1" component="h1" fontWeight={400} color={
                                     isValid() ? 'red' : 'gray.500'
                                 }>
@@ -556,7 +611,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                     <TableRow>
                                         <TableCell align="right">Pallets</TableCell>
                                         <TableCell align="right">Fecha</TableCell>
-                                        <TableCell align="right">Acciones</TableCell>
+                                        {!props.disable && <TableCell align="right">Acciones</TableCell>}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -567,6 +622,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                 historyRow={historyRow}
                                                 index={index}
                                                 detalle={row}
+                                                disable={props.disable}
                                                 seguimiento={props.seguimiento}
                                                 updateProductoPallet={updateProductoPallet}
                                                 removeProductoPallet={removeProductoPallet}
@@ -585,6 +641,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
 
 interface HistoryRowProps {
     index: number;
+    disable?: boolean;
     historyRow: DetalleCargaPalet;
     updateProductoPallet: (datos: UpdateProductoPalletParams) => unknown;
     detalle: DetalleCarga;
@@ -595,7 +652,7 @@ interface HistoryRowProps {
     }) => void
 }
 
-const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento }) => {
+const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento, disable }) => {
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
     const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
@@ -649,6 +706,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 size="small"
                 type='number'
                 value={pallets}
+                disabled={disable}
                 onChange={e => setPallets(+e.target.value)}
                 onBlur={e => updateProductoPallet({ date: date || null, pallets: +e.target.value, palletIndex: index, id: historyRow.id || 0 })}
             />
@@ -659,6 +717,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 id="outlined-basic"
                 size="small"
                 type="date"
+                disabled={disable}
                 value={date?.toISOString().split('T')[0]}
 
                 datatype='date'
@@ -677,13 +736,14 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                 }}
             />
         </TableCell>
-        <TableCell align="right">
+        {!disable &&
+            <TableCell align="right">
             <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index, id: historyRow.id || 0 })}>
                 <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
             <IconButton aria-label="edit" size="medium" onClick={onclickPrint}>
                 <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
-        </TableCell>
+        </TableCell>}
     </TableRow>
 }

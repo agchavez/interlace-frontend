@@ -48,3 +48,22 @@ export interface LoginBody {
     password: string;
 }
 
+
+export interface DashboardResponse {
+    total_trackers_completed: number;
+    total_trackers_pending:   TotalTrackersPending[];
+    time_average:             number;
+}
+
+export interface TotalTrackersPending {
+    created_at: Date;
+    status:     string;
+    id:         number;
+}
+
+
+export interface DashboardQueryParams {
+    start_date?: string;
+    end_date?:   string;
+}
+
