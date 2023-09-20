@@ -177,7 +177,7 @@ export interface AddDetalleData {
 }
 
 export interface AddDetallePalletData {
-    expiration_date: Date | null,
+    expiration_date: string | null,
     quantity: number | null,
     tracker_detail: number | null
 }

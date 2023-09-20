@@ -352,7 +352,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                          <Grid item xs={12} md={6} lg={4} xl={4}>
                             <Button variant="outlined" size="small" fullWidth color="secondary"
                                 startIcon={<AddTwoToneIcon />}
-                                disabled={watch('originLocation') === undefined || watch('originLocation') === null || watch('transferNumber').toString() === ""}
+                                disabled={watch('originLocation') === undefined || watch('originLocation') === null || watch('transferNumber')?.toString() === "" || watch('documentNumber')?.toString() === ""}
                                 onClick={() => {
                                     setopen(true);
                                 }}
@@ -493,7 +493,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 props.indexSeguimiento,
                 props.index,
                 {
-                    expiration_date: null,
+                    expiration_date: format(new Date(), 'yyyy-MM-dd'),
                     quantity: 0,
                     tracker_detail: row.id,
                 }
@@ -515,7 +515,8 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                 props.indexSeguimiento,
                 props.index, datos.palletIndex,
                 {
-                    expiration_date: datos.date,
+                    expiration_date: format(datos.date || new Date(), 'yyyy-MM-dd'),
+
                     quantity: datos.pallets,
                     id: datos.id || 0,
                     tracker_detail: row.id
@@ -651,7 +652,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
     const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
-    const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date) : new Date())
+    const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date.split('T')[0]) : undefined)
     const onclickPrint = () => {
         const red = [];
         const max = (historyRow.pallets || 0)
@@ -721,28 +722,13 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
 
                 datatype='date'
                 onChange={(e) => {
-                    // Obtén la cadena de fecha sin realizar cambios de zona horaria
-                    const inputDateStr = e.target.value;
-                    
-                    // Parsea manualmente la cadena de fecha en sus componentes (año, mes, día)
-                    const [year, month, day] = inputDateStr.split('-').map(Number);
-                    
-                    // Crea una fecha con los componentes y sin cambios de zona horaria
-                    const inputDate = new Date(year, month - 1, day);
-                
+                    const inputDate = new Date(e.target.value + 'T00:00:00');
                     if (!isNaN(inputDate.getTime())) {
                         setDate(inputDate);
                     }
                 }}
                 onBlur={e => {
-                    const inputDateStr = e.target.value;
-                    
-                    // Parsea manualmente la cadena de fecha en sus componentes (año, mes, día)
-                    const [year, month, day] = inputDateStr.split('-').map(Number);
-                    
-                    // Crea una fecha con los componentes y sin cambios de zona horaria
-                    const inputDate = new Date(year, month - 1, day);
-                
+                    const inputDate = new Date(e.target.value + 'T00:00:00');
 
                     if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
                         updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });

@@ -5,7 +5,6 @@ import { AppThunk } from '../store';
 import { toast } from 'sonner';
 import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
-import { format } from 'date-fns';
 
 
 // listar data inicial de mantenimiento
@@ -188,7 +187,7 @@ export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPal
         if (!seguimientos) return;
         const seguimiento = seguimientos[indexSeg]
         if (!seguimiento) return;
-        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? format(data.expiration_date, "yyyy-MM-dd") : null }, {
+        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? data.expiration_date : null }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
