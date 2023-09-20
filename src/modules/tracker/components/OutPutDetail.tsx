@@ -6,9 +6,10 @@ import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { removeOutProduct } from "../../../store/seguimiento/trackerThunk";
 interface OutPutDetailProps {
-    seguimiento: Seguimiento
+    seguimiento: Seguimiento,
+    disable?: boolean
 }
-export const OutPutDetail:FC<OutPutDetailProps> = ({seguimiento}) => {
+export const OutPutDetail:FC<OutPutDetailProps> = ({seguimiento, disable}) => {
     const seguimeintoActual = useAppSelector(state => state.seguimiento.seguimeintoActual)
     const dispatch = useAppDispatch();
     const handleDelete = (detalle: DetalleCargaSalida) => {
@@ -31,9 +32,10 @@ export const OutPutDetail:FC<OutPutDetailProps> = ({seguimiento}) => {
                             <StyledTableCell align="left">
                                 Cantidad
                             </StyledTableCell>
-                            <StyledTableCell align="right">
+                            {!disable &&
+                                <StyledTableCell align="right">
                                 Acciones
-                            </StyledTableCell>
+                            </StyledTableCell>}
 
                         </TableRow>
                     </TableHead>
@@ -53,13 +55,14 @@ export const OutPutDetail:FC<OutPutDetailProps> = ({seguimiento}) => {
                                     <StyledTableCell align="left">
                                         {detalle.amount}
                                     </StyledTableCell>
-                                    <StyledTableCell align="right">
+                                    {!disable &&
+                                        <StyledTableCell align="right">
                                         <IconButton aria-label="delete" size="small" onClick={() => handleDelete(detalle)}>
                                             {/* <DeleteIcon fontSize="inherit" /> */}
                                             <DeleteTwoToneIcon fontSize="inherit" />
                                         </IconButton>
 
-                                    </StyledTableCell>
+                                    </StyledTableCell>}
                                 </TableRow>
                             ))
 

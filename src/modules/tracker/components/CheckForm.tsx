@@ -378,9 +378,10 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         <StyledTableCell align="right">
                                             Total pallets
                                         </StyledTableCell>
-                                        <StyledTableCell align="right">
+                                        { !disable &&
+                                            <StyledTableCell align="right">
                                             Acciones
-                                        </StyledTableCell>
+                                        </StyledTableCell>}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -464,7 +465,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         Agregar producto de salida
                                     </Button>
                                 </Grid>}
-                                <OutPutDetail seguimiento={seguimiento} />
+                                <OutPutDetail seguimiento={seguimiento} disable={disable} />
 
                             </>
                         }

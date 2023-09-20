@@ -39,7 +39,7 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 
 
 
-  interface CheckFormType {
+  export interface CheckFormType {
     plateNumber: string;
     originLocation: number;
     outputLocation: number;
@@ -89,6 +89,12 @@ export interface Tracker {
   tracker_detail_output: TrackerDeailOutput[]
 }
 
+export enum FilterDate {
+  TODAY = 'Hoy',
+  WEEK = 'Esta semana',
+  MONTH = 'Este mes',
+  YEAR = 'Este año',
+}
 export interface TrackerQueryParams extends BaseQueryParams {
   search?: string;
   id?: number;
@@ -99,6 +105,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   date_after?: string;
   date_before?: string;
   status?: string;
+  filter_date?: FilterDate;
 }
 
 export interface TrackerDeailOutput {
@@ -206,3 +213,4 @@ export interface AddOutProductBody {
   product: number;
   quantity: number;
 }
+

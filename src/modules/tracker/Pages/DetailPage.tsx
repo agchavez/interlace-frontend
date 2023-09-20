@@ -14,10 +14,6 @@ export const DetailPage = () => {
             skip: !id
         }
     );
-    console.log(data);
-    
-
-
     if(isLoading) return <div>Cargando...</div>
     if(error || !data) return <Navigate to="/tracker/manage" />
 

@@ -55,7 +55,10 @@ export const authApi = createApi({
                     {
                         url: '/tracker/dashboard/',
                         method: 'GET',
-                        params
+                        params: {
+                            date_after: params.start_date,
+                            date_before: params.end_date
+                        }
                     }
                 )
             }
