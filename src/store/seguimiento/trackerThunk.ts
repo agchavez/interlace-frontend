@@ -4,8 +4,9 @@ import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
 import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { format } from 'date-fns';
+import { ErrorApiResponse } from '../../interfaces/api';
 
 
 // listar data inicial de mantenimiento
@@ -21,7 +22,7 @@ export const getOpenTrackings = (): AppThunk => async (dispatch, getState) => {
         const seguimientos = data.map(tracker => parseTrackerSeguimiento(tracker))
         dispatch(setSeguimientos(seguimientos))
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -39,7 +40,7 @@ export const createTracking = (body: CreateTrackingBody): AppThunk => async (dis
         dispatch(addSeguimiento(parseTrackerSeguimiento(tracker)))
         toast.success('Seguimiento creado exitosamente');
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -59,7 +60,7 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
             ...parseTrackerSeguimiento(tracker)
         }))
     } catch (error) {
-        toast.error('Error al actualizar el seguimiento');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -79,7 +80,7 @@ export const removeTracking = (indexSeguimiento: number, trackingId: number): Ap
         dispatch(setSeguimientoActual(0))
         toast.success('Seguimiento eliminado');
     } catch (error) {
-        toast.error('Error al eliminar el Seguimiento');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -125,7 +126,7 @@ export const addDetalle = (index: number, data: AddDetalleData): AppThunk => asy
                 }))
         }
     } catch (error) {
-        toast.error('Error al cargar los trackings');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -149,7 +150,7 @@ export const removeDetalle = (segIdx: number, detalleIdx: number, id: number): A
             dispatch(removeDetalleCarga({ segIdx, detalleIdx }))
         }
     } catch (error) {
-        toast.error('Error al eliminar el detale');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -174,7 +175,7 @@ export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDe
             detalleIndex: indexDet
         }))
     } catch (error) {
-        toast.error('Error al agregar');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -200,7 +201,7 @@ export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPal
             paletIndex: indexPallet,
         }))
     } catch (error) {
-        toast.error('Error al actualizar');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -226,7 +227,7 @@ export const removeDetallePallet = (indexSeg: number, indexDet: number, indexPal
         }))
         toast.success('Eliminado correctamente');
     } catch (error) {
-        toast.error('Error al eliminar');
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -251,17 +252,24 @@ export const completeTracker = (): AppThunk => async (dispatch, getState) => {
             dispatch(removeSeguimiento(seguimeintoActual))
         }
         toast.success("Seguimiento marcado como completado")
-    } catch (err) {
-        toast.error("Error al completar el seguimiento")
+    } catch (error) {
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
 }
 
-export const addOutProduct = (indexSeguimiento: number, data:AddOutProductData ): AppThunk => async (dispatch, getState) => {
+export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
+        const {seguimientos, seguimeintoActual} = getState().seguimiento
+        if(!seguimientos || seguimeintoActual === undefined) return
+        const seguimiento = seguimientos[seguimeintoActual]
+        if (seguimiento.detallesSalida?.find(d => d.sap_code === data.product.sap_code)){
+            toast.error("producto ya agregado")
+            return;
+        }
         const body: AddOutProductBody = {
             tracker: data.tracker,
             quantity: data.quantity,
@@ -274,21 +282,21 @@ export const addOutProduct = (indexSeguimiento: number, data:AddOutProductData )
         })
         if (status === 201) {
             dispatch(addDetalleCargaSalida({
-                segIndex: indexSeguimiento, 
-                product:data.product, 
+                segIndex: indexSeguimiento,
+                product: data.product,
                 amount: data.quantity,
                 idDetalle: trackerDetail.id
             }))
         }
         toast.success("Producto de salida agregado")
-    } catch (err) {
-        toast.error("Error al agregar producto de salida")
+    } catch (error) {
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
 }
 
-export const removeOutProduct = (indexSeguimiento: number, detalle:DetalleCargaSalida ): AppThunk => async (dispatch, getState) => {
+export const removeOutProduct = (indexSeguimiento: number, detalle: DetalleCargaSalida): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
@@ -298,11 +306,11 @@ export const removeOutProduct = (indexSeguimiento: number, detalle:DetalleCargaS
             }
         })
         if (status < 400) {
-            dispatch(removeDetalleCargaSalida({segIndex: indexSeguimiento, product: detalle}))
+            dispatch(removeDetalleCargaSalida({ segIndex: indexSeguimiento, product: detalle }))
         }
         toast.success("Producto de salida quitado")
-    } catch (err) {
-        toast.error("Error al eliminar producto de salida")
+    } catch (error) {
+        handleApiError(error);
     } finally {
         dispatch(setLoading(false))
     }
@@ -321,7 +329,6 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         userName: tracker.user_name,
         completed_date: tracker.completed_date,
         status: tracker.status,
-        // no se recibe
         transportNumber: 1,
         documentNumberExit: tracker.output_document_number,
         outputType: tracker.output_type,
@@ -379,21 +386,14 @@ const parseOutputDetailSalida = (tracker_detail: TrackerDeailOutput): DetalleCar
     return detalleSalida;
 }
 
-// const parseSeguimientoTracker = (seguimiento: Seguimiento):Tracker  => {
-//     return {
-//         id: seguimiento.id,
-//         tariler_data: seguimiento.rastra,
-//         tracker_detail: seguimiento.detalles,
-//         transporter_data: seguimiento.transporter,
-//         plate_number: seguimiento.plateNumber,
-//         origin_location: seguimiento.originLocation,
-//         destination_location: seguimiento.outputLocation,
-//         input_document_number: seguimiento.documentNumber,
-//         transfer_number: seguimiento.transferNumber,
-//         // no se recibe
-//         output_document_number: seguimiento.documentNumberExit,
-//         output_type: seguimiento.outputType,
-//         input_date: seguimiento.timeStart,
-//         output_date: seguimiento.timeEnd
-//     }
-// }
+const handleApiError = (error: unknown): void => {
+    if (axios.isAxiosError<ErrorApiResponse>(error)) {
+        if (error.response) {
+            const errorDetail = error.response.data.detail;
+            errorDetail.mensage && toast.error(errorDetail.mensage?.message);
+            errorDetail.non_field_errors && errorDetail.non_field_errors.forEach(e=>toast.error(e.message))
+            return;
+        }
+    }
+    toast.error("ha ocurrido un error");
+}
