@@ -1,5 +1,6 @@
 import { toast } from "sonner";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
+import { ErrorApiResponse } from "../interfaces/api";
 
 interface ErrorResponse {
     status_code: number;
@@ -78,4 +79,16 @@ export function errorApiHandler(
         console.log(error, "error");
         toast.error(mensajePersonalizado || "Ocurrio un error inesperado, contacte al administrador");
     }
+}
+
+export const handleApiError = (error: unknown): void => {
+    if (axios.isAxiosError<ErrorApiResponse>(error)) {
+        if (error.response) {
+            const errorDetail = error.response.data.detail;
+            errorDetail.mensage && toast.error(errorDetail.mensage?.message);
+            errorDetail.non_field_errors && errorDetail.non_field_errors.forEach(e=>toast.error(e.message))
+            return;
+        }
+    }
+    toast.error("Ha ocurrido un error");
 }

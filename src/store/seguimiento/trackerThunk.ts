@@ -4,9 +4,9 @@ import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
 import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import { format } from 'date-fns';
-import { ErrorApiResponse } from '../../interfaces/api';
+import { handleApiError } from '../../utils/error';
 
 
 // listar data inicial de mantenimiento
@@ -384,16 +384,4 @@ const parseOutputDetailSalida = (tracker_detail: TrackerDeailOutput): DetalleCar
         idDetalle: tracker_detail.id
     }
     return detalleSalida;
-}
-
-const handleApiError = (error: unknown): void => {
-    if (axios.isAxiosError<ErrorApiResponse>(error)) {
-        if (error.response) {
-            const errorDetail = error.response.data.detail;
-            errorDetail.mensage && toast.error(errorDetail.mensage?.message);
-            errorDetail.non_field_errors && errorDetail.non_field_errors.forEach(e=>toast.error(e.message))
-            return;
-        }
-    }
-    toast.error("ha ocurrido un error");
 }
