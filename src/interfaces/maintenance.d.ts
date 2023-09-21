@@ -138,3 +138,15 @@ export interface GroupsResponse {
     previous: Group | null;
     results:  Result[];
 }
+
+export interface Period {
+    id: number;
+    created_at: string;
+    label: "A" | "B" | "C";
+    initialDate: string;
+    finalDate: string;
+    year: number;
+    distributor_center: number;
+}
+
+export type PeriodLabel = "A" | "B" | "C"

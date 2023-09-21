@@ -2,6 +2,7 @@ import { Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QRCodeSVG } from 'qrcode.react';
+import { PeriodLabel } from '../../../interfaces/maintenance';
 import { appendLeftZeros } from '../../../utils/common';
 import { format, parseISO, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -21,7 +22,7 @@ interface PalletPrintContentProps {
         nPallets: number;
         cajasPallet: number;
         origen: string;
-        trimestre: "A" | "B" | "C" | "D";
+        periodo?: PeriodLabel;
         trackingId: number;
         detalle_pallet_id: number;
         tracker_detail: number;
@@ -49,7 +50,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     <Grid item xs={12} container padding="3pt">
                         <Grid item xs={4} sx={{ backgroundColor: "green", textAlign: "center", borderRadius: "5pt" }}>
                             <Typography component="h1" fontSize={170} color="white" fontWeight={800} lineHeight="1em">
-                                {pallet?.trimestre}
+                                {pallet?.periodo}
                             </Typography>
                         </Grid>
                         <Grid item xs={8} sx={{ textAlign: "center" }} margin="auto">

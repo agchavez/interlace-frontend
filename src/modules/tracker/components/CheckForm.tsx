@@ -652,7 +652,10 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
     const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
+
     const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date.split('T')[0]) : undefined)
+    const period = useAppSelector(state => state.maintenance.period);
+
     const onclickPrint = () => {
         const red = [];
         const max = (historyRow.pallets || 0)
@@ -667,7 +670,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     cajasPallet: detalle.boxes_pre_pallet,
                     // es solo el id debe ser texto lo que se muestra
                     origen: `${seguimiento.originLocationData?.code} - ${seguimiento.originLocationData?.name}`,
-                    trimestre: "A",
+                    periodo: period?.label,
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id || 0,
                     tracker_detail: detalle.id,

@@ -1,18 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DistributionCenter, Group } from '../../interfaces/maintenance';
+import { DistributionCenter, Group, Period } from '../../interfaces/maintenance';
 import { OutputType } from '../../interfaces/tracking';
 interface MaintenanceState {
     loading: boolean;
     disctributionCenters: DistributionCenter[];
     groups: Group[];
     outputType: OutputType[];
+    period?: Period;
 }
 
 const initialState: MaintenanceState = {
     loading: false,
     disctributionCenters: [],
     groups:[],
-    outputType: []
+    outputType: [],
 }
 
 export const maintenanceSlice = createSlice({
@@ -30,8 +31,10 @@ export const maintenanceSlice = createSlice({
         },
         setLoadingMain: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload;
-        }
-
+        },
+        setPeriod:(state, action: PayloadAction<Period>) => {
+            state.period = action.payload;
+        },
     }
 })
 
@@ -39,5 +42,6 @@ export const {
   setOutputType,
   setDistributionCenters, 
   setGroups ,
-  setLoadingMain
+  setLoadingMain,
+  setPeriod
 } = maintenanceSlice.actions;
