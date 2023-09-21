@@ -32,10 +32,17 @@ interface PalletPrintContentProps {
     }
 }
 
+const PeriodLabelColor = {
+    "A":"green",
+    "B":"#e2b714",
+    "C":"orangered"
+}
+
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
     const track = appendLeftZeros(pallet?.trackingId || 0, 9);
     const parsedDate = parseISO(pallet?.fechaVencimiento.split("T")[0] || "");
     // Evitar la conversión de fechas ponerl la fecha en formato yyyy-MM-dd
+    const bgPeriod = PeriodLabelColor[pallet?.periodo||"A"] || "green"
     
     
     return (
@@ -48,7 +55,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Typography>
                     </Grid>
                     <Grid item xs={12} container padding="3pt">
-                        <Grid item xs={4} sx={{ backgroundColor: "green", textAlign: "center", borderRadius: "5pt" }}>
+                        <Grid item xs={4} sx={{ backgroundColor: bgPeriod, textAlign: "center", borderRadius: "5pt" }}>
                             <Typography component="h1" fontSize={170} color="white" fontWeight={800} lineHeight="1em">
                                 {pallet?.periodo}
                             </Typography>
@@ -115,7 +122,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     </Grid>
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginTop: "5pt", marginBottom: "5pt" }} orientation='horizontal' />
                     <Grid item xs={12}>
-                        <Typography fontSize={60} textAlign="center" fontWeight={600}>
+                        <Typography fontSize={60} textAlign="center" fontWeight={700}>
                             {
                                 format(parsedDate, "dd-MMM-yyyy",{ locale: es }).toUpperCase()
                             }
