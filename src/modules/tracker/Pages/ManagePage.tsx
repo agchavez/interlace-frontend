@@ -6,9 +6,11 @@ import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import { format } from "date-fns/esm"
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FilterManage } from '../components/FilterManage';
+import { FilterManage, FormFilterTrack } from '../components/FilterManage';
 import { useGetTrackerQuery } from '../../../store/seguimiento/trackerApi';
 import { useAppSelector } from '../../../store';
+import { setManageQueryParams } from '../../../store/ui/uiSlice';
+import { useAppDispatch } from '../../../store/store';
 
 const tableBase = {
     localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -27,16 +29,17 @@ export const ManagePage = () => {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const {user} = useAppSelector(state => state.auth);
-    
+    const { manageQueryParams } = useAppSelector(state => state.ui);
     const [query, setquery] = useState<TrackerQueryParams>({
-        limit: parseInt(queryParams.get("limit") || "15"),
-        offset: parseInt(queryParams.get("offset") || "0"),
-        status: "COMPLETE",
-        distributor_center: user?.centro_distribucion ? [user.centro_distribucion] : undefined,
-        search: queryParams.get("search") || "",
-        trailer: queryParams.getAll("trailer").length > 0 ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer)) : undefined,
-        transporter: queryParams.getAll("transporter").length > 0 ? queryParams.getAll("transporter").map((transporter) => parseInt(transporter)) : undefined,
+        limit: parseInt(queryParams.get("limit") ||  manageQueryParams.limit.toString()),
+        offset: parseInt(queryParams.get("offset") || manageQueryParams.offset.toString()),
+        status:  manageQueryParams.status,
+        distributor_center: user?.centro_distribucion ? [user.centro_distribucion] :  manageQueryParams.distributor_center,
+        search: queryParams.get("search") || manageQueryParams.search,
+        trailer: queryParams.getAll("trailer").length > 0 ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer)) : manageQueryParams.trailer,
+        transporter: queryParams.getAll("transporter").length > 0 ? queryParams.getAll("transporter").map((transporter) => parseInt(transporter)) : manageQueryParams.transporter,
     });
     const [paginationModel, setPaginationModel] = useState<{ pageSize: number; page: number }>({
         pageSize: query.limit,
@@ -158,10 +161,25 @@ export const ManagePage = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query]);
 
+    const handleFilter = (data: FormFilterTrack) => {
+        const queryProcess = {
+            ...query,
+            search: data.search,
+            trailer: data.trailer ? [data.trailer] : undefined,
+            transporter: data.transporter ? [data.transporter] : undefined,
+            filter_date: data.date_range,
+            date_after: data.date_after,
+            date_before: data.date_before,
+        }
+        setquery(queryProcess);
+        dispatch(setManageQueryParams(queryProcess));
+    }
+
+
     const [openFilter, setopenFilter] = useState(false);
     return (
         <>
-        <FilterManage  open={openFilter}  handleClose={() => setopenFilter(false)} />
+        <FilterManage  open={openFilter}  handleClose={() => setopenFilter(false)} handleFilter={handleFilter} />
             <Container maxWidth="xl" sx={{ marginTop: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>

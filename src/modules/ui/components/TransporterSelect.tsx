@@ -1,5 +1,5 @@
 import { Controller, Control, Path } from "react-hook-form";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
@@ -38,9 +38,9 @@ props: TransporterSelectProps<TField>
     isLoading
   } = useGetTransporterQuery(query);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [query, refetch]);
+  useEffect(() => {
+    refetch();
+  }, [query, refetch]);
 
   const handleInputChange = (newInputValue: string) => {
     if (newInputValue.length > 2) {
@@ -48,9 +48,10 @@ props: TransporterSelectProps<TField>
         ...query,
         search: newInputValue
       });
-      refetch();
     }
   };
+
+
 
   return (
     <Controller

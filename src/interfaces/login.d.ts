@@ -1,3 +1,4 @@
+import { FilterDate } from './tracking';
 export interface Usuario {
     usuarioId: number;
     correo: string;
@@ -65,5 +66,6 @@ export interface TotalTrackersPending {
 export interface DashboardQueryParams {
     start_date?: string;
     end_date?:   string;
+    filterDate: FilterDate;
 }
 
