@@ -174,9 +174,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                             <Grid item xs={5}>
                                 <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
                                     imageSettings={{
-                                        src: "../../../../public/logo-qr.png",
-                                        x: undefined,
-                                        y: undefined,
+                                        src: "/public/logo-qr.png",
                                         height: 40,
                                         width: 40,
                                         excavate: true,

@@ -126,7 +126,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   user?: number[];
   date_after?: string;
   date_before?: string;
-  status?: string;
+  status?: 'COMPLETE' | 'PENDING';
   filter_date?: FilterDate;
 }
 

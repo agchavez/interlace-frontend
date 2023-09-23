@@ -1,4 +1,4 @@
-import { Container, Typography, Grid, Divider, Box, Tabs, Tab, Button } from '@mui/material';
+import { Container, Typography, Grid, Divider, Box, Tabs, Tab, Button, CircularProgress } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CheckForm } from '../components/CheckForm';
 import CreateCheckModal from '../components/CrearSeguimientoModal';
@@ -9,6 +9,7 @@ import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal
 import { getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
 import { CompletarSeguimientoModal } from '../components/CompletarSeguimientoModal';
 import FloatLoading from '../components/FloatLoading';
+import { useSearchParams } from 'react-router-dom';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -51,6 +52,8 @@ export const CheckPage = () => {
   const [completarOpen, setCompletarOpen] = useState(false)
   const { seguimientos, seguimeintoActual, loading } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
+  const [searchParams] = useSearchParams()
+  const id = searchParams.get("id");
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -82,6 +85,15 @@ export const CheckPage = () => {
     setCompletarOpen(true);
     // dispatch(completeTracker())
   }
+  useEffect(() => {
+    if (id !== null && seguimientos.length > 0) {
+      const index = seguimientos.findIndex((seguimiento) => seguimiento.id === +id);
+      if (index !== -1) {
+        dispatch(setSeguimientoActual(index))
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, seguimientos])
   return (
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
@@ -105,11 +117,16 @@ export const CheckPage = () => {
               color="secondary"
               size="small"
               fullWidth
-              startIcon={<PostAddTwoToneIcon color="inherit" fontSize="small" />}
+              disabled={loading}
+              startIcon={
+                loading ? <CircularProgress size={20} /> :
+                  <PostAddTwoToneIcon color="inherit" fontSize="small" />}
               onClick={() => setShowCreateModal(true)}
             >
               <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
-                Nueva rastra
+                {
+                  loading ? 'Cargando...' : 'Crear Seguimiento'
+                }
               </Typography>
             </Button>
           </Grid>

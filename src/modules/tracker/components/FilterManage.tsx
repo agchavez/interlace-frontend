@@ -15,7 +15,8 @@ export interface FormFilterTrack {
     transporter?: number,
     date_after: string,
     date_before: string,
-    date_range: FilterDate
+    date_range: FilterDate,
+    status: 'COMPLETE' | 'PENDING',
 }
 
 interface FilterManageProps {
@@ -35,16 +36,17 @@ export const FilterManage: FC<FilterManageProps> = ({ open, handleClose, handleF
             transporter: manageQueryParams.transporter? manageQueryParams.transporter[0] : undefined,
             date_after: manageQueryParams.date_after,
             date_before: manageQueryParams.date_before,
-            date_range: manageQueryParams.filter_date
+            date_range: manageQueryParams.filter_date,
+            status: manageQueryParams.status
         }
-    });
+    }); 
 
     useEffect(() => {
         const data = getValues()
 
         handleFilter(data)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [watch('date_after'), watch('date_before'), watch('date_range'), watch('search'), watch('trailer'), watch('transporter')])
+    }, [watch('date_after'), watch('date_before'), watch('date_range'), watch('search'), watch('trailer'), watch('transporter'), watch('status')])
 
     const handleReset = () => {
         setValue('search', '')
@@ -198,6 +200,24 @@ export const FilterManage: FC<FilterManageProps> = ({ open, handleClose, handleF
                             </FormGroup>
                         </ListItem>
 
+                    </List>
+                    <Divider />
+                    <List>
+                        <ListItem disablePadding sx={{ pl: 2 }}>
+                            <ListItemText primary={"Estado"} />
+                        </ListItem>
+                        <ListItem disablePadding sx={{ pl: 2 }}>
+                            <FormGroup>
+                                <FormControlLabel control={<Checkbox
+                                    checked={watch('status') === 'COMPLETE'}
+                                    onChange={() => setValue('status', 'COMPLETE')}
+                                />} label={<Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem"> Completado </Typography>} />
+                                <FormControlLabel control={<Checkbox
+                                    checked={watch('status') === 'PENDING'}
+                                    onChange={() => setValue('status', 'PENDING')}
+                                />} label={<Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem"> Pendiente </Typography>} />
+                            </FormGroup>
+                        </ListItem>
                     </List>
                 </Box>
             </Drawer>

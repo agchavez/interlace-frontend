@@ -32,6 +32,10 @@ export const ManagePage = () => {
     const dispatch = useAppDispatch();
     const {user} = useAppSelector(state => state.auth);
     const { manageQueryParams } = useAppSelector(state => state.ui);
+
+    const statusQueryParam = queryParams.get("status");
+    const statusManageQueryParams = manageQueryParams.status;
+      
     const [query, setquery] = useState<TrackerQueryParams>({
         limit: parseInt(queryParams.get("limit") ||  manageQueryParams.limit.toString()),
         offset: parseInt(queryParams.get("offset") || manageQueryParams.offset.toString()),
@@ -39,6 +43,9 @@ export const ManagePage = () => {
         search: queryParams.get("search") || manageQueryParams.search,
         trailer: queryParams.getAll("trailer").length > 0 ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer)) : manageQueryParams.trailer,
         transporter: queryParams.getAll("transporter").length > 0 ? queryParams.getAll("transporter").map((transporter) => parseInt(transporter)) : manageQueryParams.transporter,
+        date_after: manageQueryParams.date_after,
+        date_before: manageQueryParams.date_before,
+        status: statusQueryParam === "COMPLETE" || statusManageQueryParams === "COMPLETE" ? "COMPLETE" : statusQueryParam === "PENDING" || statusManageQueryParams === "PENDING" ? "PENDING" : undefined,
     });
     const [paginationModel, setPaginationModel] = useState<{ pageSize: number; page: number }>({
         pageSize: query.limit,
@@ -191,7 +198,7 @@ export const ManagePage = () => {
     }, [query]);
 
     const handleFilter = (data: FormFilterTrack) => {
-        const queryProcess = {
+        const queryProcess: TrackerQueryParams = {
             ...query,
             search: data.search,
             trailer: data.trailer ? [data.trailer] : undefined,
@@ -199,6 +206,7 @@ export const ManagePage = () => {
             filter_date: data.date_range,
             date_after: data.date_after,
             date_before: data.date_before,
+            status: data.status,
         }
         setquery(queryProcess);
         dispatch(setManageQueryParams(queryProcess));

@@ -12,6 +12,7 @@ import { es } from 'date-fns/locale';
 import { GridFilterListIcon } from '@mui/x-data-grid';
 import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 enum FilterDate {
     TODAY = 'Hoy',
@@ -143,6 +144,8 @@ export default function HomePage() {
         
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query])
+
+    const navigate = useNavigate();
 
     return <Container maxWidth="xl">
 
@@ -291,7 +294,7 @@ export default function HomePage() {
                                             formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })
                                         }</TableCell>
                                         <TableCell align="right">
-                                            <IconButton size="small" color="primary" aria-label="add to shopping cart">
+                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/check/?id=' + row.id)}>
                                                 <ArrowForwardIcon />
                                             </IconButton>
 
@@ -320,7 +323,7 @@ export default function HomePage() {
                         }
                     </div>
                     <Divider />
-                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />}>
+                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />} onClick={()=> navigate('/tracker/manage/?status=COMPLETE')}>
                         Ver más
                     </Button>
                 </Card>

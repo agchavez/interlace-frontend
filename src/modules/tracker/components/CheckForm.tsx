@@ -138,16 +138,17 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         {format(new Date(seguimiento?.completed_date), 'dd/MM/yyyy')}
                                     </Typography>
                                 </Grid>}
-                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                {disable && <Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Estado:
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
                                         <Chip
-                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : 'Incompleto'}
-                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : 'error'}
-                                            size="small"
+                                            sx={{ mt: 0.5 }}
+                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : 'Pendiente'}
+                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : 'warning'}
+                                            size="medium"
                                             variant="outlined"
                                         />
                                     </Typography>
@@ -176,6 +177,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 label="Numero de placa"
                                 variant="outlined"
                                 size="small"
+                                autoComplete='off'
                                 disabled={disable}
                                 {...register('plateNumber')}
                                 onBlur={(e) => sendDataToBackend("plate_number", e.target.value || null)}
