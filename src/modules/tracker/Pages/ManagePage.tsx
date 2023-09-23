@@ -1,4 +1,4 @@
-import { Button, Container, Divider, Grid, Typography, IconButton } from '@mui/material';
+import { Button, Container, Divider, Grid, Typography, IconButton, Chip } from '@mui/material';
 import { useEffect, useState } from "react"
 import { DataGrid, GridColDef, esES } from "@mui/x-data-grid"
 import { Tracker, TrackerQueryParams } from "../../../interfaces/tracking"
@@ -35,7 +35,6 @@ export const ManagePage = () => {
     const [query, setquery] = useState<TrackerQueryParams>({
         limit: parseInt(queryParams.get("limit") ||  manageQueryParams.limit.toString()),
         offset: parseInt(queryParams.get("offset") || manageQueryParams.offset.toString()),
-        status:  manageQueryParams.status,
         distributor_center: user?.centro_distribucion ? [user.centro_distribucion] :  manageQueryParams.distributor_center,
         search: queryParams.get("search") || manageQueryParams.search,
         trailer: queryParams.getAll("trailer").length > 0 ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer)) : manageQueryParams.trailer,
@@ -73,6 +72,8 @@ export const ManagePage = () => {
             field: "distributor_center_data",
             headerName: "Centro de distribución",
             flex: 1,
+            width: 170,
+            minWidth: 170,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value.name}
@@ -83,7 +84,7 @@ export const ManagePage = () => {
             field: "tariler_data",
             headerName: "Trailer",
             flex: 0,
-            width: 100,
+            width: 80,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value.code}
@@ -91,20 +92,11 @@ export const ManagePage = () => {
             }
         },
         {
-            field: "transporter_data",
-            headerName: "Transportista",
-            flex: 0,
-            width: 130,
-            renderCell: (params) => {
-                return <Typography variant="body2">
-                    {params.value.name}
-                </Typography>
-            }
-        },
-        {
             field: "input_document_number",
             headerName: "Tranferencia de entrada",
             flex: 1,
+            width: 180,
+            minWidth: 180,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value ? params.value : '-'}
@@ -112,8 +104,8 @@ export const ManagePage = () => {
             }
         },
         {
-            field: "output_document_number",
-            headerName: "Tranferencia de salida",
+            field: "transfer_number",
+            headerName: "Traslado 5001",
             flex: 1,
             renderCell: (params) => {
                 return <Typography variant="body2">
@@ -121,6 +113,43 @@ export const ManagePage = () => {
                 </Typography>
             }
 
+        },
+        {
+            field: 'output_document_number',
+            headerName: "Tranferencia de salida",
+            flex: 1,
+            width: 180,
+            minWidth: 180,
+            renderCell: (params) => {
+                return <Typography variant="body2">
+                    {params.value ? params.value : '-'}
+                </Typography>
+            }
+        },
+        {
+            field: "accounted",
+            headerName: "Contabilizado",
+            flex: 1,
+            renderCell: (params) => {
+                return <Typography variant="body2">
+                    {params.value ? params.value : '-'}
+                </Typography>
+            }
+
+        },
+        {
+            field: "status",
+            headerName: "Estado",
+            flex: 1,
+            width: 120,
+            minWidth:120,
+            renderCell: (params) => {
+                return <Chip
+                    label={params.value == 'COMPLETE'? 'Completado': 'Pendiente'}
+                    variant='outlined'
+                    color={params.value == 'COMPLETE'? 'success': 'warning'}
+                    />
+            }
         },
         {
             field: "created_at",
