@@ -1,7 +1,7 @@
 import backendApi from '../../config/apiConfig';
 import { AppThunk } from '../store';
-import { DistributionCenter, BaseaAPIResponse, GroupsResponse, Period, } from '../../interfaces/maintenance';
-import { setDistributionCenters, setOutputType, setGroups, setLoadingMain, setPeriod } from './maintenanceSlice';
+import { DistributionCenter, BaseaAPIResponse, GroupsResponse, } from '../../interfaces/maintenance';
+import { setDistributionCenters, setOutputType, setGroups, setLoadingMain } from './maintenanceSlice';
 import { OutputType, Product } from '../../interfaces/tracking';
 import { toast } from 'sonner';
 import { addDetalleCarga } from '../seguimiento/seguimientoSlice';
@@ -9,7 +9,7 @@ import { handleApiError } from '../../utils/error';
 
 
 // listar data inicial de mantenimiento
-export const getMaintenanceData = (): AppThunk => async (dispatch, getState) => {
+export const getMaintenanceData = (): AppThunk => async (dispatch) => {
     try {
         const { data: dataDistributionCenters } = await backendApi.get<DistributionCenter[]>('/distribution-center/');
         dispatch(setDistributionCenters(dataDistributionCenters));
@@ -17,15 +17,6 @@ export const getMaintenanceData = (): AppThunk => async (dispatch, getState) => 
         dispatch(setGroups(dataGroups.results));
         const { data: dataOutput } = await backendApi.get<BaseaAPIResponse<OutputType>>('/output-type/');
         dispatch(setOutputType(dataOutput.results));
-        const { token, user } = getState().auth;
-        if (user?.centro_distribucion) {
-            const { data: dataPeriod } = await backendApi.get<Period>('/period/last-period/', {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            dispatch(setPeriod(dataPeriod));
-        }
     } catch (error) {
         toast.error('Error al cargar los datos de mantenimiento');
         handleApiError(error)
@@ -54,6 +45,7 @@ export const getArticlesByBarcode = (barcode: string, index: number): AppThunk =
                 amount: 1,
                 history: [],
                 index,
+                productId: data!.results[0].id
             }));
             toast.success('Producto de entrada agregado / actualizado');
         }
