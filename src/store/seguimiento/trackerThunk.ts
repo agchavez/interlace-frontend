@@ -350,6 +350,7 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
     const seguimiento_detalle: DetalleCarga = {
         amount: tracker_detail.quantity,
         id: tracker_detail.id,
+        productId: tracker_detail.product_data.id,
         created_at: tracker_detail.created_at,
         name: tracker_detail.product_data.name,
         brand: tracker_detail.product_data.brand,

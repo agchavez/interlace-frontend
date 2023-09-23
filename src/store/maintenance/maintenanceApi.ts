@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch, LocationType, LocationTypeQuerySearch, Transporter, TransporterQuerySearch } from '../../interfaces/maintenance';
+import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch, LocationType, LocationTypeQuerySearch, Transporter, TransporterQuerySearch, ProductPeriodQueryParams, Period } from '../../interfaces/maintenance';
 import { Product, ProductQuerySearch } from '../../interfaces/tracking';
 
 export const maintenanceApi = createApi({
@@ -81,6 +81,17 @@ export const maintenanceApi = createApi({
             keepUnusedDataFor: 120000
 
         }),
+        getProductPeriod: builder.query<Period, ProductPeriodQueryParams>({
+            query: (params) =>{
+                return ({
+                url: `/period/last-period/`,
+                method: 'GET',
+                params: {
+                    product: params.product
+                }
+            })},
+            keepUnusedDataFor: 120000
+        }),
     })
 })
 
@@ -91,5 +102,6 @@ export const {
     useGetOperatorByDistributionCenterQuery,
     useGetDriverQuery,
     useGetProductQuery,
-    useGetLocationsQuery
+    useGetLocationsQuery,
+    useGetProductPeriodQuery,
 } = maintenanceApi

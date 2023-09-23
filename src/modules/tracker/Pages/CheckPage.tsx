@@ -8,6 +8,7 @@ import { setSeguimientoActual } from '../../../store/seguimiento/seguimientoSlic
 import { EliminarSeguimientoModal } from '../components/EliminarSeguimientoModal';
 import { getOpenTrackings } from '../../../store/seguimiento/trackerThunk';
 import { CompletarSeguimientoModal } from '../components/CompletarSeguimientoModal';
+import FloatLoading from '../components/FloatLoading';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -45,10 +46,9 @@ function a11yProps(index: number) {
 
 export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false)
-  const [ completarOpen, setCompletarOpen ] = useState(false)
+  const [completarOpen, setCompletarOpen] = useState(false)
   const { seguimientos, seguimeintoActual, loading } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
 
@@ -77,7 +77,7 @@ export const CheckPage = () => {
     dispatch(getOpenTrackings())
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
- 
+
   const handleClickCompletar = () => {
     setCompletarOpen(true);
     // dispatch(completeTracker())
@@ -95,6 +95,7 @@ export const CheckPage = () => {
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
+          <FloatLoading visible={loading} />
           <Grid item xs={12} md={8} lg={9} xl={10}>
           </Grid>
           <Grid item xs={12} md={4} lg={3} xl={2}
@@ -124,7 +125,6 @@ export const CheckPage = () => {
                       )
                     })
                   }
-                  {loading && <p>Cargando...</p>}
                 </Tabs>
               </Box>
               {

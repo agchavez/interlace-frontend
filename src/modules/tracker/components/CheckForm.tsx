@@ -26,6 +26,8 @@ import { addDetallePallet, removeDetalle, removeDetallePallet, updateDetallePall
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns/esm';
+import { Period } from '../../../interfaces/maintenance';
+import { useGetProductPeriodQuery } from '../../../store/maintenance/maintenanceApi';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -487,6 +489,8 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
     const { row } = props;
     const [open, setOpen] = useState(false);
     const dispatch = useAppDispatch()
+    const {data: period, isLoading, isFetching} = useGetProductPeriodQuery({product:row.productId})
+    const loadingSeguimiento = useAppSelector(state => state.seguimiento.loading)
     const handleClickAgregar = () => {
         dispatch(
             addDetallePallet(
@@ -611,7 +615,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {row.history?.map((historyRow, index) => {
+                                    { row.history?.map((historyRow, index) => {
                                         return (
                                             <HistoryRow
                                                 key={historyRow.id}
@@ -622,6 +626,7 @@ function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number
                                                 seguimiento={props.seguimiento}
                                                 updateProductoPallet={updateProductoPallet}
                                                 removeProductoPallet={removeProductoPallet}
+                                                productPeriod={{loading: isLoading || isFetching || loadingSeguimiento, period: period as Period }}
                                             />
                                         )
                                     })}
@@ -646,15 +651,15 @@ interface HistoryRowProps {
         palletIndex: number;
         id: number
     }) => void
+    productPeriod: {loading:boolean, period: Period};
 }
 
-const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento, disable }) => {
+const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento, disable, productPeriod }) => {
     const [willPrint, setWillPrint] = useState(false)
     const [componenPrint, setComponentPrint] = useState(<></>)
     const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
 
     const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date.split('T')[0]) : undefined)
-    const period = useAppSelector(state => state.maintenance.period);
 
     const onclickPrint = () => {
         const red = [];
@@ -670,7 +675,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
                     cajasPallet: detalle.boxes_pre_pallet,
                     // es solo el id debe ser texto lo que se muestra
                     origen: `${seguimiento.originLocationData?.code} - ${seguimiento.originLocationData?.name}`,
-                    periodo: period?.label,
+                    periodo: productPeriod.period.label,
                     trackingId: seguimiento.id,
                     detalle_pallet_id: historyRow.id || 0,
                     tracker_detail: detalle.id,
@@ -745,7 +750,7 @@ const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, upd
             <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index, id: historyRow.id || 0 })}>
                 <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
-            <IconButton aria-label="edit" size="medium" onClick={onclickPrint}>
+            <IconButton aria-label="edit" size="medium" onClick={onclickPrint} disabled={productPeriod.loading}>
                 <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
             </IconButton>
         </TableCell>}
