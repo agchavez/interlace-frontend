@@ -45,7 +45,6 @@ function a11yProps(index: number) {
 
 export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false)
   const [ completarOpen, setCompletarOpen ] = useState(false)

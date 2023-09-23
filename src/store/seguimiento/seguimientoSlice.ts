@@ -58,7 +58,8 @@ interface RemoveDetalle {
 
 export interface DetalleCarga extends Product {
     amount: number;
-    history?: DetalleCargaPalet[]
+    history?: DetalleCargaPalet[];
+    productId: number;
 }
 
 export interface DetalleCargaSalida extends Product {

@@ -130,6 +130,9 @@ export interface LocationTypeQuerySearch extends BaseQueryParams {
     id?: number;
 }
 
+export interface ProductPeriodQueryParams {
+    product?: number;
+}
 
 //gorups response
 export interface GroupsResponse {

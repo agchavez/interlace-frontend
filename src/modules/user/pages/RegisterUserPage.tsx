@@ -82,7 +82,6 @@ export const RegisterUserPage = () => {
             group: '',
             employee_number: undefined
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [edit, editingUser]) 
 
     useEffect(() => {
