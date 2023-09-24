@@ -272,7 +272,8 @@ export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData)
         const body: AddOutProductBody = {
             tracker: data.tracker,
             quantity: data.quantity,
-            product: data.product.id
+            product: data.product.id,
+            expiration_date: data.expiration_date
         }
         const { status, data: trackerDetail } = await backendApi.post<TrackerDeailOutput, AxiosResponse<TrackerDeailOutput>>(`/tracker-detail-output/`, body, {
             headers: {
@@ -284,11 +285,13 @@ export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData)
                 segIndex: indexSeguimiento,
                 product: data.product,
                 amount: data.quantity,
-                idDetalle: trackerDetail.id
+                idDetalle: trackerDetail.id,
+                expiration_date: trackerDetail.expiration_date,
             }))
         }
         toast.success("Producto de salida agregado")
     } catch (error) {
+        console.error("eror", error)
         handleApiError(error);
     } finally {
         dispatch(setLoading(false))
@@ -402,7 +405,8 @@ const parseOutputDetailSalida = (tracker_detail: TrackerDeailOutput): DetalleCar
         id: tracker_detail.id,
         amount: tracker_detail.quantity,
         created_at: tracker_detail.created_at,
-        idDetalle: tracker_detail.id
+        idDetalle: tracker_detail.id,
+        expiration_date: tracker_detail.expiration_date,
     }
     return detalleSalida;
 }

@@ -17,6 +17,7 @@ interface ProductSelectProps<
   disabled?: boolean;
   onChange?: (value: Product | null) => void;
   ProductId?: number;
+  isOutput?:boolean;
 }
 
 export const ProductSelect = <
@@ -28,7 +29,8 @@ props: ProductSelectProps<TField>
     limit: 10,
     offset: 0,
     search: "",
-    id: props.ProductId
+    id: props.ProductId,
+    is_output: props.isOutput,
   });
   
   const {

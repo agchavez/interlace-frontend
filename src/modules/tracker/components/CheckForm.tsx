@@ -63,6 +63,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
     const [openOutput, setopenOutput] = useState(false);
+    const outputTypeData = outputType.find((d) => d.id === Number(watch('outputType')))
     return (
         <>
             <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
@@ -449,22 +450,21 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             />
                         </Grid>
                         {
-                            outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
-                            <>
-                                {!disable &&<Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Button variant="outlined" size="small" fullWidth color="secondary"
-                                        startIcon={<AddTwoToneIcon />} onClick={() => {
-                                            setopenOutput(true);
-                                        }
-                                        }
-
-                                    >
-                                        Agregar producto de salida
-                                    </Button>
-                                </Grid>}
-                                <OutPutDetail seguimiento={seguimiento} disable={disable} />
-                            </>
-                        }
+                            outputTypeData && (
+                                <>
+                                    {
+                                        outputTypeData?.required_details &&
+                                        (!disable && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                            <Button variant="outlined" size="small" fullWidth color="secondary"
+                                                startIcon={<AddTwoToneIcon />} onClick={() => setopenOutput(true)}
+                                            >
+                                                Agregar producto de salida
+                                            </Button>
+                                        </Grid>)
+                                    }
+                                    <OutPutDetail seguimiento={seguimiento} disable={disable} outputType={outputTypeData} />
+                                </>
+                            )}
                     </Grid>
                 </Grid>
             </Grid>

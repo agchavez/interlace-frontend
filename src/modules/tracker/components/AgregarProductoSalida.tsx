@@ -1,10 +1,11 @@
-import { 
-    Box, 
-    Button, 
-    Container, 
-    Dialog, 
-    DialogActions, 
-    DialogContent, DialogTitle, Grid, IconButton, TextField, styled } from "@mui/material";
+import {
+    Box,
+    Button,
+    Container,
+    Dialog,
+    DialogActions,
+    DialogContent, DialogTitle, Grid, IconButton, TextField, styled
+} from "@mui/material";
 import { FunctionComponent, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
@@ -21,6 +22,7 @@ interface CreateCheckProps {
 interface FormValues {
     producto: Product | null;
     cantidad: number;
+    fechaExpiracion: Date;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -41,7 +43,8 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
     const { handleSubmit, register, formState: { errors }, reset, control, setFocus } = useForm<FormValues>({
         defaultValues: {
             producto: null,
-            cantidad: 0
+            cantidad: 0,
+            fechaExpiracion: new Date(),
         }
     })
 
@@ -50,7 +53,8 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
         dispatch(addOutProduct(seguimeintoActual || 0, {
             tracker: seguimientos[seguimeintoActual].id,
             product: product,
-            quantity: data.cantidad
+            quantity: data.cantidad,
+            expiration_date: data.fechaExpiracion
         }))
         // dispatch(addDetalleCargaSalida({
         //     product,
@@ -63,7 +67,7 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
 
     const handleSelectProduct = (value: Product | null) => {
         setproduct(value)
-        
+
     }
 
 
@@ -88,12 +92,12 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
                 >
                     <CloseIcon />
                 </IconButton>
-            <form onSubmit={handleSubmit(handleSubmitForm)}>
-                <DialogContent dividers>
-                    <Box>
-                        <Container maxWidth="xl">
-                            <Grid container spacing={3}>
-                                <Grid item xs={12}>
+                <form onSubmit={handleSubmit(handleSubmitForm)}>
+                    <DialogContent dividers>
+                        <Box>
+                            <Container maxWidth="xl">
+                                <Grid container spacing={3}>
+                                    <Grid item xs={12}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12} md={9}>
                                                 <ProductSelect
@@ -101,7 +105,7 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
                                                     name="producto"
                                                     onChange={handleSelectProduct}
                                                     placeholder="Producto"
-                                                    />
+                                                />
                                             </Grid>
                                             <Grid item xs={12} md={6} lg={4} xl={3}>
                                                 <TextField
@@ -116,25 +120,36 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
                                                     helperText={errors.cantidad?.message}
                                                 />
                                             </Grid>
-
-
+                                            <Grid item xs={12} md={6} lg={4} xl={3}>
+                                                <TextField
+                                                    fullWidth
+                                                    id="outlined-basic"
+                                                    label="Fecha de Expiración"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="date"
+                                                    {...register("fechaExpiracion")}
+                                                    error={errors.cantidad ? true : false}
+                                                    helperText={errors.cantidad?.message}
+                                                />
+                                            </Grid>
                                         </Grid>
+                                    </Grid>
                                 </Grid>
-                            </Grid>
-                        </Container>
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        variant="text"
-                        color="primary"
-                        type="submit"
-                        
+                            </Container>
+                        </Box>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button
+                            variant="text"
+                            color="primary"
+                            type="submit"
+
                         >
-                        Agregar
-                    </Button>
-                </DialogActions>
-                                    </form>
+                            Agregar
+                        </Button>
+                    </DialogActions>
+                </form>
             </BootstrapDialog>
         </>
     );
