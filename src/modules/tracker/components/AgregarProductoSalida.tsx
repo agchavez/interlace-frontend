@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { Product } from '../../../interfaces/tracking';
 import { ProductSelect } from "../../ui/components/ProductSelect";
 import { addOutProduct } from "../../../store/seguimiento/trackerThunk";
+import { format } from "date-fns";
 
 interface CreateCheckProps {
     open: boolean;
@@ -22,7 +23,7 @@ interface CreateCheckProps {
 interface FormValues {
     producto: Product | null;
     cantidad: number;
-    fechaExpiracion: Date;
+    fechaExpiracion: string;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -40,11 +41,11 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
     const seguimientos = useAppSelector(state => state.seguimiento.seguimientos)
     const [product, setproduct] = useState<Product | null>(null);
 
-    const { handleSubmit, register, formState: { errors }, reset, control, setFocus } = useForm<FormValues>({
+    const { handleSubmit, register, formState: { errors }, reset, control, setFocus, watch } = useForm<FormValues>({
         defaultValues: {
             producto: null,
             cantidad: 0,
-            fechaExpiracion: new Date(),
+            fechaExpiracion: format(new Date(), "yyyy-MM-dd"),
         }
     })
 
@@ -128,6 +129,7 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({ open, hand
                                                     variant="outlined"
                                                     size="small"
                                                     type="date"
+                                                    value={watch("fechaExpiracion")}
                                                     {...register("fechaExpiracion")}
                                                     error={errors.cantidad ? true : false}
                                                     helperText={errors.cantidad?.message}

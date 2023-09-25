@@ -252,13 +252,13 @@ export interface AddOutProductData {
   tracker: number;
   product: Product;
   quantity: number;
-  expiration_date: Date;
+  expiration_date: string;
 }
 
 export interface AddOutProductBody {
   tracker: number;
   product: number;
   quantity: number;
-  expiration_date: Date;
+  expiration_date: string;
 }
 
