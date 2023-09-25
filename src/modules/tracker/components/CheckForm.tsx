@@ -1,15 +1,11 @@
-import { Box, Button, Card, Chip, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
-import { Fragment, FunctionComponent, useEffect, useState } from 'react';
+import { Box, Button, Card, Chip, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
+import { useState } from 'react';
 
 // iCONS
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 
 import { useAppDispatch } from '../../../store';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento } from '../../../store/seguimiento/seguimientoSlice';
+import { Seguimiento } from '../../../store/seguimiento/seguimientoSlice';
 import AgregarProductoModal from './AgregarProductoModal';
 import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
 import { useAppSelector } from '../../../store/store';
@@ -20,14 +16,11 @@ import { DriverSelect } from '../../ui/components';
 import { LocationSelect } from '../../ui/components/LocationSelect';
 import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
-import PrintComponent from '../../../utils/componentPrinter';
-import PalletPrint from './PalletPrint';
-import { addDetallePallet, removeDetalle, removeDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
+import { updateTracking } from '../../../store/seguimiento/trackerThunk';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns/esm';
-import { Period } from '../../../interfaces/maintenance';
-import { useGetProductPeriodQuery } from '../../../store/maintenance/maintenanceApi';
+import { ProductoEntradaTableRow } from './ProductoEntradaTableRow';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -70,6 +63,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
     const [openOutput, setopenOutput] = useState(false);
+    const outputTypeData = outputType.find((d) => d.id === Number(watch('outputType')))
     return (
         <>
             <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
@@ -392,7 +386,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                     {
                                         seguimiento?.detalles.map((detalle, index) => {
                                             return (
-                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} disable={disable} />
+                                                <ProductoEntradaTableRow key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} disable={disable} />
                                             )
                                         })
                                     }
@@ -456,305 +450,24 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             />
                         </Grid>
                         {
-                            outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
-                            <>
-                                {!disable &&<Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Button variant="outlined" size="small" fullWidth color="secondary"
-                                        startIcon={<AddTwoToneIcon />} onClick={() => {
-                                            setopenOutput(true);
-                                        }
-                                        }
-
-                                    >
-                                        Agregar producto de salida
-                                    </Button>
-                                </Grid>}
-                                <OutPutDetail seguimiento={seguimiento} disable={disable} />
-
-                            </>
-                        }
+                            outputTypeData && (
+                                <>
+                                    {
+                                        outputTypeData?.required_details &&
+                                        (!disable && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                            <Button variant="outlined" size="small" fullWidth color="secondary"
+                                                startIcon={<AddTwoToneIcon />} onClick={() => setopenOutput(true)}
+                                            >
+                                                Agregar producto de salida
+                                            </Button>
+                                        </Grid>)
+                                    }
+                                    <OutPutDetail seguimiento={seguimiento} disable={disable} outputType={outputTypeData} />
+                                </>
+                            )}
                     </Grid>
                 </Grid>
             </Grid>
         </>
     )
-}
-interface UpdateProductoPalletParams {
-    palletIndex: number,
-    date: Date | null,
-    pallets: number,
-    id: number, 
-    disable?: boolean
-}
-
-function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number, disable: boolean }) {
-    const { row } = props;
-    const [open, setOpen] = useState(false);
-    const dispatch = useAppDispatch()
-    const {data: period, isLoading, isFetching} = useGetProductPeriodQuery({product:row.productId})
-    const loadingSeguimiento = useAppSelector(state => state.seguimiento.loading)
-    const handleClickAgregar = () => {
-        dispatch(
-            addDetallePallet(
-                props.indexSeguimiento,
-                props.index,
-                {
-                    expiration_date: format(new Date(), 'yyyy-MM-dd'),
-                    quantity: 0,
-                    tracker_detail: row.id,
-                }
-            )
-        )
-        // dispatch(addDetalleCargaPallet({
-        //     segIndex: props.indexSeguimiento,
-        //     detalleIndex: props.index, id: 1,
-        //     pallets: 0, date: new Date().toISOString(),
-        //     amount: 0
-        // }))
-    }
-
-    const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
-        console.log(datos.date);
-        
-        dispatch(
-            updateDetallePallet(
-                props.indexSeguimiento,
-                props.index, datos.palletIndex,
-                {
-                    expiration_date: format(datos.date || new Date(), 'yyyy-MM-dd'),
-
-                    quantity: datos.pallets,
-                    id: datos.id || 0,
-                    tracker_detail: row.id
-                }
-            )
-        )
-    }
-    const removeProductoPallet = (datos: { palletIndex: number, id:number }): void => {
-        const {indexSeguimiento, index} = props;
-        dispatch(removeDetallePallet(indexSeguimiento, index, datos.palletIndex, datos.id))
-    }
-
-    const isValid = (): boolean => {
-        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0) !== +row.amount
-    }
-    return (
-        <Fragment>
-            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-                <TableCell>
-                    <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => setOpen(!open)}
-                        sx={{
-                            backgroundColor: isValid() ? 'red' : 'inherit   '
-                        }}
-                    >
-                        {open ? <KeyboardArrowUpIcon
-                        /> : <KeyboardArrowDownIcon
-                        />}
-                    </IconButton>
-                </TableCell>
-                <TableCell component="th" align="right">
-                    {row.sap_code}
-                </TableCell>
-                <TableCell align="right">
-                    {row.name}
-                </TableCell>
-                <TableCell align="right">
-                    {row.amount}
-                </TableCell>
-                
-                {!props.disable && <TableCell align="right">
-
-                    <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        disabled={props.disable}
-                        onClick={() => dispatch(removeDetalle(props.indexSeguimiento, props.index, row.id ))}
-                    >
-                        <DeleteTwoToneIcon />
-                    </IconButton>
-                </TableCell>}
-            </TableRow>
-            <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 1 }}>
-                            <Typography variant="h6" gutterBottom component="div">
-                                Detalles
-                            </Typography>
-                            <Grid item sx={{
-                                display: 'flex', justifyContent: 'space-between    ', alignItems: 'center', marginTop: 1, marginBottom: 1
-                            }} xs={12}>
-                                {!props.disable && 
-                                    <Button variant="outlined" size="small" color="secondary"
-                                    startIcon={<AddTwoToneIcon />}
-                                    onClick={handleClickAgregar}
-                                >
-                                    Agregar
-                                </Button>}
-                                <Typography variant="body1" component="h1" fontWeight={400} color={
-                                    isValid() ? 'red' : 'gray.500'
-                                }>
-                                    Total de Pallets: {"  "}
-                                    {row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0)}
-                                    {" "} de {" "}
-                                    {
-                                        row.amount
-                                    }
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} md={5} lg={2} xl={2}>
-                            </Grid>
-
-                            <Table size="small" aria-label="purchases">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="right">Pallets</TableCell>
-                                        <TableCell align="right">Fecha</TableCell>
-                                        {!props.disable && <TableCell align="right">Acciones</TableCell>}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    { row.history?.map((historyRow, index) => {
-                                        return (
-                                            <HistoryRow
-                                                key={historyRow.id}
-                                                historyRow={historyRow}
-                                                index={index}
-                                                detalle={row}
-                                                disable={props.disable}
-                                                seguimiento={props.seguimiento}
-                                                updateProductoPallet={updateProductoPallet}
-                                                removeProductoPallet={removeProductoPallet}
-                                                productPeriod={{loading: isLoading || isFetching || loadingSeguimiento, period: period as Period }}
-                                            />
-                                        )
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </Box>
-                    </Collapse>
-                </TableCell>
-            </TableRow>
-        </Fragment>
-    );
-}
-
-interface HistoryRowProps {
-    index: number;
-    disable?: boolean;
-    historyRow: DetalleCargaPalet;
-    updateProductoPallet: (datos: UpdateProductoPalletParams) => unknown;
-    detalle: DetalleCarga;
-    seguimiento: Seguimiento;
-    removeProductoPallet: (datos: {
-        palletIndex: number;
-        id: number
-    }) => void
-    productPeriod: {loading:boolean, period: Period};
-}
-
-const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento, disable, productPeriod }) => {
-    const [willPrint, setWillPrint] = useState(false)
-    const [componenPrint, setComponentPrint] = useState(<></>)
-    const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
-
-    const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date.split('T')[0]) : undefined)
-
-    const onclickPrint = () => {
-        const red = [];
-        const max = (historyRow.pallets || 0)
-        for (let i = 0; i < max; i++) {
-            red.push(<PalletPrint
-                pallet={{
-                    numeroSap: +detalle.sap_code,
-                    rastra: seguimiento.rastra.code,
-                    nDocEntrada: seguimiento.documentNumber || 0,
-                    fechaVencimiento: historyRow.date || new Date().toISOString(),
-                    nPallets: historyRow.pallets || 0,
-                    cajasPallet: detalle.boxes_pre_pallet,
-                    // es solo el id debe ser texto lo que se muestra
-                    origen: `${seguimiento.originLocationData?.code} - ${seguimiento.originLocationData?.name}`,
-                    periodo: productPeriod.period.label,
-                    trackingId: seguimiento.id,
-                    detalle_pallet_id: historyRow.id || 0,
-                    tracker_detail: detalle.id,
-                    nombre_producto: detalle.name,
-                    block: detalle.block_days,
-                    pre_block: detalle.pre_block_days_next,
-                }} />)
-            if (((i + 1) % 2 === 0) && (i + 1 < max)) {
-                red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
-            }
-        }
-        setComponentPrint(<Grid container>{red}</Grid>)
-        setWillPrint(true);
-    }
-
-    const print = PrintComponent({
-        pageOrientation: "landscape",
-        component: componenPrint
-    })
-
-    useEffect(() => {
-        if (willPrint) {
-            setWillPrint(false);
-            print.print()
-        }
-    }, [print, willPrint])
-
-    
-
-    return <TableRow key={index}>
-        {willPrint && print.component}
-        <TableCell align="right">
-            <TextField
-                fullWidth
-                id="outlined-basic"
-                size="small"
-                type='number'
-                value={pallets}
-                disabled={disable}
-                onChange={e => setPallets(+e.target.value)}
-                onBlur={e => updateProductoPallet({ date: date || null, pallets: +e.target.value, palletIndex: index, id: historyRow.id || 0 })}
-            />
-        </TableCell>
-        <TableCell component="th" scope="row" align="right">
-            <TextField
-                fullWidth
-                id="outlined-basic"
-                size="small"
-                type="date"
-                disabled={disable}
-                value={date?.toISOString().split('T')[0]}
-
-                datatype='date'
-                onChange={(e) => {
-                    const inputDate = new Date(e.target.value + 'T00:00:00');
-                    if (!isNaN(inputDate.getTime())) {
-                        setDate(inputDate);
-                    }
-                }}
-                onBlur={e => {
-                    const inputDate = new Date(e.target.value + 'T00:00:00');
-
-                    if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                        updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });
-
-                    }
-                }}
-            />
-        </TableCell>
-        {!disable &&
-            <TableCell align="right">
-            <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index, id: historyRow.id || 0 })}>
-                <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
-            </IconButton>
-            <IconButton aria-label="edit" size="medium" onClick={onclickPrint} disabled={productPeriod.loading}>
-                <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
-            </IconButton>
-        </TableCell>}
-    </TableRow>
 }

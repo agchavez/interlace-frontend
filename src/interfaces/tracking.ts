@@ -44,6 +44,7 @@ export interface ProductQuerySearch extends BaseQueryParams {
   search?: string;
   id?: number;
   bar_code?: string;
+  is_output?: boolean;
 }
 
 export interface OutputType {
@@ -137,6 +138,7 @@ export interface TrackerDeailOutput {
   quantity:     number;
   tracker:      number;
   product:      number;
+  expiration_date:  string;
 }
 export interface DistributorCenterData {
   id: number;
@@ -250,11 +252,13 @@ export interface AddOutProductData {
   tracker: number;
   product: Product;
   quantity: number;
+  expiration_date: string;
 }
 
 export interface AddOutProductBody {
   tracker: number;
   product: number;
   quantity: number;
+  expiration_date: string;
 }
 
