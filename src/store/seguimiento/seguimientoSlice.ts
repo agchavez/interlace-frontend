@@ -80,6 +80,8 @@ export interface Seguimiento {
     completed?: string;
     plateNumber: string;
     completed_date: string | null;
+    invoiceNumber: string | null;
+    containernumber: number | null;
     originLocation?: number;
     outputLocation?: number;
     driver?: number| null;
@@ -94,6 +96,7 @@ export interface Seguimiento {
     timeEnd: string | null;
     opm1?: number;
     opm2?: number;
+    type: 'LOCAL' | 'IMPORT';
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
     originLocationData: LocationType | null;
@@ -209,7 +212,14 @@ export const seguimientoSlice = createSlice({
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload
+        },
+        // Quitar segumiento del array
+        removeSeguimientoActual: (state) => {
+            state.seguimientos.splice(state.seguimeintoActual || 0, 1);
+            state.seguimeintoActual = state.seguimientos.length - 1;
         }
+
+
 
 
 
@@ -230,5 +240,6 @@ export const {
     addDetalleCargaSalida,
     removeDetalleCargaSalida,
     setLoading,
-    setSeguimientos
+    setSeguimientos,
+    removeSeguimientoActual
 } = seguimientoSlice.actions;

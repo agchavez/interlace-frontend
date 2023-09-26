@@ -16,7 +16,7 @@ export interface FormFilterTrack {
     date_after: string,
     date_before: string,
     date_range: FilterDate,
-    status: 'COMPLETE' | 'PENDING',
+    status: 'COMPLETE' | 'PENDING' | 'EDITED';
 }
 
 interface FilterManageProps {
@@ -216,6 +216,11 @@ export const FilterManage: FC<FilterManageProps> = ({ open, handleClose, handleF
                                     checked={watch('status') === 'PENDING'}
                                     onChange={() => setValue('status', 'PENDING')}
                                 />} label={<Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem"> Pendiente </Typography>} />
+                                <FormControlLabel control={<Checkbox
+                                    checked={watch('status') === 'EDITED'}
+                                    onChange={() => setValue('status', 'EDITED')}
+                                />} label={<Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem"> En atención </Typography>} />
+
                             </FormGroup>
                         </ListItem>
                     </List>

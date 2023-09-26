@@ -3,7 +3,9 @@ import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTit
 import { FunctionComponent } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch } from "../../../store";
-import { completeTracker } from "../../../store/seguimiento/trackerThunk";
+import { completeTracker, chanceStatusTracking } from '../../../store/seguimiento/trackerThunk';
+import { useAppSelector } from '../../../store/store';
+import { removeSeguimientoActual } from "../../../store/seguimiento/seguimientoSlice";
 
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -17,18 +19,30 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 interface DeleteCheckProps {
     open: boolean;
+    copleted: boolean;
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;
 }
 
-export const CompletarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ open, handleClose}) => {
-    const dispatch = useAppDispatch()
-    const handleClickDelete = () => { 
+export const CompletarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ open, handleClose, copleted }) => {
+    const dispatch = useAppDispatch();
+    const {seguimeintoActual, seguimientos} = useAppSelector((state) => state.seguimiento)
+    const handleClickDelete = () => {
+        if(copleted){
         dispatch(completeTracker())
         handleClose && handleClose({}, "backdropClick");
+        return;
+        }
+        if(seguimeintoActual !== undefined){
+            dispatch(chanceStatusTracking('PENDING', seguimientos[seguimeintoActual].id, () => dispatch(removeSeguimientoActual())))
+            handleClose && handleClose({}, "backdropClick");
+        }
     }
+
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-            Completar Seguimiento
+            {
+                copleted ? "Completar Seguimiento" : "Mover a pendientes"
+            }
         </DialogTitle>
         <IconButton
             aria-label="close"
@@ -51,7 +65,7 @@ export const CompletarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({
                     <Grid container spacing={3}>
                         <Grid item xs={12}>
                             <Typography>
-                                ¿Está seguro que desea completar este seguimiento?
+                                ¿Está seguro que desea {copleted ? "completar" : "mover a pendientes"} este seguimiento?
                             </Typography>
                         </Grid>
                     </Grid>
@@ -61,7 +75,7 @@ export const CompletarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({
         <DialogActions>
             <Button variant="contained" color="primary" size="medium" onClick={handleClickDelete}>
                 <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
-                    Completar
+                    Confirmar
                 </Typography>
             </Button>
         </DialogActions>

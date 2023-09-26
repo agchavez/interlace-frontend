@@ -65,6 +65,26 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
     }
 }
 
+export const chanceStatusTracking = (status: 'PENDING' | 'EDITED',trackerId: number,  onComplete?: () => void): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        await backendApi.patch<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackerId}/`, { status }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        toast.success("Seguimiento actualizado", {
+            description:status === 'PENDING' ? 'El seguimiento se movio a pendientes' : 'El seguimiento se encuentra ahora en atención'
+        })
+        onComplete && onComplete()
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
 export const removeTracking = (indexSeguimiento: number, trackingId: number): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
@@ -325,6 +345,8 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
         transporter: tracker.transporter_data,
         plateNumber: tracker.plate_number,
+        containernumber: tracker.container_number,
+        invoiceNumber: tracker.invoice_number,
         documentNumber: tracker.input_document_number,
         transferNumber: tracker.transfer_number,
         created_at: tracker.created_at,
@@ -332,6 +354,7 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         completed_date: tracker.completed_date,
         status: tracker.status,
         transportNumber: 1,
+        type: tracker.type,
         documentNumberExit: tracker.output_document_number,
         outputType: tracker.output_type,
         timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0).toISOString() : null,

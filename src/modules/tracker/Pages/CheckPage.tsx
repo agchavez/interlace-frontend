@@ -49,7 +49,10 @@ export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false)
-  const [completarOpen, setCompletarOpen] = useState(false)
+  const [completarOpen, setCompletarOpen] = useState({
+    open: false,
+    completed: true,
+  })
   const { seguimientos, seguimeintoActual, loading } = useAppSelector(state => state.seguimiento)
   const dispatch = useAppDispatch()
   const [searchParams] = useSearchParams()
@@ -68,7 +71,17 @@ export const CheckPage = () => {
   }
 
   const handleCloseCompleteModal = () => {
-    setCompletarOpen(false)
+    setCompletarOpen({
+      open: false,
+      completed: true,
+    })
+  }
+
+  const handleClickPending = () => {
+    setCompletarOpen({
+      open: true,
+      completed: false,
+    })
   }
 
   const handleClickDelete = () => {
@@ -82,7 +95,10 @@ export const CheckPage = () => {
   }, [])
 
   const handleClickCompletar = () => {
-    setCompletarOpen(true);
+    setCompletarOpen({
+      open: true,
+      completed: true,
+    })
     // dispatch(completeTracker())
   }
   useEffect(() => {
@@ -98,7 +114,7 @@ export const CheckPage = () => {
     <>
       <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
       <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id} />
-      <CompletarSeguimientoModal open={completarOpen} handleClose={handleCloseCompleteModal} />
+      <CompletarSeguimientoModal open={completarOpen.open} handleClose={handleCloseCompleteModal} copleted={completarOpen.completed}/>
       <Container maxWidth="xl">
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
@@ -161,18 +177,25 @@ export const CheckPage = () => {
               <Grid item xs={12}>
                 <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
               </Grid>
-              <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" color="error" size="medium" fullWidth onClick={handleClickDelete}>
+              <Grid item xs={12} md={3} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="outlined" color="error" size="medium" fullWidth onClick={handleClickDelete}>
                   <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
                     Eliminar
                   </Typography>
                 </Button>
               </Grid>
-              <Grid item xs={12} md={4} lg={6} xl={8}>
+              <Grid item xs={12} md={3} lg={3} xl={6}>
 
               </Grid>
-              <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" color="success" size="medium" fullWidth onClick={handleClickCompletar}>
+              <Grid item xs={12} md={3} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="text" color="secondary" size="medium" fullWidth onClick={handleClickPending}>
+                  <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
+                    Pendiente
+                  </Typography>
+                </Button>
+              </Grid>
+              <Grid item xs={12} md={3} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="outlined" color="success" size="medium" fullWidth onClick={handleClickCompletar}>
                   <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
                     Completar
                   </Typography>

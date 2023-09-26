@@ -67,6 +67,8 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
     originLocation: number;
     outputLocation: number;
     driver?: number | null;
+    invoiceNumber: string | null;
+    containernumber: number | null;
     documentNumber: number;
     transportNumber: number;
     transferNumber: number;
@@ -96,6 +98,8 @@ export interface Tracker {
   input_date: string | null;
   output_date: string | null;
   time_invested: null;
+  invoice_number: string | null;
+  container_number: number | null;
   status: string;
   trailer: number;
   transporter: number;
@@ -108,6 +112,7 @@ export interface Tracker {
   driver: number | null;
   output_type: number;
   completed_date: string | null;
+  type: 'LOCAL' | 'IMPORT';
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[]
 }
@@ -127,7 +132,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   user?: number[];
   date_after?: string;
   date_before?: string;
-  status?: 'COMPLETE' | 'PENDING';
+  status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   filter_date?: FilterDate;
 }
 
@@ -165,6 +170,7 @@ export interface TransporterData {
 export interface CreateTrackingBody {
   trailer: number;
   transporter: number;
+  type: string;
 }
 
 export interface AddDetalleBody {

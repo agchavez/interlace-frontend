@@ -1,4 +1,4 @@
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, styled } from "@mui/material";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, styled } from "@mui/material";
 import { FunctionComponent, useEffect, useRef, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
@@ -14,6 +14,12 @@ interface CreateCheckProps {
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;
 }
 
+interface FormValues {
+    rastraId: number;
+    transporter: number;
+    type: string;
+}
+
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
         padding: theme.spacing(2),
@@ -27,21 +33,24 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClose }) => {
     const schema = yup.object().shape({
         rastraId: yup.number().required("Este campo es requerido").min(1, "Seleccione una rastra"),
-        transporter: yup.number().required("Este campo es requerido").min(1, "Seleccione un transportista")
+        transporter: yup.number().required("Este campo es requerido").min(1, "Seleccione un transportista"),
+        // solo admite LOCAL o IMPORT
+        type: yup.string().required("Este campo es requerido").matches(/^(LOCAL|IMPORT)$/, "Solo admite LOCAL o IMPORT")
     })
 
     const [trailer, settrailer] = useState<Trailer | null>(null)
-    const [transporter, setTransporter] = useState<Transporter | null>(null)
+    const [transporter, setTransporter] = useState<Transporter | null>(null) 
 
     const dispach = useAppDispatch()
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { handleSubmit, reset, setFocus, control } = useForm({
+    const { handleSubmit, reset, setFocus, control, register, watch, formState:{isValid, errors} } = useForm<FormValues>({
         resolver: yupResolver(schema),
         defaultValues: {
             rastraId: 0,
-            transporter: 0
+            transporter: 0,
+            type: "LOCAL"
         }
     })
 
@@ -58,15 +67,16 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
     }
 
 
-    const handleSubmitForm = () => {
+    const handleSubmitForm = (data: FormValues) => {
         if (trailer && transporter) {
-            dispach(createTracking({trailer:trailer.id, transporter:transporter.id}));
+            dispach(createTracking({trailer:trailer.id, transporter:transporter.id, type: data.type}))
             //dispach(setSeguimientoActual(seguimientos.length))
         }
     }
 
     const handleClickCreate = () => {
         formRef.current?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }))
+        if (!isValid) return;
         handleClose && handleClose({}, "backdropClick");
         reset();
     }
@@ -102,11 +112,11 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                 <DialogContent dividers >
                     <Box >
                         <Container maxWidth="xl">
-                            <Grid container spacing={3}>
+                            <Grid container spacing={0}>
                                 <Grid item xs={12}>
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
-                                        <Grid container>
-                                            <Grid item xs={6}>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={12}>
                                                 <TrailerSelect
                                                     control={control}
                                                     name="rastraId"
@@ -114,13 +124,30 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                                                     onChange={handleChangeTrailer}
                                                 />
                                             </Grid>
-                                            <Grid item xs={6}>
+                                            <Grid item xs={12}>
                                                 <TransporterSelect
                                                     control={control}
                                                     name="transporter"
                                                     placeholder="Seleccione un transportista"
                                                     onChange={handleChangeTDriver}
                                                 />
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                            <FormControl fullWidth size="small" variant="outlined" error={!!errors.type}>
+                                                <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+                                                <Select
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select"
+                                                    label="Tipo"
+                                                    error={!!errors.type}
+                                                    {...register("type")}
+                                                    value={watch("type")}
+                                                >
+                                                    <MenuItem value="LOCAL">Locales</MenuItem>
+                                                    <MenuItem value="IMPORT">Importado</MenuItem>
+                                                </Select>
+                                                
+                                                </FormControl>
                                             </Grid>
                                         </Grid>
                                     </form>

@@ -16,11 +16,13 @@ import { DriverSelect } from '../../ui/components';
 import { LocationSelect } from '../../ui/components/LocationSelect';
 import AgregarProductoSalida from './AgregarProductoSalida';
 import { OutPutDetail } from './OutPutDetail';
-import { updateTracking } from '../../../store/seguimiento/trackerThunk';
+import { updateTracking, chanceStatusTracking } from '../../../store/seguimiento/trackerThunk';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { format } from 'date-fns/esm';
 import { ProductoEntradaTableRow } from './ProductoEntradaTableRow';
+import { EditNote } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -57,13 +59,17 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
         }
     });
     const tiempoEntrada = seguimiento?.timeStart ? new Date(seguimiento?.timeStart) : null;
-    const tiempoSalida = seguimiento?.timeEnd? new Date(seguimiento?.timeEnd) : null;
+    const tiempoSalida = seguimiento?.timeEnd ? new Date(seguimiento?.timeEnd) : null;
 
     async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
         dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
     }
     const [openOutput, setopenOutput] = useState(false);
-    const outputTypeData = outputType.find((d) => d.id === Number(watch('outputType')))
+    const outputTypeData = outputType.find((d) => d.id === Number(watch('outputType')));
+    const navigate = useNavigate();
+    const handleEditState = () => {
+        dispatch(chanceStatusTracking('EDITED', seguimiento.id, () => navigate('/tracker/check/?id=' + seguimiento.id)))
+    }
     return (
         <>
             <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
@@ -79,15 +85,24 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             </Typography>
                             <Typography>
                                 {
-                                    disable? "Revisado:": "Tiempo en revision:"
+                                    disable ? "Revisado:" : "Tiempo en revision:"
                                 }
-                                 <Chip label={formatDistanceToNow(new Date(seguimiento?.created_at), { addSuffix: true, locale: es})} />
+                                <Chip label={formatDistanceToNow(new Date(seguimiento?.created_at), { addSuffix: true, locale: es })} />
                             </Typography>
                         </Box>
                         <Divider />
                         <Box sx={{ padding: 2 }}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
+                                        Tipo
+                                    </Typography>
+                                    <Divider />
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
+                                        {seguimiento?.type === 'IMPORT' ? 'Importación' : 'Local'}
+                                    </Typography>
+                                </Grid>
+                                <Grid item xs={12} md={6} lg={4} xl={3}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Transportista
                                     </Typography>
@@ -96,7 +111,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         {seguimiento?.transporter.name}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                <Grid item xs={12} md={6} lg={4} xl={3}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Tractor
                                     </Typography>
@@ -105,7 +120,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         {seguimiento?.transporter.tractor}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                <Grid item xs={12} md={6} lg={4} xl={3}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Cabezal
                                     </Typography>
@@ -114,7 +129,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         {seguimiento?.transporter.head}
                                     </Typography>
                                 </Grid>
-                               {disable && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                {disable && <Grid item xs={12} md={6} lg={4} xl={3}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Revisado por:
                                     </Typography>
@@ -123,7 +138,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         {seguimiento?.userName}
                                     </Typography>
                                 </Grid>}
-                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
+                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={3}>
                                     <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                                         Completado el:
                                     </Typography>
@@ -140,11 +155,25 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                     <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
                                         <Chip
                                             sx={{ mt: 0.5 }}
-                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : 'Pendiente'}
-                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : 'warning'}
+                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : seguimiento?.status === 'PENDING' ? 'Pendiente' : 'En atención'}
+                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : seguimiento?.status === 'PENDING' ? 'warning' : 'info'}
                                             size="medium"
                                             variant="outlined"
                                         />
+                                    </Typography>
+                                </Grid>}
+                                {disable && seguimiento?.status === 'PENDING' && <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
+                                        <Button
+                                            variant="outlined"
+                                            color="secondary"
+                                            fullWidth
+                                            onClick={() => handleEditState()}
+                                            startIcon={<EditNote />}
+                                        >
+                                            Editar
+                                        </Button>
+
                                     </Typography>
                                 </Grid>}
                             </Grid>
@@ -199,18 +228,49 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 onChange={e => sendDataToBackend("driver", e?.id || null)}
                             />
                         </Grid>
+                        {
+                            seguimiento?.type === 'IMPORT' &&
+                            < Grid item xs={12} md={12}>
+                                <TextField
+                                    fullWidth
+                                    id="outlined-basic"
+                                    label="No. contenedor"
+                                    variant="outlined"
+                                    size="small"
+                                    disabled={disable}
+                                    {...register('containernumber')}
+                                    onBlur={e => sendDataToBackend("container_number", e.target.value || null)}
+                                />
+                            </Grid>
+
+                        }
                         <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="Tranferencia de entrada"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                disabled={disable}
-                                {...register('documentNumber')}
-                                onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
-                            />
+                            {seguimiento?.type === 'LOCAL' ?
+                                <TextField
+                                    fullWidth
+                                    id="outlined-basic"
+                                    label="Tranferencia de entrada"
+                                    variant="outlined"
+                                    size="small"
+                                    type="number"
+                                    disabled={disable}
+                                    {...register('documentNumber')}
+                                    onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
+                                />
+                                :
+                                <TextField
+                                    fullWidth
+                                    id="outlined-basic"
+                                    label="No. Factura"
+                                    variant="outlined"
+                                    size="small"
+                                    type="text"
+                                    disabled={disable}
+                                    {...register('invoiceNumber')}
+                                    onBlur={e => sendDataToBackend("invoice_number", e.target.value || null)}
+                                />}
+
+
                         </Grid>
 
                         <Grid item xs={12} md={6}>
@@ -230,7 +290,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                 </Grid>
 
 
-                <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
+                {seguimiento.type === "LOCAL" && <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Datos operador
@@ -299,7 +359,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             </Button>
                         </Grid>
                         <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
-                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !==null) || disable}
+                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !== null) || disable}
                                 onClick={() => {
                                     sendDataToBackend("output_date", (new Date()).toISOString())
                                     // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
@@ -333,7 +393,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                         </Grid>
 
                     </Grid>
-                </Grid>
+                </Grid>}
                 <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
@@ -341,25 +401,25 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                         </Typography>
                     </Divider>
                     <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    {!disable &&
-                    <> <Grid item xs={12} md={12} lg={4} xl={4}>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={4}>
+                        {!disable &&
+                            <> <Grid item xs={12} md={12} lg={4} xl={4}>
+                            </Grid>
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
 
-                        </Grid>
-                         <Grid item xs={12} md={6} lg={4} xl={4}>
-                            <Button variant="outlined" size="small" fullWidth color="secondary"
-                                startIcon={<AddTwoToneIcon />}
-                                disabled={watch('originLocation') === undefined || watch('originLocation') === null || watch('transferNumber')?.toString() === "" || watch('documentNumber')?.toString() === ""}
-                                onClick={() => {
-                                    setopen(true);
-                                }}
-                            >
-                                Agregar producto
-                            </Button>
-                        </Grid>
-                        </>}
-                        
+                                </Grid>
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                    <Button variant="outlined" size="small" fullWidth color="secondary"
+                                        startIcon={<AddTwoToneIcon />}
+                                        disabled={watch('originLocation') === undefined || watch('originLocation') === null || (watch('documentNumber')?.toString() === "" && watch('invoiceNumber')?.toString() === "")}
+                                        onClick={() => {
+                                            setopen(true);
+                                        }}
+                                    >
+                                        Agregar producto
+                                    </Button>
+                                </Grid>
+                            </>}
+
                         <Grid item xs={12}>
                             <Table size="small" aria-label="a dense table" >
                                 <TableHead>
@@ -376,10 +436,10 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                         <StyledTableCell align="right">
                                             Total pallets
                                         </StyledTableCell>
-                                        { !disable &&
+                                        {!disable &&
                                             <StyledTableCell align="right">
-                                            Acciones
-                                        </StyledTableCell>}
+                                                Acciones
+                                            </StyledTableCell>}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -395,7 +455,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
+                {seguimiento.type === "LOCAL" && <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
                     <Divider >
                         <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
                             Salida de producto
@@ -466,7 +526,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 </>
                             )}
                     </Grid>
-                </Grid>
+                </Grid>}
             </Grid>
         </>
     )

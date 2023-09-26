@@ -17,7 +17,7 @@ interface PalletPrintContentProps {
     pallet?: {
         numeroSap: number;
         rastra: string;
-        nDocEntrada: number;
+        nDocEntrada: number | string;
         fechaVencimiento: string;
         nPallets: number;
         cajasPallet: number;

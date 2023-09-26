@@ -60,7 +60,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
           pallet={{
             numeroSap: +detalle.sap_code,
             rastra: seguimiento.rastra.code,
-            nDocEntrada: seguimiento.documentNumber || 0,
+            nDocEntrada: seguimiento.documentNumber || seguimiento.invoiceNumber || "",
             fechaVencimiento: historyRow.date || new Date().toISOString(),
             nPallets: historyRow.pallets || 0,
             cajasPallet: detalle.boxes_pre_pallet,

@@ -11,6 +11,8 @@ import { useGetTrackerQuery } from '../../../store/seguimiento/trackerApi';
 import { useAppSelector } from '../../../store';
 import { setManageQueryParams } from '../../../store/ui/uiSlice';
 import { useAppDispatch } from '../../../store/store';
+import { chanceStatusTracking } from '../../../store/seguimiento/trackerThunk';
+import { EditNoteOutlined } from '@mui/icons-material';
 
 const tableBase = {
     localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -36,6 +38,10 @@ export const ManagePage = () => {
     const statusQueryParam = queryParams.get("status");
     const statusManageQueryParams = manageQueryParams.status;
       
+    const handleEditState = (id: number) => {
+        dispatch(chanceStatusTracking('EDITED', id, ()=> navigate('/tracker/check/?id='+id)))
+    }
+
     const [query, setquery] = useState<TrackerQueryParams>({
         limit: parseInt(queryParams.get("limit") ||  manageQueryParams.limit.toString()),
         offset: parseInt(queryParams.get("offset") || manageQueryParams.offset.toString()),
@@ -69,6 +75,8 @@ export const ManagePage = () => {
             field: "id",
             headerName: "Tracking",
             flex: 1,
+            width: 140,
+            minWidth: 140,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     TRK-{params.value.toString().padStart(10, "0")}
@@ -111,9 +119,24 @@ export const ManagePage = () => {
             }
         },
         {
+            field: "invoice_number",
+            headerName: "No. Factura",
+            flex: 1,
+            width: 130,
+            minWidth: 130,
+            renderCell: (params) => {
+                return <Typography variant="body2">
+                    {params.value ? params.value : '-'}
+                </Typography>
+            }
+        },
+
+        {
             field: "transfer_number",
             headerName: "Traslado 5001",
             flex: 1,
+            width: 130,
+            minWidth: 130,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value ? params.value : '-'}
@@ -137,6 +160,8 @@ export const ManagePage = () => {
             field: "accounted",
             headerName: "Contabilizado",
             flex: 1,
+            width: 120,
+            minWidth: 120,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value ? params.value : '-'}
@@ -152,9 +177,9 @@ export const ManagePage = () => {
             minWidth:120,
             renderCell: (params) => {
                 return <Chip
-                    label={params.value == 'COMPLETE'? 'Completado': 'Pendiente'}
+                    label={params.value == 'COMPLETE'? 'Completado': params.value == 'PENDING'? 'Pendiente': 'En atención'}
                     variant='outlined'
-                    color={params.value == 'COMPLETE'? 'success': 'warning'}
+                    color={params.value == 'COMPLETE'? 'success': params.value == 'PENDING'? 'warning': 'info'}
                     />
             }
         },
@@ -162,6 +187,8 @@ export const ManagePage = () => {
             field: "created_at",
             headerName: "Registrado el",
             flex: 1,
+            width: 120,
+            minWidth: 120,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {format(new Date(params.value), 'dd/MM/yyyy')}
@@ -173,6 +200,8 @@ export const ManagePage = () => {
             field: "completed_date",
             headerName: "Compleado el",
             flex: 1,
+            width: 120,
+            minWidth: 120,
             renderCell: (params) => {
                 return <Typography variant="body2">
                     {params.value ? format(new Date(params.value), 'dd/MM/yyyy') : '-'}
@@ -181,13 +210,18 @@ export const ManagePage = () => {
         },
         {
             field: "ver",
-            headerName: "Ver",
+            headerName: "Acciones",
             flex: 0,
-            width: 60,
+            width: 80,
             renderCell: (params) => {
-                return <IconButton size="small" color="primary" onClick={() => navigate("/tracker/detail/" + params.row.id)}>  
+                return <>
+                <IconButton size="small" color="primary" onClick={() => navigate("/tracker/detail/" + params.row.id)}>  
                     <ArrowForwardIcon />
                 </IconButton>
+                <IconButton size="small" color="primary" onClick={() => handleEditState(params.row.id)}>
+                    <EditNoteOutlined />
+                </IconButton>
+                </>
             }
         }
     ];
