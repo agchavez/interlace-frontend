@@ -218,9 +218,13 @@ export const ManagePage = () => {
                 <IconButton size="small" color="primary" onClick={() => navigate("/tracker/detail/" + params.row.id)}>  
                     <ArrowForwardIcon />
                 </IconButton>
-                <IconButton size="small" color="primary" onClick={() => handleEditState(params.row.id)}>
+                {
+                    params.row.status === 'PENDING' &&
+
+                    <IconButton size="small" color="primary" onClick={() => handleEditState(params.row.id)}>
                     <EditNoteOutlined />
                 </IconButton>
+                }
                 </>
             }
         }

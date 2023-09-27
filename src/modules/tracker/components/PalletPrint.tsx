@@ -48,7 +48,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
     return (
         <ThemeProvider theme={THEME}>
             <Grid xs={6} component="div" paddingRight="8pt">
-                <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#ddd" }}>
+                <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#fff" }}>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
                         <Typography component="h1" fontSize={25} color="white" margin="3pt">
                             TRK-{track}
@@ -109,7 +109,20 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                             </Grid>
                             <Grid item xs={4} container direction="column" alignItems="center" margin="auto">
                                 <Typography fontSize={15}>
-                                    TA
+                                    {/* 
+                                        TA = TURNO A DE 6:00 A 14:00
+                                        TB = TURNO B DE 14:00 A 20:30
+                                        TC = TURNO C DE 20:30 A 6:00
+                                        en base a la fecha que se imprime se debe calcular el turno
+                                    */}
+                                    {
+
+                                        format(new Date(), "HH:mm:ss") > "06:00:00" && format(new Date(), "HH:mm:ss") < "14:00:00" ? "TA" :
+                                            format(new Date(), "HH:mm:ss") > "14:00:00" && format(new Date(), "HH:mm:ss") < "20:30:00" ? "TB" :
+                                                format(new Date(), "HH:mm:ss") > "20:30:00" && format(new Date(), "HH:mm:ss") < "23:59:59" ? "TC" :
+                                                    format(new Date(), "HH:mm:ss") > "00:00:00" && format(new Date(), "HH:mm:ss") < "06:00:00" ? "TC" : ""
+                                                    
+                                    }
                                 </Typography>
                                 <Typography fontSize={15}>
                                     {format(new Date(), "dd-MMM-yyyy",{ locale: es }).toUpperCase()}
@@ -174,7 +187,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                             <Grid item xs={5}>
                                 <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
                                     imageSettings={{
-                                        src: "/public/logo-qr.png",
+                                        src: "/logo-qr.png",
                                         height: 40,
                                         width: 40,
                                         excavate: true,

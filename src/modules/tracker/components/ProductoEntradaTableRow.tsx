@@ -43,7 +43,7 @@ export interface ProductoEntradaTableRowProps {
 export interface UpdateProductoPalletParams {
   palletIndex: number;
   date: Date | null;
-  pallets: number;
+  pallets: number | null;
   id: number;
   disable?: boolean;
 }

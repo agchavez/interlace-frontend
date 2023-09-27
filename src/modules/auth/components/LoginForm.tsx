@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid } from '@mui/material';
+import { Button, Container, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid, CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
@@ -124,6 +124,8 @@ export function LoginForm() {
                     variant="contained"
                     color="primary"
                     type="submit"
+                    disabled={resultLogin.isLoading}
+                    startIcon={resultLogin.isLoading ? <CircularProgress size={20} /> : null}
                     sx={{ marginTop: "1rem", marginBottom: "1rem" }}
                 >
                     <Typography component="body" variant="body1" textAlign="center">

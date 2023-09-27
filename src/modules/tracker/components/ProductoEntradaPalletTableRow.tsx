@@ -43,7 +43,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
 }) => {
   const [willPrint, setWillPrint] = useState(false);
   const [componenPrint, setComponentPrint] = useState(<></>);
-  const [pallets, setPallets] = useState<number>(historyRow.pallets || 0);
+  const [pallets, setPallets] = useState<number | null>(historyRow.pallets || null);
 
   const [date, setDate] = useState<Date | undefined>(
     historyRow.date && historyRow.date !== null
