@@ -46,11 +46,13 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                 left: 0,
                 zIndex: 3
             }}>
-            <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
-                <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
-                    { sidebarOpen ? <CloseIcon />: <MenuIcon />}
-                </Button>
-            </Grid>
+            {
+                status === "authenticated" && <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
+                    <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
+                        { sidebarOpen ? <CloseIcon />: <MenuIcon />}
+                    </Button>
+                </Grid>
+            }
             <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
                 {/* Logo */}
                 {/* {status == 'authenticated1' && <IconButton
