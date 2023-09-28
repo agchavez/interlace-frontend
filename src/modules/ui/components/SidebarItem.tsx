@@ -24,12 +24,8 @@ export interface SidebarItemProps {
 
 const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text, id, link = "" }) => {
     const [open, setOpen] = useState(false)
-    const handleClick:React.MouseEventHandler<HTMLDivElement> = (e) => {
-        e.preventDefault()
+    const handleClick = () => {
         setOpen(!open)
-    }
-    const handleClickMainmenu:React.MouseEventHandler<HTMLAnchorElement> = () => {
-        if(!open)setOpen(true)
     }
     const selected = subItems?.find((item) => item.selected)
     return (
@@ -37,7 +33,7 @@ const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text
         <Grid item container sx={{ paddingLeft: "0.2rem", marginTop: "1rem" }}>
             <Grid item style={{ paddingLeft: "1rem", paddingRight: "1rem" }} flexGrow={1}>
                 <Grid container direction={"column"}>
-                    <Link to={link || "#"} style={{ textDecoration: "none" }} className={`sidebar_item__main text_gray ${selected ? "sidebar_item__main_selected" : ""}`} onClick={handleClickMainmenu}>
+                    <Link to={link || "#"} style={{ textDecoration: "none" }} className={`sidebar_item__main text_gray ${selected ? "sidebar_item__main_selected" : ""}`} onClick={handleClick}>
                         <Grid container borderRadius={2} alignItems="center">
                             <Grid item xs={2} textAlign="right">
                                 <Grid container alignItems="center" justifyContent="flex-end" height="100%">
@@ -49,7 +45,7 @@ const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text
                                     {text}
                                 </Typography>
                             </Grid>
-                            <Grid item xs={2} textAlign="right" onClick={handleClick}>
+                            <Grid item xs={2} textAlign="right">
                                 <Grid container alignItems="center" justifyContent="flex-end" height="100%">
                                     {open ? <KeyboardArrowDownOutlinedIcon fontSize="small" /> : <KeyboardArrowRightOutlinedIcon fontSize="small" />}
                                 </Grid>
