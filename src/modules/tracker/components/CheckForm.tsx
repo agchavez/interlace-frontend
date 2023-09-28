@@ -231,7 +231,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                         </Grid>
                         <Grid item xs={2} md={2}>
                             {
-                                <ShowCodeDriver driverId={watch('driver') || undefined} />
+                                watch('driver') &&  <ShowCodeDriver driverId={watch('driver') || undefined} />
                             }
                         </Grid>
                         {

@@ -36,6 +36,7 @@ props: TrailerSelectProps<TField>
     id: props.trailerId
   });
   
+  
   const {
     data: categorias,
     refetch,

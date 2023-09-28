@@ -112,7 +112,7 @@ export const CheckPage = () => {
   }, [id, seguimientos])
   return (
     <>
-      <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />
+      {showCreateModal && <CreateCheckModal open={showCreateModal} handleClose={handleCloseCreateModal} />}
       <EliminarSeguimientoModal index={seguimeintoActual || 0} open={eliminarOpen} handleClose={handleCloseDeleteModal} seguimientoId={seguimientos[seguimeintoActual || 0] && seguimientos[seguimeintoActual || 0].id} />
       <CompletarSeguimientoModal open={completarOpen.open} handleClose={handleCloseCompleteModal} copleted={completarOpen.completed}/>
       <Container maxWidth="xl">

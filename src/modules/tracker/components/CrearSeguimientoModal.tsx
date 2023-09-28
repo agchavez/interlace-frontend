@@ -127,14 +127,14 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                                     <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
                                         <Grid container spacing={2}>
                                             <Grid item xs={12}>
-                                                <TrailerSelect
+                                               {open && <TrailerSelect
                                                     control={control}
                                                     registered={true}
                                                     name="rastraId"
                                                     placeholder="Seleccione una rastra"
                                                     trailerId={trailer?.id}
                                                     onChange={handleChangeTrailer}
-                                                />
+                                                />}
                                             </Grid>
                                             <Grid item xs={12}>
                                                 <TransporterSelect
