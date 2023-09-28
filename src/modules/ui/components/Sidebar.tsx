@@ -36,6 +36,7 @@ const items: SideBarItem[] = [
             },
         ],
         id: "inicio",
+        link: "/",
     },
     {
         text: "USUARIO",
@@ -53,6 +54,7 @@ const items: SideBarItem[] = [
             }
         ],
         id: "usuarios",
+        link: '/user/register'
     },
     {
         text: "T1",
@@ -70,6 +72,7 @@ const items: SideBarItem[] = [
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "movimientos",
+        link: '/tracker/check'
     },
     {
         text: "REPORTE",
@@ -78,6 +81,7 @@ const items: SideBarItem[] = [
         ],
         icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "reportes",
+        link: '/movimientos/crear'
     }
 ]
 
@@ -133,7 +137,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
                             sidebarItems.map((item) => {
                                 if (item.visible) {
                                     return (
-                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} link={item.link}/>
                                     )
                                 }
                             })
@@ -162,7 +166,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
                             sidebarItems.map((item) => {
                                 if (item.visible) {
                                     return (
-                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} link={item.link}/>
                                     )
                                 }
                             })
