@@ -48,11 +48,21 @@ props: ProductSelectProps<TField>
 
   const handleInputChange = (newInputValue: string) => {
     if (newInputValue.length > 2) {
+      const splitted = newInputValue.split(" - ");
+      if (splitted.length > 1){
       setQuery({
         ...query,
-        search: newInputValue
+        search: splitted[0],
       });
       refetch();
+    }
+    else{
+      setQuery({
+        ...query,
+        search: newInputValue,
+      });
+      refetch();
+    }
     }
   };
 
