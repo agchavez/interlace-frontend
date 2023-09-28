@@ -45,18 +45,25 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
 
     const formRef = useRef<HTMLFormElement>(null);
 
-    const { handleSubmit, reset, setFocus, control, register, watch, formState:{isValid, errors} } = useForm<FormValues>({
+    const { handleSubmit, reset, setFocus, control, register, watch, formState:{isValid, errors}, setValue } = useForm<FormValues>({
         resolver: yupResolver(schema),
         defaultValues: {
             rastraId: 0,
             transporter: 0,
             type: "LOCAL"
         }
-    })
+    });
+
+    useEffect(() => {
+        if (open) {
+            reset();
+        }
+    }, [open, reset])
 
     const handleChangeTrailer = (value: Trailer | null) => {
         if (value) {
-            settrailer(value)
+            settrailer(value);
+            setValue("rastraId", value.id)
         }
     }
 
@@ -119,8 +126,10 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
                                             <Grid item xs={12}>
                                                 <TrailerSelect
                                                     control={control}
+                                                    registered={true}
                                                     name="rastraId"
                                                     placeholder="Seleccione una rastra"
+                                                    trailerId={trailer?.id}
                                                     onChange={handleChangeTrailer}
                                                 />
                                             </Grid>

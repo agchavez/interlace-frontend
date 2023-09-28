@@ -48,6 +48,7 @@ const permisions = [
             "maintenance.view_routemodel",
             "maintenance.view_transportermodel",
             "maintenance.view_trailermodel",
+            "maintenance.add_trailermodel",
         ]
     },
     {

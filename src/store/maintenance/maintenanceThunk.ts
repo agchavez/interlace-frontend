@@ -9,13 +9,26 @@ import { handleApiError } from '../../utils/error';
 
 
 // listar data inicial de mantenimiento
-export const getMaintenanceData = (): AppThunk => async (dispatch) => {
+export const getMaintenanceData = (): AppThunk => async (dispatch, getState) => {
     try {
-        const { data: dataDistributionCenters } = await backendApi.get<DistributionCenter[]>('/distribution-center/');
+        const { token } = getState().auth;
+        const { data: dataDistributionCenters } = await backendApi.get<DistributionCenter[]>('/distribution-center/', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         dispatch(setDistributionCenters(dataDistributionCenters));
-        const { data: dataGroups } = await backendApi.get<GroupsResponse>('/groups/');
+        const { data: dataGroups } = await backendApi.get<GroupsResponse>('/groups/', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         dispatch(setGroups(dataGroups.results));
-        const { data: dataOutput } = await backendApi.get<BaseaAPIResponse<OutputType>>('/output-type/');
+        const { data: dataOutput } = await backendApi.get<BaseaAPIResponse<OutputType>>('/output-type/', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         dispatch(setOutputType(dataOutput.results));
     } catch (error) {
         toast.error('Error al cargar los datos de mantenimiento');
@@ -26,8 +39,7 @@ export const getMaintenanceData = (): AppThunk => async (dispatch) => {
 // Buscar articulos por codigo de barras
 export const getArticlesByBarcode = (barcode: string, index: number): AppThunk => async (dispatch, getState) => {
     try {
-        console.log('index', index);
-
+    
         dispatch(setLoadingMain(true))
         const { token } = getState().auth;
         const { data } = await backendApi.get<BaseaAPIResponse<Product>>(`/product/?bar_code=${barcode}`, {

@@ -29,6 +29,15 @@ export const maintenanceApi = createApi({
             }),
             keepUnusedDataFor: 120000
         }),
+        registerTrailer: builder.mutation<Trailer, string>({
+            query: (body) => ({
+                url: `/trailer/`,
+                method: 'POST',
+                body:{
+                    code: body
+                }
+            })
+        }),
         getTransporter: builder.query<BaseApiResponse<Transporter>, TransporterQuerySearch>({
             query: (params) => ({
                 url: `/transporter/`,
@@ -104,4 +113,5 @@ export const {
     useGetProductQuery,
     useGetLocationsQuery,
     useGetProductPeriodQuery,
+    useRegisterTrailerMutation
 } = maintenanceApi

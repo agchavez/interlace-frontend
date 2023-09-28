@@ -69,7 +69,7 @@ props: ProductSelectProps<TField>
         return (<>
           <Autocomplete
             value={value ? categorias?.results?.find((option : Product) => value === option.id) ?? null : null}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => option.sap_code + " - " + option.name}
             disabled={props.disabled}
             onChange={(_, newValue) => {
               if (newValue === null){

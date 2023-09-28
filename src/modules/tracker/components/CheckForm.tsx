@@ -23,6 +23,7 @@ import { format } from 'date-fns/esm';
 import { ProductoEntradaTableRow } from './ProductoEntradaTableRow';
 import { EditNote } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { ShowCodeDriver } from './ShowCodeDriver';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -218,7 +219,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             />
 
                         </Grid>
-                        <Grid item xs={12} md={12}>
+                        <Grid item xs={10} md={10}>
                             <DriverSelect
                                 control={control}
                                 name='driver'
@@ -227,6 +228,11 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 driver={watch('driver') || undefined}
                                 onChange={e => sendDataToBackend("driver", e?.id || null)}
                             />
+                        </Grid>
+                        <Grid item xs={2} md={2}>
+                            {
+                                <ShowCodeDriver driverId={watch('driver') || undefined} />
+                            }
                         </Grid>
                         {
                             seguimiento?.type === 'IMPORT' &&

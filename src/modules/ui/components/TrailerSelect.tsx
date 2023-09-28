@@ -1,10 +1,14 @@
 import { Controller, Control, Path } from "react-hook-form";
 import { useEffect, useState } from 'react';
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, createFilterOptions } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
 import { TrailerQuerySearch, Trailer } from '../../../interfaces/maintenance';
-import { useGetTrailerQuery } from "../../../store/maintenance/maintenanceApi";
+import { useGetTrailerQuery, useRegisterTrailerMutation } from "../../../store/maintenance/maintenanceApi";
+import { toast } from "sonner";
+
+
+const filter = createFilterOptions<Trailer>();
 
 interface TrailerSelectProps<
     TField extends FieldValues
@@ -14,6 +18,7 @@ interface TrailerSelectProps<
   name: Path<TField>;
   placeholder?: string;
   //options?: o[];
+  registered?: boolean;
   disabled?: boolean;
   onChange?: (value: Trailer | null) => void;
   trailerId?: number;
@@ -38,6 +43,10 @@ props: TrailerSelectProps<TField>
     isLoading
   } = useGetTrailerQuery(query);
 
+  const [
+    registerTrailer, { isLoading: isRegistering, isSuccess: isRegisteringSuccess , data: registerTrailerData, reset: resetRegisterTrailer }
+  ] = useRegisterTrailerMutation();
+
   useEffect(() => {
     refetch();
   }, [query, refetch]);
@@ -50,6 +59,29 @@ props: TrailerSelectProps<TField>
       });
     }
   };
+
+  useEffect(() => {
+    if (isRegisteringSuccess && registerTrailerData){
+      toast.success(registerTrailerData.code, {
+        description: "Trailer registrado con exito"
+      });
+      props.onChange?.(registerTrailerData);
+      resetRegisterTrailer();
+      setQuery({
+        ...query,
+        id: registerTrailerData.id, 
+        search: ""
+      })
+
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRegisteringSuccess, registerTrailerData, query]);
+
+  const handleRegister = (newInputValue: string) => {
+    if (newInputValue.length > 2) {
+      registerTrailer(newInputValue);
+    }
+  }
 
   return (
     <Controller
@@ -75,11 +107,28 @@ props: TrailerSelectProps<TField>
                 })
               }
               const resolvedId = newValue ? newValue.id : null;
+              if(resolvedId === 546464 && newValue?.code !== undefined){
+                handleRegister(newValue?.code.split(" ")[1]);
+                return;
+              }
               onChange(resolvedId);
               props.onChange?.(newValue);
             }}
             onInputChange={(_, newInputValue) => handleInputChange(newInputValue)}
-            loading={isLoading || isFetching}
+            filterOptions={(options, params) => {
+              const filtered = filter(options, params);
+              const exist = options.some((option) => params.inputValue.toUpperCase() === option.code);
+              if (params.inputValue !== '' && !exist && props.registered && params.inputValue.length > 2) {
+                filtered.push({
+                  id: 546464,
+                  createdAtDate: new Date().toDateString(),
+                  createdAtTime: new Date().toTimeString(),
+                  code: `Agregar ${params.inputValue}`,
+                });
+              }
+              return filtered;
+            }}
+            loading={isLoading || isFetching || isRegistering}
             id="autocomplete-categoria"
             size="small"
             options={categorias?.results ?? []}
