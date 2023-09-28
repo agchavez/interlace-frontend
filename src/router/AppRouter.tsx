@@ -118,7 +118,7 @@ export function AppRouter() {
 
     return <>
         <div >
-            {status === 'authenticated' && <Sidebar open={openMobileSidebar} />}
+            {status === 'authenticated' && <Sidebar open={openMobileSidebar} setOpen={setOpenMobileSidebar}/>}
             <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
             <LogOutTimer />
             <div>
