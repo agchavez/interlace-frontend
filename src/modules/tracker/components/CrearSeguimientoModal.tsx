@@ -57,6 +57,9 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({ open, handleClo
     useEffect(() => {
         if (open) {
             reset();
+            settrailer(null);
+            setTransporter(null);
+            
         }
     }, [open, reset])
 
