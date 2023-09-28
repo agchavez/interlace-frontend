@@ -12,7 +12,8 @@ import { useLogoutMutation } from "../../../store/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { RoutePermissionsDirectory } from '../../../config/directory'
 interface SidebarProps {
-    open: boolean
+    open: boolean,
+    setOpen: (value: boolean)=>void
 }
 
 interface SideBarItem {
@@ -83,7 +84,7 @@ const items: SideBarItem[] = [
 
 items.forEach(item => item.subItems.forEach(sub => sub.permissions = RoutePermissionsDirectory[sub.href || -1]))
 
-const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
     const user = useAppSelector(state => state.auth.user)
     const [logoutAPI] = useLogoutMutation();
     const dispatch = useAppDispatch()
@@ -162,7 +163,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open }) => {
                             sidebarItems.map((item) => {
                                 if (item.visible) {
                                     return (
-                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} />
+                                        <SidebarItem subItems={item.subItems} icon={item.icon} text={item.text} id={item.id} key={item.id} subitemClickAction={()=>setOpen(false)}/>
                                     )
                                 }
                             })
