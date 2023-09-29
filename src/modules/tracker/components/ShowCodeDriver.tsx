@@ -34,7 +34,7 @@ export const ShowCodeDriver:FC<ShowCodeDriverProps> = ({driverId}) => {
     
   return (
     <>
-        <Typography variant="h6" component="h6" sx={{color:"text.secondary"}}>{data?.results[0]?.code}</Typography>
+        <Typography variant="h6" component="h6" sx={{color:"text.secondary"}}>{data?.results[0]?.sap_code}</Typography>
     </>
   )
 }
