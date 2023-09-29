@@ -1,4 +1,4 @@
-import { Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QRCodeSVG } from 'qrcode.react';
@@ -39,7 +39,7 @@ const PeriodLabelColor = {
 }
 
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
-    const track = appendLeftZeros(pallet?.trackingId || 0, 9);
+    const track = appendLeftZeros(pallet?.trackingId || 0, 5);
     const parsedDate = parseISO(pallet?.fechaVencimiento.split("T")[0] || "");
     // Evitar la conversión de fechas ponerl la fecha en formato yyyy-MM-dd
     const bgPeriod = PeriodLabelColor[pallet?.periodo||"A"] || "green"
@@ -174,38 +174,28 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Grid>
                     </Grid>
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginTop: "5pt", marginBottom: "5pt" }} orientation='horizontal' />
-                    <Grid item container xs={12} marginTop="7pt" marginBottom="10pt">
-                        <Grid item xs={4} margin="auto">
-                            <Typography fontSize={30} textAlign="center" fontWeight={700}>
-                                TRACK
-                            </Typography>
-                            <Typography fontSize={22} textAlign="center" fontWeight={700}>
-                                QR CODE
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={8} container margin="auto">
-                            <Grid item xs={5}>
-                                <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
-                                    imageSettings={{
+                    <Grid container xs={12} marginTop="7pt" marginBottom="10pt">
+                        <Grid item container xs={6} justifyContent="center" justifyItems="center">
+                            <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
+                                imageSettings={{
                                         src: "/logo-qr.png",
                                         height: 40,
                                         width: 40,
                                         excavate: true,
-                                      }}
-                                      level='Q'
-                                />
-                            </Grid>
-                            <Grid item xs={7} margin="auto">
-                                <Typography fontSize={15} textAlign="center">
-                                    ESCANEA EL QR
-                                </Typography>
-                                <Typography fontSize={15} textAlign="center">
-                                    PARA <span style={{ fontWeight: 700 }}>CHECK</span>
-                                </Typography>
-                                <Typography fontSize={15} textAlign="center" fontWeight={700}>
-                                    DE STOCK AGE
-                                </Typography>
-                            </Grid>
+                                    }}
+                                    level='Q'
+                            />
+                        </Grid>
+                        <Grid item xs={6} container margin="auto" direction="column">
+                            <Typography component="p" fontSize={20} textAlign="center">
+                                SCAN TO TRACK
+                            </Typography>
+                            <Box textAlign="center">
+                            <Box component="img" src="/track.png" width="40pt" height="40pt"/>
+                            </Box>
+                            <Typography fontSize={20} textAlign="center" fontWeight={700}>
+                                STOCK AGE INDEX | FRESCURA | TRAZABILIDAD
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Grid>
