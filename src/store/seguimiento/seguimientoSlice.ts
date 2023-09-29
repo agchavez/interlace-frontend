@@ -77,6 +77,7 @@ export interface Seguimiento {
     rastra: TarilerData,
     transporter: TransporterData,
     userName?: string;
+    distributorCenter: number;
     completed?: string;
     plateNumber: string;
     completed_date: string | null;

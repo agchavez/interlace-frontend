@@ -342,6 +342,7 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
         rastra: tracker.tariler_data,
+        distributorCenter: tracker.distributor_center,
         detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
         transporter: tracker.transporter_data,
         plateNumber: tracker.plate_number,

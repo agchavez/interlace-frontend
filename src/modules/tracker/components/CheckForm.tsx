@@ -24,6 +24,7 @@ import { ProductoEntradaTableRow } from './ProductoEntradaTableRow';
 import { EditNote } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { ShowCodeDriver } from './ShowCodeDriver';
+import { ShowRoute } from './ShowRoute';
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -514,6 +515,12 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 options={outputType.map((d) => ({ label: d.name, id: d.id?.toString() }))}
                                 onChange={e => sendDataToBackend("output_type", e)}
                             />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <ShowRoute 
+                                distributorCenterId={seguimiento.distributorCenter}
+                                locationId={watch('outputLocation')}
+                                />
                         </Grid>
                         {
                             outputTypeData && (
