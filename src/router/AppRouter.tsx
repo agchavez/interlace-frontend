@@ -12,8 +12,9 @@ import Navbar from '../modules/ui/components/Navbar';
 
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
-import { RoutePermissionsDirectory } from '../config/directory';
+import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
+
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
@@ -104,7 +105,15 @@ export function AppRouter() {
 
     const permitedRoute = useMemo(() => {
         const location_ = location.pathname;
-        const requiredPermissions = RoutePermissionsDirectory[location_] || [];
+        const obj = permisions.find(perm => {
+            if(perm.reg) {
+                return perm.reg?.test(location_)
+            } else {
+                return perm.url === location_ || (perm.url +'/') === location_
+            }
+        })
+        if (!obj) return false
+        const requiredPermissions = obj?.permissions
         if (requiredPermissions.includes("any")) return true;
         return requiredPermissions.every(r_perm =>
             user?.list_permissions.includes(r_perm) ||
