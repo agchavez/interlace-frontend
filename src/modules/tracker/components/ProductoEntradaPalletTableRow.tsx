@@ -88,6 +88,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
   const print = PrintComponent({
     pageOrientation: "landscape",
     component: componenPrint,
+    margin: "10px",
   });
 
   useEffect(() => {

@@ -31,7 +31,7 @@ const QRCheckPage: FunctionComponent<QRCheckPageProps> = () => {
             <ArrowBack color="primary" fontSize="medium" />
           </IconButton>
           <Typography variant="h4" component="h1" fontWeight={400}>
-            TRK-{id?.padStart(10, "0")}
+            TRK-{id?.padStart(5, "0")}
           </Typography>
           <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
         </Grid>

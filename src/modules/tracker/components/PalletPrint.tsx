@@ -47,7 +47,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
     
     return (
         <ThemeProvider theme={THEME}>
-            <Grid xs={6} component="div" paddingRight="8pt">
+            <Grid xs={6} component="div" paddingRight="6pt">
                 <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#fff" }}>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
                         <Typography component="h1" fontSize={25} color="white" margin="3pt">

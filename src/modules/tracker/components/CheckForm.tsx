@@ -184,7 +184,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                 </Grid>
                 <Grid item xs={12} >
                     <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
-                        TRK-{seguimiento.id?.toString().padStart(8, '0')}
+                        TRK-{seguimiento.id?.toString().padStart(5, '0')}
                     </Typography>
                 </Grid>
 
@@ -383,7 +383,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 operatorId={watch('opm1')}
                                 disabled={disable}
                                 invalidId={watch('opm2')}
-                                onChange={e => sendDataToBackend("operator_1", e?.id || 0)}
+                                onChange={e => sendDataToBackend("operator_1", e?.id || null)}
                             />
                         </Grid>
                         <Grid item xs={12} >
@@ -395,7 +395,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                 label='Operador #2'
                                 operatorId={watch('opm2')}
                                 invalidId={watch('opm1')}
-                                onChange={e => sendDataToBackend("operator_2", e?.id || 0)}
+                                onChange={e => sendDataToBackend("operator_2", e?.id || null)}
                             />
                         </Grid>
 
