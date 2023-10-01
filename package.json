@@ -29,7 +29,8 @@
     "react-to-print": "^2.14.13",
     "sass": "^1.66.1",
     "sonner": "^0.7.0",
-    "yup": "^1.2.0"
+    "yup": "^1.2.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
   },
   "devDependencies": {
     "@types/react": "^18.2.21",
