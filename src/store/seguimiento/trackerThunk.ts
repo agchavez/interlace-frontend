@@ -65,7 +65,7 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
     }
 }
 
-export const chanceStatusTracking = (status: 'PENDING' | 'EDITED',trackerId: number,  onComplete?: () => void): AppThunk => async (dispatch, getState) => {
+export const chanceStatusTracking = (status: 'PENDING' | 'EDITED', trackerId: number, onComplete?: () => void): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
@@ -75,7 +75,7 @@ export const chanceStatusTracking = (status: 'PENDING' | 'EDITED',trackerId: num
             }
         })
         toast.success("Seguimiento actualizado", {
-            description:status === 'PENDING' ? 'El seguimiento se movio a pendientes' : 'El seguimiento se encuentra ahora en atención'
+            description: status === 'PENDING' ? 'El seguimiento se movio a pendientes' : 'El seguimiento se encuentra ahora en atención'
         })
         onComplete && onComplete()
     } catch (error) {
@@ -282,10 +282,10 @@ export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData)
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
-        const {seguimientos, seguimeintoActual} = getState().seguimiento
-        if(!seguimientos || seguimeintoActual === undefined) return
+        const { seguimientos, seguimeintoActual } = getState().seguimiento
+        if (!seguimientos || seguimeintoActual === undefined) return
         const seguimiento = seguimientos[seguimeintoActual]
-        if (seguimiento.detallesSalida?.find(d => d.sap_code === data.product.sap_code)){
+        if (seguimiento.detallesSalida?.find(d => d.sap_code === data.product.sap_code)) {
             toast.error("producto ya agregado")
             return;
         }
@@ -341,6 +341,7 @@ export const removeOutProduct = (indexSeguimiento: number, detalle: DetalleCarga
 export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
+        user: tracker.user,
         rastra: tracker.tariler_data,
         distributorCenter: tracker.distributor_center,
         detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
