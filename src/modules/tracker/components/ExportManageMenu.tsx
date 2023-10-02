@@ -14,11 +14,13 @@ import { StyledMenu } from "../../ui/components/StyledMenu";
 interface ExportManageProps {
   disabled: boolean;
   query: TrackerQueryParams;
+  t1Count: number;
 }
 
 const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   disabled,
   query,
+  t1Count,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { token } = useAppSelector((state) => state.auth);
@@ -37,7 +39,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { ...query, offset: 0, limit: undefined },
+        params: { ...query, offset: 0, limit: t1Count },
       }
     );
     return response.data;
@@ -59,7 +61,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       "Completado el",
     ];
     const trackerData = data.results.map((tr) => [
-      tr.id,
+      "TRK-" + tr.id.toString().padStart(10, "0"),
       tr.distributor_center_data.name,
       tr.tariler_data.code,
       tr.input_document_number,
