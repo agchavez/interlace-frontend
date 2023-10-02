@@ -52,38 +52,49 @@ export const ManagePage = () => {
     );
   };
 
-  const [query, setquery] = useState<TrackerQueryParams>({
-    limit: parseInt(
-      queryParams.get("limit") || manageQueryParams.limit.toString()
-    ),
-    offset: parseInt(
-      queryParams.get("offset") || manageQueryParams.offset.toString()
-    ),
-    distributor_center: user?.centro_distribucion
-      ? [user.centro_distribucion]
-      : manageQueryParams.distributor_center,
-    search: queryParams.get("search") || manageQueryParams.search,
-    trailer:
-      queryParams.getAll("trailer").length > 0
-        ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer))
-        : manageQueryParams.trailer,
-    transporter:
-      queryParams.getAll("transporter").length > 0
-        ? queryParams
-            .getAll("transporter")
-            .map((transporter) => parseInt(transporter))
-        : manageQueryParams.transporter,
-    date_after: manageQueryParams.date_after,
-    date_before: manageQueryParams.date_before,
-    status:
-      statusQueryParam === "COMPLETE" || statusManageQueryParams === "COMPLETE"
-        ? "COMPLETE"
-        : statusQueryParam === "PENDING" ||
-          statusManageQueryParams === "PENDING"
-        ? "PENDING"
-        : undefined,
-    user: user && manageQueryParams.onlyMyTreckers ? [+user.id] : undefined,
-    onlyMyTreckers: manageQueryParams.onlyMyTreckers,
+  const [query, setquery] = useState<TrackerQueryParams>(() => {
+    const onlyMyTreckers =
+      manageQueryParams.onlyMyTreckers !== undefined
+        ? manageQueryParams.onlyMyTreckers
+        : user?.list_groups.includes("SUPERVISOR");
+    let userId: number[] | undefined;
+    if (onlyMyTreckers) {
+      userId = user !== null && user.id ? [+user.id] : undefined;
+    }
+    return {
+      limit: parseInt(
+        queryParams.get("limit") || manageQueryParams.limit.toString()
+      ),
+      offset: parseInt(
+        queryParams.get("offset") || manageQueryParams.offset.toString()
+      ),
+      distributor_center: user?.centro_distribucion
+        ? [user.centro_distribucion]
+        : manageQueryParams.distributor_center,
+      search: queryParams.get("search") || manageQueryParams.search,
+      trailer:
+        queryParams.getAll("trailer").length > 0
+          ? queryParams.getAll("trailer").map((trailer) => parseInt(trailer))
+          : manageQueryParams.trailer,
+      transporter:
+        queryParams.getAll("transporter").length > 0
+          ? queryParams
+              .getAll("transporter")
+              .map((transporter) => parseInt(transporter))
+          : manageQueryParams.transporter,
+      date_after: manageQueryParams.date_after,
+      date_before: manageQueryParams.date_before,
+      status:
+        statusQueryParam === "COMPLETE" ||
+        statusManageQueryParams === "COMPLETE"
+          ? "COMPLETE"
+          : statusQueryParam === "PENDING" ||
+            statusManageQueryParams === "PENDING"
+          ? "PENDING"
+          : undefined,
+      user: userId,
+      onlyMyTreckers: onlyMyTreckers,
+    };
   });
   const [paginationModel, setPaginationModel] = useState<{
     pageSize: number;
@@ -312,6 +323,7 @@ export const ManagePage = () => {
       date_before: data.date_before,
       status: data.status,
       user: userId,
+      onlyMyTreckers: data.onlyMyTreckers,
     };
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
