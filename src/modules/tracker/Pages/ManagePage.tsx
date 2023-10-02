@@ -347,7 +347,11 @@ export const ManagePage = () => {
             >
               Filtrar
             </Button>
-            <ExportManageMenu disabled={false} query={query} />
+            <ExportManageMenu
+              disabled={(data?.count || 0) <= 0 || isLoading || isFetching}
+              query={query}
+              t1Count={data?.count || 0}
+            />
           </Grid>
           <Grid item xs={12}>
             <DataGrid
