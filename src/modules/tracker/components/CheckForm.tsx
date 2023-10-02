@@ -221,18 +221,31 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
 
                         </Grid>
                         <Grid item xs={10} md={10}>
-                            <DriverSelect
-                                control={control}
-                                name='driver'
-                                placeholder='Conductor'
-                                disabled={disable}
-                                driver={watch('driver') || undefined}
-                                onChange={e => sendDataToBackend("driver", e?.id || null)}
-                            />
+                            {
+                                seguimiento.type === 'LOCAL' ?
+                                    <DriverSelect
+                                        control={control}
+                                        name='driver'
+                                        placeholder='Conductor'
+                                        disabled={disable}
+                                        driver={watch('driver') || undefined}
+                                        onChange={e => sendDataToBackend("driver", e?.id || null)}
+                                    /> :
+                                    <TextField
+                                        fullWidth
+                                        id="outlined-basic"
+                                        label="Conductor"
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={disable}
+                                        {...register('driverImport')}
+                                        onBlur={e => sendDataToBackend("driver_import", e.target.value || null)}
+                                    />
+                            }
                         </Grid>
                         <Grid item xs={2} md={2}>
                             {
-                                watch('driver') &&  <ShowCodeDriver driverId={watch('driver') || undefined} />
+                                watch('driver') && <ShowCodeDriver driverId={watch('driver') || undefined} />
                             }
                         </Grid>
                         {
@@ -517,10 +530,10 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <ShowRoute 
+                            <ShowRoute
                                 distributorCenterId={seguimiento.distributorCenter}
                                 locationId={watch('outputLocation')}
-                                />
+                            />
                         </Grid>
                         {
                             outputTypeData && (

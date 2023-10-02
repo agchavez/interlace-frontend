@@ -256,7 +256,7 @@ export default function HomePage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 
                         <Typography variant="body1" component="h6" style={{ textAlign: "start" }} color={"secondary"} fontWeight={200}>
-                            T1 - En atención
+                            T1 - Pendientes
                         </Typography>
                         {
                             isLoading || isFetching ? <CircularProgress size={20} /> : <Typography variant="h6" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={600}>
@@ -294,7 +294,7 @@ export default function HomePage() {
                                             formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })
                                         }</TableCell>
                                         <TableCell align="right">
-                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/check/?id=' + row.id)}>
+                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + row.id)}>
                                                 <ArrowForwardIcon />
                                             </IconButton>
 

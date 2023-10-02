@@ -80,7 +80,8 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         <Grid item container direction="column" xs={5} sx={{ textAlign: "center", marginTop: "5pt" }}>
                             <Grid item sx={{ backgroundColor: "black", color: "white" }}>
                                 <Typography fontSize={43}>
-                                    {pallet?.rastra}
+                                    {/* LIMITAR SOLO A 6 DIGISTOS */}
+                                    {pallet?.rastra && pallet?.rastra.length > 6 ? pallet?.rastra.slice(0, 6) : pallet?.rastra}
                                 </Typography>
                             </Grid>
                             <Grid item >

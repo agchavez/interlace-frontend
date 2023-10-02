@@ -355,6 +355,7 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         completed_date: tracker.completed_date,
         status: tracker.status,
         transportNumber: 1,
+        driverImport: tracker.driver_import,
         type: tracker.type,
         documentNumberExit: tracker.output_document_number,
         outputType: tracker.output_type,

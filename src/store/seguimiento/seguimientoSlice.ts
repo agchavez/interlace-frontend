@@ -85,7 +85,8 @@ export interface Seguimiento {
     containernumber: number | null;
     originLocation?: number;
     outputLocation?: number;
-    driver?: number| null;
+    driver: number| null;
+    driverImport: string | null;
     documentNumber: number;
     status: string;
     transportNumber: number;

@@ -64,6 +64,7 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 
   export interface CheckFormType {
     plateNumber: string;
+    driverImport: string | null;
     originLocation: number;
     outputLocation: number;
     driver?: number | null;
@@ -84,6 +85,7 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 // Tracker
 export interface Tracker {
   id: number;
+  driver_import: string | null;
   tariler_data: TarilerData;
   transporter_data: TransporterData;
   distributor_center_data: DistributorCenterData;
