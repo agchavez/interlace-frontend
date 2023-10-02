@@ -12,6 +12,7 @@ import backendApi from "../../../config/apiConfig";
 import { BaseApiResponse } from "../../../interfaces/api";
 import { useAppSelector } from "../../../store";
 import { StyledMenu } from "../../ui/components/StyledMenu";
+import { format } from "date-fns";
 interface ExportManageProps {
   disabled: boolean;
   query: TrackerQueryParams;
@@ -74,9 +75,15 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       tr.transfer_number,
       tr.output_document_number,
       tr.accounted,
-      tr.status,
-      tr.created_at,
-      tr.completed_date,
+      tr.status == "COMPLETE"
+        ? "Completado"
+        : tr.status == "PENDING"
+        ? "Pendiente"
+        : "En atención",
+      format(new Date(tr.created_at), "dd/MM/yyyy"),
+      tr.completed_date
+        ? format(new Date(tr.completed_date), "dd/MM/yyyy")
+        : "-",
       tr.user_name,
     ]);
     if (type == "csv") {
