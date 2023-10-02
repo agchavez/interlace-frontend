@@ -82,6 +82,8 @@ export const ManagePage = () => {
           statusManageQueryParams === "PENDING"
         ? "PENDING"
         : undefined,
+    user: user && manageQueryParams.onlyMyTreckers ? [+user.id] : undefined,
+    onlyMyTreckers: manageQueryParams.onlyMyTreckers,
   });
   const [paginationModel, setPaginationModel] = useState<{
     pageSize: number;
@@ -299,6 +301,7 @@ export const ManagePage = () => {
   }, [query]);
 
   const handleFilter = (data: FormFilterTrack) => {
+    const userId = user && data.onlyMyTreckers ? [+user.id] : undefined;
     const queryProcess: TrackerQueryParams = {
       ...query,
       search: data.search,
@@ -308,6 +311,7 @@ export const ManagePage = () => {
       date_after: data.date_after,
       date_before: data.date_before,
       status: data.status,
+      user: userId,
     };
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
