@@ -291,15 +291,17 @@ export const ManagePage = () => {
             >
               <ArrowForwardIcon />
             </IconButton>
-            {params.row.status === "PENDING" && (
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={() => handleEditState(params.row.id)}
-              >
-                <EditNoteOutlined />
-              </IconButton>
-            )}
+            {params.row.status === "PENDING" &&
+              user != null &&
+              params.row.user === +user.id && (
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => handleEditState(params.row.id)}
+                >
+                  <EditNoteOutlined />
+                </IconButton>
+              )}
           </>
         );
       },

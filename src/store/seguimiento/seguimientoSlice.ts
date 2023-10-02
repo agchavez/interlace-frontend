@@ -74,6 +74,7 @@ export interface DetalleCargaIdx extends DetalleCarga {
 
 export interface Seguimiento {
     id: number,
+    user: number,
     rastra: TarilerData,
     transporter: TransporterData,
     userName?: string;
@@ -85,7 +86,7 @@ export interface Seguimiento {
     containernumber: number | null;
     originLocation?: number;
     outputLocation?: number;
-    driver: number| null;
+    driver: number | null;
     driverImport: string | null;
     documentNumber: number;
     status: string;
@@ -197,7 +198,7 @@ export const seguimientoSlice = createSlice({
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date})
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date })
                 }
             } else {
                 seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
