@@ -57,7 +57,10 @@ export const FilterManage: FC<FilterManageProps> = ({
         date_before: manageQueryParams.date_before,
         date_range: manageQueryParams.filter_date,
         status: manageQueryParams.status,
-        onlyMyTreckers: !user?.list_groups.includes("SUPERVISOR"),
+        onlyMyTreckers:
+          manageQueryParams.onlyMyTreckers !== undefined
+            ? manageQueryParams.onlyMyTreckers
+            : user?.list_groups.includes("SUPERVISOR"),
       },
     });
 
