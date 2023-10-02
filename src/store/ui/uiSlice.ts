@@ -9,7 +9,7 @@ enum FilterDate {
     WEEK = 'Esta semana',
     MONTH = 'Este mes',
     YEAR = 'Este año',
-  }
+}
 
 
 
@@ -33,7 +33,6 @@ const initialState: uiState = {
         date_before: format(new Date(), "yyyy-MM-dd"),
         date_after: format(new Date(), "yyyy-MM-dd"),
         filter_date: FilterDate.TODAY,
-        
     }
 }
 
@@ -41,13 +40,13 @@ export const uiSlice = createSlice({
     name: "ui",
     initialState,
     reducers: {
-        setLoading: (state, action:PayloadAction<boolean>) => {
+        setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload
         },
-        setDashboardQueryParams: (state, action:PayloadAction<DashboardQueryParams>) => {
+        setDashboardQueryParams: (state, action: PayloadAction<DashboardQueryParams>) => {
             state.dashboardQueryParams = action.payload
         },
-        setManageQueryParams: (state, action:PayloadAction<TrackerQueryParams>) => {
+        setManageQueryParams: (state, action: PayloadAction<TrackerQueryParams>) => {
             state.manageQueryParams = action.payload
         }
 

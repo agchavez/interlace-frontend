@@ -8,35 +8,35 @@ export interface Rastra {
 }
 
 export interface Product {
-    id:                      number;
-    created_at:              string;
-    name:                    string;
-    sap_code:                string;
-    brand:                   string;
-    boxes_pre_pallet:        number;
-    useful_life:             number;
-    bar_code:                string;
-    standard_cost:           string;
-    pre_block:               number;
-    block:                   number;
-    pre_block_days:          number;
-    pre_block_days_next:     number;
-    block_days:              number;
-    code_feature:            string;
-    division:                string;
-    class_product:           string;
-    size:                    string;
-    packaging:               string;
-    helectrolitos:           string;
-    hl_per_unit:             string;
-    concadenated_type:       string;
-    cost:                    string;
-    description_sap:         string;
-    lib_to_ton:              string;
-    weight:                  string;
-    ton:                     string;
-    block_t1:                number;
-    days_not_accept_product: number;
+  id: number;
+  created_at: string;
+  name: string;
+  sap_code: string;
+  brand: string;
+  boxes_pre_pallet: number;
+  useful_life: number;
+  bar_code: string;
+  standard_cost: string;
+  pre_block: number;
+  block: number;
+  pre_block_days: number;
+  pre_block_days_next: number;
+  block_days: number;
+  code_feature: string;
+  division: string;
+  class_product: string;
+  size: string;
+  packaging: string;
+  helectrolitos: string;
+  hl_per_unit: string;
+  concadenated_type: string;
+  cost: string;
+  description_sap: string;
+  lib_to_ton: string;
+  weight: string;
+  ton: string;
+  block_t1: number;
+  days_not_accept_product: number;
 }
 
 
@@ -62,24 +62,24 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 
 
 
-  export interface CheckFormType {
-    plateNumber: string;
-    originLocation: number;
-    outputLocation: number;
-    driver?: number | null;
-    invoiceNumber: string | null;
-    containernumber: number | null;
-    documentNumber: number;
-    transportNumber: number;
-    transferNumber: number;
-    documentNumberExit: number;
-    outputType: string;
-    timeStart: string| null;
-    timeEnd: string| null;
-    opm1?: number;
-    opm2?: number;
-    accounted: number | null;
-  }
+export interface CheckFormType {
+  plateNumber: string;
+  originLocation: number;
+  outputLocation: number;
+  driver?: number | null;
+  invoiceNumber: string | null;
+  containernumber: number | null;
+  documentNumber: number;
+  transportNumber: number;
+  transferNumber: number;
+  documentNumberExit: number;
+  outputType: string;
+  timeStart: string | null;
+  timeEnd: string | null;
+  opm1?: number;
+  opm2?: number;
+  accounted: number | null;
+}
 
 // Tracker
 export interface Tracker {
@@ -126,7 +126,7 @@ export enum FilterDate {
 export interface TrackerQueryParams extends BaseQueryParams {
   search?: string;
   id?: number;
-  transporter? : number[];
+  transporter?: number[];
   trailer?: number[];
   distributor_center?: number[];
   user?: number[];
@@ -134,16 +134,17 @@ export interface TrackerQueryParams extends BaseQueryParams {
   date_before?: string;
   status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   filter_date?: FilterDate;
+  onlyMyTreckers?: boolean;
 }
 
 export interface TrackerDeailOutput {
-  id:           number;
+  id: number;
   product_data: ProductData;
-  created_at:   string; 
-  quantity:     number;
-  tracker:      number;
-  product:      number;
-  expiration_date:  string;
+  created_at: string;
+  quantity: number;
+  tracker: number;
+  product: number;
+  expiration_date: string;
 }
 export interface DistributorCenterData {
   id: number;
@@ -154,7 +155,7 @@ export interface DistributorCenterData {
 
 export interface TarilerData {
   id: number;
-  created_at: string| null;
+  created_at: string | null;
   code: string;
 }
 
@@ -185,9 +186,9 @@ export interface AddDetalleData {
 }
 
 export interface AddDetallePalletData {
-    expiration_date: string | null,
-    quantity: number | null,
-    tracker_detail: number | null
+  expiration_date: string | null,
+  quantity: number | null,
+  tracker_detail: number | null
 }
 
 export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
@@ -204,54 +205,54 @@ export interface AddDetallePalletResponse {
 }
 
 export interface TrackerDetailResponse {
-  id:                     number;
+  id: number;
   tracker_product_detail: TrackerProductDetail[];
-  product_data:           ProductData;
-  created_at:             string;
-  quantity:               number;
-  tracker:                number;
-  product:                number;
+  product_data: ProductData;
+  created_at: string;
+  quantity: number;
+  tracker: number;
+  product: number;
 }
 
 export interface ProductData {
-  id:               number;
-  created_at:       null;
-  name:             string;
-  sap_code:         string;
-  brand:            string;
+  id: number;
+  created_at: null;
+  name: string;
+  sap_code: string;
+  brand: string;
   boxes_pre_pallet: number;
-  useful_life:      number;
-  bar_code:         string;
-  standard_cost:           string;
-  pre_block:               number;
-  block:                   number;
-  pre_block_days:          number;
-  pre_block_days_next:     number;
-  block_days:              number;
-  code_feature:            string;
-  division:                string;
-  class_product:           string;
-  size:                    string;
-  packaging:               string;
-  helectrolitos:           string;
-  hl_per_unit:             string;
-  concadenated_type:       string;
-  cost:                    string;
-  description_sap:         string;
-  lib_to_ton:              string;
-  weight:                  string;
-  ton:                     string;
-  block_t1:                number;
+  useful_life: number;
+  bar_code: string;
+  standard_cost: string;
+  pre_block: number;
+  block: number;
+  pre_block_days: number;
+  pre_block_days_next: number;
+  block_days: number;
+  code_feature: string;
+  division: string;
+  class_product: string;
+  size: string;
+  packaging: string;
+  helectrolitos: string;
+  hl_per_unit: string;
+  concadenated_type: string;
+  cost: string;
+  description_sap: string;
+  lib_to_ton: string;
+  weight: string;
+  ton: string;
+  block_t1: number;
   days_not_accept_product: number;
-  
+
 }
 
 export interface TrackerProductDetail {
-  id:              number;
-  created_at:      string;
+  id: number;
+  created_at: string;
   expiration_date: string;
-  quantity:        number;
-  tracker_detail:  number;
+  quantity: number;
+  tracker_detail: number;
 }
 
 export interface AddOutProductData {
