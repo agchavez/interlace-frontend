@@ -6,7 +6,7 @@ import CodeIcon from "@mui/icons-material/Code";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import Button from "@mui/material/Button";
 import React from "react";
-import { exportToCSV } from "../../../utils/exportToCSV";
+import { exportToCSV, exportToXLSX } from "../../../utils/exportToCSV";
 import backendApi from "../../../config/apiConfig";
 import { BaseApiResponse } from "../../../interfaces/api";
 import { useAppSelector } from "../../../store";
@@ -29,13 +29,22 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const handleClickCSV = async () => {
-    const data = await backendApi.get<BaseApiResponse<Tracker>>(`/tracker/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      params: { ...query, offset: 0, limit: undefined },
-    });
+
+  const fetchData = async () => {
+    const response = await backendApi.get<BaseApiResponse<Tracker>>(
+      `/tracker/`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { ...query, offset: 0, limit: undefined },
+      }
+    );
+    return response.data;
+  };
+
+  const handleExport = async (type: "csv" | "xlsx") => {
+    const data = await fetchData();
     const headers = [
       "Tracking",
       "Centro de Distribución",
@@ -49,7 +58,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       "Registrado el",
       "Completado el",
     ];
-    const trackerData = data.data.results.map((tr) => [
+    const trackerData = data.results.map((tr) => [
       tr.id,
       tr.distributor_center_data.name,
       tr.tariler_data.code,
@@ -62,10 +71,18 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       tr.created_at,
       tr.completed_date,
     ]);
-    await exportToCSV({
-      data: [headers, ...trackerData],
-      filename: "exporttocsv.csv",
-    });
+    if (type == "csv") {
+      await exportToCSV({
+        data: [headers, ...trackerData],
+        filename: "t1_report.csv",
+      });
+    } else if (type == "xlsx") {
+      await exportToXLSX({
+        data: [headers, ...trackerData],
+        filename: "t1_report.xlsx",
+      });
+    }
+    handleClose();
   };
 
   return (
@@ -92,11 +109,11 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClickCSV} disableRipple>
+        <MenuItem onClick={() => handleExport("csv")} disableRipple>
           <GridOnSharpIcon />
           CSV
         </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={() => handleExport("xlsx")} disableRipple>
           <CodeIcon />
           XML
         </MenuItem>
