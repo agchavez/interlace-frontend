@@ -80,9 +80,9 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         : tr.status == "PENDING"
         ? "Pendiente"
         : "En atención",
-      format(new Date(tr.created_at), "dd/MM/yyyy"),
+      format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
       tr.completed_date
-        ? format(new Date(tr.completed_date), "dd/MM/yyyy")
+        ? format(new Date(tr.completed_date), "dd/MM/yyyy hh:mm")
         : "-",
       tr.user_name,
     ]);
