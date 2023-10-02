@@ -115,7 +115,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         </MenuItem>
         <MenuItem onClick={() => handleExport("xlsx")} disableRipple>
           <CodeIcon />
-          XML
+          XLSX
         </MenuItem>
       </StyledMenu>
     </div>
