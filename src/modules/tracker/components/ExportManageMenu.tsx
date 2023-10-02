@@ -1,4 +1,5 @@
 import { FunctionComponent } from "react";
+import { Typography, CircularProgress } from "@mui/material";
 import { Tracker, TrackerQueryParams } from "../../../interfaces/tracking";
 import MenuItem from "@mui/material/MenuItem";
 import GridOnSharpIcon from "@mui/icons-material/GridOnSharp";
@@ -23,6 +24,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   t1Count,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [loading, setLoading] = React.useState(false);
   const { token } = useAppSelector((state) => state.auth);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -46,6 +48,8 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   };
 
   const handleExport = async (type: "csv" | "xlsx") => {
+    setLoading(true);
+    handleClose();
     const data = await fetchData();
     const headers = [
       "Tracking",
@@ -59,6 +63,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       "Estado",
       "Registrado el",
       "Completado el",
+      "Usuario",
     ];
     const trackerData = data.results.map((tr) => [
       "TRK-" + tr.id.toString().padStart(10, "0"),
@@ -72,6 +77,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       tr.status,
       tr.created_at,
       tr.completed_date,
+      tr.user_name,
     ]);
     if (type == "csv") {
       await exportToCSV({
@@ -84,7 +90,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         filename: "t1_report.xlsx",
       });
     }
-    handleClose();
+    setLoading(false);
   };
 
   return (
@@ -97,10 +103,12 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         variant="contained"
         disableElevation
         onClick={handleClick}
-        endIcon={<CloudDownloadIcon />}
-        disabled={disabled}
+        endIcon={
+          loading ? <CircularProgress size={15} /> : <CloudDownloadIcon />
+        }
+        disabled={disabled || loading}
       >
-        Exportar
+        {loading ? "Exportando..." : "Exportar"}
       </Button>
       <StyledMenu
         id="demo-customized-menu"
@@ -113,11 +121,11 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       >
         <MenuItem onClick={() => handleExport("csv")} disableRipple>
           <GridOnSharpIcon />
-          CSV
+          <Typography ml={1}>CSV</Typography>
         </MenuItem>
         <MenuItem onClick={() => handleExport("xlsx")} disableRipple>
           <CodeIcon />
-          XLSX
+          <Typography ml={1}>XLSX</Typography>
         </MenuItem>
       </StyledMenu>
     </div>
