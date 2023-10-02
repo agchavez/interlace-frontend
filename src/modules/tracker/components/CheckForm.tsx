@@ -128,7 +128,7 @@ export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Segui
                                     </Typography>
                                     <Divider />
                                     <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {seguimiento?.transporter.head}
+                                        {seguimiento?.transporter.code}
                                     </Typography>
                                 </Grid>
                                 {disable && <Grid item xs={12} md={6} lg={4} xl={3}>

@@ -95,7 +95,7 @@ export const ManagePage = () => {
     setquery({
       ...query,
       limit: paginationModel.pageSize,
-      offset: paginationModel.page,
+      offset: paginationModel.page * paginationModel.pageSize,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginationModel]);
