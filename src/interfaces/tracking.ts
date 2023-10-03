@@ -145,6 +145,8 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   tracker_detail?: number;
   tracker_detail__tracker?: number;
   tracker_detail__tracker__distributor_center?: number;
+  tracker_detail__tracker__status?: 'COMPLETE' | 'PENDING' | 'EDITED';
+  tracker_detail__tracker__user?: string;
   created_at__gte?: string;
   created_at__lte?: string;
 }
@@ -209,11 +211,16 @@ export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
 }
 
 export interface AddDetallePalletResponse {
-  id: number,
-  created_at: string,
-  expiration_date: string,
-  quantity: number,
-  tracker_detail: number
+  id: number;
+  created_at: string;
+  expiration_date: string;
+  quantity: number;
+  tracker_detail: number;
+  product_name: string;
+  product_sap_code: string;
+  tracker_detail_id: number;
+  tracker_id: number;
+
 }
 
 export interface TrackerDetailResponse {

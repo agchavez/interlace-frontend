@@ -80,7 +80,15 @@ const items: SideBarItem[] = [
     {
         text: "REPORTE",
         subItems: [
-            { text: "Movimientos", href: "/movimientos/crear", id: "nuevo" },
+            { text: 
+                "Movimientos", 
+                href: "/movimientos/crear", 
+                id: "nuevo" },
+            { text: 
+                "Por turno", 
+                href: "/report/shift", 
+                id: "turno" 
+            },
         ],
         icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
         id: "reportes",

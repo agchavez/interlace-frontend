@@ -127,10 +127,6 @@ export const seguimientoSlice = createSlice({
     reducers: {
         addSeguimiento: (state, action: PayloadAction<Seguimiento>) => {
             // Si el seguimiento ya existe no se agrega
-            if (state.seguimientos.findIndex((seg) => seg.rastra.code === action.payload.rastra.code) !== -1) {
-                toast.error("Ya existe un seguimiento con este codigo de rastra");
-                return
-            }
             state.seguimientos.push(action.payload);
             const seguimientoActualValue = state.seguimientos.length - 1;
             state.seguimeintoActual = seguimientoActualValue;
