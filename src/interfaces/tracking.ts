@@ -62,25 +62,25 @@ export interface OutputTypeQuerySearch extends BaseQueryParams {
 
 
 
-  export interface CheckFormType {
-    plateNumber: string;
-    driverImport: string | null;
-    originLocation: number;
-    outputLocation: number;
-    driver?: number | null;
-    invoiceNumber: string | null;
-    containernumber: number | null;
-    documentNumber: number;
-    transportNumber: number;
-    transferNumber: number;
-    documentNumberExit: number;
-    outputType: string;
-    timeStart: string| null;
-    timeEnd: string| null;
-    opm1?: number;
-    opm2?: number;
-    accounted: number | null;
-  }
+export interface CheckFormType {
+  plateNumber: string;
+  driverImport: string | null;
+  originLocation: number;
+  outputLocation: number;
+  driver?: number | null;
+  invoiceNumber: string | null;
+  containernumber: number | null;
+  documentNumber: number;
+  transportNumber: number;
+  transferNumber: number;
+  documentNumberExit: number;
+  outputType: string;
+  timeStart: string | null;
+  timeEnd: string | null;
+  opm1?: number;
+  opm2?: number;
+  accounted: number | null;
+}
 
 // Tracker
 export interface Tracker {
@@ -147,6 +147,11 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   tracker_detail__tracker__distributor_center?: number;
   created_at__gte?: string;
   created_at__lte?: string;
+  order_by?: string;
+}
+
+export interface LastTrackerOutputQueryParams {
+  limit?: number;
 }
 
 export interface TrackerDeailOutput {
@@ -268,7 +273,17 @@ export interface TrackerProductDetail {
   product_name: string;
   product_sap_code: string;
   tracker_detail_id: number;
-  tracker_id: number;
+  tracker_id?: number;
+}
+
+export interface LastTrackerOutput {
+  required_details: boolean;
+  tracking?: number;
+  sap_code?: string;
+  product_name?: string;
+  quantity?: number;
+  expiration_date?: Date;
+  output_type_name: string;
 }
 
 export interface AddOutProductData {
