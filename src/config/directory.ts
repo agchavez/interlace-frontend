@@ -101,6 +101,16 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker/view",
+        permissions: [
+            "tracker.view_trackerdetailmodel",
+            "tracker.view_trackerdetailoutputmodel",
+            "tracker.view_trackerdetailproductmodel",
+            "tracker.view_trackermodel",
+            "tracker.view_typedetailoutputmodel"
+        ]
+    },
+    {
         url: "/movimientos/crear",
         permissions: [
             "any"
