@@ -139,6 +139,16 @@ export interface TrackerQueryParams extends BaseQueryParams {
   onlyMyTreckers?: boolean;
 }
 
+export interface TrackerProductDetailQueryParams extends BaseQueryParams {
+  search?: string;
+  id?: number;
+  tracker_detail?: number;
+  tracker_detail__tracker?: number;
+  tracker_detail__tracker__distributor_center?: number;
+  created_at__gte?: string;
+  created_at__lte?: string;
+}
+
 export interface TrackerDeailOutput {
   id: number;
   product_data: ProductData;
@@ -255,6 +265,10 @@ export interface TrackerProductDetail {
   expiration_date: string;
   quantity: number;
   tracker_detail: number;
+  product_name: string;
+  product_sap_code: string;
+  tracker_detail_id: number;
+  tracker_id: number;
 }
 
 export interface AddOutProductData {

@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Tracker, TrackerQueryParams } from '../../interfaces/tracking';
+import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams } from '../../interfaces/tracking';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -37,7 +37,38 @@ export const trackerApi = createApi({
     })
 })
 
+export const trackerPalletsApi = createApi({
+    reducerPath: 'trackerPalletsApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getTrackerPallets: builder.query<BaseApiResponse<TrackerProductDetail>, TrackerProductDetailQueryParams>({
+            query: (params) => ({
+                url: `/tracker-detail-product/`,
+                method: 'GET',
+                params:{
+                    ...params
+                }
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
 export const { 
     useGetTrackerQuery,
     useGetTrackerByIdQuery
 } = trackerApi
+
+
+export const {
+    useGetTrackerPalletsQuery
+} = trackerPalletsApi
