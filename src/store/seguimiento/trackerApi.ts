@@ -1,9 +1,9 @@
-import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams } from '../../interfaces/tracking';
+import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutput, LastTrackerOutputQueryParams } from '../../interfaces/tracking';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -21,7 +21,7 @@ export const trackerApi = createApi({
             query: (params) => ({
                 url: `/tracker/`,
                 method: 'GET',
-                params:{
+                params: {
                     ...params
                 }
             }),
@@ -54,7 +54,7 @@ export const trackerPalletsApi = createApi({
             query: (params) => ({
                 url: `/tracker-detail-product/`,
                 method: 'GET',
-                params:{
+                params: {
                     ...params
                 }
             }),
@@ -63,7 +63,33 @@ export const trackerPalletsApi = createApi({
     })
 })
 
-export const { 
+export const trackerOutputApi = createApi({
+    reducerPath: 'trackerOutputApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getLastTrackerOutput: builder.query<BaseApiResponse<LastTrackerOutput>, LastTrackerOutputQueryParams>({
+            query: (params) => ({
+                url: `/tracker/last-output/`,
+                method: 'GET',
+                params: {
+                    ...params
+                }
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const {
     useGetTrackerQuery,
     useGetTrackerByIdQuery
 } = trackerApi
@@ -72,3 +98,7 @@ export const {
 export const {
     useGetTrackerPalletsQuery
 } = trackerPalletsApi
+
+export const {
+    useGetLastTrackerOutputQuery
+} = trackerOutputApi

@@ -183,7 +183,7 @@ export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDe
         if (!seguimientos) return;
         const seguimiento = seguimientos[indexSeg]
         if (!seguimiento) return;
-        const { data: detailProduct } = await backendApi.post<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/`, data, {
+        const { data: detailProduct } = await backendApi.post<TrackerProductDetail, AxiosResponse<TrackerProductDetail>>(`/tracker-detail-product/`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -208,7 +208,7 @@ export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPal
         if (!seguimientos) return;
         const seguimiento = seguimientos[indexSeg]
         if (!seguimiento) return;
-        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? data.expiration_date : null }, {
+        const { data: detailProduct } = await backendApi.patch<TrackerProductDetail, AxiosResponse<TrackerProductDetail>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? data.expiration_date : null }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
