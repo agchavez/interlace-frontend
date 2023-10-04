@@ -14,6 +14,7 @@ import {
   styled,
   tableCellClasses,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import {
   LastTrackerOutput,
@@ -30,8 +31,10 @@ import { useAppSelector } from "../../../store";
 import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import { appendLeftZeros } from "../../../utils/common";
+import FullViewDialog from "../components/FullViewmodal";
 
-export const ViewTrackerPage = () => {
+export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
+  const [modlaOpen, setModalOpen] = useState(false);
   const {
     data: entradas,
     refetch: refetchEntradas,
@@ -77,20 +80,48 @@ export const ViewTrackerPage = () => {
       <Container maxWidth="xl" sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
-            >
-              <Typography variant="h5" component="h1" fontWeight={400}>
-                Vista de Trackers
-              </Typography>
-              <Typography variant="body1" component="p" fontWeight={200}>
-                DH01 - CD LA GRANJA
-              </Typography>
-            </div>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Typography variant="h5" component="h1" fontWeight={400}>
+                    Vista de Trackers
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight={200}>
+                    DH01 - CD LA GRANJA
+                  </Typography>
+                </div>
+              </Grid>
+              {!isModal && (
+                <Grid item>
+                  {modlaOpen && (
+                    <FullViewDialog
+                      open={modlaOpen}
+                      handleClose={() => setModalOpen(false)}
+                    >
+                      {<ViewTrackerPage isModal={true} />}
+                    </FullViewDialog>
+                  )}
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    type="button"
+                    onClick={() => setModalOpen(true)}
+                  >
+                    <Typography variant="button" fontWeight={300}>
+                      Ampliar
+                    </Typography>
+                  </Button>
+                </Grid>
+              )}
+            </Grid>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
           <Grid item xs={12} md={6}>
