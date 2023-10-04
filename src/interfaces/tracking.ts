@@ -114,10 +114,12 @@ export interface Tracker {
   driver: number | null;
   output_type: number;
   completed_date: string | null;
-  type: 'LOCAL' | 'IMPORT';
+  type: TrackerType;
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[]
 }
+
+export type TrackerType = 'LOCAL' | 'IMPORT';
 
 export enum FilterDate {
   TODAY = 'Hoy',
@@ -137,6 +139,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
+  type?: "IMPORT" | "LOCAL"
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {
@@ -297,13 +300,13 @@ export interface AddOutProductData {
   tracker: number;
   product: Product;
   quantity: number;
-  expiration_date: string;
+  expiration_date: string | null;
 }
 
 export interface AddOutProductBody {
   tracker: number;
   product: number;
   quantity: number;
-  expiration_date: string;
+  expiration_date: string | null;
 }
 

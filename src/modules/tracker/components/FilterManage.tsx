@@ -31,6 +31,7 @@ export interface FormFilterTrack {
   date_range: FilterDate;
   status: "COMPLETE" | "PENDING" | "EDITED";
   onlyMyTreckers: boolean;
+  type?: "IMPORT" | "LOCAL";
 }
 
 interface FilterManageProps {
@@ -61,6 +62,7 @@ export const FilterManage: FC<FilterManageProps> = ({
           manageQueryParams.onlyMyTreckers !== undefined
             ? manageQueryParams.onlyMyTreckers
             : user?.list_groups.includes("SUPERVISOR"),
+        type: manageQueryParams.type,
       },
     });
 
@@ -77,6 +79,7 @@ export const FilterManage: FC<FilterManageProps> = ({
     watch("transporter"),
     watch("status"),
     watch("onlyMyTreckers"),
+    watch("type"),
   ]);
 
   const handleReset = () => {
@@ -92,6 +95,7 @@ export const FilterManage: FC<FilterManageProps> = ({
         ? user.list_groups.includes("SUPERVISOR")
         : true
     );
+    setValue("type", undefined);
   };
 
   const handleFilterDate = (value: FilterDate) => {
@@ -157,6 +161,7 @@ export const FilterManage: FC<FilterManageProps> = ({
       if (manageQueryParams.onlyMyTreckers !== undefined) {
         setValue("onlyMyTreckers", manageQueryParams.onlyMyTreckers);
       }
+      setValue("type", manageQueryParams.type);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -384,6 +389,7 @@ export const FilterManage: FC<FilterManageProps> = ({
               </FormGroup>
             </ListItem>
           </List>
+          <Divider />
           <List>
             <ListItem disablePadding sx={{ pl: 2 }}>
               <ListItemText primary={"Usuario"} />
@@ -408,6 +414,76 @@ export const FilterManage: FC<FilterManageProps> = ({
                   >
                     {" "}
                     Solo míos{" "}
+                  </Typography>
+                }
+              />
+            </ListItem>
+          </List>
+          <Divider />
+          <List>
+            <ListItem disablePadding sx={{ pl: 2 }}>
+              <ListItemText primary={"Tipo"} />
+            </ListItem>
+
+            <ListItem disablePadding sx={{ pl: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={watch("type") === "IMPORT"}
+                    onClick={() => setValue("type", "IMPORT")}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    fontWeight={200}
+                    lineHeight="2rem"
+                  >
+                    {" "}
+                    Importados{" "}
+                  </Typography>
+                }
+              />
+            </ListItem>
+            <ListItem disablePadding sx={{ pl: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={watch("type") === "LOCAL"}
+                    onClick={() => setValue("type", "LOCAL")}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    fontWeight={200}
+                    lineHeight="2rem"
+                  >
+                    {" "}
+                    Locales{" "}
+                  </Typography>
+                }
+              />
+            </ListItem>
+            <ListItem disablePadding sx={{ pl: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={watch("type") === undefined}
+                    onClick={() => setValue("type", undefined)}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    fontWeight={200}
+                    lineHeight="2rem"
+                  >
+                    {" "}
+                    Ambos{" "}
                   </Typography>
                 }
               />

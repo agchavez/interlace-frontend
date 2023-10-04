@@ -9,7 +9,11 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
-import { Tracker, TrackerQueryParams } from "../../../interfaces/tracking";
+import {
+  Tracker,
+  TrackerQueryParams,
+  TrackerType,
+} from "../../../interfaces/tracking";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { format } from "date-fns/esm";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -22,6 +26,7 @@ import { useAppDispatch } from "../../../store/store";
 import { chanceStatusTracking } from "../../../store/seguimiento/trackerThunk";
 import { EditNoteOutlined } from "@mui/icons-material";
 import ExportManageMenu from "../components/ExportManageMenu";
+import { optionsTypeTracker } from "../../../utils/common";
 
 const tableBase = {
   localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -94,6 +99,7 @@ export const ManagePage = () => {
           : undefined,
       user: userId,
       onlyMyTreckers: onlyMyTreckers,
+      type: manageQueryParams.type,
     };
   });
   const [paginationModel, setPaginationModel] = useState<{
@@ -127,6 +133,19 @@ export const ManagePage = () => {
           <Typography variant="body2">
             TRK-{params.value.toString().padStart(10, "0")}
           </Typography>
+        );
+      },
+    },
+    {
+      field: "type",
+      headerName: "Tipo",
+      flex: 1,
+      width: 140,
+      minWidth: 140,
+      renderCell: (params) => {
+        const option = params.value as TrackerType;
+        return (
+          <Typography variant="body2">{optionsTypeTracker[option]}</Typography>
         );
       },
     },
@@ -326,6 +345,7 @@ export const ManagePage = () => {
       status: data.status,
       user: userId,
       onlyMyTreckers: data.onlyMyTreckers,
+      type: data.type,
     };
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
