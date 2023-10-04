@@ -94,6 +94,7 @@ export const ManagePage = () => {
           : undefined,
       user: userId,
       onlyMyTreckers: onlyMyTreckers,
+      type: manageQueryParams.type,
     };
   });
   const [paginationModel, setPaginationModel] = useState<{
@@ -326,6 +327,7 @@ export const ManagePage = () => {
       status: data.status,
       user: userId,
       onlyMyTreckers: data.onlyMyTreckers,
+      type: data.type,
     };
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
