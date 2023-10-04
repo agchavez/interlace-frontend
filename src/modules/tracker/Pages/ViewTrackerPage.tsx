@@ -14,7 +14,7 @@ import {
   styled,
   tableCellClasses,
   CircularProgress,
-  Button,
+  IconButton,
 } from "@mui/material";
 import {
   LastTrackerOutput,
@@ -32,6 +32,7 @@ import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import { appendLeftZeros } from "../../../utils/common";
 import FullViewDialog from "../components/FullViewmodal";
+import AspectRatioTwoToneIcon from "@mui/icons-material/AspectRatioTwoTone";
 
 export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
   const [modlaOpen, setModalOpen] = useState(false);
@@ -107,18 +108,13 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
                       {<ViewTrackerPage isModal={true} />}
                     </FullViewDialog>
                   )}
-                  <Button
-                    fullWidth
-                    variant="contained"
+                  <IconButton
                     color="primary"
-                    size="small"
-                    type="button"
+                    size="medium"
                     onClick={() => setModalOpen(true)}
                   >
-                    <Typography variant="button" fontWeight={300}>
-                      Ampliar
-                    </Typography>
-                  </Button>
+                    <AspectRatioTwoToneIcon />
+                  </IconButton>
                 </Grid>
               )}
             </Grid>
