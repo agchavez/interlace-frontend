@@ -19,7 +19,7 @@ import {
   LastTrackerOutput,
   TrackerProductDetail,
 } from "../../../interfaces/tracking";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import {
   useGetLastTrackerOutputQuery,
   useGetTrackerPalletsQuery,
@@ -162,6 +162,9 @@ export function CustomizedTables({ rows }: CustomizedTablesProps) {
         </TableHead>
         <TableBody>
           {rows.map((row) => {
+            const parsedDate = parseISO(
+              row?.expiration_date.split("T")[0] || ""
+            );
             return (
               <StyledTableRow key={row.id}>
                 <StyledTableCell align="left">
@@ -176,7 +179,7 @@ export function CustomizedTables({ rows }: CustomizedTablesProps) {
                 </StyledTableCell>
                 <StyledTableCell align="left">{row.quantity}</StyledTableCell>
                 <StyledTableCell align="left">
-                  {format(new Date(row.expiration_date), "dd-MM-yyyy")}
+                  {format(new Date(parsedDate), "dd-MM-yyyy")}
                 </StyledTableCell>
               </StyledTableRow>
             );
@@ -229,27 +232,31 @@ export function CustomizedTablesOut({ rows }: CustomizedTablesOutProps) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rowsToShow.map((row) => (
-            <StyledTableRow>
-              <StyledTableCell align="left">
-                {voidProductsList.find((vp) => vp === row.sap_code)
-                  ? "Vacío"
-                  : "Lleno"}
-              </StyledTableCell>
-              <StyledTableCell align="left">
-                {row.tracking && `TRK-${appendLeftZeros(row.tracking, 10)}`}
-              </StyledTableCell>
-              <StyledTableCell align="left">{row.sap_code}</StyledTableCell>
-              <StyledTableCell component="th" scope="row">
-                {row.product_name}
-              </StyledTableCell>
-              <StyledTableCell align="left">{row.quantity}</StyledTableCell>
-              <StyledTableCell align="left">
-                {row.expiration_date &&
-                  format(new Date(row.expiration_date), "dd-MM-yyyy")}
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
+          {rowsToShow.map((row) => {
+            const parsedDate =
+              row.expiration_date &&
+              parseISO(row?.expiration_date.split("T")[0] || "");
+            return (
+              <StyledTableRow>
+                <StyledTableCell align="left">
+                  {voidProductsList.find((vp) => vp === row.sap_code)
+                    ? "Vacío"
+                    : "Lleno"}
+                </StyledTableCell>
+                <StyledTableCell align="left">
+                  {row.tracking && `TRK-${appendLeftZeros(row.tracking, 10)}`}
+                </StyledTableCell>
+                <StyledTableCell align="left">{row.sap_code}</StyledTableCell>
+                <StyledTableCell component="th" scope="row">
+                  {row.product_name}
+                </StyledTableCell>
+                <StyledTableCell align="left">{row.quantity}</StyledTableCell>
+                <StyledTableCell align="left">
+                  {parsedDate && format(new Date(parsedDate), "dd-MM-yyyy")}
+                </StyledTableCell>
+              </StyledTableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </TableContainer>

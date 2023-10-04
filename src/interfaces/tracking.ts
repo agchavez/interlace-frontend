@@ -289,7 +289,7 @@ export interface LastTrackerOutput {
   sap_code?: string;
   product_name?: string;
   quantity?: number;
-  expiration_date?: Date;
+  expiration_date?: string;
   output_type_name: string;
 }
 
