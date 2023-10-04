@@ -137,6 +137,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
+  type?: "IMPORT" | "LOCAL"
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {
