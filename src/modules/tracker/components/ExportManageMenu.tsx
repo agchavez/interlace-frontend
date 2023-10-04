@@ -13,6 +13,7 @@ import { BaseApiResponse } from "../../../interfaces/api";
 import { useAppSelector } from "../../../store";
 import { StyledMenu } from "../../ui/components/StyledMenu";
 import { format } from "date-fns";
+import { optionsTypeTracker } from "../../../utils/common";
 interface ExportManageProps {
   disabled: boolean;
   query: TrackerQueryParams;
@@ -54,6 +55,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
     const data = await fetchData();
     const headers = [
       "Tracking",
+      "Tipo",
       "Centro de Distribución",
       "Trailer",
       "Transferencia de entrada",
@@ -66,26 +68,29 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       "Completado el",
       "Usuario",
     ];
-    const trackerData = data.results.map((tr) => [
-      "TRK-" + tr.id.toString().padStart(10, "0"),
-      tr.distributor_center_data.name,
-      tr.tariler_data.code,
-      tr.input_document_number,
-      tr.invoice_number,
-      tr.transfer_number,
-      tr.output_document_number,
-      tr.accounted,
-      tr.status == "COMPLETE"
-        ? "Completado"
-        : tr.status == "PENDING"
-        ? "Pendiente"
-        : "En atención",
-      format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
-      tr.completed_date
-        ? format(new Date(tr.completed_date), "dd/MM/yyyy hh:mm")
-        : "-",
-      tr.user_name,
-    ]);
+    const trackerData = data.results.map((tr) => {
+      return [
+        "TRK-" + tr.id.toString().padStart(10, "0"),
+        optionsTypeTracker[tr.type],
+        tr.distributor_center_data.name,
+        tr.tariler_data.code,
+        tr.input_document_number,
+        tr.invoice_number,
+        tr.transfer_number,
+        tr.output_document_number,
+        tr.accounted,
+        tr.status == "COMPLETE"
+          ? "Completado"
+          : tr.status == "PENDING"
+          ? "Pendiente"
+          : "En atención",
+        format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
+        tr.completed_date
+          ? format(new Date(tr.completed_date), "dd/MM/yyyy hh:mm")
+          : "-",
+        tr.user_name,
+      ];
+    });
     if (type == "csv") {
       await exportToCSV({
         data: [headers, ...trackerData],

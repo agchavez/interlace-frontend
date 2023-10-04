@@ -462,7 +462,7 @@ export const FilterManage: FC<FilterManageProps> = ({
                     lineHeight="2rem"
                   >
                     {" "}
-                    Local{" "}
+                    Locales{" "}
                   </Typography>
                 }
               />

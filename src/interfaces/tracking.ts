@@ -114,10 +114,12 @@ export interface Tracker {
   driver: number | null;
   output_type: number;
   completed_date: string | null;
-  type: 'LOCAL' | 'IMPORT';
+  type: TrackerType;
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[]
 }
+
+export type TrackerType = 'LOCAL' | 'IMPORT';
 
 export enum FilterDate {
   TODAY = 'Hoy',
