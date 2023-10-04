@@ -11,15 +11,19 @@ import { BrowserRouter } from 'react-router-dom';
 import { maintheme } from './config/theme';
 import { ThemeProvider } from '@emotion/react';
 import { Toaster } from 'sonner'
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 
 function App() {
   return (
     <ThemeProvider theme={maintheme}>
       <Provider store={store}>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
         <BrowserRouter>
         <Toaster duration={3000} position="top-right" richColors closeButton />
           <AppRouter />
         </BrowserRouter>
+        </LocalizationProvider>
       </Provider>
     </ThemeProvider>
   )
