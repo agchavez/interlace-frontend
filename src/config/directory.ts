@@ -109,7 +109,6 @@ export const permisions = [
             "tracker.view_trackermodel",
             "tracker.view_typedetailoutputmodel",
             "report.report_shift",
-            "report.report_tracker",
         ]
     },
     {

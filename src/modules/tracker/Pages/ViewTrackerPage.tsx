@@ -38,15 +38,15 @@ export const ViewTrackerPage = () => {
     isLoading: isLoadingEntradas,
   } = useGetTrackerPalletsQuery({
     offset: 0,
-    limit: 15,
-    order_by: "-created_at",
+    limit: 9  ,
+    ordering: "-created_at",
   });
   const {
     data: salidas,
     refetch: refetchSalidas,
     isLoading: isLoadingSalidas,
   } = useGetLastTrackerOutputQuery({
-    limit: 15,
+    limit: 5,
   });
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,7 +166,7 @@ export function CustomizedTables({ rows }: CustomizedTablesProps) {
               <StyledTableRow key={row.id}>
                 <StyledTableCell align="left">
                   {row.tracker_id &&
-                    `TRK-${appendLeftZeros(row.tracker_id, 9)}`}
+                    `TRK-${appendLeftZeros(row.tracker_id, 5)}`}
                 </StyledTableCell>
                 <StyledTableCell align="left">
                   {row.product_sap_code}
@@ -176,7 +176,7 @@ export function CustomizedTables({ rows }: CustomizedTablesProps) {
                 </StyledTableCell>
                 <StyledTableCell align="left">{row.quantity}</StyledTableCell>
                 <StyledTableCell align="left">
-                  {format(new Date(row.expiration_date), "dd-MM-yyyy")}
+                  {row.expiration_date}
                 </StyledTableCell>
               </StyledTableRow>
             );
@@ -237,7 +237,7 @@ export function CustomizedTablesOut({ rows }: CustomizedTablesOutProps) {
                   : "Lleno"}
               </StyledTableCell>
               <StyledTableCell align="left">
-                {row.tracking && `TRK-${appendLeftZeros(row.tracking, 10)}`}
+                {row.tracking && `TRK-${appendLeftZeros(row.tracking, 5)}`}
               </StyledTableCell>
               <StyledTableCell align="left">{row.sap_code}</StyledTableCell>
               <StyledTableCell component="th" scope="row">

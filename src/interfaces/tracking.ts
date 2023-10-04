@@ -149,7 +149,7 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   tracker_detail__tracker__user?: string;
   created_at__gte?: string;
   created_at__lte?: string;
-  order_by?: string;
+  ordering?: string;
 }
 
 export interface LastTrackerOutputQueryParams {

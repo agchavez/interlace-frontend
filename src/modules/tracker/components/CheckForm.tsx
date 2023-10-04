@@ -36,9 +36,9 @@ import {
   updateTracking,
   chanceStatusTracking,
 } from "../../../store/seguimiento/trackerThunk";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
-import { format } from "date-fns/esm";
+import { format } from "date-fns-tz";
 import { ProductoEntradaTableRow } from "./ProductoEntradaTableRow";
 import { EditNote } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -273,7 +273,9 @@ export const CheckForm = ({
                     >
                       {format(
                         new Date(seguimiento?.completed_date),
-                        "dd/MM/yyyy"
+                        "dd/MM/yyyy", {
+                          timeZone: "America/Tegucigalpa",
+                        }
                       )}
                     </Typography>
                   </Grid>
@@ -529,11 +531,10 @@ export const CheckForm = ({
                 >
                   {(tiempoEntrada &&
                     tiempoEntrada !== null &&
-                    String(tiempoEntrada.getHours()).padStart(2, "0") +
-                      ":" +
-                      String(tiempoEntrada.getMinutes()).padStart(2, "0") +
-                      ":" +
-                      String(tiempoEntrada.getSeconds()).padStart(2, "0")) ||
+                     format(tiempoEntrada, "HH:mm:ss", {
+                      locale: es,
+                      timeZone: "America/Tegucigalpa",
+                    })) ||
                     "00:00:00"}
                 </Typography>
               </Grid>
@@ -555,11 +556,8 @@ export const CheckForm = ({
                 >
                   {(tiempoSalida &&
                     tiempoSalida !== null &&
-                    String(tiempoSalida.getHours()).padStart(2, "0") +
-                      ":" +
-                      String(tiempoSalida.getMinutes()).padStart(2, "0") +
-                      ":" +
-                      String(tiempoSalida.getSeconds()).padStart(2, "0")) ||
+                    format(tiempoSalida, "HH:mm:ss")) ||
+                    
                     "00:00:00"}
                 </Typography>
               </Grid>
@@ -580,17 +578,10 @@ export const CheckForm = ({
                   color={"gray.500"}
                 >
                   {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
-                    ? String(
-                        tiempoSalida.getHours() - tiempoEntrada.getHours()
-                      ).padStart(2, "0") +
-                      ":" +
-                      String(
-                        tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()
-                      ).padStart(2, "0") +
-                      ":" +
-                      String(
-                        tiempoSalida.getSeconds() - tiempoEntrada.getSeconds()
-                      ).padStart(2, "0")
+                    ? formatDistance(tiempoEntrada, tiempoSalida, {
+                        locale: es,
+                      })
+
                     : "--:--:--"}
                 </Typography>
               </Grid>
