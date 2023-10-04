@@ -8,7 +8,7 @@ import { userApi } from './user/userApi';
 import { userSlice } from "./user/userSlice";
 import { maintenanceApi } from './maintenance/maintenanceApi';
 import { maintenanceSlice } from './maintenance/maintenanceSlice';
-import { trackerApi, trackerPalletsApi } from './seguimiento/trackerApi';
+import { trackerApi, trackerOutputApi, trackerPalletsApi } from './seguimiento/trackerApi';
 import { uiSlice } from './ui/uiSlice';
 
 export const store = configureStore({
@@ -23,14 +23,16 @@ export const store = configureStore({
         [trackerApi.reducerPath]: trackerApi.reducer,
         [uiSlice.name]: uiSlice.reducer,
         [trackerPalletsApi.reducerPath]: trackerPalletsApi.reducer,
-    }, 
+        [trackerOutputApi.reducerPath]: trackerOutputApi.reducer,
+    },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
         .concat(authApi.middleware)
         .concat(maintenanceApi.middleware)
         .concat(trackerApi.middleware)
         .concat(trackerPalletsApi.middleware)
-        ,
+        .concat(trackerOutputApi.middleware)
+    ,
     devTools: true
 })
 
