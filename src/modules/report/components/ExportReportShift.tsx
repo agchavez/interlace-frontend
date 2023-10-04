@@ -34,7 +34,7 @@ export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query,
 
     const fetchData = async () => {
         const response = await backendApi.get<BaseApiResponse<TrackerProductDetail>>(
-            `/tracker/`,
+            `/tracker-detail-product/`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`,

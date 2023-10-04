@@ -107,13 +107,15 @@ export const permisions = [
             "tracker.view_trackerdetailoutputmodel",
             "tracker.view_trackerdetailproductmodel",
             "tracker.view_trackermodel",
-            "tracker.view_typedetailoutputmodel"
+            "tracker.view_typedetailoutputmodel",
+            "report.report_shift",
+            "report.report_tracker",
         ]
     },
     {
         url: "/movimientos/crear",
         permissions: [
-            "any"
+            "report.report_tracker",
         ]
     },
     {

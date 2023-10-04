@@ -89,7 +89,7 @@ export const ShiftReportPage = () => {
     const getTurnoFromCurrentTime = () => {
         const now = new Date();
         const currentHour = now.getHours();
-    
+
         if (currentHour >= 6 && currentHour < 14) {
             return 'A';
         } else if (currentHour >= 14 && currentHour < 20) {
@@ -104,6 +104,8 @@ export const ShiftReportPage = () => {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const endOfToday = new Date(today);
+        const startOfToday = new Date(today);
+        const horaActual = now.getHours();
         switch (turno) {
             case 'A':
                 return {
@@ -116,12 +118,23 @@ export const ShiftReportPage = () => {
                     end: new Date(today.setHours(20, 30, 0, 0))
                 };
             case 'C':
-                endOfToday.setDate(endOfToday.getDate() + 1);
-                endOfToday.setHours(6, 0, 0, 0);
-                return {
-                    start: new Date(today.setHours(20, 30, 0, 0)),
-                    end: endOfToday
-                };
+                
+                if (horaActual >= 20) {
+                    endOfToday.setDate(endOfToday.getDate() + 1);
+                    endOfToday.setHours(6, 0, 0, 0);
+                    return {
+                        start: new Date(today.setHours(20, 30, 0, 0)),
+                        end: endOfToday
+                    };
+                } else {
+                    // si es menor entonces el rango es del dia anterior a las 20:30 hasta las 6:00 del dia actual
+                    startOfToday.setDate(startOfToday.getDate() - 1);
+                    startOfToday.setHours(20, 30, 0, 0);
+                    return {
+                        start: startOfToday,
+                        end: new Date(today.setHours(6, 0, 0, 0))
+                    };
+                }
             default:
                 return null;
         }
@@ -190,7 +203,7 @@ export const ShiftReportPage = () => {
                     </Grid>
                     <Grid item xs={12} md={8} lg={9} xl={10}>
                         <Typography variant="body1" component="p" fontWeight={200}>
-                           Lista de productos registrados.  
+                            Lista de productos registrados.
                         </Typography>
 
                     </Grid>
