@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { toast } from 'sonner'
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
 
@@ -199,7 +198,6 @@ export const seguimientoSlice = createSlice({
             } else {
                 seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
             }
-            toast.success("Producto de salida agregado")
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
             const { segIndex, product } = action.payload
