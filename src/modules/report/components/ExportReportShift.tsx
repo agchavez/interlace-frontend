@@ -18,7 +18,7 @@ interface ExportReportShiftProps {
     turno: string;
 }
 
-export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query, count, turno }) => {
+export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query, count }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [loading, setLoading] = useState(false);
     const { token } = useAppSelector((state) => state.auth);
@@ -59,7 +59,7 @@ export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query,
         ];
         const trackerData = data.results.map((tr) => [
             "TRK-" + tr.id.toString().padStart(5, "0"),
-            turno,
+            tr.shift || "",
             tr.product_sap_code,
             tr.product_name,
             tr.quantity,
@@ -68,7 +68,7 @@ export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query,
         if (type == "csv") {
             await exportToCSV({
                 data: [headers, ...trackerData],
-                filename: `reporte_turno_${turno}_${format(
+                filename: `reporte_pallets_${format(
                     new Date(),
                     "dd-MM-yyyy"
                 )}.csv`,
@@ -76,7 +76,7 @@ export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query,
         } else if (type == "xlsx") {
             await exportToXLSX({
                 data: [headers, ...trackerData],
-                filename: `reporte_turno_${turno}_${format(
+                filename: `reporte_pallets_${format(
                     new Date(),
                     "dd-MM-yyyy"
                 )}.xlsx`,

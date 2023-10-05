@@ -38,9 +38,7 @@ props: ProductSelectProps<TField>
     refetch,
     isFetching,
     isLoading
-  } = useGetProductQuery(query, {
-    skip: !query.search
-  });
+  } = useGetProductQuery(query);
 
   // useEffect(() => {
   //   refetch();

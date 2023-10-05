@@ -147,11 +147,14 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   id?: number;
   tracker_detail?: number;
   tracker_detail__tracker?: number;
+  tracker_detail__product?: number;
   tracker_detail__tracker__distributor_center?: number;
   tracker_detail__tracker__status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   tracker_detail__tracker__user?: string;
+  expiration_date?: string;
   created_at__gte?: string;
   created_at__lte?: string;
+  shift?: 'A' | 'B' | 'C';
   ordering?: string;
 }
 
@@ -284,6 +287,7 @@ export interface TrackerProductDetail {
   product_sap_code: string;
   tracker_detail_id: number;
   tracker_id?: number;
+  shift?: string;
 }
 
 export interface LastTrackerOutput {

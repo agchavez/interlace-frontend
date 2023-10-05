@@ -108,7 +108,6 @@ export const permisions = [
             "tracker.view_trackerdetailproductmodel",
             "tracker.view_trackermodel",
             "tracker.view_typedetailoutputmodel",
-            "report.report_shift",
         ]
     },
     {
@@ -121,7 +120,6 @@ export const permisions = [
         url: "/report/shift",
         permissions: [
             "tracker.view_trackerdetailproductmodel",
-            "report.report_shift"
         ]
     },
     {

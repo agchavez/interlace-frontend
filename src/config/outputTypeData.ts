@@ -11,6 +11,16 @@ interface OutputTypeDataRow {
 
 const outputTypeDataToShow: OutputType[] = [
   {
+    name: "VACÍA",
+    rows: [
+      {
+        material: "--",
+        description: "VACÍA",
+        quantity: 0,
+      },
+    ],
+  },
+  {
     name: "Pallets de Madera",
     rows: [
       {

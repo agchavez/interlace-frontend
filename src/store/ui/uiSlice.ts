@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DashboardQueryParams } from '../../interfaces/login';
 import { format } from "date-fns";
 import { TrackerQueryParams } from '../../interfaces/tracking';
+import { FormFilterShiftManage } from "../../modules/report/components/FilterShiftManage";
 
 
 enum FilterDate {
@@ -17,6 +18,7 @@ export interface uiState {
     loading: boolean;
     dashboardQueryParams: DashboardQueryParams;
     manageQueryParams: TrackerQueryParams;
+    reportPallets: FormFilterShiftManage;
 }
 
 const initialState: uiState = {
@@ -25,6 +27,14 @@ const initialState: uiState = {
         filterDate: FilterDate.TODAY,
         start_date: format(new Date(), "yyyy-MM-dd"),
         end_date: format(new Date(), "yyyy-MM-dd")
+    },
+    reportPallets: {
+        date_after: format(new Date(), "yyyy-MM-dd"),
+        date_before: format(new Date(), "yyyy-MM-dd"),
+        shift: undefined,
+        distribution_center: undefined,
+        product: undefined,
+        expiration_date: null,
     },
     manageQueryParams: {
         limit: 15,
@@ -48,6 +58,9 @@ export const uiSlice = createSlice({
         },
         setManageQueryParams: (state, action: PayloadAction<TrackerQueryParams>) => {
             state.manageQueryParams = action.payload
+        },
+        setQueryReportPallets: (state, action: PayloadAction<FormFilterShiftManage>) => {
+            state.reportPallets = action.payload
         }
 
     }
@@ -57,5 +70,6 @@ export const uiSlice = createSlice({
 export const {
     setLoading,
     setDashboardQueryParams,
-    setManageQueryParams
+    setManageQueryParams,
+    setQueryReportPallets
 } = uiSlice.actions;

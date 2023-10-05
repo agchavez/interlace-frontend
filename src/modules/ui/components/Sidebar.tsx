@@ -85,7 +85,7 @@ const items: SideBarItem[] = [
                 href: "/movimientos/crear", 
                 id: "nuevo" },
             { text: 
-                "Por turno", 
+                "Productos", 
                 href: "/report/shift", 
                 id: "turno" 
             },

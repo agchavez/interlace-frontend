@@ -42,7 +42,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
     isLoading: isLoadingEntradas,
   } = useGetTrackerPalletsQuery({
     offset: 0,
-    limit: 9  ,
+    limit: 10,
     ordering: "-created_at",
   });
   const {
@@ -50,7 +50,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
     refetch: refetchSalidas,
     isLoading: isLoadingSalidas,
   } = useGetLastTrackerOutputQuery({
-    limit: 5,
+    limit: 7,
   });
   useEffect(() => {
     const interval = setInterval(() => {
