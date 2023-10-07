@@ -50,7 +50,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
     refetch: refetchSalidas,
     isLoading: isLoadingSalidas,
   } = useGetLastTrackerOutputQuery({
-    limit: 7,
+    limit: 10,
   });
   useEffect(() => {
     const interval = setInterval(() => {
