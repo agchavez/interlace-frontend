@@ -121,7 +121,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
           <Grid item xs={12} md={6}>
-            <Divider>
+            <Divider textAlign="left">
               <Typography variant="h6" component="h2" fontWeight={400}>
                 ENTRADAS
               </Typography>
@@ -133,7 +133,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
             )}
           </Grid>
           <Grid item xs={12} md={6}>
-            <Divider>
+            <Divider textAlign="left">
               <Typography variant="h6" component="h2" fontWeight={400}>
                 SALIDAS
               </Typography>
@@ -153,6 +153,26 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableCellEntrada = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "green",
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableCellSalida = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "red",
     color: theme.palette.common.white,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -180,11 +200,21 @@ export function CustomizedTables({ rows }: CustomizedTablesProps) {
       <Table sx={{}} aria-label="customized table">
         <TableHead>
           <TableRow>
-            <StyledTableCell align="left"># Tracking</StyledTableCell>
-            <StyledTableCell align="left">Codigo SAP</StyledTableCell>
-            <StyledTableCell align="left">Producto</StyledTableCell>
-            <StyledTableCell align="left">Pallets</StyledTableCell>
-            <StyledTableCell align="left">Fecha</StyledTableCell>
+            <StyledTableCellEntrada align="left">
+              # Tracking
+            </StyledTableCellEntrada>
+            <StyledTableCellEntrada align="left">
+              Codigo SAP
+            </StyledTableCellEntrada>
+            <StyledTableCellEntrada align="left">
+              Producto
+            </StyledTableCellEntrada>
+            <StyledTableCellEntrada align="left">
+              Pallets
+            </StyledTableCellEntrada>
+            <StyledTableCellEntrada align="left">
+              Vencimiento
+            </StyledTableCellEntrada>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -250,12 +280,20 @@ export function CustomizedTablesOut({ rows }: CustomizedTablesOutProps) {
       <Table sx={{}} aria-label="customized table">
         <TableHead>
           <TableRow>
-            <StyledTableCell align="left">Categoría</StyledTableCell>
-            <StyledTableCell align="left"># Tracking</StyledTableCell>
-            <StyledTableCell align="left">Codigo SAP</StyledTableCell>
-            <StyledTableCell align="left">Producto</StyledTableCell>
-            <StyledTableCell align="left">Pallets</StyledTableCell>
-            <StyledTableCell align="left">Fecha</StyledTableCell>
+            <StyledTableCellSalida align="left">
+              Categoría
+            </StyledTableCellSalida>
+            <StyledTableCellSalida align="left">
+              # Tracking
+            </StyledTableCellSalida>
+            <StyledTableCellSalida align="left">
+              Codigo SAP
+            </StyledTableCellSalida>
+            <StyledTableCellSalida align="left">Producto</StyledTableCellSalida>
+            <StyledTableCellSalida align="left">Pallets</StyledTableCellSalida>
+            <StyledTableCellSalida align="left">
+              Vencimiento
+            </StyledTableCellSalida>
           </TableRow>
         </TableHead>
         <TableBody>
