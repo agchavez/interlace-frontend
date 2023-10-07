@@ -1,7 +1,7 @@
 import { FunctionComponent } from "react";
 import { CheckForm } from "../components/CheckForm";
 import { useGetTrackerByIdQuery } from "../../../store/seguimiento/trackerApi";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { parseTrackerSeguimiento } from "../../../store/seguimiento/trackerThunk";
 import { skipToken } from "@reduxjs/toolkit/dist/query";
 import {
@@ -16,11 +16,16 @@ import { ArrowBack } from "@mui/icons-material";
 interface QRCheckPageProps {}
 
 const QRCheckPage: FunctionComponent<QRCheckPageProps> = () => {
-  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+
+  // query params tracker_id
+
+  const tracker_id = searchParams.get('tracker_id');
   const navigate = useNavigate();
-  const { data, error, isLoading } = useGetTrackerByIdQuery(id || skipToken, {
-    skip: !id,
+  const { data, error, isLoading } = useGetTrackerByIdQuery(tracker_id || skipToken, {
+    skip: !tracker_id,
   });
+
   if (isLoading) return <div>Cargando...</div>;
   if (error || !data) return <Navigate to="/tracker/manage" />;
   return (
@@ -31,7 +36,7 @@ const QRCheckPage: FunctionComponent<QRCheckPageProps> = () => {
             <ArrowBack color="primary" fontSize="medium" />
           </IconButton>
           <Typography variant="h4" component="h1" fontWeight={400}>
-            TRK-{id?.padStart(5, "0")}
+            TRK-{tracker_id?.padStart(5, "0")}
           </Typography>
           <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
         </Grid>

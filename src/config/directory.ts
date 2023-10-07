@@ -59,17 +59,7 @@ export const permisions = [
             "tracker.view_trackerdetailoutputmodel",
             "tracker.view_trackerdetailproductmodel",
             "tracker.view_trackermodel",
-            "tracker.view_typedetailoutputmodel",
-            "maintenance.view_distributorcenter",
-            "maintenance.view_drivermodel",
-            "maintenance.view_locationmodel",
-            "maintenance.view_operatormodel",
-            "maintenance.view_outputtypemodel",
-            "maintenance.view_periodmodel",
-            "maintenance.view_productmodel",
-            "maintenance.view_routemodel",
-            "maintenance.view_transportermodel",
-            "maintenance.view_trailermodel",
+            "tracker.view_typedetailoutputmodel"
         ]
     },
     {

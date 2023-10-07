@@ -1,5 +1,5 @@
 import { Controller, Control, Path } from "react-hook-form";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
@@ -40,9 +40,9 @@ props: ProductSelectProps<TField>
     isLoading
   } = useGetProductQuery(query);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [query, refetch]);
+  useEffect(() => {
+    refetch();
+  }, [query, refetch]);
 
   const handleInputChange = (newInputValue: string) => {
     if (newInputValue.length > 2) {
@@ -52,7 +52,6 @@ props: ProductSelectProps<TField>
         ...query,
         search: splitted[0],
       });
-      refetch();
     }
     else{
       setQuery({

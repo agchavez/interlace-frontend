@@ -186,7 +186,7 @@ export default function HomePage() {
                 </StyledMenu>
             </Grid>
 
-            <Grid item xs={12} md={8} >
+            <Grid item xs={12} md={6} >
                 <Card elevation={0} sx={{
                     p: 2, borderRadius: 2
                 }} >
@@ -210,7 +210,7 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
-            <Grid item xs={12} md={4} >
+            <Grid item xs={12} md={6} >
                 <Card elevation={1} sx={{
                     p: 2, borderRadius: 2,
                 }} >
@@ -223,6 +223,11 @@ export default function HomePage() {
                             <Divider />
                             <Typography variant="h6" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
                                 {user?.centro_distribucion_name}
+                            </Typography>
+                        </div>
+                        <div>
+                        <Typography variant="h2" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
+                                TAT
                             </Typography>
                         </div>
 
@@ -238,7 +243,10 @@ export default function HomePage() {
                                     )}
                                     variant='outlined'
                                     color="success"
-                                    size="small"
+                                    size="medium"
+                                    sx={{
+                                        fontSize: '30px'
+                                    }}
                                     icon={
                                         isLoading || isFetching ? <CircularProgress size={20} /> : <AccessTimeIcon />
                                     }
