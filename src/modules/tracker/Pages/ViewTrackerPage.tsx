@@ -263,17 +263,20 @@ export function CustomizedTablesOut({ rows }: CustomizedTablesOutProps) {
       (ot) => ot.name.toLowerCase() === row.output_type_name.toLowerCase()
     );
     if (!dataByType) continue;
-    const newRows: LastTrackerOutput[] = dataByType.rows.map((otrow) => {
-      return {
-        output_type_name: row.output_type_name,
-        required_details: false,
-        tracking: row.tracking,
-        sap_code: otrow.material,
-        product_name: otrow.description,
-        quantity: otrow.quantity,
-      };
-    });
-    rowsToShow.push(...newRows);
+    for (let i = 0; i < dataByType.rows.length; i++) {
+      const otrow = dataByType.rows[i];
+      if (otrow.material === "3501451") continue;
+      if (row) {
+        rowsToShow.push({
+          output_type_name: row.output_type_name,
+          required_details: false,
+          tracking: row.tracking,
+          sap_code: otrow.material,
+          product_name: otrow.description,
+          quantity: otrow.quantity,
+        });
+      }
+    }
   }
   return (
     <TableContainer component={Paper}>
