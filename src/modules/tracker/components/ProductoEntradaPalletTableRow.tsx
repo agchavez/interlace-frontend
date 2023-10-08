@@ -17,6 +17,8 @@ import {
 import PrintComponent from "../../../utils/componentPrinter";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import LocalPrintshopTwoToneIcon from "@mui/icons-material/LocalPrintshopTwoTone";
+import { toast } from "sonner";
+import { differenceInDays } from "date-fns";
 
 interface ProductoEntradaPalletTableRowProps {
   index: number;
@@ -43,7 +45,9 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
 }) => {
   const [willPrint, setWillPrint] = useState(false);
   const [componenPrint, setComponentPrint] = useState(<></>);
-  const [pallets, setPallets] = useState<number | null>(historyRow.pallets || null);
+  const [pallets, setPallets] = useState<number | null>(
+    historyRow.pallets || null
+  );
 
   const [date, setDate] = useState<Date | undefined>(
     historyRow.date && historyRow.date !== null
@@ -60,7 +64,8 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
           pallet={{
             numeroSap: +detalle.sap_code,
             rastra: seguimiento.rastra.code,
-            nDocEntrada: seguimiento.documentNumber || seguimiento.invoiceNumber || "",
+            nDocEntrada:
+              seguimiento.documentNumber || seguimiento.invoiceNumber || "",
             fechaVencimiento: historyRow.date || new Date().toISOString(),
             nPallets: historyRow.pallets || 0,
             cajasPallet: detalle.boxes_pre_pallet,
@@ -140,6 +145,12 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
 
             if (!isNaN(inputDate.getTime())) {
               // Verificar si es una fecha válida
+              const leftDays = differenceInDays(inputDate, new Date());
+              if (leftDays <= 60) {
+                toast.error(
+                  "El producto ingresado vencera en menos de 60 dias"
+                );
+              }
               updateProductoPallet({
                 date: inputDate,
                 palletIndex: index,
