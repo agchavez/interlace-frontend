@@ -162,6 +162,14 @@ export interface LastTrackerOutputQueryParams {
   limit?: number;
 }
 
+export interface NearExpirationQueryParams {
+  limit: number;
+  offset: number;
+  product?: number;
+  distributor_center?: number;
+  days?: number;
+}
+
 export interface TrackerDeailOutput {
   id: number;
   product_data: ProductData;
@@ -298,6 +306,17 @@ export interface LastTrackerOutput {
   quantity?: number;
   expiration_date?: string;
   output_type_name: string;
+}
+
+export interface NearExpirationProductResponse {
+  product_name: string;
+  sap_code: string;
+  expiration_list: HistoryNearExpiration[]
+}
+
+export interface HistoryNearExpiration {
+  expiration_date: string;
+  total_quantity: number;
 }
 
 export interface AddOutProductData {

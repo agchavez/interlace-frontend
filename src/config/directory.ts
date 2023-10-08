@@ -113,6 +113,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/report/por-expirar",
+        permissions: [
+            "tracker.view_trackerdetailproductmodel",
+        ]
+    },
+    {
         url: "/auth/login",
         permissions: [
             "any"
