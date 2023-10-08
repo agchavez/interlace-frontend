@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutput, LastTrackerOutputQueryParams, NearExpirationProductResponse } from '../../interfaces/tracking';
+import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutput, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams } from '../../interfaces/tracking';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -102,7 +102,7 @@ export const nearExpirationProductsApi = createApi({
         }
     }),
     endpoints: (builder) => ({
-        getNearExpirationProducts: builder.query<BaseApiResponse<NearExpirationProductResponse>, LastTrackerOutputQueryParams>({
+        getNearExpirationProducts: builder.query<BaseApiResponse<NearExpirationProductResponse>, NearExpirationQueryParams>({
             query: (params) => ({
                 url: `/report/next-win/`,
                 method: 'GET',

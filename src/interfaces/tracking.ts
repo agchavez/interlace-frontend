@@ -162,6 +162,14 @@ export interface LastTrackerOutputQueryParams {
   limit?: number;
 }
 
+export interface NearExpirationQueryParams {
+  limit: number;
+  offset: number;
+  product?: number;
+  distributor_center?: number;
+  days?: number;
+}
+
 export interface TrackerDeailOutput {
   id: number;
   product_data: ProductData;

@@ -1,20 +1,19 @@
 import { Button, Container, Divider, Grid, Typography } from "@mui/material";
-import { TrackerProductDetailQueryParams } from "../../../interfaces/tracking";
+import { NearExpirationQueryParams } from "../../../interfaces/tracking";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../../../store/store";
 import { useGetNearExpirationProductsQuery } from "../../../store/seguimiento/trackerApi";
 import { format } from "date-fns";
 import { differenceInDays, parseISO } from "date-fns";
-import {
-  FilterShiftManage,
-  FormFilterShiftManage,
-} from "../components/FilterShiftManage";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
-import { toast } from "sonner";
 import NearExpirationTable, {
   NearExpirationProduct,
 } from "../components/NearExpirationTable";
 import { ExportReportNearExpiration } from "../components/ExportReportNearExpiration";
+import {
+  FilterNearExpiration,
+  FormFilterNearExpiration,
+} from "../components/FilterNearExpiration";
 export const NearExpirationReportPage = () => {
   const user = useAppSelector((state) => state.auth.user);
 
@@ -31,12 +30,11 @@ export const NearExpirationReportPage = () => {
     }
   };
 
-  const [query, setquery] = useState<TrackerProductDetailQueryParams>({
-    limit: 15,
+  const [query, setquery] = useState<NearExpirationQueryParams>({
+    limit: 10,
     offset: 0,
-    ordering: "-created_at",
-    tracker_detail__tracker__distributor_center:
-      user?.centro_distribucion || undefined,
+    distributor_center: user?.centro_distribucion || undefined,
+    days: 60,
   });
 
   const {
@@ -46,28 +44,16 @@ export const NearExpirationReportPage = () => {
     refetch,
   } = useGetNearExpirationProductsQuery(query);
 
-  const handleFilter = (data: FormFilterShiftManage) => {
-    const dateStart = data.date_after
-      ? format(new Date(data.date_after), "yyyy-MM-dd")
-      : undefined;
-    const dateEnd = data.date_before
-      ? format(new Date(data.date_before), "yyyy-MM-dd")
-      : undefined;
-    if (dateStart && dateEnd && dateStart > dateEnd) {
-      toast.error("La fecha de inicio no puede ser mayor a la fecha final");
-      return;
-    }
-    setquery((query) => ({
-      ...query,
-      created_at__gte: dateStart,
-      created_at__lte: dateEnd,
-      tracker_detail__tracker__distributor_center: data.distribution_center,
-      shift: data.shift,
-      expiration_date: data.expiration_date
-        ? format(new Date(data.expiration_date), "yyyy-MM-dd")
-        : undefined,
-      tracker_detail__product: data.product ? data.product : undefined,
-    }));
+  const handleFilter = (data: FormFilterNearExpiration) => {
+    setquery((query) => {
+      const newQuery = {
+        ...query,
+        distributor_center: data.distribution_center,
+        product: data.product ? data.product : undefined,
+        days: data.days === null ? undefined : data.days,
+      };
+      return newQuery;
+    });
   };
 
   const [openFilter, setopenFilter] = useState(false);
@@ -82,7 +68,8 @@ export const NearExpirationReportPage = () => {
 
   useEffect(() => {
     refetch();
-  }, [query, refetch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   useEffect(() => {
     setquery((query) => ({
@@ -114,7 +101,7 @@ export const NearExpirationReportPage = () => {
 
   return (
     <>
-      <FilterShiftManage
+      <FilterNearExpiration
         open={openFilter}
         handleClose={() => setopenFilter(false)}
         handleFilter={handleFilter}
@@ -147,7 +134,8 @@ export const NearExpirationReportPage = () => {
           </Grid>
           <Grid item xs={12} md={4} lg={6} xl={8}>
             <Typography variant="body1" component="p" fontWeight={200}>
-              Lista de productos registrados.
+              Lista de productos por vencer dentro de los próximos {query.days}{" "}
+              días.
             </Typography>
           </Grid>
           <Grid item xs={12} md={4} lg={3} xl={2}>
@@ -181,6 +169,7 @@ export const NearExpirationReportPage = () => {
               count={nearExpirationPallets?.count || 0}
               paginationModel={paginationModel}
               setPaginationModel={setPaginationModel}
+              loading={isLoading || isFetching}
             />
           </Grid>
         </Grid>

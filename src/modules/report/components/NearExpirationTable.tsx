@@ -12,12 +12,13 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { TablePagination } from "@mui/material";
+import { CircularProgress, TablePagination } from "@mui/material";
 
 interface NearExpirationTableProps {
   rows: NearExpirationProduct[];
   count: number;
   paginationModel: PaginationModel;
+  loading: boolean;
   setPaginationModel: (paginationModel: PaginationModel) => void;
 }
 
@@ -102,6 +103,7 @@ export default function NearExpirationTable({
   rows,
   count,
   paginationModel,
+  loading,
   setPaginationModel,
 }: NearExpirationTableProps) {
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -127,9 +129,21 @@ export default function NearExpirationTable({
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <Row key={row.sap_code} row={row} />
-            ))}
+            {loading ? (
+              <TableRow sx={{ height: 50 }}>
+                <TableCell
+                  align="right"
+                  colSpan={5}
+                  sx={{
+                    textAlign: "center",
+                  }}
+                >
+                  <CircularProgress size={40} />
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows.map((row) => <Row key={row.sap_code} row={row} />)
+            )}
           </TableBody>
         </Table>
       </TableContainer>
