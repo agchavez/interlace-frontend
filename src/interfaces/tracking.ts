@@ -300,6 +300,17 @@ export interface LastTrackerOutput {
   output_type_name: string;
 }
 
+export interface NearExpirationProductResponse {
+  product_name: string;
+  sap_code: string;
+  expiration_list: HistoryNearExpiration[]
+}
+
+export interface HistoryNearExpiration {
+  expiration_date: string;
+  total_quantity: number;
+}
+
 export interface AddOutProductData {
   tracker: number;
   product: Product;
