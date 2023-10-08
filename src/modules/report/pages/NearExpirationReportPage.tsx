@@ -82,15 +82,17 @@ export const NearExpirationReportPage = () => {
   const results: NearExpirationProduct[] | undefined =
     nearExpirationPallets?.results.map((r) => {
       return {
+        distributorCenter: r.distributor_center,
         productName: r.product_name,
         sap_code: r.sap_code,
         registeredDates: r.expiration_list.length,
         total: r.expiration_list
-          .map((ex) => ex.total_quantity)
+          .map((ex) => ex.quantity)
           .reduce((p, c) => p + c, 0),
         history: r.expiration_list.map((elr) => ({
-          expirationDate: format(new Date(elr.expiration_date), "dd-MM-yyyy"),
-          quantity: elr.total_quantity,
+          expirationDate: format(parseISO(elr.expiration_date.split("T")[0]), "dd/MM/yyyy"),
+          quantity: elr.quantity,
+          trackerId: elr.tracker_id,
           daysExpiration: differenceInDays(
             parseISO(elr.expiration_date),
             new Date()
@@ -118,15 +120,18 @@ export const NearExpirationReportPage = () => {
                 }}
               >
                 <Typography variant="h5" component="h1" fontWeight={400}>
-                  Productos por Vencer
+                  RISKS - STOCK AGE INDEX
                 </Typography>
                 <Typography variant="body1" component="p" fontWeight={200}>
-                  {user?.centro_distribucion_name}
+                  Alertas de Productos Proximos a Vencer
                 </Typography>
               </div>
               <div>
                 <Typography variant="body1" component="p" fontWeight={200}>
                   <b>Fecha:</b> {format(new Date(), "dd/MM/yyyy")}
+                </Typography>
+                <Typography variant="body1" component="p" fontWeight={200}>
+                  {user?.centro_distribucion_name}
                 </Typography>
               </div>
             </div>

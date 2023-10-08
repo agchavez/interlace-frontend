@@ -13,6 +13,8 @@ import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { CircularProgress, TablePagination } from "@mui/material";
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from "react-router-dom";
 
 interface NearExpirationTableProps {
   rows: NearExpirationProduct[];
@@ -30,6 +32,7 @@ interface PaginationModel {
 export interface NearExpirationProduct {
   productName: string;
   sap_code: string;
+  distributorCenter: string;
   registeredDates: number;
   total: number;
   history: HistoryRow[];
@@ -38,16 +41,17 @@ export interface NearExpirationProduct {
 interface HistoryRow {
   expirationDate: string;
   quantity: number;
+  trackerId: number;
   daysExpiration: number;
 }
 
 function Row(props: { row: NearExpirationProduct }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-
+  const navigate = useNavigate();
   return (
     <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
+      <TableRow>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -57,11 +61,12 @@ function Row(props: { row: NearExpirationProduct }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
+        <TableCell >{row.sap_code}</TableCell>
         <TableCell component="th" scope="row">
           {row.productName}
         </TableCell>
-        <TableCell align="right">{row.sap_code}</TableCell>
-        <TableCell align="right">{row.registeredDates}</TableCell>
+       
+        <TableCell align="center">{row.registeredDates}</TableCell>
         <TableCell align="right">{row.total}</TableCell>
       </TableRow>
       <TableRow>
@@ -74,19 +79,31 @@ function Row(props: { row: NearExpirationProduct }) {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
+                  <TableCell>#Tracking</TableCell>
                     <TableCell>Fecha</TableCell>
-                    <TableCell>Cantidad</TableCell>
+                    <TableCell>Pallets</TableCell>
                     <TableCell>Días Restantes</TableCell>
+                    <TableCell align="center">
+                      Ver
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {row.history.map((historyRow) => (
                     <TableRow key={historyRow.expirationDate}>
+                       <TableCell component="th" scope="row">
+                        TKR-{historyRow.trackerId.toString().padStart(5, "0")}
+                      </TableCell>
                       <TableCell component="th" scope="row">
                         {historyRow.expirationDate}
                       </TableCell>
                       <TableCell>{historyRow.quantity}</TableCell>
                       <TableCell>{historyRow.daysExpiration}</TableCell>
+                      <TableCell align="center">
+                      <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + historyRow.trackerId)}>
+                        <ArrowForwardIcon />
+                    </IconButton>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -117,15 +134,15 @@ export default function NearExpirationTable({
   };
   return (
     <Paper sx={{ width: "100%" }}>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
               <TableCell />
+              <TableCell>Código Sap</TableCell>
               <TableCell>Producto</TableCell>
-              <TableCell align="right">Código Sap</TableCell>
-              <TableCell align="right">Fechas Registradas</TableCell>
-              <TableCell align="right">Total</TableCell>
+              <TableCell align="center">Fechas Registradas</TableCell>
+              <TableCell align="right">Pallets Total</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

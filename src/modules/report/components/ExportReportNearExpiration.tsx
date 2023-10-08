@@ -66,7 +66,7 @@ export const ExportReportNearExpiration: FC<
           tr.product_name,
           tr.sap_code,
           row.expiration_date,
-          row.total_quantity,
+          row.quantity,
           differenceInDays(parseISO(row.expiration_date), new Date()),
         ]);
         return rows;

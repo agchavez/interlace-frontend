@@ -82,7 +82,7 @@ const items: SideBarItem[] = [
     subItems: [
       { text: "Movimientos", href: "/movimientos/crear", id: "nuevo" },
       { text: "Productos", href: "/report/shift", id: "turno" },
-      { text: "Por Expirar", href: "/report/por-expirar", id: "porExpirar" },
+      { text: "RISKS - STOCK AGE", href: "/report/por-expirar", id: "porExpirar" },
     ],
     icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "reportes",

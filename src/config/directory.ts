@@ -110,12 +110,14 @@ export const permisions = [
         url: "/report/shift",
         permissions: [
             "tracker.view_trackerdetailproductmodel",
+            "report.report_shift",
         ]
     },
     {
         url: "/report/por-expirar",
         permissions: [
             "tracker.view_trackerdetailproductmodel",
+            "report.report_risk_stock_ege",
         ]
     },
     {

@@ -1,5 +1,5 @@
 
-import {  Button, Container, Divider, Grid, Typography } from '@mui/material';
+import { Button, Container, Divider, Grid, IconButton, Typography } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { TrackerProductDetail, TrackerProductDetailQueryParams } from '../../../interfaces/tracking';
 import { tableBase } from '../../ui/index';
@@ -11,9 +11,11 @@ import { ExportReportShift } from '../components/ExportReportShift';
 import { FilterShiftManage, FormFilterShiftManage } from '../components/FilterShiftManage';
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import { toast } from 'sonner';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useNavigate } from 'react-router-dom';
 export const ShiftReportPage = () => {
     const user = useAppSelector((state) => state.auth.user);
-    
+    const navigate = useNavigate();
 
     const columns: GridColDef<TrackerProductDetail>[] = [
         {
@@ -110,6 +112,21 @@ export const ShiftReportPage = () => {
                 );
             },
         },
+        {
+            field: "actions",
+            headerName: "Acciones",
+            flex: 0,
+            width: 80,
+            minWidth: 80,
+            renderCell: (params) => {
+                return (
+                    <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + params.row.tracker_id)}>
+                        <ArrowForwardIcon />
+                    </IconButton>
+                );
+            }
+
+        }
 
     ];
 
@@ -173,7 +190,7 @@ export const ShiftReportPage = () => {
         limit: 15,
         offset: 0,
         ordering: "-created_at",
-        tracker_detail__tracker__distributor_center: user?.centro_distribucion || undefined, 
+        tracker_detail__tracker__distributor_center: user?.centro_distribucion || undefined,
     });
 
     const {

@@ -319,12 +319,14 @@ export interface LastTrackerOutput {
 export interface NearExpirationProductResponse {
   product_name: string;
   sap_code: string;
+  distributor_center: string;
   expiration_list: HistoryNearExpiration[]
 }
 
 export interface HistoryNearExpiration {
   expiration_date: string;
-  total_quantity: number;
+  quantity: number;
+  tracker_id: number;
 }
 
 export interface AddOutProductData {
