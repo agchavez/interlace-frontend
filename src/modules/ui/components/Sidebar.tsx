@@ -69,9 +69,9 @@ const items: SideBarItem[] = [
                 id: "gestion",
             },
             {
-                text: "Vista",
+                text: "In-out",
                 href: "/tracker/view",
-                id: "vista",
+                id: "IN-OUT",
             }
         ],
         icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,

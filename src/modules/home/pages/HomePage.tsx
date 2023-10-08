@@ -331,6 +331,46 @@ export default function HomePage() {
                         }
                     </div>
                     <Divider />
+                    <TableContainer sx={{ mt: 1 }}>
+                        <Table size="small" aria-label="a dense table">
+                            <TableHead>
+                                <TableRow>
+                                    <StyledTableCell align="left">
+                                        Tracking
+                                    </StyledTableCell>
+                                    <StyledTableCell align="left">
+                                    Traslado 5001
+                                    </StyledTableCell>
+                                    <StyledTableCell align="right">
+
+                                    </StyledTableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {data?.last_trackers.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell align="left" component="th" scope="row">
+                                            TRK-{row.id.toString().padStart(8, '0')}
+                                        </TableCell>
+                                        <TableCell align="left">{
+                                            row?.transfer_number
+                                        }</TableCell>
+                                        <TableCell align="right">
+                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + row.id)}>
+                                                <ArrowForwardIcon />
+                                            </IconButton>
+
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+
+                        </Table>
+                    </TableContainer>
+
                     <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />} onClick={()=> navigate('/tracker/manage/?status=COMPLETE')}>
                         Ver más
                     </Button>

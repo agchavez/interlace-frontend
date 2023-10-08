@@ -15,6 +15,7 @@ import {
   tableCellClasses,
   CircularProgress,
   IconButton,
+  Card,
 } from "@mui/material";
 import {
   LastTrackerOutput,
@@ -82,24 +83,69 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Grid container justifyContent="space-between">
-              <Grid item>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                  }}
-                >
+              <Grid item xs={12} md={3} padding={0.5}>
+                <Card sx={{padding: 1}}>
+                <div>
                   <Typography variant="h5" component="h1" fontWeight={400}>
-                    Vista de Trackers
+                    IN-OUT TRACKINGS
                   </Typography>
                   <Typography variant="body1" component="p" fontWeight={200}>
                     DH01 - CD LA GRANJA
                   </Typography>
                 </div>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={3} padding={0.5}>
+                <Card sx={{padding: 1}}>
+                <div>
+                  <Typography variant="h5" component="h1" fontWeight={400}>
+                    {salidas?.total_hele || 0}
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight={200}>
+                    Hectolitros totales
+                  </Typography>
+                </div>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2} padding={0.5}>
+                <Card sx={{padding: 1}}>
+                <div>
+                  <Typography variant="h5" component="h1" fontWeight={400}>
+                  {salidas?.total_pallets || 0}
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight={200}>
+                    Pallets totales
+                  </Typography>
+                </div>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={2} padding={0.5}>
+                <Card sx={{padding: 1}}>
+                <div>
+                  <Typography variant="h5" component="h1" fontWeight={400}>
+                    {salidas?.tracker_completed_today || 0}
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight={200}>
+                    Tracking completados
+                  </Typography>
+                </div>
+                </Card>
+              </Grid>
+              
+              <Grid item xs={12} md={2} padding={0.5}>
+                <Card sx={{padding: 1}}>
+                <div>
+                  <Typography variant="h5" component="h1" fontWeight={400}>
+                    {format(new Date(), 'dd/MM/yyyy')}
+                  </Typography>
+                  <Typography variant="body1" component="p" fontWeight={200}>
+                    Fecha
+                  </Typography>
+                </div>
+                </Card>
               </Grid>
               {!isModal && (
-                <Grid item>
+                <Grid item xs={12} alignContent={'end'} justifyContent={'end'} display={"flex"}>
                   {modlaOpen && (
                     <FullViewDialog
                       open={modlaOpen}

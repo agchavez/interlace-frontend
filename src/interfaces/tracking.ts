@@ -290,6 +290,14 @@ export interface TrackerProductDetail {
   shift?: string;
 }
 
+export interface LastTrackerOutputResult{
+  results: LastTrackerOutput[];
+  tracker_completed_today: number;
+  total_hele: number;
+  total_pallets: number;
+}
+
+
 export interface LastTrackerOutput {
   required_details: boolean;
   tracking?: number;

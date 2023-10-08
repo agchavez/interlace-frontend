@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutput, LastTrackerOutputQueryParams } from '../../interfaces/tracking';
+import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -76,7 +76,7 @@ export const trackerOutputApi = createApi({
         }
     }),
     endpoints: (builder) => ({
-        getLastTrackerOutput: builder.query<BaseApiResponse<LastTrackerOutput>, LastTrackerOutputQueryParams>({
+        getLastTrackerOutput: builder.query<LastTrackerOutputResult, LastTrackerOutputQueryParams>({
             query: (params) => ({
                 url: `/tracker/last-output/`,
                 method: 'GET',
