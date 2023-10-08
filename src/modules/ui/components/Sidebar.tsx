@@ -69,7 +69,7 @@ const items: SideBarItem[] = [
         id: "gestion",
       },
       {
-        text: "Vista",
+        text: "IN-OUT",
         href: "/tracker/view",
         id: "vista",
       },
