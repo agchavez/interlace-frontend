@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
@@ -33,7 +33,7 @@ export const maintenanceApi = createApi({
             query: (body) => ({
                 url: `/trailer/`,
                 method: 'POST',
-                body:{
+                body: {
                     code: body
                 }
             })
@@ -73,45 +73,48 @@ export const maintenanceApi = createApi({
             query: (params) => ({
                 url: `/product/`,
                 method: 'GET',
-                params
+                params: { ...params, id: params.id !== null ? params.id : undefined }
             }),
             keepUnusedDataFor: 120000
         }),
         getLocations: builder.query<BaseApiResponse<LocationType>, LocationTypeQuerySearch>({
-            query: (params) =>{
+            query: (params) => {
                 return ({
-                url: `/location/`,
-                method: 'GET',
-                params: {
-                    ...params,
-                    id: params.id ? params.id : undefined,
-                }
-            })},
+                    url: `/location/`,
+                    method: 'GET',
+                    params: {
+                        ...params,
+                        id: params.id ? params.id : undefined,
+                    }
+                })
+            },
             keepUnusedDataFor: 120000
 
         }),
         getProductPeriod: builder.query<Period, ProductPeriodQueryParams>({
-            query: (params) =>{
+            query: (params) => {
                 return ({
-                url: `/period/last-period/`,
-                method: 'GET',
-                params: {
-                    product: params.product
-                }
-            })},
+                    url: `/period/last-period/`,
+                    method: 'GET',
+                    params: {
+                        product: params.product
+                    }
+                })
+            },
             keepUnusedDataFor: 120000
         }),
         getRoute: builder.query<BaseApiResponse<Route>, RouteQuerySearch>({
-            query: (params) =>{
+            query: (params) => {
                 return ({
-                url: `/route/`,
-                method: 'GET',
-                params: {
-                    ...params,
-                    id: params.id ? params.id : undefined,
-                    distributor_center: params.distributorCenter ? params.distributorCenter : undefined,
-                }
-            })}
+                    url: `/route/`,
+                    method: 'GET',
+                    params: {
+                        ...params,
+                        id: params.id ? params.id : undefined,
+                        distributor_center: params.distributorCenter ? params.distributorCenter : undefined,
+                    }
+                })
+            }
         }),
     })
 })
