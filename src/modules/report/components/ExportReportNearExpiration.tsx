@@ -54,8 +54,10 @@ export const ExportReportNearExpiration: FC<
     handleClose();
     const data = await fetchData();
     const headers = [
-      "Producto",
+      "Tracking",
+      "Centro de distribución",
       "Codigo Sap",
+      "Producto",
       "Fecha Exp",
       "Cantidad",
       "Días restantes",
@@ -63,8 +65,10 @@ export const ExportReportNearExpiration: FC<
     const trackerData = data.results
       .map((tr) => {
         const rows = tr.expiration_list.map((row) => [
-          tr.product_name,
+          row.tracker_id,
+          tr.distributor_center,
           tr.sap_code,
+          tr.product_name,
           row.expiration_date,
           row.quantity,
           differenceInDays(parseISO(row.expiration_date), new Date()),
