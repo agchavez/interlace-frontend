@@ -2,7 +2,7 @@ export interface RoutePermissions {
     [url: string]: string[]
 }
 
-const permisions = [
+export const permisions = [
     {
         url: "/user/register",
         permissions: [
@@ -48,10 +48,30 @@ const permisions = [
             "maintenance.view_routemodel",
             "maintenance.view_transportermodel",
             "maintenance.view_trailermodel",
+            "maintenance.add_trailermodel",
+        ]
+    },
+    {
+        url: "/tracker/pallet-detail/:id",
+        reg: /\/tracker\/pallet-detail\/\d+/,
+        permissions: [
+            "tracker.view_trackerdetailmodel",
+            "tracker.view_trackerdetailoutputmodel",
+            "tracker.view_trackerdetailproductmodel",
+            "tracker.view_trackermodel",
+            "tracker.view_typedetailoutputmodel"
+        ]
+    },
+    {
+        url: "/tracker/detail/:id",
+        reg: /\/tracker\/detail\/\d+/,
+        permissions: [
+            "any",
         ]
     },
     {
         url: "/tracker/check/:id",
+        reg: /\/tracker\/check\/\d+/,
         permissions: [
             "tracker.view_trackerdetailmodel",
             "tracker.view_trackerdetailoutputmodel",
@@ -71,9 +91,33 @@ const permisions = [
         ]
     },
     {
+        url: "/tracker/view",
+        permissions: [
+            "tracker.view_trackerdetailmodel",
+            "tracker.view_trackerdetailoutputmodel",
+            "tracker.view_trackerdetailproductmodel",
+            "tracker.view_trackermodel",
+            "tracker.view_typedetailoutputmodel",
+        ]
+    },
+    {
         url: "/movimientos/crear",
         permissions: [
-            "any"
+            "report.report_tracker",
+        ]
+    },
+    {
+        url: "/report/shift",
+        permissions: [
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_shift",
+        ]
+    },
+    {
+        url: "/report/por-expirar",
+        permissions: [
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_risk_stock_ege",
         ]
     },
     {
@@ -94,7 +138,7 @@ const directory: RoutePermissions = {}
 
 permisions.forEach(perm => {
     directory[perm.url] = perm.permissions
-    directory[perm.url+'/'] = perm.permissions
+    directory[perm.url + '/'] = perm.permissions
 })
 
 export const RoutePermissionsDirectory = directory

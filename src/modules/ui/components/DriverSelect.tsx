@@ -68,7 +68,7 @@ props: DriverSelectProps<TField>
         return (<>
           <Autocomplete
             value={value ? categorias?.results?.find((option : Driver) => value === option.id) ?? null : null}
-            getOptionLabel={(option) => option.first_name + " " + option.last_name}
+            getOptionLabel={(option) => option.first_name}
             disabled={props.disabled}
             onChange={(_, newValue) => {
               if (newValue === null){

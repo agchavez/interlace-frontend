@@ -1,8 +1,8 @@
-import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch, LocationType, LocationTypeQuerySearch, Transporter, TransporterQuerySearch } from '../../interfaces/maintenance';
+import { Trailer, TrailerQuerySearch, OperatorQuerySearch, Operator, Driver, DriverQuerySearch, LocationType, LocationTypeQuerySearch, Transporter, TransporterQuerySearch, ProductPeriodQueryParams, Period, Route, RouteQuerySearch } from '../../interfaces/maintenance';
 import { Product, ProductQuerySearch } from '../../interfaces/tracking';
 
 export const maintenanceApi = createApi({
@@ -28,6 +28,15 @@ export const maintenanceApi = createApi({
                 }
             }),
             keepUnusedDataFor: 120000
+        }),
+        registerTrailer: builder.mutation<Trailer, string>({
+            query: (body) => ({
+                url: `/trailer/`,
+                method: 'POST',
+                body: {
+                    code: body
+                }
+            })
         }),
         getTransporter: builder.query<BaseApiResponse<Transporter>, TransporterQuerySearch>({
             query: (params) => ({
@@ -64,22 +73,48 @@ export const maintenanceApi = createApi({
             query: (params) => ({
                 url: `/product/`,
                 method: 'GET',
-                params
+                params: { ...params, id: params.id !== null ? params.id : undefined }
             }),
             keepUnusedDataFor: 120000
         }),
         getLocations: builder.query<BaseApiResponse<LocationType>, LocationTypeQuerySearch>({
-            query: (params) =>{
+            query: (params) => {
                 return ({
-                url: `/location/`,
-                method: 'GET',
-                params: {
-                    ...params,
-                    id: params.id ? params.id : undefined,
-                }
-            })},
+                    url: `/location/`,
+                    method: 'GET',
+                    params: {
+                        ...params,
+                        id: params.id ? params.id : undefined,
+                    }
+                })
+            },
             keepUnusedDataFor: 120000
 
+        }),
+        getProductPeriod: builder.query<Period, ProductPeriodQueryParams>({
+            query: (params) => {
+                return ({
+                    url: `/period/last-period/`,
+                    method: 'GET',
+                    params: {
+                        product: params.product
+                    }
+                })
+            },
+            keepUnusedDataFor: 120000
+        }),
+        getRoute: builder.query<BaseApiResponse<Route>, RouteQuerySearch>({
+            query: (params) => {
+                return ({
+                    url: `/route/`,
+                    method: 'GET',
+                    params: {
+                        ...params,
+                        id: params.id ? params.id : undefined,
+                        distributor_center: params.distributorCenter ? params.distributorCenter : undefined,
+                    }
+                })
+            }
         }),
     })
 })
@@ -91,5 +126,8 @@ export const {
     useGetOperatorByDistributionCenterQuery,
     useGetDriverQuery,
     useGetProductQuery,
-    useGetLocationsQuery
+    useGetLocationsQuery,
+    useGetProductPeriodQuery,
+    useRegisterTrailerMutation,
+    useGetRouteQuery
 } = maintenanceApi

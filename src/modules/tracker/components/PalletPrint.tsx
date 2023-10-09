@@ -1,4 +1,4 @@
-import { Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Typography } from '@mui/material';
 import { FunctionComponent } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QRCodeSVG } from 'qrcode.react';
@@ -17,7 +17,7 @@ interface PalletPrintContentProps {
     pallet?: {
         numeroSap: number;
         rastra: string;
-        nDocEntrada: number;
+        nDocEntrada: number | string;
         fechaVencimiento: string;
         nPallets: number;
         cajasPallet: number;
@@ -32,23 +32,30 @@ interface PalletPrintContentProps {
     }
 }
 
+const PeriodLabelColor = {
+    "A":"green",
+    "B":"#e2b714",
+    "C":"orangered"
+}
+
 const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet }) => {
-    const track = appendLeftZeros(pallet?.trackingId || 0, 9);
+    const track = appendLeftZeros(pallet?.trackingId || 0, 5);
     const parsedDate = parseISO(pallet?.fechaVencimiento.split("T")[0] || "");
     // Evitar la conversión de fechas ponerl la fecha en formato yyyy-MM-dd
+    const bgPeriod = PeriodLabelColor[pallet?.periodo||"A"] || "green"
     
     
     return (
         <ThemeProvider theme={THEME}>
-            <Grid xs={6} component="div" paddingRight="8pt">
-                <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#ddd" }}>
+            <Grid xs={6} component="div" paddingRight="6pt">
+                <Grid container sx={{ borderRadius: "30pt", overflow: "hidden", backgroundColor: "#fff" }}>
                     <Grid item xs={12} sx={{ backgroundColor: "black", color: "white", textAlign: "center" }}>
                         <Typography component="h1" fontSize={25} color="white" margin="3pt">
                             TRK-{track}
                         </Typography>
                     </Grid>
                     <Grid item xs={12} container padding="3pt">
-                        <Grid item xs={4} sx={{ backgroundColor: "green", textAlign: "center", borderRadius: "5pt" }}>
+                        <Grid item xs={4} sx={{ backgroundColor: bgPeriod, textAlign: "center", borderRadius: "5pt" }}>
                             <Typography component="h1" fontSize={170} color="white" fontWeight={800} lineHeight="1em">
                                 {pallet?.periodo}
                             </Typography>
@@ -73,7 +80,8 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         <Grid item container direction="column" xs={5} sx={{ textAlign: "center", marginTop: "5pt" }}>
                             <Grid item sx={{ backgroundColor: "black", color: "white" }}>
                                 <Typography fontSize={43}>
-                                    {pallet?.rastra}
+                                    {/* LIMITAR SOLO A 6 DIGISTOS */}
+                                    {pallet?.rastra && pallet?.rastra.length > 6 ? pallet?.rastra.slice(0, 6) : pallet?.rastra}
                                 </Typography>
                             </Grid>
                             <Grid item >
@@ -102,7 +110,20 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                             </Grid>
                             <Grid item xs={4} container direction="column" alignItems="center" margin="auto">
                                 <Typography fontSize={15}>
-                                    TA
+                                    {/* 
+                                        TA = TURNO A DE 6:00 A 14:00
+                                        TB = TURNO B DE 14:00 A 20:30
+                                        TC = TURNO C DE 20:30 A 6:00
+                                        en base a la fecha que se imprime se debe calcular el turno
+                                    */}
+                                    {
+
+                                        format(new Date(), "HH:mm:ss") > "06:00:00" && format(new Date(), "HH:mm:ss") < "14:00:00" ? "TA" :
+                                            format(new Date(), "HH:mm:ss") > "14:00:00" && format(new Date(), "HH:mm:ss") < "20:30:00" ? "TB" :
+                                                format(new Date(), "HH:mm:ss") > "20:30:00" && format(new Date(), "HH:mm:ss") < "23:59:59" ? "TC" :
+                                                    format(new Date(), "HH:mm:ss") > "00:00:00" && format(new Date(), "HH:mm:ss") < "06:00:00" ? "TC" : ""
+                                                    
+                                    }
                                 </Typography>
                                 <Typography fontSize={15}>
                                     {format(new Date(), "dd-MMM-yyyy",{ locale: es }).toUpperCase()}
@@ -115,7 +136,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                     </Grid>
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginTop: "5pt", marginBottom: "5pt" }} orientation='horizontal' />
                     <Grid item xs={12}>
-                        <Typography fontSize={60} textAlign="center" fontWeight={600}>
+                        <Typography fontSize={60} textAlign="center" fontWeight={700}>
                             {
                                 format(parsedDate, "dd-MMM-yyyy",{ locale: es }).toUpperCase()
                             }
@@ -154,40 +175,28 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({ pallet
                         </Grid>
                     </Grid>
                     <Divider sx={{ borderWidth: "1pt", borderColor: "black", width: "100%", marginTop: "5pt", marginBottom: "5pt" }} orientation='horizontal' />
-                    <Grid item container xs={12} marginTop="7pt" marginBottom="10pt">
-                        <Grid item xs={4} margin="auto">
-                            <Typography fontSize={30} textAlign="center" fontWeight={700}>
-                                TRACK
-                            </Typography>
-                            <Typography fontSize={22} textAlign="center" fontWeight={700}>
-                                QR CODE
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={8} container margin="auto">
-                            <Grid item xs={5}>
-                                <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
-                                    imageSettings={{
-                                        src: "../../../../public/logo-qr.png",
-                                        x: undefined,
-                                        y: undefined,
+                    <Grid container xs={12} marginTop="7pt" marginBottom="10pt">
+                        <Grid item container xs={6} justifyContent="center" justifyItems="center">
+                            <QRCodeSVG value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/pallet-detail/${pallet?.detalle_pallet_id}?tracker_id=${pallet?.trackingId}&tracker_detail=${pallet?.tracker_detail}`} 
+                                imageSettings={{
+                                        src: "/logo-qr.png",
                                         height: 40,
                                         width: 40,
                                         excavate: true,
-                                      }}
-                                      level='Q'
-                                />
-                            </Grid>
-                            <Grid item xs={7} margin="auto">
-                                <Typography fontSize={15} textAlign="center">
-                                    ESCANEA EL QR
-                                </Typography>
-                                <Typography fontSize={15} textAlign="center">
-                                    PARA <span style={{ fontWeight: 700 }}>CHECK</span>
-                                </Typography>
-                                <Typography fontSize={15} textAlign="center" fontWeight={700}>
-                                    DE STOCK AGE
-                                </Typography>
-                            </Grid>
+                                    }}
+                                    level='Q'
+                            />
+                        </Grid>
+                        <Grid item xs={6} container margin="auto" direction="column">
+                            <Typography component="p" fontSize={20} textAlign="center">
+                                SCAN TO TRACK
+                            </Typography>
+                            <Box textAlign="center">
+                            <Box component="img" src="/track.png" width="40pt" height="40pt"/>
+                            </Box>
+                            <Typography fontSize={20} textAlign="center" fontWeight={700}>
+                                STOCK AGE INDEX | FRESCURA | TRAZABILIDAD
+                            </Typography>
                         </Grid>
                     </Grid>
                 </Grid>

@@ -12,11 +12,13 @@ import Navbar from '../modules/ui/components/Navbar';
 
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
-import { RoutePermissionsDirectory } from '../config/directory';
+import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
+
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
+const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -34,77 +36,18 @@ export function AppRouter() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status])
-    // useEffect(() => {
-    //     setTimeout(() => {
-    //         dispatch(login({
-    //             "user": {
-    //                 "id": "cc9fc03d-2379-476f-b56d-346b15e8f125",
-    //                 "list_groups": [],
-    //                 "list_permissions": [
-    //                     "contenttypes.view_contenttype",
-    //                     "sessions.add_session",
-    //                     "maintenance.view_centrodistribucion",
-    //                     "auth.view_group",
-    //                     "user.change_detailgroup",
-    //                     "user.view_usermodel",
-    //                     "contenttypes.add_contenttype",
-    //                     "maintenance.delete_centrodistribucion",
-    //                     "sessions.change_session",
-    //                     "auth.view_permission",
-    //                     "user.delete_detailgroup",
-    //                     "auth.add_permission",
-    //                     "auth.change_group",
-    //                     "auth.change_permission",
-    //                     "auth.delete_group",
-    //                     "contenttypes.delete_contenttype",
-    //                     "user.change_usermodel",
-    //                     "auth.delete_permission",
-    //                     "maintenance.change_centrodistribucion",
-    //                     "admin.change_logentry",
-    //                     "admin.add_logentry",
-    //                     "user.view_detailgroup",
-    //                     "user.add_usermodel",
-    //                     "sessions.view_session",
-    //                     "user.add_detailgroup",
-    //                     "admin.view_logentry",
-    //                     "sessions.delete_session",
-    //                     "admin.delete_logentry",
-    //                     "user.delete_usermodel",
-    //                     "contenttypes.change_contenttype",
-    //                     "maintenance.add_centrodistribucion",
-    //                     "auth.add_group"
-    //                 ],
-    //                 "centro_distribucion": null,
-    //                 "last_login": new Date("2023-08-30T06:32:08.853477-06:00"),
-    //                 "is_superuser": true,
-    //                 "username": "agchavez",
-    //                 "is_staff": true,
-    //                 "is_active": true,
-    //                 "date_joined": new Date("2023-08-28T20:02:34.782965-06:00"),
-    //                 "first_name": "GABRIEL",
-    //                 "last_name": "CHAVEZ",
-    //                 "email": "agchavez@unah.hn",
-    //                 "created_at": new Date("2023-08-28T20:02:34.935469-06:00"),
-    //                 "groups": [],
-    //                 "user_permissions": []
-    //             },
-    //             token: {
-    //                 access: "",
-    //                 refresh: "",
-    //                 exp: 0,
-    //             },
-    //         }))
-    //     }, 1000);
-    //     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [])
-
-    // if (status === 'checking') {
-    //     return <>Loading</>
-    // }
 
     const permitedRoute = useMemo(() => {
         const location_ = location.pathname;
-        const requiredPermissions = RoutePermissionsDirectory[location_] || [];
+        const obj = permisions.find(perm => {
+            if(perm.reg) {
+                return perm.reg?.test(location_)
+            } else {
+                return perm.url === location_ || (perm.url +'/') === location_
+            }
+        })
+        if (!obj) return false
+        const requiredPermissions = obj?.permissions
         if (requiredPermissions.includes("any")) return true;
         return requiredPermissions.every(r_perm =>
             user?.list_permissions.includes(r_perm) ||
@@ -118,7 +61,7 @@ export function AppRouter() {
 
     return <>
         <div >
-            {status === 'authenticated' && <Sidebar open={openMobileSidebar} />}
+            {status === 'authenticated' && <Sidebar open={openMobileSidebar} setOpen={setOpenMobileSidebar}/>}
             <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
             <LogOutTimer />
             <div>
@@ -149,6 +92,13 @@ export function AppRouter() {
                         <Route path="/*" element={
                             <PrivateRoute access={status === 'authenticated'} path="/auth/login">
                                 <HomeRouter />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/report/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    ReportRouter
+                                } />
                             </PrivateRoute>
                         } />
 

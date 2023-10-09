@@ -12,6 +12,7 @@ import { es } from 'date-fns/locale';
 import { GridFilterListIcon } from '@mui/x-data-grid';
 import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 enum FilterDate {
     TODAY = 'Hoy',
@@ -144,6 +145,8 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query])
 
+    const navigate = useNavigate();
+
     return <Container maxWidth="xl">
 
         <Grid container sx={{ mt: 3 }} spacing={2} >
@@ -183,7 +186,7 @@ export default function HomePage() {
                 </StyledMenu>
             </Grid>
 
-            <Grid item xs={12} md={8} >
+            <Grid item xs={12} md={6} >
                 <Card elevation={0} sx={{
                     p: 2, borderRadius: 2
                 }} >
@@ -207,7 +210,7 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
-            <Grid item xs={12} md={4} >
+            <Grid item xs={12} md={6} >
                 <Card elevation={1} sx={{
                     p: 2, borderRadius: 2,
                 }} >
@@ -220,6 +223,11 @@ export default function HomePage() {
                             <Divider />
                             <Typography variant="h6" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
                                 {user?.centro_distribucion_name}
+                            </Typography>
+                        </div>
+                        <div>
+                        <Typography variant="h2" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
+                                TAT
                             </Typography>
                         </div>
 
@@ -235,7 +243,10 @@ export default function HomePage() {
                                     )}
                                     variant='outlined'
                                     color="success"
-                                    size="small"
+                                    size="medium"
+                                    sx={{
+                                        fontSize: '30px'
+                                    }}
                                     icon={
                                         isLoading || isFetching ? <CircularProgress size={20} /> : <AccessTimeIcon />
                                     }
@@ -253,7 +264,7 @@ export default function HomePage() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 
                         <Typography variant="body1" component="h6" style={{ textAlign: "start" }} color={"secondary"} fontWeight={200}>
-                            T1 - En atención
+                            T1 - Pendientes
                         </Typography>
                         {
                             isLoading || isFetching ? <CircularProgress size={20} /> : <Typography variant="h6" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={600}>
@@ -291,7 +302,7 @@ export default function HomePage() {
                                             formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })
                                         }</TableCell>
                                         <TableCell align="right">
-                                            <IconButton size="small" color="primary" aria-label="add to shopping cart">
+                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + row.id)}>
                                                 <ArrowForwardIcon />
                                             </IconButton>
 
@@ -320,7 +331,47 @@ export default function HomePage() {
                         }
                     </div>
                     <Divider />
-                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />}>
+                    <TableContainer sx={{ mt: 1 }}>
+                        <Table size="small" aria-label="a dense table">
+                            <TableHead>
+                                <TableRow>
+                                    <StyledTableCell align="left">
+                                        Tracking
+                                    </StyledTableCell>
+                                    <StyledTableCell align="left">
+                                    Traslado 5001
+                                    </StyledTableCell>
+                                    <StyledTableCell align="right">
+
+                                    </StyledTableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {data?.last_trackers.map((row) => (
+                                    <TableRow
+                                        key={row.id}
+                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                    >
+                                        <TableCell align="left" component="th" scope="row">
+                                            TRK-{row.id.toString().padStart(8, '0')}
+                                        </TableCell>
+                                        <TableCell align="left">{
+                                            row?.transfer_number
+                                        }</TableCell>
+                                        <TableCell align="right">
+                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + row.id)}>
+                                                <ArrowForwardIcon />
+                                            </IconButton>
+
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+
+                        </Table>
+                    </TableContainer>
+
+                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />} onClick={()=> navigate('/tracker/manage/?status=COMPLETE')}>
                         Ver más
                     </Button>
                 </Card>

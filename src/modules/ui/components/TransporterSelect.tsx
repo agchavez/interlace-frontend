@@ -66,7 +66,7 @@ props: TransporterSelectProps<TField>
         return (<>
           <Autocomplete
             value={value ? categorias?.results?.find((option : Transporter) => value === option.id) ?? null : null}
-            getOptionLabel={(option) => option.code}
+            getOptionLabel={(option) => option.name}
             disabled={props.disabled}
             onChange={(_, newValue) => {
               if (newValue === null){

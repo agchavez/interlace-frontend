@@ -1,753 +1,835 @@
-import { Box, Button, Card, Chip, Collapse, Divider, Grid, IconButton, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, styled, tableCellClasses } from '@mui/material';
-import { Fragment, FunctionComponent, useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  Divider,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  styled,
+  tableCellClasses,
+} from "@mui/material";
+import { useState } from "react";
 
 // iCONS
-import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import LocalPrintshopTwoToneIcon from '@mui/icons-material/LocalPrintshopTwoTone';
-import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
+import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 
-import { useAppDispatch } from '../../../store';
-import { DetalleCarga, DetalleCargaPalet, Seguimiento } from '../../../store/seguimiento/seguimientoSlice';
-import AgregarProductoModal from './AgregarProductoModal';
-import { AutoCompleteBase } from '../../ui/components/BaseAutocomplete';
-import { useAppSelector } from '../../../store/store';
-import { useForm } from 'react-hook-form';
-import { CheckFormType, Tracker } from '../../../interfaces/tracking';
-import { OperatorSelect } from '../../ui/components/OperatorSelect';
-import { DriverSelect } from '../../ui/components';
-import { LocationSelect } from '../../ui/components/LocationSelect';
-import AgregarProductoSalida from './AgregarProductoSalida';
-import { OutPutDetail } from './OutPutDetail';
-import PrintComponent from '../../../utils/componentPrinter';
-import PalletPrint from './PalletPrint';
-import { addDetallePallet, removeDetalle, removeDetallePallet, updateDetallePallet, updateTracking } from '../../../store/seguimiento/trackerThunk';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { format } from 'date-fns/esm';
+import { useAppDispatch } from "../../../store";
+import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import AgregarProductoModal from "./AgregarProductoModal";
+import { AutoCompleteBase } from "../../ui/components/BaseAutocomplete";
+import { useAppSelector } from "../../../store/store";
+import { useForm } from "react-hook-form";
+import { CheckFormType, Tracker } from "../../../interfaces/tracking";
+import { OperatorSelect } from "../../ui/components/OperatorSelect";
+import { DriverSelect } from "../../ui/components";
+import { LocationSelect } from "../../ui/components/LocationSelect";
+import AgregarProductoSalida from "./AgregarProductoSalida";
+import { OutPutDetail } from "./OutPutDetail";
+import {
+  updateTracking,
+  chanceStatusTracking,
+} from "../../../store/seguimiento/trackerThunk";
+import { formatDistance, formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import { format } from "date-fns-tz";
+import { ProductoEntradaTableRow } from "./ProductoEntradaTableRow";
+import { EditNote } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
+import { ShowCodeDriver } from "./ShowCodeDriver";
+import { ShowRoute } from "./ShowRoute";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.secondary.main,
-        color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
 }));
 
-export const CheckForm = ({ seguimiento, indice, disable }: { seguimiento: Seguimiento, indice: number, disable: boolean }) => {
-    const dispatch = useAppDispatch();
-    const [open, setopen] = useState(false);
-    const { outputType } = useAppSelector(state => state.maintenance);
-    const centro_distribucion = useAppSelector(state => state.auth.user?.centro_distribucion);
-    // function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
-    //     if (!seguimiento) return;
+export const CheckForm = ({
+  seguimiento,
+  indice,
+  disable,
+}: {
+  seguimiento: Seguimiento;
+  indice: number;
+  disable: boolean;
+}) => {
+  const dispatch = useAppDispatch();
+  const [open, setopen] = useState(false);
+  const { outputType } = useAppSelector((state) => state.maintenance);
+  const centro_distribucion = useAppSelector(
+    (state) => state.auth.user?.centro_distribucion
+  );
+  const user = useAppSelector((state) => state.auth.user);
+  // function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
+  //     if (!seguimiento) return;
 
-    //     dispatch(updateSeguimiento({
-    //         ...seguimiento,
-    //         datosOperador: {
-    //             ...seguimiento.datosOperador,
-    //             ...datos
-    //         },
-    //         index: indice
-    //     }))
-    // }
-    const { control, register, watch, } = useForm<CheckFormType>({
-        defaultValues: {
-            ...seguimiento,
-            outputType: seguimiento.outputType?.toString(),
-            driver: (seguimiento.driver !== null) ? seguimiento.driver : undefined
-        }
-    });
-    const tiempoEntrada = seguimiento?.timeStart ? new Date(seguimiento?.timeStart) : null;
-    const tiempoSalida = seguimiento?.timeEnd? new Date(seguimiento?.timeEnd) : null;
+  //     dispatch(updateSeguimiento({
+  //         ...seguimiento,
+  //         datosOperador: {
+  //             ...seguimiento.datosOperador,
+  //             ...datos
+  //         },
+  //         index: indice
+  //     }))
+  // }
+  const { control, register, watch } = useForm<CheckFormType>({
+    defaultValues: {
+      ...seguimiento,
+      outputType: seguimiento.outputType?.toString(),
+      driver: seguimiento.driver !== null ? seguimiento.driver : undefined,
+    },
+  });
+  const tiempoEntrada = seguimiento?.timeStart
+    ? new Date(seguimiento?.timeStart)
+    : null;
+  const tiempoSalida = seguimiento?.timeEnd
+    ? new Date(seguimiento?.timeEnd)
+    : null;
 
-    async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
-        dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }))
-    }
-    const [openOutput, setopenOutput] = useState(false);
-    return (
-        <>
-            <AgregarProductoSalida open={openOutput} handleClose={() => setopenOutput(false)} />
-            {open && <AgregarProductoModal open={open} handleClose={() => setopen(false)} />}
-            <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
-                <Grid item xs={12}>
-                    <Card sx={{
-                        borderRadius: 2,
-                    }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 2 }}>
-                            <Typography variant="h6" component="h1" fontWeight={400} color={'gray.500'}>
-                                Datos principales
-                            </Typography>
-                            <Typography>
-                                {
-                                    disable? "Revisado:": "Tiempo en revision:"
-                                }
-                                 <Chip label={formatDistanceToNow(new Date(seguimiento?.created_at), { addSuffix: true, locale: es})} />
-                            </Typography>
-                        </Box>
-                        <Divider />
-                        <Box sx={{ padding: 2 }}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Transportista
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {seguimiento?.transporter.name}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Tractor
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {seguimiento?.transporter.tractor}
-                                    </Typography>
-                                </Grid>
-                                <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Cabezal
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {seguimiento?.transporter.head}
-                                    </Typography>
-                                </Grid>
-                               {disable && <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Revisado por:
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {seguimiento?.userName}
-                                    </Typography>
-                                </Grid>}
-                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Completado el:
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        {format(new Date(seguimiento?.completed_date), 'dd/MM/yyyy')}
-                                    </Typography>
-                                </Grid>}
-                                {disable && seguimiento?.completed_date && <Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                        Estado:
-                                    </Typography>
-                                    <Divider />
-                                    <Typography variant="body1" component="h1" fontWeight={600} color={'gray.500'}>
-                                        <Chip
-                                            label={seguimiento?.status === 'COMPLETE' ? 'Completado' : 'Incompleto'}
-                                            color={seguimiento?.status === 'COMPLETE' ? 'success' : 'error'}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    </Typography>
-                                </Grid>}
-                            </Grid>
-                        </Box>
-                    </Card>
-                </Grid>
-                <Grid item xs={12} >
-                    <Typography variant="h4" component="h1" fontWeight={400} color={'gray.500'} align="center">
-                        TRK-{seguimiento.id?.toString().padStart(8, '0')}
-                    </Typography>
-                </Grid>
-
-                <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
-                    <Divider >
-                        <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                            Datos generales
-                        </Typography>
-                    </Divider>
-                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                        <Grid item xs={12} >
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="Numero de placa"
-                                variant="outlined"
-                                size="small"
-                                disabled={disable}
-                                {...register('plateNumber')}
-                                onBlur={(e) => sendDataToBackend("plate_number", e.target.value || null)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                            <LocationSelect
-                                control={control}
-                                name='originLocation'
-                                placeholder='Localidad de Origen'
-                                locationId={watch('originLocation')}
-                                label='Localidad de Origen'
-                                disabled={disable}
-                                onChange={(e) => sendDataToBackend("origin_location", e?.id || null)}
-                            />
-
-                        </Grid>
-                        <Grid item xs={12} md={12}>
-                            <DriverSelect
-                                control={control}
-                                name='driver'
-                                placeholder='Conductor'
-                                disabled={disable}
-                                driver={watch('driver') || undefined}
-                                onChange={e => sendDataToBackend("driver", e?.id || null)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="Tranferencia de entrada"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                disabled={disable}
-                                {...register('documentNumber')}
-                                onBlur={e => sendDataToBackend("input_document_number", e.target.value || null)}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="N° de Traslado 5001"
-                                variant="outlined"
-                                size="small"
-                                disabled={disable}
-                                type="number"
-                                {...register('transferNumber')}
-                                onBlur={e => sendDataToBackend("transfer_number", e.target.value || null)}
-                            />
-                        </Grid>
-                    </Grid>
-                </Grid>
-
-
-                <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
-                    <Divider >
-                        <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                            Datos operador
-                        </Typography>
-                    </Divider>
-                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                        <Grid item xs={12} md={6} lg={4}>
-                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                Tiempo de entrada
-                            </Typography>
-                            <Divider />
-                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                {
-                                    tiempoEntrada && tiempoEntrada !== null &&
-                                    (
-                                        String(tiempoEntrada.getHours()).padStart(2, '0') + ":" +
-                                        String(tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
-                                        String(tiempoEntrada.getSeconds()).padStart(2, '0')
-                                    )
-                                    || "00:00:00"
-                                }
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4}>
-                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                Tiempo de salida
-                            </Typography>
-                            <Divider />
-                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                {
-                                    tiempoSalida && tiempoSalida !== null &&
-                                    (
-                                        String(tiempoSalida.getHours()).padStart(2, '0') + ":" +
-                                        String(tiempoSalida.getMinutes()).padStart(2, '0') + ":" +
-                                        String(tiempoSalida.getSeconds()).padStart(2, '0')
-                                    )
-                                    || "00:00:00"
-                                }
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4}>
-                            <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                                Tiempo invertido
-                            </Typography>
-                            <Divider />
-                            <Typography variant="body2" component="h1" fontWeight={400} color={'gray.500'}>
-                                {
-                                    tiempoSalida && tiempoEntrada && tiempoEntrada !== null ?
-                                        (
-                                            String(tiempoSalida.getHours() - tiempoEntrada.getHours()).padStart(2, '0') + ":" +
-                                            String(tiempoSalida.getMinutes() - tiempoEntrada.getMinutes()).padStart(2, '0') + ":" +
-                                            String(tiempoSalida.getSeconds() - tiempoEntrada.getSeconds()).padStart(2, '0')
-                                        ) : "--:--:--"
-                                }
-                            </Typography>
-                        </Grid>
-
-                        <Grid item xs={12} md={6} sx={{ marginTop: "4px" }} >
-                            <Button variant="outlined" size="small" fullWidth color="success" disabled={tiempoEntrada ? true : false || disable}
-
-                                onClick={() => {
-                                    sendDataToBackend("input_date", (new Date()).toISOString())
-                                    // updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
-                                }}>
-                                Registrar entrada
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
-                            <Button variant="outlined" size="small" fullWidth color="error" disabled={(tiempoEntrada === undefined || tiempoEntrada === null) || (tiempoSalida !== undefined && tiempoSalida !==null) || disable}
-                                onClick={() => {
-                                    sendDataToBackend("output_date", (new Date()).toISOString())
-                                    // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
-                                }}>
-                                Registrar salida
-                            </Button>
-                        </Grid>
-                        <Grid item xs={12} >
-                            <OperatorSelect
-                                control={control}
-                                distributionCenterId={centro_distribucion || null}
-                                name='opm1'
-                                label='Operador #1'
-                                operatorId={watch('opm1')}
-                                disabled={disable}
-                                invalidId={watch('opm2')}
-                                onChange={e => sendDataToBackend("operator_1", e?.id || 0)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} >
-                            <OperatorSelect
-                                control={control}
-                                distributionCenterId={centro_distribucion || null}
-                                name='opm2'
-                                disabled={disable}
-                                label='Operador #2'
-                                operatorId={watch('opm2')}
-                                invalidId={watch('opm1')}
-                                onChange={e => sendDataToBackend("operator_2", e?.id || 0)}
-                            />
-                        </Grid>
-
-                    </Grid>
-                </Grid>
-                <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
-                    <Divider >
-                        <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                            Entrada de producto
-                        </Typography>
-                    </Divider>
-                    <Grid container spacing={2} sx={{ marginTop: 2 }}>
-                    {!disable &&
-                    <> <Grid item xs={12} md={12} lg={4} xl={4}>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={4}>
-
-                        </Grid>
-                         <Grid item xs={12} md={6} lg={4} xl={4}>
-                            <Button variant="outlined" size="small" fullWidth color="secondary"
-                                startIcon={<AddTwoToneIcon />}
-                                disabled={watch('originLocation') === undefined || watch('originLocation') === null || watch('transferNumber')?.toString() === "" || watch('documentNumber')?.toString() === ""}
-                                onClick={() => {
-                                    setopen(true);
-                                }}
-                            >
-                                Agregar producto
-                            </Button>
-                        </Grid>
-                        </>}
-                        
-                        <Grid item xs={12}>
-                            <Table size="small" aria-label="a dense table" >
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell>
-                                            Detalle
-                                        </StyledTableCell>
-                                        <StyledTableCell align="right">
-                                            No. SAP
-                                        </StyledTableCell>
-                                        <StyledTableCell align="right">
-                                            Producto
-                                        </StyledTableCell>
-                                        <StyledTableCell align="right">
-                                            Total pallets
-                                        </StyledTableCell>
-                                        { !disable &&
-                                            <StyledTableCell align="right">
-                                            Acciones
-                                        </StyledTableCell>}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {
-                                        seguimiento?.detalles.map((detalle, index) => {
-                                            return (
-                                                <Row key={detalle.name} row={detalle} seguimiento={seguimiento} index={index} indexSeguimiento={indice} disable={disable} />
-                                            )
-                                        })
-                                    }
-                                </TableBody>
-                            </Table>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
-                    <Divider >
-                        <Typography variant="body1" component="h1" fontWeight={400} color={'gray.500'}>
-                            Salida de producto
-                        </Typography>
-                    </Divider>
-                    <Grid container spacing={1} sx={{ marginTop: 2 }}>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="N° de Doc. Salida"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                disabled={disable}
-                                {...register('documentNumberExit')}
-                                onBlur={e => sendDataToBackend("output_document_number", e.target.value || null)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-                                id="outlined-basic"
-                                label="Contabilizado"
-                                variant="outlined"
-                                size="small"
-                                type="number"
-                                disabled={disable}
-                                {...register('accounted')}
-                                onBlur={e => sendDataToBackend("accounted", e.target.value || null)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <LocationSelect
-                                control={control}
-                                name='outputLocation'
-                                placeholder='Localidad de Envío'
-                                locationId={watch('outputLocation')}
-                                label='Localidad de Envío'
-                                disabled={disable}
-                                onChange={e => sendDataToBackend("destination_location", e?.id)}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <AutoCompleteBase
-                                control={control}
-                                name="outputType"
-                                placeholder='Unidad Cargada con'
-                                disabled={disable}
-                                options={outputType.map((d) => ({ label: d.name, id: d.id?.toString() }))}
-                                onChange={e => sendDataToBackend("output_type", e)}
-                            />
-                        </Grid>
-                        {
-                            outputType.find((d) => d.id === Number(watch('outputType')))?.required_details &&
-                            <>
-                                {!disable &&<Grid item xs={12} md={6} lg={4} xl={4}>
-                                    <Button variant="outlined" size="small" fullWidth color="secondary"
-                                        startIcon={<AddTwoToneIcon />} onClick={() => {
-                                            setopenOutput(true);
-                                        }
-                                        }
-
-                                    >
-                                        Agregar producto de salida
-                                    </Button>
-                                </Grid>}
-                                <OutPutDetail seguimiento={seguimiento} disable={disable} />
-
-                            </>
-                        }
-                    </Grid>
-                </Grid>
-            </Grid>
-        </>
-    )
-}
-interface UpdateProductoPalletParams {
-    palletIndex: number,
-    date: Date | null,
-    pallets: number,
-    id: number, 
-    disable?: boolean
-}
-
-function Row(props: { row: DetalleCarga, seguimiento: Seguimiento, index: number, indexSeguimiento: number, disable: boolean }) {
-    const { row } = props;
-    const [open, setOpen] = useState(false);
-    const dispatch = useAppDispatch()
-    const handleClickAgregar = () => {
-        dispatch(
-            addDetallePallet(
-                props.indexSeguimiento,
-                props.index,
-                {
-                    expiration_date: format(new Date(), 'yyyy-MM-dd'),
-                    quantity: 0,
-                    tracker_detail: row.id,
-                }
-            )
-        )
-        // dispatch(addDetalleCargaPallet({
-        //     segIndex: props.indexSeguimiento,
-        //     detalleIndex: props.index, id: 1,
-        //     pallets: 0, date: new Date().toISOString(),
-        //     amount: 0
-        // }))
-    }
-
-    const updateProductoPallet = (datos: UpdateProductoPalletParams): void => {
-        console.log(datos.date);
-        
-        dispatch(
-            updateDetallePallet(
-                props.indexSeguimiento,
-                props.index, datos.palletIndex,
-                {
-                    expiration_date: format(datos.date || new Date(), 'yyyy-MM-dd'),
-
-                    quantity: datos.pallets,
-                    id: datos.id || 0,
-                    tracker_detail: row.id
-                }
-            )
-        )
-    }
-    const removeProductoPallet = (datos: { palletIndex: number, id:number }): void => {
-        const {indexSeguimiento, index} = props;
-        dispatch(removeDetallePallet(indexSeguimiento, index, datos.palletIndex, datos.id))
-    }
-
-    const isValid = (): boolean => {
-        return row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0) !== +row.amount
-    }
-    return (
-        <Fragment>
-            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-                <TableCell>
-                    <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        onClick={() => setOpen(!open)}
-                        sx={{
-                            backgroundColor: isValid() ? 'red' : 'inherit   '
-                        }}
-                    >
-                        {open ? <KeyboardArrowUpIcon
-                        /> : <KeyboardArrowDownIcon
-                        />}
-                    </IconButton>
-                </TableCell>
-                <TableCell component="th" align="right">
-                    {row.sap_code}
-                </TableCell>
-                <TableCell align="right">
-                    {row.name}
-                </TableCell>
-                <TableCell align="right">
-                    {row.amount}
-                </TableCell>
-                
-                {!props.disable && <TableCell align="right">
-
-                    <IconButton
-                        aria-label="expand row"
-                        size="small"
-                        disabled={props.disable}
-                        onClick={() => dispatch(removeDetalle(props.indexSeguimiento, props.index, row.id ))}
-                    >
-                        <DeleteTwoToneIcon />
-                    </IconButton>
-                </TableCell>}
-            </TableRow>
-            <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-                    <Collapse in={open} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 1 }}>
-                            <Typography variant="h6" gutterBottom component="div">
-                                Detalles
-                            </Typography>
-                            <Grid item sx={{
-                                display: 'flex', justifyContent: 'space-between    ', alignItems: 'center', marginTop: 1, marginBottom: 1
-                            }} xs={12}>
-                                {!props.disable && 
-                                    <Button variant="outlined" size="small" color="secondary"
-                                    startIcon={<AddTwoToneIcon />}
-                                    onClick={handleClickAgregar}
-                                >
-                                    Agregar
-                                </Button>}
-                                <Typography variant="body1" component="h1" fontWeight={400} color={
-                                    isValid() ? 'red' : 'gray.500'
-                                }>
-                                    Total de Pallets: {"  "}
-                                    {row.history?.map((d) => d.pallets).reduce((a = 0, b = 0) => a + b, 0)}
-                                    {" "} de {" "}
-                                    {
-                                        row.amount
-                                    }
-                                </Typography>
-                            </Grid>
-                            <Grid item xs={12} md={5} lg={2} xl={2}>
-                            </Grid>
-
-                            <Table size="small" aria-label="purchases">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="right">Pallets</TableCell>
-                                        <TableCell align="right">Fecha</TableCell>
-                                        {!props.disable && <TableCell align="right">Acciones</TableCell>}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {row.history?.map((historyRow, index) => {
-                                        return (
-                                            <HistoryRow
-                                                key={historyRow.id}
-                                                historyRow={historyRow}
-                                                index={index}
-                                                detalle={row}
-                                                disable={props.disable}
-                                                seguimiento={props.seguimiento}
-                                                updateProductoPallet={updateProductoPallet}
-                                                removeProductoPallet={removeProductoPallet}
-                                            />
-                                        )
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </Box>
-                    </Collapse>
-                </TableCell>
-            </TableRow>
-        </Fragment>
+  async function sendDataToBackend<T>(fieldName: keyof Tracker, value: T) {
+    dispatch(updateTracking(indice, seguimiento.id, { [fieldName]: value }));
+  }
+  const [openOutput, setopenOutput] = useState(false);
+  const outputTypeData = outputType.find(
+    (d) => d.id === Number(watch("outputType"))
+  );
+  const navigate = useNavigate();
+  const handleEditState = () => {
+    dispatch(
+      chanceStatusTracking("EDITED", seguimiento.id, () =>
+        navigate("/tracker/check/?id=" + seguimiento.id)
+      )
     );
-}
+  };
+  return (
+    <>
+      <AgregarProductoSalida
+        open={openOutput}
+        handleClose={() => setopenOutput(false)}
+      />
+      {open && (
+        <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
+      )}
+      <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
+        <Grid item xs={12}>
+          <Card
+            sx={{
+              borderRadius: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                component="h1"
+                fontWeight={400}
+                color={"gray.500"}
+              >
+                Datos principales
+              </Typography>
+              <Typography>
+                {disable ? "Revisado:" : "Tiempo en revision:"}
+                <Chip
+                  label={formatDistanceToNow(
+                    new Date(seguimiento?.created_at),
+                    { addSuffix: true, locale: es }
+                  )}
+                />
+              </Typography>
+            </Box>
+            <Divider />
+            <Box sx={{ padding: 2 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Tipo
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.type === "IMPORT" ? "Importación" : "Local"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Transportista
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.transporter.name}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Tractor
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.transporter.tractor}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Cabezal
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.transporter.code}
+                  </Typography>
+                </Grid>
+                {disable && (
+                  <Grid item xs={12} md={6} lg={4} xl={3}>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Revisado por:
+                    </Typography>
+                    <Divider />
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                    >
+                      {seguimiento?.userName}
+                    </Typography>
+                  </Grid>
+                )}
+                {disable && seguimiento?.completed_date && (
+                  <Grid item xs={12} md={6} lg={4} xl={3}>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Completado el:
+                    </Typography>
+                    <Divider />
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                    >
+                      {format(
+                        new Date(seguimiento?.completed_date),
+                        "dd/MM/yyyy",
+                        {
+                          timeZone: "America/Tegucigalpa",
+                        }
+                      )}
+                    </Typography>
+                  </Grid>
+                )}
+                {disable && (
+                  <Grid item xs={12} md={6} lg={4} xl={4}>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Estado:
+                    </Typography>
+                    <Divider />
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                    >
+                      <Chip
+                        sx={{ mt: 0.5 }}
+                        label={
+                          seguimiento?.status === "COMPLETE"
+                            ? "Completado"
+                            : seguimiento?.status === "PENDING"
+                            ? "Pendiente"
+                            : "En atención"
+                        }
+                        color={
+                          seguimiento?.status === "COMPLETE"
+                            ? "success"
+                            : seguimiento?.status === "PENDING"
+                            ? "warning"
+                            : "info"
+                        }
+                        size="medium"
+                        variant="outlined"
+                      />
+                    </Typography>
+                  </Grid>
+                )}
+                {user !== null &&
+                  +user?.id === seguimiento.user &&
+                  disable &&
+                  seguimiento?.status === "PENDING" && (
+                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={600}
+                        color={"gray.500"}
+                      >
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          fullWidth
+                          onClick={() => handleEditState()}
+                          startIcon={<EditNote />}
+                        >
+                          Editar
+                        </Button>
+                      </Typography>
+                    </Grid>
+                  )}
+              </Grid>
+            </Box>
+          </Card>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography
+            variant="h4"
+            component="h1"
+            fontWeight={400}
+            color={"white"}
+            align="center"
+            bgcolor={"#1c2536"}
+          >
+            TRK-{seguimiento.id?.toString().padStart(5, "0")}
+          </Typography>
+        </Grid>
 
-interface HistoryRowProps {
-    index: number;
-    disable?: boolean;
-    historyRow: DetalleCargaPalet;
-    updateProductoPallet: (datos: UpdateProductoPalletParams) => unknown;
-    detalle: DetalleCarga;
-    seguimiento: Seguimiento;
-    removeProductoPallet: (datos: {
-        palletIndex: number;
-        id: number
-    }) => void
-}
-
-const HistoryRow: FunctionComponent<HistoryRowProps> = ({ index, historyRow, updateProductoPallet, removeProductoPallet, detalle, seguimiento, disable }) => {
-    const [willPrint, setWillPrint] = useState(false)
-    const [componenPrint, setComponentPrint] = useState(<></>)
-    const [pallets, setPallets] = useState<number>(historyRow.pallets || 0)
-
-    const [date, setDate] = useState<Date | undefined>((historyRow.date && historyRow.date !==null) ? new Date(historyRow.date.split('T')[0]) : undefined)
-    const period = useAppSelector(state => state.maintenance.period);
-
-    const onclickPrint = () => {
-        const red = [];
-        const max = (historyRow.pallets || 0)
-        for (let i = 0; i < max; i++) {
-            red.push(<PalletPrint
-                pallet={{
-                    numeroSap: +detalle.sap_code,
-                    rastra: seguimiento.rastra.code,
-                    nDocEntrada: seguimiento.documentNumber || 0,
-                    fechaVencimiento: historyRow.date || new Date().toISOString(),
-                    nPallets: historyRow.pallets || 0,
-                    cajasPallet: detalle.boxes_pre_pallet,
-                    // es solo el id debe ser texto lo que se muestra
-                    origen: `${seguimiento.originLocationData?.code} - ${seguimiento.originLocationData?.name}`,
-                    periodo: period?.label,
-                    trackingId: seguimiento.id,
-                    detalle_pallet_id: historyRow.id || 0,
-                    tracker_detail: detalle.id,
-                    nombre_producto: detalle.name,
-                    block: detalle.block_days,
-                    pre_block: detalle.pre_block_days_next,
-                }} />)
-            if (((i + 1) % 2 === 0) && (i + 1 < max)) {
-                red.push(<Grid item xs={12} style={{ pageBreakBefore: "always", }}></Grid>)
-            }
-        }
-        setComponentPrint(<Grid container>{red}</Grid>)
-        setWillPrint(true);
-    }
-
-    const print = PrintComponent({
-        pageOrientation: "landscape",
-        component: componenPrint
-    })
-
-    useEffect(() => {
-        if (willPrint) {
-            setWillPrint(false);
-            print.print()
-        }
-    }, [print, willPrint])
-
-    
-
-    return <TableRow key={index}>
-        {willPrint && print.component}
-        <TableCell align="right">
-            <TextField
+        <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
+          <Divider>
+            <Typography
+              variant="body1"
+              component="h1"
+              fontWeight={400}
+              color={"gray.500"}
+            >
+              Datos generales
+            </Typography>
+          </Divider>
+          <Grid container spacing={2} sx={{ marginTop: 2 }}>
+            <Grid item xs={12}>
+              <TextField
                 fullWidth
                 id="outlined-basic"
+                label="Numero de placa"
+                variant="outlined"
                 size="small"
-                type='number'
-                value={pallets}
+                autoComplete="off"
                 disabled={disable}
-                onChange={e => setPallets(+e.target.value)}
-                onBlur={e => updateProductoPallet({ date: date || null, pallets: +e.target.value, palletIndex: index, id: historyRow.id || 0 })}
-            />
-        </TableCell>
-        <TableCell component="th" scope="row" align="right">
-            <TextField
+                {...register("plateNumber")}
+                onBlur={(e) =>
+                  sendDataToBackend("plate_number", e.target.value || null)
+                }
+              />
+            </Grid>
+            <Grid item xs={12} md={12}>
+              <LocationSelect
+                control={control}
+                name="originLocation"
+                placeholder="Localidad de Origen"
+                locationId={watch("originLocation")}
+                label="Localidad de Origen"
+                disabled={disable}
+                onChange={(e) =>
+                  sendDataToBackend("origin_location", e?.id || null)
+                }
+              />
+            </Grid>
+            <Grid item xs={10} md={10}>
+              {seguimiento.type === "LOCAL" ? (
+                <DriverSelect
+                  control={control}
+                  name="driver"
+                  placeholder="Conductor"
+                  disabled={disable}
+                  driver={watch("driver") || undefined}
+                  onChange={(e) => sendDataToBackend("driver", e?.id || null)}
+                />
+              ) : (
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="Conductor"
+                  variant="outlined"
+                  size="small"
+                  disabled={disable}
+                  {...register("driverImport")}
+                  onBlur={(e) =>
+                    sendDataToBackend("driver_import", e.target.value || null)
+                  }
+                />
+              )}
+            </Grid>
+            <Grid item xs={2} md={2}>
+              {watch("driver") && (
+                <ShowCodeDriver driverId={watch("driver") || undefined} />
+              )}
+            </Grid>
+            {seguimiento?.type === "IMPORT" && (
+              <Grid item xs={12} md={12}>
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="No. contenedor"
+                  variant="outlined"
+                  size="small"
+                  disabled={disable}
+                  {...register("containernumber")}
+                  onBlur={(e) =>
+                    sendDataToBackend(
+                      "container_number",
+                      e.target.value || null
+                    )
+                  }
+                />
+              </Grid>
+            )}
+            <Grid item xs={12} md={6}>
+              {seguimiento?.type === "LOCAL" ? (
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="Tranferencia de entrada"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  disabled={disable}
+                  {...register("documentNumber")}
+                  onBlur={(e) =>
+                    sendDataToBackend(
+                      "input_document_number",
+                      e.target.value || null
+                    )
+                  }
+                />
+              ) : (
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="No. Factura"
+                  variant="outlined"
+                  size="small"
+                  type="text"
+                  disabled={disable}
+                  {...register("invoiceNumber")}
+                  onBlur={(e) =>
+                    sendDataToBackend("invoice_number", e.target.value || null)
+                  }
+                />
+              )}
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <TextField
                 fullWidth
                 id="outlined-basic"
+                label="N° de Traslado 5001"
+                variant="outlined"
                 size="small"
-                type="date"
                 disabled={disable}
-                value={date?.toISOString().split('T')[0]}
+                type="number"
+                {...register("transferNumber")}
+                onBlur={(e) =>
+                  sendDataToBackend("transfer_number", e.target.value || null)
+                }
+              />
+            </Grid>
+          </Grid>
+        </Grid>
 
-                datatype='date'
-                onChange={(e) => {
-                    const inputDate = new Date(e.target.value + 'T00:00:00');
-                    if (!isNaN(inputDate.getTime())) {
-                        setDate(inputDate);
+        {seguimiento.type === "LOCAL" && (
+          <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
+            <Divider>
+              <Typography
+                variant="body1"
+                component="h1"
+                fontWeight={400}
+                color={"gray.500"}
+              >
+                Datos operador
+              </Typography>
+            </Divider>
+            <Grid container spacing={2} sx={{ marginTop: 2 }}>
+              <Grid item xs={12} md={6} lg={4}>
+                <Typography
+                  variant="body1"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  Tiempo de entrada
+                </Typography>
+                <Divider />
+                <Typography
+                  variant="body2"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  {(tiempoEntrada &&
+                    tiempoEntrada !== null &&
+                    format(tiempoEntrada, "HH:mm:ss", {
+                      locale: es,
+                      timeZone: "America/Tegucigalpa",
+                    })) ||
+                    "00:00:00"}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6} lg={4}>
+                <Typography
+                  variant="body1"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  Tiempo de salida
+                </Typography>
+                <Divider />
+                <Typography
+                  variant="body2"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  {(tiempoSalida &&
+                    tiempoSalida !== null &&
+                    format(tiempoSalida, "HH:mm:ss")) ||
+                    "00:00:00"}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6} lg={4}>
+                <Typography
+                  variant="body1"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  Tiempo invertido
+                </Typography>
+                <Divider />
+                <Typography
+                  variant="body2"
+                  component="h1"
+                  fontWeight={400}
+                  color={"gray.500"}
+                >
+                  {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
+                    ? formatDistance(tiempoEntrada, tiempoSalida, {
+                        locale: es,
+                      })
+                    : "--:--:--"}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  color="success"
+                  disabled={tiempoEntrada ? true : false || disable}
+                  onClick={() => {
+                    sendDataToBackend("input_date", new Date().toISOString());
+                    // updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
+                  }}
+                >
+                  Registrar entrada
+                </Button>
+              </Grid>
+              <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  color="error"
+                  disabled={
+                    tiempoEntrada === undefined ||
+                    tiempoEntrada === null ||
+                    (tiempoSalida !== undefined && tiempoSalida !== null) ||
+                    disable
+                  }
+                  onClick={() => {
+                    sendDataToBackend("output_date", new Date().toISOString());
+                    // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
+                  }}
+                >
+                  Registrar salida
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <OperatorSelect
+                  control={control}
+                  distributionCenterId={centro_distribucion || null}
+                  name="opm1"
+                  label="Operador #1"
+                  operatorId={watch("opm1")}
+                  disabled={disable}
+                  invalidId={watch("opm2")}
+                  onChange={(e) =>
+                    sendDataToBackend("operator_1", e?.id || null)
+                  }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <OperatorSelect
+                  control={control}
+                  distributionCenterId={centro_distribucion || null}
+                  name="opm2"
+                  disabled={disable}
+                  label="Operador #2"
+                  operatorId={watch("opm2")}
+                  invalidId={watch("opm1")}
+                  onChange={(e) =>
+                    sendDataToBackend("operator_2", e?.id || null)
+                  }
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        )}
+        <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
+          <Divider>
+            <Typography
+              variant="body1"
+              component="h1"
+              fontWeight={400}
+              color={"gray.500"}
+            >
+              Entrada de producto
+            </Typography>
+          </Divider>
+          <Grid container spacing={2} sx={{ marginTop: 2 }}>
+            {!disable && (
+              <>
+                {" "}
+                <Grid item xs={12} md={12} lg={4} xl={4}></Grid>
+                <Grid item xs={12} md={6} lg={4} xl={4}></Grid>
+                <Grid item xs={12} md={6} lg={4} xl={4}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    color="secondary"
+                    startIcon={<AddTwoToneIcon />}
+                    disabled={
+                      watch("originLocation") === undefined ||
+                      watch("originLocation") === null ||
+                      (watch("documentNumber")?.toString() === "" &&
+                        watch("invoiceNumber")?.toString() === "")
                     }
-                }}
-                onBlur={e => {
-                    const inputDate = new Date(e.target.value + 'T00:00:00');
+                    onClick={() => {
+                      setopen(true);
+                    }}
+                  >
+                    Agregar producto
+                  </Button>
+                </Grid>
+              </>
+            )}
 
-                    if (!isNaN(inputDate.getTime())) { // Verificar si es una fecha válida
-                        updateProductoPallet({ date: inputDate, palletIndex: index, id: historyRow.id || 0, pallets: pallets });
-
-                    }
-                }}
-            />
-        </TableCell>
-        {!disable &&
-            <TableCell align="right">
-            <IconButton aria-label="delete" size="medium" onClick={() => removeProductoPallet({ palletIndex: index, id: historyRow.id || 0 })}>
-                <DeleteTwoToneIcon fontSize="inherit" color='secondary' />
-            </IconButton>
-            <IconButton aria-label="edit" size="medium" onClick={onclickPrint}>
-                <LocalPrintshopTwoToneIcon fontSize="inherit" color='secondary' />
-            </IconButton>
-        </TableCell>}
-    </TableRow>
-}
+            <Grid item xs={12}>
+              <Table size="small" aria-label="a dense table">
+                <TableHead>
+                  <TableRow>
+                    <StyledTableCell>Detalle</StyledTableCell>
+                    <StyledTableCell align="right">No. SAP</StyledTableCell>
+                    <StyledTableCell align="right">Producto</StyledTableCell>
+                    <StyledTableCell align="right">
+                      Total pallets
+                    </StyledTableCell>
+                    {!disable && (
+                      <StyledTableCell align="right">Acciones</StyledTableCell>
+                    )}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {seguimiento?.detalles.map((detalle, index) => {
+                    return (
+                      <ProductoEntradaTableRow
+                        key={detalle.name}
+                        row={detalle}
+                        seguimiento={seguimiento}
+                        index={index}
+                        indexSeguimiento={indice}
+                        disable={disable}
+                      />
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Grid>
+          </Grid>
+        </Grid>
+        {seguimiento.type === "LOCAL" && (
+          <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
+            <Divider>
+              <Typography
+                variant="body1"
+                component="h1"
+                fontWeight={400}
+                color={"gray.500"}
+              >
+                Salida de producto
+              </Typography>
+            </Divider>
+            <Grid container spacing={1} sx={{ marginTop: 2 }}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="N° de Doc. Salida"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  disabled={disable}
+                  {...register("documentNumberExit")}
+                  onBlur={(e) =>
+                    sendDataToBackend(
+                      "output_document_number",
+                      e.target.value || null
+                    )
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label="Contabilizado"
+                  variant="outlined"
+                  size="small"
+                  type="number"
+                  disabled={disable}
+                  {...register("accounted")}
+                  onBlur={(e) =>
+                    sendDataToBackend("accounted", e.target.value || null)
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <LocationSelect
+                  control={control}
+                  name="outputLocation"
+                  placeholder="Localidad de Envío"
+                  locationId={watch("outputLocation")}
+                  label="Localidad de Envío"
+                  disabled={disable}
+                  onChange={(e) =>
+                    sendDataToBackend("destination_location", e?.id)
+                  }
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <AutoCompleteBase
+                  control={control}
+                  name="outputType"
+                  placeholder="Unidad Cargada con"
+                  disabled={disable}
+                  options={outputType.map((d) => ({
+                    label: d.name,
+                    id: d.id?.toString(),
+                  }))}
+                  onChange={(e) => sendDataToBackend("output_type", e)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <ShowRoute
+                  distributorCenterId={seguimiento.distributorCenter}
+                  locationId={watch("outputLocation")}
+                />
+              </Grid>
+              {outputTypeData && (
+                <>
+                  {outputTypeData?.required_details && !disable && (
+                    <Grid item xs={12} md={6} lg={4} xl={4}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        color="secondary"
+                        startIcon={<AddTwoToneIcon />}
+                        onClick={() => setopenOutput(true)}
+                      >
+                        Agregar producto de salida
+                      </Button>
+                    </Grid>
+                  )}
+                  <OutPutDetail
+                    seguimiento={seguimiento}
+                    disable={disable}
+                    outputType={outputTypeData}
+                  />
+                </>
+              )}
+            </Grid>
+          </Grid>
+        )}
+      </Grid>
+    </>
+  );
+};

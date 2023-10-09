@@ -1,9 +1,9 @@
-import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
-import { Tracker, TrackerQueryParams } from '../../interfaces/tracking';
+import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -21,7 +21,7 @@ export const trackerApi = createApi({
             query: (params) => ({
                 url: `/tracker/`,
                 method: 'GET',
-                params:{
+                params: {
                     ...params
                 }
             }),
@@ -37,7 +37,99 @@ export const trackerApi = createApi({
     })
 })
 
-export const { 
+export const trackerPalletsApi = createApi({
+    reducerPath: 'trackerPalletsApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getTrackerPallets: builder.query<BaseApiResponse<TrackerProductDetail>, TrackerProductDetailQueryParams>({
+            query: (params) => ({
+                url: `/tracker-detail-product/`,
+                method: 'GET',
+                params: {
+                    ...params
+                }
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const trackerOutputApi = createApi({
+    reducerPath: 'trackerOutputApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getLastTrackerOutput: builder.query<LastTrackerOutputResult, LastTrackerOutputQueryParams>({
+            query: (params) => ({
+                url: `/tracker/last-output/`,
+                method: 'GET',
+                params: {
+                    ...params
+                }
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const nearExpirationProductsApi = createApi({
+    reducerPath: 'nearExpirationProductsApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getNearExpirationProducts: builder.query<BaseApiResponse<NearExpirationProductResponse>, NearExpirationQueryParams>({
+            query: (params) => ({
+                url: `/report/next-win/`,
+                method: 'GET',
+                params: {
+                    ...params,
+                }
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const {
     useGetTrackerQuery,
     useGetTrackerByIdQuery
 } = trackerApi
+
+
+export const {
+    useGetTrackerPalletsQuery
+} = trackerPalletsApi
+
+export const {
+    useGetLastTrackerOutputQuery
+} = trackerOutputApi
+
+
+export const {
+    useGetNearExpirationProductsQuery
+} = nearExpirationProductsApi

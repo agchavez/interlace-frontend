@@ -1,0 +1,13 @@
+# Seguimiento service                                                                                  licitaciones.service                                                                                              
+[Unit]
+Description=tracker daemon
+After=network.target
+
+[Service]
+User=tracker
+Group=www-data
+WorkingDirectory=/var/www/html/tracker-backend
+
+ExecStart=/var/www/html/env/bin/gunicorn  --timeout 30000  --access-logfile - --workers 3 --bind unix:/home/tracker/socks/tracker.sock config.wsgi:application
+[Install]
+WantedBy=multi-user.target

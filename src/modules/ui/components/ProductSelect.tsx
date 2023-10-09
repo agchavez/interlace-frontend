@@ -1,5 +1,5 @@
 import { Controller, Control, Path } from "react-hook-form";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
@@ -17,6 +17,7 @@ interface ProductSelectProps<
   disabled?: boolean;
   onChange?: (value: Product | null) => void;
   ProductId?: number;
+  isOutput?:boolean;
 }
 
 export const ProductSelect = <
@@ -28,7 +29,8 @@ props: ProductSelectProps<TField>
     limit: 10,
     offset: 0,
     search: "",
-    id: props.ProductId
+    id: props.ProductId,
+    is_output: props.isOutput,
   });
   
   const {
@@ -36,21 +38,28 @@ props: ProductSelectProps<TField>
     refetch,
     isFetching,
     isLoading
-  } = useGetProductQuery(query, {
-    skip: !query.search
-  });
+  } = useGetProductQuery(query);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, [query, refetch]);
+  useEffect(() => {
+    refetch();
+  }, [query, refetch]);
 
   const handleInputChange = (newInputValue: string) => {
     if (newInputValue.length > 2) {
+      const splitted = newInputValue.split(" - ");
+      if (splitted.length > 1){
       setQuery({
         ...query,
-        search: newInputValue
+        search: splitted[0],
+      });
+    }
+    else{
+      setQuery({
+        ...query,
+        search: newInputValue,
       });
       refetch();
+    }
     }
   };
 
@@ -67,7 +76,7 @@ props: ProductSelectProps<TField>
         return (<>
           <Autocomplete
             value={value ? categorias?.results?.find((option : Product) => value === option.id) ?? null : null}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => option.sap_code + " - " + option.name}
             disabled={props.disabled}
             onChange={(_, newValue) => {
               if (newValue === null){

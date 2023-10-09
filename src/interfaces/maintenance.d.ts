@@ -130,6 +130,9 @@ export interface LocationTypeQuerySearch extends BaseQueryParams {
     id?: number;
 }
 
+export interface ProductPeriodQueryParams {
+    product?: number;
+}
 
 //gorups response
 export interface GroupsResponse {
@@ -147,6 +150,22 @@ export interface Period {
     finalDate: string;
     year: number;
     distributor_center: number;
+}
+export interface Route {
+    id:                      number;
+    distributor_center_name: string;
+    location_name:           string;
+    created_at:              Date;
+    code:                    string;
+    distributor_center:      number;
+    location:                number;
+}
+
+export interface RouteQuerySearch extends BaseQueryParams {
+    search?: string;
+    distributorCenter?: number;
+    id?: number;
+    location?: number;
 }
 
 export type PeriodLabel = "A" | "B" | "C"

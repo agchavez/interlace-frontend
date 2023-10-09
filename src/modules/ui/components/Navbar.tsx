@@ -6,7 +6,8 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 // import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
-import { useAppSelector } from '../../../store';
+import { useAppDispatch, useAppSelector } from '../../../store';
+import { logout } from '../../../store/auth';
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
 interface NavbarProps {
@@ -16,6 +17,7 @@ interface NavbarProps {
 const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+    const dispatch = useAppDispatch();
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
@@ -26,7 +28,7 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
     // const dispatch = useAppDispatch();
     const { status, user } = useAppSelector(state => state.auth);
     const handleLogout = () => {
-        handleClose();
+        dispatch(logout());
     }
 
     return (
@@ -44,11 +46,13 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                 left: 0,
                 zIndex: 3
             }}>
-            <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
-                <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
-                    { sidebarOpen ? <CloseIcon />: <MenuIcon />}
-                </Button>
-            </Grid>
+            {
+                status === "authenticated" && <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
+                    <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
+                        { sidebarOpen ? <CloseIcon />: <MenuIcon />}
+                    </Button>
+                </Grid>
+            }
             <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
                 {/* Logo */}
                 {/* {status == 'authenticated1' && <IconButton
@@ -163,10 +167,10 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                     transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                     anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                    <MenuItem onClick={handleClose}>
+                    <MenuItem onClick={handleClose} disabled>
                         Mi perfil
                     </MenuItem>
-                    <MenuItem onClick={handleClose}>
+                    <MenuItem onClick={handleClose} disabled>
                         Historial
                     </MenuItem>
                     <Divider />
@@ -174,7 +178,7 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                         <ListItemIcon>
                             <Logout fontSize="small" color="error" />
                         </ListItemIcon>
-                        Cerar sesión
+                        Cerrar sesión
                     </MenuItem>
                 </Menu>
             </Grid>

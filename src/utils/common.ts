@@ -13,10 +13,18 @@ export const formatTime = (d: Date) => {
     return `${appendLeftZeros(d.getHours(), 2)}:${appendLeftZeros(d.getMinutes(), 2)}:${appendLeftZeros(d.getSeconds(), 2)}`
 }
 
-export const appendLeftZeros = (n: number, length: number):string => {
+export const appendLeftZeros = (n: number, length: number): string => {
     let track = n.toString();
-    for (let i = track.length; track.length<length; i++) {
+    for (let i = track.length; track.length < length; i++) {
         track = "0" + track
     }
     return track;
 }
+
+export const optionsTypeTracker = {
+    IMPORT: "Importados",
+    LOCAL: "Locales",
+};
+
+
+

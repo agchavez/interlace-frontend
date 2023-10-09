@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { toast } from 'sonner'
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
 
@@ -58,12 +57,14 @@ interface RemoveDetalle {
 
 export interface DetalleCarga extends Product {
     amount: number;
-    history?: DetalleCargaPalet[]
+    history?: DetalleCargaPalet[];
+    productId: number;
 }
 
 export interface DetalleCargaSalida extends Product {
     amount: number;
     idDetalle: number;
+    expiration_date: string;
 }
 
 export interface DetalleCargaIdx extends DetalleCarga {
@@ -72,15 +73,20 @@ export interface DetalleCargaIdx extends DetalleCarga {
 
 export interface Seguimiento {
     id: number,
+    user: number,
     rastra: TarilerData,
     transporter: TransporterData,
     userName?: string;
+    distributorCenter: number;
     completed?: string;
     plateNumber: string;
     completed_date: string | null;
+    invoiceNumber: string | null;
+    containernumber: number | null;
     originLocation?: number;
     outputLocation?: number;
-    driver?: number| null;
+    driver: number | null;
+    driverImport: string | null;
     documentNumber: number;
     status: string;
     transportNumber: number;
@@ -92,6 +98,7 @@ export interface Seguimiento {
     timeEnd: string | null;
     opm1?: number;
     opm2?: number;
+    type: 'LOCAL' | 'IMPORT';
     detalles: DetalleCarga[]
     detallesSalida?: DetalleCargaSalida[]
     originLocationData: LocationType | null;
@@ -119,10 +126,6 @@ export const seguimientoSlice = createSlice({
     reducers: {
         addSeguimiento: (state, action: PayloadAction<Seguimiento>) => {
             // Si el seguimiento ya existe no se agrega
-            if (state.seguimientos.findIndex((seg) => seg.rastra.code === action.payload.rastra.code) !== -1) {
-                toast.error("Ya existe un seguimiento con este codigo de rastra");
-                return
-            }
             state.seguimientos.push(action.payload);
             const seguimientoActualValue = state.seguimientos.length - 1;
             state.seguimeintoActual = seguimientoActualValue;
@@ -182,20 +185,19 @@ export const seguimientoSlice = createSlice({
                 detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number }>) => {
-            const { segIndex, product, amount, idDetalle } = action.payload
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number, expiration_date: string }>) => {
+            const { segIndex, product, amount, idDetalle, expiration_date } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             if (seguimiento.detallesSalida) {
                 const index = seguimiento.detallesSalida.findIndex((det) => det.id === product.id)
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle})
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date })
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount, idDetalle }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
             }
-            toast.success("Producto de salida agregado")
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
             const { segIndex, product } = action.payload
@@ -207,7 +209,14 @@ export const seguimientoSlice = createSlice({
         },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload
+        },
+        // Quitar segumiento del array
+        removeSeguimientoActual: (state) => {
+            state.seguimientos.splice(state.seguimeintoActual || 0, 1);
+            state.seguimeintoActual = state.seguimientos.length - 1;
         }
+
+
 
 
 
@@ -228,5 +237,6 @@ export const {
     addDetalleCargaSalida,
     removeDetalleCargaSalida,
     setLoading,
-    setSeguimientos
+    setSeguimientos,
+    removeSeguimientoActual
 } = seguimientoSlice.actions;

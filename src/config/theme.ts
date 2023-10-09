@@ -1,4 +1,5 @@
 import {createTheme} from '@mui/material/styles'
+import { esES } from '@mui/x-date-pickers/locales';
 
 export const maintheme = createTheme({
     typography:{
@@ -13,6 +14,5 @@ export const maintheme = createTheme({
         secondary: {
             main: '#1c2536'
         },
-
-    }
-})
+    },
+}, esES)    

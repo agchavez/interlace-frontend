@@ -65,6 +65,26 @@ export const updateTracking = (indexSeguimiento: number, trackingId: number, bod
     }
 }
 
+export const chanceStatusTracking = (status: 'PENDING' | 'EDITED', trackerId: number, onComplete?: () => void): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        await backendApi.patch<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackerId}/`, { status }, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        toast.success("Seguimiento actualizado", {
+            description: status === 'PENDING' ? 'El seguimiento se movio a pendientes' : 'El seguimiento se encuentra ahora en atención'
+        })
+        onComplete && onComplete()
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
 export const removeTracking = (indexSeguimiento: number, trackingId: number): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
@@ -163,7 +183,7 @@ export const addDetallePallet = (indexSeg: number, indexDet: number, data: AddDe
         if (!seguimientos) return;
         const seguimiento = seguimientos[indexSeg]
         if (!seguimiento) return;
-        const { data: detailProduct } = await backendApi.post<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/`, data, {
+        const { data: detailProduct } = await backendApi.post<TrackerProductDetail, AxiosResponse<TrackerProductDetail>>(`/tracker-detail-product/`, data, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -188,7 +208,7 @@ export const updateDetallePallet = (indexSeg: number, indexDet: number, indexPal
         if (!seguimientos) return;
         const seguimiento = seguimientos[indexSeg]
         if (!seguimiento) return;
-        const { data: detailProduct } = await backendApi.patch<AddDetallePalletResponse, AxiosResponse<AddDetallePalletResponse>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? data.expiration_date : null }, {
+        const { data: detailProduct } = await backendApi.patch<TrackerProductDetail, AxiosResponse<TrackerProductDetail>>(`/tracker-detail-product/${data.id}/`, { ...data, expiration_date: data.expiration_date ? data.expiration_date : null }, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -262,17 +282,18 @@ export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData)
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
-        const {seguimientos, seguimeintoActual} = getState().seguimiento
-        if(!seguimientos || seguimeintoActual === undefined) return
+        const { seguimientos, seguimeintoActual } = getState().seguimiento
+        if (!seguimientos || seguimeintoActual === undefined) return
         const seguimiento = seguimientos[seguimeintoActual]
-        if (seguimiento.detallesSalida?.find(d => d.sap_code === data.product.sap_code)){
+        if (seguimiento.detallesSalida?.find(d => d.sap_code === data.product.sap_code)) {
             toast.error("producto ya agregado")
             return;
         }
         const body: AddOutProductBody = {
             tracker: data.tracker,
             quantity: data.quantity,
-            product: data.product.id
+            product: data.product.id,
+            expiration_date: data.expiration_date
         }
         const { status, data: trackerDetail } = await backendApi.post<TrackerDeailOutput, AxiosResponse<TrackerDeailOutput>>(`/tracker-detail-output/`, body, {
             headers: {
@@ -284,11 +305,13 @@ export const addOutProduct = (indexSeguimiento: number, data: AddOutProductData)
                 segIndex: indexSeguimiento,
                 product: data.product,
                 amount: data.quantity,
-                idDetalle: trackerDetail.id
+                idDetalle: trackerDetail.id,
+                expiration_date: trackerDetail.expiration_date,
             }))
         }
         toast.success("Producto de salida agregado")
     } catch (error) {
+        console.error("eror", error)
         handleApiError(error);
     } finally {
         dispatch(setLoading(false))
@@ -318,10 +341,14 @@ export const removeOutProduct = (indexSeguimiento: number, detalle: DetalleCarga
 export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
+        user: tracker.user,
         rastra: tracker.tariler_data,
+        distributorCenter: tracker.distributor_center,
         detalles: tracker.tracker_detail.map(det => parseDetail(det)).reverse(),
         transporter: tracker.transporter_data,
         plateNumber: tracker.plate_number,
+        containernumber: tracker.container_number,
+        invoiceNumber: tracker.invoice_number,
         documentNumber: tracker.input_document_number,
         transferNumber: tracker.transfer_number,
         created_at: tracker.created_at,
@@ -329,6 +356,8 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         completed_date: tracker.completed_date,
         status: tracker.status,
         transportNumber: 1,
+        driverImport: tracker.driver_import,
+        type: tracker.type,
         documentNumberExit: tracker.output_document_number,
         outputType: tracker.output_type,
         timeStart: tracker.input_date !== null ? new Date(tracker.input_date || 0).toISOString() : null,
@@ -350,6 +379,7 @@ const parseDetail = (tracker_detail: TrackerDetailResponse): DetalleCarga => {
     const seguimiento_detalle: DetalleCarga = {
         amount: tracker_detail.quantity,
         id: tracker_detail.id,
+        productId: tracker_detail.product_data.id,
         created_at: tracker_detail.created_at,
         name: tracker_detail.product_data.name,
         brand: tracker_detail.product_data.brand,
@@ -401,7 +431,8 @@ const parseOutputDetailSalida = (tracker_detail: TrackerDeailOutput): DetalleCar
         id: tracker_detail.id,
         amount: tracker_detail.quantity,
         created_at: tracker_detail.created_at,
-        idDetalle: tracker_detail.id
+        idDetalle: tracker_detail.id,
+        expiration_date: tracker_detail.expiration_date,
     }
     return detalleSalida;
 }

@@ -20,9 +20,10 @@ export interface SidebarItemProps {
     text: string;
     id: string;
     link?: string;
+    subitemClickAction?: ()=>void
 }
 
-const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text, id, link = "" }) => {
+const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text, id, link = "", subitemClickAction }) => {
     const [open, setOpen] = useState(false)
     const handleClick = () => {
         setOpen(!open)
@@ -55,7 +56,7 @@ const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text
                     {
                         subItems && subItems.map((item) => {
                             if (item.visible) {
-                                return <Link to={item.href || ""} style={{ textDecoration: "none" }} className={`sidebar_item__child text_gray ${open ? "" : "close"}`} key={`${id}-${item.id}`}>
+                                return <Link to={item.href || ""} style={{ textDecoration: "none" }} className={`sidebar_item__child text_gray ${open ? "" : "close"}`} key={`${id}-${item.id}`} onClick={subitemClickAction}>
                                     <Grid container alignItems="center"> {/* Añadido alignItems */}
                                         <Grid item xs={2} textAlign="right">
                                             <Grid container alignItems="center" height="100%" justifyContent="center"> {/* Añadido contenedor para centrar verticalmente */}

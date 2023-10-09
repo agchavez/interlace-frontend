@@ -1,4 +1,4 @@
-import { FilterDate } from './tracking';
+import { FilterDate, Tracker } from './tracking';
 export interface Usuario {
     usuarioId: number;
     correo: string;
@@ -54,6 +54,7 @@ export interface DashboardResponse {
     total_trackers_completed: number;
     total_trackers_pending:   TotalTrackersPending[];
     time_average:             number;
+    last_trackers:            Tracker[];
 }
 
 export interface TotalTrackersPending {
