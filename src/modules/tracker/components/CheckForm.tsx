@@ -273,7 +273,8 @@ export const CheckForm = ({
                     >
                       {format(
                         new Date(seguimiento?.completed_date),
-                        "dd/MM/yyyy", {
+                        "dd/MM/yyyy",
+                        {
                           timeZone: "America/Tegucigalpa",
                         }
                       )}
@@ -351,8 +352,9 @@ export const CheckForm = ({
             variant="h4"
             component="h1"
             fontWeight={400}
-            color={"gray.500"}
+            color={"white"}
             align="center"
+            bgcolor={"#1c2536"}
           >
             TRK-{seguimiento.id?.toString().padStart(5, "0")}
           </Typography>
@@ -531,7 +533,7 @@ export const CheckForm = ({
                 >
                   {(tiempoEntrada &&
                     tiempoEntrada !== null &&
-                     format(tiempoEntrada, "HH:mm:ss", {
+                    format(tiempoEntrada, "HH:mm:ss", {
                       locale: es,
                       timeZone: "America/Tegucigalpa",
                     })) ||
@@ -557,7 +559,6 @@ export const CheckForm = ({
                   {(tiempoSalida &&
                     tiempoSalida !== null &&
                     format(tiempoSalida, "HH:mm:ss")) ||
-                    
                     "00:00:00"}
                 </Typography>
               </Grid>
@@ -581,7 +582,6 @@ export const CheckForm = ({
                     ? formatDistance(tiempoEntrada, tiempoSalida, {
                         locale: es,
                       })
-
                     : "--:--:--"}
                 </Typography>
               </Grid>
