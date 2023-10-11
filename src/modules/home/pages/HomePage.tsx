@@ -214,7 +214,7 @@ export default function HomePage() {
                 <Card elevation={1} sx={{
                     p: 2, borderRadius: 2,
                 }} >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div className='home__dashboard-container'>
 
                         <div>
                             <Typography variant="body1" component="h6" style={{ textAlign: "start" }} color={"secondary"} fontWeight={200}>

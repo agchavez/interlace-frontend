@@ -14,6 +14,18 @@
     color: $color-primary;
 }
 
+.home__dashboard-container { 
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: "center" !important;
+}
+
+@media  screen and (max-width: $md-breackpoint) {
+    .home__dashboard-container {
+        flex-direction: column !important;
+    }
+}
+
 .sidebar_item__child {
     display: block;
     height: 2rem;
