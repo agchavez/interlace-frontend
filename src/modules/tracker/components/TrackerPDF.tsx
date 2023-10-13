@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "white",
-    padding: "2.5cm",
+    padding: "0.5cm",
   },
   section: { paddingVertical: 11 },
   title: {
