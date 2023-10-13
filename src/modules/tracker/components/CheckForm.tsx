@@ -232,6 +232,25 @@ export const CheckForm = ({
             <Divider />
             <Box sx={{ padding: 2 }}>
               <Grid container spacing={2}>
+              <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Rastra
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.rastra.code}
+                  </Typography>
+                </Grid>
                 <Grid item xs={12} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
@@ -357,7 +376,7 @@ export const CheckForm = ({
                   </Grid>
                 )}
                 {disable && (
-                  <Grid item xs={12} md={6} lg={4} xl={4}>
+                  <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
                       variant="body1"
                       component="h1"
