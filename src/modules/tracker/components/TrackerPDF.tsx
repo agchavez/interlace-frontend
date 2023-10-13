@@ -99,7 +99,7 @@ function TrakerPDFDocument({
           <Image src="/logo.png" style={{ width: 200 }} />
         </View>
         <View style={{ ...styles.section, backgroundColor: "#1c2536" }}>
-          <PDFTitle style={{ color: "white" }}>
+          <PDFTitle style={{ color: "white", fontSize: 30 }}>
             TRK-{seguimiento.id?.toString().padStart(5, "0")}
           </PDFTitle>
         </View>
@@ -345,6 +345,7 @@ function TrakerPDFDocument({
 
             {outputTypeData && (
               <View style={styles.section}>
+              <PDFSubTitle>Salida de producto:</PDFSubTitle>
                 <PDFTable
                   data={salidaTableData}
                   header={

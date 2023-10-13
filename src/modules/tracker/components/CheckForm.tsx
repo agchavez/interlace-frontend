@@ -47,7 +47,7 @@ import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
 import {
   useGetDriverQuery,
   useGetLocationsQuery,
@@ -191,7 +191,7 @@ export const CheckForm = ({
                 loadingOutputData;
               return (
                 <IconButton color="secondary" disabled={loading}>
-                  <PictureAsPdfIcon />
+                  <PictureAsPdfTwoToneIcon fontSize="large" />
                 </IconButton>
               );
             }}
