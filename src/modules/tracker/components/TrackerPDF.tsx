@@ -180,7 +180,7 @@ function TrakerPDFDocument({
               <View style={{ flex: 1 }}>
                 <PDFText>
                   {seguimiento.type === "LOCAL"
-                    ? `${driver?.first_name} ${driver?.last_name}`
+                    ? `${driver?.first_name}`
                     : `${seguimiento.driverImport}`}
                 </PDFText>
               </View>
@@ -202,7 +202,7 @@ function TrakerPDFDocument({
                   <PDFText>Transferencia de entrada:</PDFText>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <PDFText>{seguimiento.transferNumber}</PDFText>
+                  <PDFText>{seguimiento.documentNumber}</PDFText>
                 </View>
               </View>
             ) : (
@@ -220,7 +220,7 @@ function TrakerPDFDocument({
                 <PDFText>N° de Traslado 5001:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{seguimiento.transportNumber}</PDFText>
+                <PDFText>{seguimiento.transferNumber}</PDFText>
               </View>
             </View>
           </View>
