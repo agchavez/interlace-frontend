@@ -118,6 +118,14 @@ function TrakerPDFDocument({
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 100 }}>
+                <PDFText>Número de Rastra:</PDFText>
+              </View>
+              <View style={{ flex: 1 }}>
+                <PDFText>{seguimiento?.rastra.code}</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ minWidth: 100 }}>
                 <PDFText>Tipo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
