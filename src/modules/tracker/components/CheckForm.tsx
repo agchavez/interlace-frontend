@@ -5,6 +5,7 @@ import {
   Chip,
   Divider,
   Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -44,6 +45,14 @@ import { EditNote } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
+import TrakerPDFDocument from "./TrackerPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import {
+  useGetDriverQuery,
+  useGetLocationsQuery,
+  useGetOperatorByDistributionCenterQuery,
+} from "../../../store/maintenance/maintenanceApi";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -90,6 +99,29 @@ export const CheckForm = ({
       driver: seguimiento.driver !== null ? seguimiento.driver : undefined,
     },
   });
+  const { data: dataDriver, isLoading: loadingDriver } = useGetDriverQuery({
+    id: seguimiento.driver !== null ? seguimiento.driver : undefined,
+    limit: 1,
+    offset: 0,
+  });
+  const { data: dataOp1, isLoading: loadingOP1 } =
+    useGetOperatorByDistributionCenterQuery({
+      id: seguimiento.driver !== null ? seguimiento.opm1 : undefined,
+      limit: 1,
+      offset: 0,
+    });
+  const { data: dataOp2, isLoading: loadingOP2 } =
+    useGetOperatorByDistributionCenterQuery({
+      limit: 1,
+      offset: 0,
+      id: seguimiento.driver !== null ? seguimiento.opm2 : undefined,
+    });
+  const { data: dataOutputLocation, isLoading: loadingOutputData } =
+    useGetLocationsQuery({
+      id: seguimiento.driver !== null ? seguimiento.outputLocation : undefined,
+      limit: 1,
+      offset: 0,
+    });
   const tiempoEntrada = seguimiento?.timeStart
     ? new Date(seguimiento?.timeStart)
     : null;
@@ -122,6 +154,49 @@ export const CheckForm = ({
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
       <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
+        <Grid
+          item
+          xs={12}
+          container
+          justifyContent="flex-end"
+          justifyItems="flex-end"
+        >
+          <PDFDownloadLink
+            fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
+            document={
+              <TrakerPDFDocument
+                seguimiento={seguimiento}
+                outputTypeData={outputTypeData}
+                driver={dataDriver?.results[0]}
+                op1={
+                  seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                    ? dataOp1?.results[0]
+                    : undefined
+                }
+                op2={
+                  seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                    ? dataOp2?.results[0]
+                    : undefined
+                }
+                outputLocation={dataOutputLocation?.results[0]}
+              />
+            }
+          >
+            {({ loading: pdfLoading }) => {
+              const loading =
+                pdfLoading ||
+                loadingDriver ||
+                loadingOP1 ||
+                loadingOP2 ||
+                loadingOutputData;
+              return (
+                <IconButton color="secondary" disabled={loading}>
+                  <PictureAsPdfIcon />
+                </IconButton>
+              );
+            }}
+          </PDFDownloadLink>
+        </Grid>
         <Grid item xs={12}>
           <Card
             sx={{
