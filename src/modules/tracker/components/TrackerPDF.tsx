@@ -2,7 +2,7 @@ import { Document, Page, View, StyleSheet, Image } from "@react-pdf/renderer";
 import PDFText from "../../ui/components/pdfDocs/PDFText";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
 import PDFTable from "../../ui/components/pdfDocs/Table";
-import { formatDistance } from "date-fns";
+import { formatDistance, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { OutputType } from "../../../interfaces/tracking";
 import outputTypeDataToShow from "../../../config/outputTypeData";
@@ -14,6 +14,7 @@ import {
 } from "../../../interfaces/maintenance";
 import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -25,6 +26,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
   },
+  divider: {
+    backgroundColor: 'gray',
+    height: 1,
+    width: '100%', // Adjust the width according to your layout
+    marginBottom: 10,
+  },
+  subTitle: {
+    marginBottom: 5,
+  }
 });
 
 interface TrakerPDFDocumentProps {
@@ -51,7 +61,7 @@ function TrakerPDFDocument({
           det.sap_code,
           det.name,
           h.pallets,
-          h.date && format(new Date(h.date), "yyyy-MM-dd"),
+          h.date && format(new Date(parseISO(h.date.split("T")[0])), "yyyy-MM-dd"),
         ]) || [];
       return rows;
     })
@@ -87,17 +97,20 @@ function TrakerPDFDocument({
   const tiempoSalida = seguimiento?.timeEnd
     ? new Date(seguimiento?.timeEnd)
     : null;
-
   return (
     <Document
       title="Datos Tracker"
       language="es"
       style={{ fontFamily: "Helvetica" }}
+      author="AbinBev"
+      creator="AbinBev Tracker"
+      keywords="Tracker, AbinBev, PDF, Seguimiento"
     >
       <Page size="LETTER" style={styles.page}>
         <View style={{ ...styles.section }}>
           <Image src="/logo.png" style={{ width: 200 }} />
         </View>
+        <View style={{...styles.divider}} />
         <View style={{ ...styles.section, backgroundColor: "#1c2536" }}>
           <PDFTitle style={{ color: "white", fontSize: 30 }}>
             TRK-{seguimiento.id?.toString().padStart(5, "0")}
@@ -105,7 +118,7 @@ function TrakerPDFDocument({
         </View>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle>Datos principales:</PDFSubTitle>
+            <PDFSubTitle style={{...styles.subTitle}}>Datos principales:</PDFSubTitle>
             <View style={{ flexDirection: "row", paddingRight: 10 }}>
               <View style={{ minWidth: 100 }}>
                 <PDFText>Fecha de registro:</PDFText>
@@ -115,6 +128,18 @@ function TrakerPDFDocument({
                   {format(new Date(seguimiento?.created_at), "dd/MM/yyyy")}
                 </PDFText>
               </View>
+              
+            </View>
+            <View style={{ flexDirection: "row", paddingRight: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Centro distribución:</PDFText>
+              </View>
+              <View style={{ flex: 1 }}>
+                <PDFText>
+                  {seguimiento?.distributorCenterName}
+                </PDFText>
+              </View>
+              
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 100 }}>
@@ -161,7 +186,7 @@ function TrakerPDFDocument({
           </View>
 
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle>Datos generales:</PDFSubTitle>
+            <PDFSubTitle style={{...styles.subTitle}}>Datos generales:</PDFSubTitle>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
                 <PDFText>Numero de placa:</PDFText>
@@ -235,7 +260,7 @@ function TrakerPDFDocument({
         </View>
 
         <View style={styles.section}>
-          <PDFSubTitle>Entrada de producto:</PDFSubTitle>
+          <PDFSubTitle style={{...styles.subTitle}}>Entrada de producto:</PDFSubTitle>
           <PDFTable
             data={entradaTableData}
             header={["N° Sap", "Producto", "Pallets", "Fecha Expiración"]}
@@ -247,7 +272,7 @@ function TrakerPDFDocument({
           <>
             <View style={{ display: "flex", flexDirection: "row" }}>
               <View style={{ ...styles.section, flex: 1 }}>
-                <PDFSubTitle>Datos del Operador:</PDFSubTitle>
+                <PDFSubTitle style={{...styles.subTitle}}>Datos del Operador:</PDFSubTitle>
                 <View style={{ flexDirection: "row" }}>
                   <View style={{ minWidth: 100 }}>
                     <PDFText>Tiempo de entrada:</PDFText>
@@ -314,7 +339,7 @@ function TrakerPDFDocument({
               </View>
 
               <View style={{ ...styles.section, flex: 1 }}>
-                <PDFSubTitle>Salida de producto:</PDFSubTitle>
+                <PDFSubTitle style={{...styles.subTitle}}>Salida de producto:</PDFSubTitle>
                 <View style={{ flexDirection: "row" }}>
                   <View style={{ minWidth: 120 }}>
                     <PDFText>N° de Doc. Salida:</PDFText>
@@ -353,7 +378,7 @@ function TrakerPDFDocument({
 
             {outputTypeData && (
               <View style={styles.section}>
-              <PDFSubTitle>Salida de producto:</PDFSubTitle>
+              <PDFSubTitle style={{...styles.subTitle}}>Salida de producto:</PDFSubTitle>
                 <PDFTable
                   data={salidaTableData}
                   header={
@@ -366,6 +391,8 @@ function TrakerPDFDocument({
                 />
               </View>
             )}
+            
+            
           </>
         )}
       </Page>

@@ -112,3 +112,12 @@
     background-color: #252e3e;
     line-height: 2rem;
 }
+
+.home__dashboard-card {
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+    @media screen and (max-width: $sm-breackpoint) {
+        display: block;
+    }
+}

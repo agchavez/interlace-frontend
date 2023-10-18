@@ -153,7 +153,7 @@ export const CheckForm = ({
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
-      <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
+      <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
         <Grid
           item
           xs={12}
@@ -494,7 +494,7 @@ export const CheckForm = ({
                 }
               />
             </Grid>
-            <Grid item xs={10} md={10}>
+            <Grid item xs={12} md={10}>
               {seguimiento.type === "LOCAL" ? (
                 <DriverSelect
                   control={control}

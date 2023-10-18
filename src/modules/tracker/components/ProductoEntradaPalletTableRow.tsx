@@ -107,7 +107,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
     <TableRow key={index}>
       {willPrint && print.component}
       <TableCell align="right">
-        <TextField
+        {!disable ? <TextField
           fullWidth
           id="outlined-basic"
           size="small"
@@ -124,9 +124,11 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
             })
           }
         />
+          : pallets
+      }
       </TableCell>
       <TableCell component="th" scope="row" align="right">
-        <TextField
+        {!disable ? <TextField
           fullWidth
           id="outlined-basic"
           size="small"
@@ -160,6 +162,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
             }
           }}
         />
+          : date?.toISOString().split("T")[0]}
       </TableCell>
       {!disable && (
         <TableCell align="right">

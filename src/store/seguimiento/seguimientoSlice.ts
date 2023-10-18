@@ -78,6 +78,7 @@ export interface Seguimiento {
     transporter: TransporterData,
     userName?: string;
     distributorCenter: number;
+    distributorCenterName: string;
     completed?: string;
     plateNumber: string;
     completed_date: string | null;
