@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useRef, useState } from "react";
 import { Period } from "../../../interfaces/maintenance";
 import {
   DetalleCarga,
@@ -57,6 +57,9 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
       : undefined
   );
 
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [dateInputFocus, setDateInputFocus] = useState(false);
+
   const onclickPrint = () => {
     const red = [];
     const max = historyRow.pallets || 0;
@@ -105,6 +108,47 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
     }
   }, [print, willPrint]);
 
+  useEffect(() => {
+    if (!dateInputRef.current) return;
+    const element = dateInputRef.current;
+    function activarFocus() {
+      setDateInputFocus(true);
+    }
+    function desactivarFocus() {
+      setDateInputFocus(false);
+    }
+    element.addEventListener("focus", activarFocus);
+    element.addEventListener("blur", desactivarFocus);
+    return () => {
+      element.removeEventListener("focus", activarFocus);
+      element.removeEventListener("blur", desactivarFocus);
+    };
+  }, [dateInputRef, setDateInputFocus]);
+
+  useEffect(() => {
+    if (dateInputFocus) return;
+    if (!date) return;
+    const dateStored =
+      historyRow.date && new Date(historyRow.date.split("T")[0]);
+    if (!dateStored) return;
+    if (date.getTime() === dateStored.getTime()) return;
+    const inputDate = new Date(date);
+    if (!isNaN(inputDate.getTime())) {
+      // Verificar si es una fecha válida
+      const leftDays = differenceInDays(inputDate, new Date());
+      if (leftDays <= 60) {
+        toast.error("El producto ingresado vencera en menos de 60 dias");
+      }
+      updateProductoPallet({
+        date: inputDate,
+        palletIndex: index,
+        id: historyRow.id || 0,
+        pallets: pallets,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateInputFocus, date]);
+
   return (
     <TableRow key={index}>
       {willPrint && print.component}
@@ -134,31 +178,17 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
       <TableCell component="th" scope="row" align="right">
         {!disable ? (
           <DatePicker
+            inputRef={dateInputRef}
             label="Fecha de vencimiento"
             slotProps={{ textField: { size: "small", fullWidth: true } }}
             value={date && toDate(date?.toISOString().split("T")[0])}
             format="dd/MM/yyyy"
             onChange={(e) => {
+              if (e === date) return;
               if (e === null) return;
               const inputDate = new Date(e);
               if (!isNaN(inputDate.getTime())) {
                 setDate(inputDate);
-              }
-
-              if (!isNaN(inputDate.getTime())) {
-                // Verificar si es una fecha válida
-                const leftDays = differenceInDays(inputDate, new Date());
-                if (leftDays <= 60) {
-                  toast.error(
-                    "El producto ingresado vencera en menos de 60 dias"
-                  );
-                }
-                updateProductoPallet({
-                  date: inputDate,
-                  palletIndex: index,
-                  id: historyRow.id || 0,
-                  pallets: pallets,
-                });
               }
             }}
           />
