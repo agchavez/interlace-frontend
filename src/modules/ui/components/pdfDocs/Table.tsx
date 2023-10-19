@@ -27,7 +27,7 @@ function PDFTable({
     <View style={styles.table} wrap={false}>
       {header && <PDFTableHeader item={header} cellStyles={headerCellsStyle} />}
       {data.map((item) => (
-        <TableRow item={item} cellStyles={rowCellsStyle} />
+        <TableRow key={item.join()} item={item} cellStyles={rowCellsStyle} />
       ))}
     </View>
   );

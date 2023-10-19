@@ -24,6 +24,7 @@ function TableRow({ item, cellStyles }: TableRowProps) {
         {item.map((value, index) => {
           return (
             <TableCell
+              key={value}
               style={{
                 ...styles,
                 ...(cellStyles
