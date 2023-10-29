@@ -39,7 +39,7 @@ export const DetailPage = () => {
                             </Typography>
                         </div>
                         <Typography variant="h6" component="h2" fontWeight={200} sx={{ marginLeft: 6  }}>
-                            CD LA GRANJA
+                            {data.distributor_center_data?.name}
                         </Typography>
                         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
                     </Grid>
