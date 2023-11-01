@@ -116,7 +116,8 @@ export interface Tracker {
   completed_date: string | null;
   type: TrackerType;
   location_data: LocationType | null;
-  tracker_detail_output: TrackerDeailOutput[]
+  tracker_detail_output: TrackerDeailOutput[];
+  observation: string | null;
 }
 
 export type TrackerType = 'LOCAL' | 'IMPORT';
@@ -298,7 +299,7 @@ export interface TrackerProductDetail {
   shift?: string;
 }
 
-export interface LastTrackerOutputResult{
+export interface LastTrackerOutputResult {
   results: LastTrackerOutput[];
   tracker_completed_today: number;
   total_hele: number;

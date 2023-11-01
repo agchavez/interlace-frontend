@@ -45,7 +45,7 @@ export const createTracking = (body: CreateTrackingBody): AppThunk => async (dis
     }
 }
 
-export const updateTracking = (indexSeguimiento: number, trackingId: number, body: Partial<CreateTrackingBody>): AppThunk => async (dispatch, getState) => {
+export const updateTracking = (indexSeguimiento: number, trackingId: number, body: Partial<Tracker>): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
@@ -367,7 +367,8 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         originLocationData: tracker.location_data,
         originLocation: tracker.origin_location || undefined,
         accounted: tracker.accounted,
-        detallesSalida: tracker.tracker_detail_output.map(out => parseOutputDetailSalida(out))
+        detallesSalida: tracker.tracker_detail_output.map(out => parseOutputDetailSalida(out)),
+        observation: tracker.observation
     }
     tracker.destination_location !== null && (seguimiento.outputLocation = tracker.destination_location);
     tracker.operator_1 !== null && (seguimiento.opm1 = tracker.operator_1);
