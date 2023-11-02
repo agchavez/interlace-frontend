@@ -104,6 +104,7 @@ export interface Seguimiento {
     detallesSalida?: DetalleCargaSalida[]
     originLocationData: LocationType | null;
     accounted: number | null;
+    observation: string | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {

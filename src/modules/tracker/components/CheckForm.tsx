@@ -47,12 +47,13 @@ import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
+import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import {
   useGetDriverQuery,
   useGetLocationsQuery,
   useGetOperatorByDistributionCenterQuery,
 } from "../../../store/maintenance/maintenanceApi";
+import ObservationModal from "./ObservationModal";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -75,23 +76,12 @@ export const CheckForm = ({
 }) => {
   const dispatch = useAppDispatch();
   const [open, setopen] = useState(false);
+  const [openObservationModal, setOpenObservationModal] = useState(false);
   const { outputType } = useAppSelector((state) => state.maintenance);
   const centro_distribucion = useAppSelector(
     (state) => state.auth.user?.centro_distribucion
   );
   const user = useAppSelector((state) => state.auth.user);
-  // function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
-  //     if (!seguimiento) return;
-
-  //     dispatch(updateSeguimiento({
-  //         ...seguimiento,
-  //         datosOperador: {
-  //             ...seguimiento.datosOperador,
-  //             ...datos
-  //         },
-  //         index: indice
-  //     }))
-  // }
   const { control, register, watch } = useForm<CheckFormType>({
     defaultValues: {
       ...seguimiento,
@@ -149,6 +139,11 @@ export const CheckForm = ({
       <AgregarProductoSalida
         open={openOutput}
         handleClose={() => setopenOutput(false)}
+      />
+      <ObservationModal
+        open={openObservationModal}
+        seguimiento={seguimiento}
+        handleClose={() => setOpenObservationModal(false)}
       />
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
@@ -232,7 +227,7 @@ export const CheckForm = ({
             <Divider />
             <Box sx={{ padding: 2 }}>
               <Grid container spacing={2}>
-              <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -326,6 +321,36 @@ export const CheckForm = ({
                   >
                     {seguimiento?.transporter.code}
                   </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="space-between"
+                  >
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Observaciones
+                    </Typography>
+                    <Button onClick={() => setOpenObservationModal(true)}>
+                      Editar
+                    </Button>
+                  </Grid>
+                  <Divider />
+                  <pre>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                    >
+                      {seguimiento?.observation}
+                    </Typography>
+                  </pre>
                 </Grid>
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
