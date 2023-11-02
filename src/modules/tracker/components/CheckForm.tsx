@@ -435,6 +435,8 @@ export const CheckForm = ({
                       component="h1"
                       fontWeight={600}
                       color={"gray.500"}
+                      // que se acomode al texto
+                      style={{ whiteSpace: "pre-wrap" }}
                     >
                       {seguimiento?.observation || "--"}
                     </Typography>
