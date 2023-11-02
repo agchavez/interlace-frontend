@@ -322,36 +322,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                <Grid item xs={12}>
-                  <Grid
-                    container
-                    direction="row"
-                    justifyContent="space-between"
-                  >
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={400}
-                      color={"gray.500"}
-                    >
-                      Observaciones
-                    </Typography>
-                    <Button onClick={() => setOpenObservationModal(true)}>
-                      Editar
-                    </Button>
-                  </Grid>
-                  <Divider />
-                  <pre>
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={600}
-                      color={"gray.500"}
-                    >
-                      {seguimiento?.observation}
-                    </Typography>
-                  </pre>
-                </Grid>
+                
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -439,6 +410,36 @@ export const CheckForm = ({
                     </Typography>
                   </Grid>
                 )}
+                <Grid item xs={12}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="space-between"
+                  >
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Observaciones
+                    </Typography>
+                    {!disable &&  <Button onClick={() => setOpenObservationModal(true)}>
+                      Editar
+                    </Button>}
+                  </Grid>
+                  <Divider />
+                  <pre>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                    >
+                      {seguimiento?.observation || "--"}
+                    </Typography>
+                  </pre>
+                </Grid>
                 {user !== null &&
                   +user?.id === seguimiento.user &&
                   disable &&
