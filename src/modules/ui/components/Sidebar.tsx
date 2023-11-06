@@ -69,10 +69,17 @@ const items: SideBarItem[] = [
         id: "gestion",
       },
       {
+        text: "Pedidos",
+        href: "/order/manage",
+        id: "order",
+      },
+      {
         text: "IN-OUT",
         href: "/tracker/view",
         id: "vista",
       },
+      
+
     ],
     icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "movimientos",

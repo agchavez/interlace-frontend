@@ -19,7 +19,7 @@ const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
 const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
-
+const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
@@ -98,6 +98,13 @@ export function AppRouter() {
                             <PrivateRoute access={status === 'authenticated'} path="/">
                                 <LazyLoading Children={
                                     ReportRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/order/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    OrderRouter
                                 } />
                             </PrivateRoute>
                         } />
