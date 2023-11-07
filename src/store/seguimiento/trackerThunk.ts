@@ -3,7 +3,7 @@ import { AddDetalleBody, AddDetalleData, AddDetallePalletData, AddDetallePalletR
 import { AppThunk } from '../store';
 '../../interfaces/tracking';
 import { toast } from 'sonner';
-import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
+import { DetalleCarga, DetalleCargaPalet, DetalleCargaSalida, Seguimiento, UploadDataBody, addDetalleCarga, addDetalleCargaPallet, addDetalleCargaSalida, addSeguimiento, removeDetalleCarga, removeDetalleCargaPallet, removeDetalleCargaSalida, removeSeguimiento, setLoading, setSeguimientoActual, setSeguimientos, updateDetalleCargaPallet, updateSeguimiento } from './seguimientoSlice';
 import { AxiosResponse } from 'axios';
 import { handleApiError } from '../../utils/error';
 
@@ -338,6 +338,106 @@ export const removeOutProduct = (indexSeguimiento: number, detalle: DetalleCarga
     }
 }
 
+export const uploadFile = (indexSeguimiento: number, trackerId: number, dataFile: UploadDataBody): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const formData = new FormData();
+        dataFile.archivo && formData.append("archivo", dataFile.archivo)
+        dataFile.archivo_name && formData.append("name", dataFile.archivo_name)
+        const config = {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data', // Establece el tipo de contenido como form-data
+            }
+        };
+        const { status, data } = await backendApi.patch<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackerId}/upload-file/`, formData, config)
+        if (status < 400) {
+            dispatch(updateSeguimiento({
+                index: indexSeguimiento,
+                ...parseTrackerSeguimiento(data)
+            }))
+        }
+        toast.success("Archivo subido exitosamente")
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const downloadFile = (trackerId: number): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        const { token } = getState().auth;
+        const { seguimientos, seguimeintoActual } = getState().seguimiento;
+        const response = await backendApi.get(`/tracker/${trackerId}/get-file/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            responseType: "blob"
+        });
+        console.log("status", response.status)
+        if (response.status >= 400) {
+            toast.error("No se ha podido descargar")
+            return
+        }
+        if (response.status !== 200) {
+            toast.error(`Error al descargar el archivo. Código de estado: ${response.status}`)
+            return
+        }
+        const contentDisposition = response.headers['content-disposition'];
+        let fileName
+        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (contentDisposition) {
+            if (filenameMatch) {
+                fileName = filenameMatch[1].trim().replace(/^("+|"+)$/g, '').replace(/"/g, '');
+            } else {
+                fileName = (seguimeintoActual !== undefined) ? seguimientos[seguimeintoActual].id : "archivo_tracking";
+            }
+        }
+        const blob = new Blob([response.data], { type: 'application/octet-stream' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = decodeURIComponent(fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Liberar la URL del objeto
+        window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
+export const removeFile = (indexSeguimiento: number, trackerId: number, cb: (() => unknown) | undefined): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoading(true))
+        console.log("aaaa")
+        const { token } = getState().auth;
+        const { data, status } = await backendApi.delete<Tracker, AxiosResponse<Tracker>>(`/tracker/${trackerId}/delete-file/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        if (status < 400) {
+            dispatch(updateSeguimiento({
+                index: indexSeguimiento,
+                ...parseTrackerSeguimiento(data)
+            }))
+        }
+        toast.success("Archivo eliminado exitosamente")
+        cb && cb()
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoading(false))
+    }
+}
+
 export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     const seguimiento: Seguimiento = {
         id: tracker.id,
@@ -368,7 +468,9 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
         originLocation: tracker.origin_location || undefined,
         accounted: tracker.accounted,
         detallesSalida: tracker.tracker_detail_output.map(out => parseOutputDetailSalida(out)),
-        observation: tracker.observation
+        observation: tracker.observation,
+        archivo_name: tracker.archivo_name,
+        is_archivo_up: tracker.is_archivo_up,
     }
     tracker.destination_location !== null && (seguimiento.outputLocation = tracker.destination_location);
     tracker.operator_1 !== null && (seguimiento.opm1 = tracker.operator_1);
