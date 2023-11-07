@@ -36,6 +36,7 @@ import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
   chanceStatusTracking,
+  downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -48,12 +49,16 @@ import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+
 import {
   useGetDriverQuery,
   useGetLocationsQuery,
   useGetOperatorByDistributionCenterQuery,
 } from "../../../store/maintenance/maintenanceApi";
 import ObservationModal from "./ObservationModal";
+import ArchivoModal from "./ArchivoModal";
+import DownloadTwoToneIcon from "@mui/icons-material/DownloadTwoTone";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -77,6 +82,7 @@ export const CheckForm = ({
   const dispatch = useAppDispatch();
   const [open, setopen] = useState(false);
   const [openObservationModal, setOpenObservationModal] = useState(false);
+  const [openArchivoModal, setOpenArchivoModal] = useState(false);
   const { outputType } = useAppSelector((state) => state.maintenance);
   const centro_distribucion = useAppSelector(
     (state) => state.auth.user?.centro_distribucion
@@ -134,6 +140,11 @@ export const CheckForm = ({
       )
     );
   };
+
+  const handleClickDescargar = () => {
+    dispatch(downloadFile(seguimiento.id));
+  };
+
   return (
     <>
       <AgregarProductoSalida
@@ -145,6 +156,11 @@ export const CheckForm = ({
         seguimiento={seguimiento}
         handleClose={() => setOpenObservationModal(false)}
       />
+      <ArchivoModal
+        open={openArchivoModal}
+        seguimiento={seguimiento}
+        handleClose={() => setOpenArchivoModal(false)}
+      />
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
@@ -155,7 +171,31 @@ export const CheckForm = ({
           container
           justifyContent="flex-end"
           justifyItems="flex-end"
+          alignItems="center"
+          gap={1}
         >
+          {(!disable || seguimiento.is_archivo_up) && (
+            <Grid
+              container
+              width="auto"
+              alignItems="center"
+              border="solid black 1px"
+              borderRadius={5}
+              px={1}
+            >
+              <Typography>Archivo</Typography>
+              {!disable && (
+                <IconButton onClick={() => setOpenArchivoModal(true)}>
+                  <EditTwoToneIcon />
+                </IconButton>
+              )}
+              {seguimiento.is_archivo_up && (
+                <IconButton onClick={handleClickDescargar}>
+                  <DownloadTwoToneIcon />
+                </IconButton>
+              )}
+            </Grid>
+          )}
           <PDFDownloadLink
             fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
             document={
@@ -322,7 +362,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                
+
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -424,9 +464,11 @@ export const CheckForm = ({
                     >
                       Observaciones
                     </Typography>
-                    {!disable &&  <Button onClick={() => setOpenObservationModal(true)}>
-                      Editar
-                    </Button>}
+                    {!disable && (
+                      <Button onClick={() => setOpenObservationModal(true)}>
+                        Editar
+                      </Button>
+                    )}
                   </Grid>
                   <Divider />
                   <pre>

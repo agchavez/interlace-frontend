@@ -118,6 +118,8 @@ export interface Tracker {
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[];
   observation: string | null;
+  archivo_name: string | null;
+  is_archivo_up: boolean;
 }
 
 export type TrackerType = 'LOCAL' | 'IMPORT';
