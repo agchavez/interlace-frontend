@@ -49,7 +49,7 @@ import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import ArticleTwoToneIcon from '@mui/icons-material/ArticleTwoTone';
 
 import {
   useGetDriverQuery,
@@ -58,7 +58,6 @@ import {
 } from "../../../store/maintenance/maintenanceApi";
 import ObservationModal from "./ObservationModal";
 import ArchivoModal from "./ArchivoModal";
-import DownloadTwoToneIcon from "@mui/icons-material/DownloadTwoTone";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -174,28 +173,6 @@ export const CheckForm = ({
           alignItems="center"
           gap={1}
         >
-          {(!disable || seguimiento.is_archivo_up) && (
-            <Grid
-              container
-              width="auto"
-              alignItems="center"
-              border="solid black 1px"
-              borderRadius={5}
-              px={1}
-            >
-              <Typography>Archivo</Typography>
-              {!disable && (
-                <IconButton onClick={() => setOpenArchivoModal(true)}>
-                  <EditTwoToneIcon />
-                </IconButton>
-              )}
-              {seguimiento.is_archivo_up && (
-                <IconButton onClick={handleClickDescargar}>
-                  <DownloadTwoToneIcon />
-                </IconButton>
-              )}
-            </Grid>
-          )}
           <PDFDownloadLink
             fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
             document={
@@ -434,15 +411,15 @@ export const CheckForm = ({
                           seguimiento?.status === "COMPLETE"
                             ? "Completado"
                             : seguimiento?.status === "PENDING"
-                            ? "Pendiente"
-                            : "En atención"
+                              ? "Pendiente"
+                              : "En atención"
                         }
                         color={
                           seguimiento?.status === "COMPLETE"
                             ? "success"
                             : seguimiento?.status === "PENDING"
-                            ? "warning"
-                            : "info"
+                              ? "warning"
+                              : "info"
                         }
                         size="medium"
                         variant="outlined"
@@ -483,6 +460,42 @@ export const CheckForm = ({
                       {seguimiento?.observation || "--"}
                     </Typography>
                   </pre>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="space-between"
+                  >
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Documento
+                    </Typography>
+                    {!disable && (
+                      <Button onClick={() => setOpenArchivoModal(true)}>
+                        Cargar
+                      </Button>
+                    )}
+                  </Grid>
+                  <Divider />
+                  {
+                    seguimiento.is_archivo_up ?
+                    <Chip
+                      onClick={handleClickDescargar}
+                      label={seguimiento.archivo_name}
+                      variant='outlined'
+                      color="info"
+                      icon={<ArticleTwoToneIcon color="info"/>}
+                      size="small"
+                      sx={{mt:1}}
+                    />
+                    :
+                      '--'
+                  }
                 </Grid>
                 {user !== null &&
                   +user?.id === seguimiento.user &&
@@ -744,8 +757,8 @@ export const CheckForm = ({
                 >
                   {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
                     ? formatDistance(tiempoEntrada, tiempoSalida, {
-                        locale: es,
-                      })
+                      locale: es,
+                    })
                     : "--:--:--"}
                 </Typography>
               </Grid>

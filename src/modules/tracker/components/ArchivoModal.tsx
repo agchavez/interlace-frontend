@@ -3,27 +3,24 @@ import {
   Button,
   Container,
   Dialog,
-  // DialogActions,
+  DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
   IconButton,
-  TextField,
+  Paper,
+  Typography,
   styled,
 } from "@mui/material";
 import { FunctionComponent, useEffect, useRef, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
-import {
-  removeFile,
-  uploadFile,
-} from "../../../store/seguimiento/trackerThunk";
+import { uploadFile } from "../../../store/seguimiento/trackerThunk";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
-import PublishTwoToneIcon from "@mui/icons-material/PublishTwoTone";
-import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import AttachFileTwoToneIcon from "@mui/icons-material/AttachFileTwoTone";
-import SaveTwoToneIcon from "@mui/icons-material/SaveTwoTone";
+import { FileUploader } from "react-drag-drop-files";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { toast } from "sonner";
 
 interface ArchivoModalProps {
   open: boolean;
@@ -60,12 +57,8 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
   const formRef = useRef<HTMLFormElement>(null);
 
   const [file_name, set_file_name] = useState<string | null>("");
-  const [originalFileName, setOriginalFileName] = useState<string | null>("");
-  const {
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<FormValues>({
+  const [dragging, setDragging] = useState(false);
+  const { handleSubmit, setValue, watch } = useForm<FormValues>({
     defaultValues: {
       file: null,
       fileName: null,
@@ -81,17 +74,7 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
         archivo: data.file,
       })
     );
-  };
-
-  const saveFilename = () => {
-    if (seguimeintoActual === undefined) return;
-    if (file_name === null) return;
-    dispatch(
-      uploadFile(seguimeintoActual, seguimiento.id, {
-        archivo_name: file_name,
-        archivo: null,
-      })
-    );
+    handleClose && handleClose({}, "backdropClick")
   };
 
   const handleClickGuardar = () => {
@@ -99,29 +82,6 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
       new Event("submit", { cancelable: true, bubbles: true })
     );
   };
-
-  const handleClickEliminar = () => {
-    if (seguimeintoActual !== undefined) {
-      dispatch(
-        removeFile(seguimeintoActual, seguimiento.id, () => {
-          setValue("fileName", "");
-          set_file_name("");
-          setOriginalFileName(null);
-        })
-      );
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0]; // Obtener el primer archivo seleccionado
-    const formFileName = file ? file.name : null;
-    setValue("file", file); // Guardar el archivo en el estado o en las referencias
-    setValue("fileName", formFileName);
-    set_file_name(formFileName); // Guardar el nombre del archivo en el estado o en las referencias
-    file !== null && setOriginalFileName(file.name);
-  };
-
-  console.log(originalFileName);
 
   useEffect(() => {
     if (open) {
@@ -131,13 +91,22 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const handleFileChange = (file: File) => {
+    const formFileName = file ? file.name : null;
+    setValue("file", file); // Guardar el archivo en el estado o en las referencias
+    setValue("fileName", formFileName);
+    set_file_name(formFileName); // Guardar el nombre del archivo en el estado o en las referencias
+  };
+
+  const file = watch("file");
+
   return (
     <>
       <BootstrapDialog
         open={open}
         onClose={handleClose}
         fullWidth={true}
-        maxWidth="xs"
+        maxWidth="lg"
       >
         <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
           Archivo para tracker TRK-
@@ -164,90 +133,64 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
-                    <Grid container spacing={2}>
-                      <>
-                        <Grid item xs={12}>
-                          <Grid container>
-                            <Grid item flexGrow={1}>
-                              <Button
-                                component="label"
-                                variant="contained"
-                                color="primary"
-                              >
-                                Elegir Archivo
-                                <AttachFileTwoToneIcon />
-                                <input
-                                  type="file"
-                                  hidden
-                                  onChange={handleFileChange}
-                                />
-                              </Button>
-                            </Grid>
-                            <Grid item flexGrow={1}>
-                              <Button
-                                variant="contained"
-                                color="success"
-                                onClick={handleClickGuardar}
-                                fullWidth
-                              >
-                                Subir
-                                <PublishTwoToneIcon />
-                              </Button>
-                            </Grid>
-                          </Grid>
-                          {originalFileName}
-                        </Grid>
-                        {seguimiento.is_archivo_up && (
-                          <Grid item xs={12}>
-                            <Grid container>
-                              <Grid item flexGrow={1}>
-                                <TextField
-                                  id="outlined-basic"
-                                  variant="outlined"
-                                  label="Nombre de archivo"
-                                  size="small"
-                                  value={file_name}
-                                  fullWidth
-                                  onChange={(e) => {
-                                    const value = e.target.value;
-                                    setValue("fileName", value);
-                                    set_file_name(value);
-                                  }}
-                                  error={errors.fileName ? true : false}
-                                  helperText={errors.fileName?.message}
-                                />
-                              </Grid>
-                              {seguimiento.is_archivo_up && (
-                                <IconButton onClick={saveFilename}>
-                                  <SaveTwoToneIcon />
-                                </IconButton>
-                              )}
-                            </Grid>
-                          </Grid>
-                        )}
-                      </>
-
-                      {seguimiento.is_archivo_up && (
-                        <Grid item xs={12}>
-                          <Button
-                            variant="contained"
-                            component="label"
-                            color="error"
-                            onClick={handleClickEliminar}
-                            fullWidth
-                          >
-                            Eliminar archivo
-                            <DeleteTwoToneIcon />
-                          </Button>
-                        </Grid>
-                      )}
-                    </Grid>
+                    <FileUploader
+                      name="file"
+                      label="Arrastre un archivo o haga click para seleccionar uno"
+                      dropMessageStyle={{ backgroundColor: "red" }}
+                      maxSize={20}
+                      multiple={false}
+                      onDraggingStateChange={(d: boolean) => setDragging(d)}
+                      onDrop={handleFileChange}
+                      onSelect={handleFileChange}
+                      onSizeError = {()=>toast.error("No se admiten archivos de archivos mayores a 20 MB")}
+                    >
+                      <Paper
+                        style={{
+                          width: "100%",
+                          height: 200,
+                          border: "2px dashed #aaaaaa",
+                          borderRadius: 5,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          position: "relative",
+                          overflow: "hidden",
+                          backgroundColor: dragging ? "#F0E68C" : "transparent",
+                        }}
+                      >
+                        <CloudUploadIcon
+                          style={{
+                            fontSize: 40,
+                            color: "#aaaaaa",
+                          }}
+                        />
+                        <Typography
+                          variant="body1"
+                          style={{ color: "#aaaaaa" }}
+                          textAlign="center"
+                        >
+                          {dragging
+                            ? "Suelta el Archivo"
+                            : file != null
+                            ? file.name
+                            : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
+                        </Typography>
+                        <input type="file" style={{ display: "none" }} />
+                      </Paper>
+                    </FileUploader>
                   </form>
                 </Grid>
               </Grid>
             </Container>
           </Box>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClickGuardar} disabled={file === null} variant="outlined">
+            Subir
+          </Button>
+        </DialogActions>
       </BootstrapDialog>
     </>
   );
