@@ -292,6 +292,7 @@ export interface TrackerProductDetail {
   expiration_date: string;
   quantity: number;
   tracker_detail: number;
+  available_quantity: number;
   product_name: string;
   product_sap_code: string;
   tracker_detail_id: number;

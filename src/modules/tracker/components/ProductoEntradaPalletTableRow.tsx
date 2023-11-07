@@ -142,6 +142,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
       updateProductoPallet({
         date: inputDate,
         palletIndex: index,
+        cajas:  0,
         id: historyRow.id || 0,
         pallets: pallets,
       });
@@ -166,6 +167,7 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
               updateProductoPallet({
                 date: date || null,
                 pallets: +e.target.value,
+                cajas: 0,
                 palletIndex: index,
                 id: historyRow.id || 0,
               })
@@ -174,6 +176,9 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
         ) : (
           pallets
         )}
+      </TableCell>
+      <TableCell align="right">
+          {historyRow.availableQuantity}
       </TableCell>
       <TableCell component="th" scope="row" align="right">
         {!disable ? (

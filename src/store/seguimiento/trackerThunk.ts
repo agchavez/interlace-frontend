@@ -420,7 +420,7 @@ const parseProductDetail = (tracker_detail: TrackerProductDetail): DetalleCargaP
         amount: tracker_detail.quantity,
 
         date: new Date(tracker_detail.expiration_date).toISOString(),
-
+        availableQuantity: tracker_detail.available_quantity,
         id: tracker_detail.id,
         pallets: tracker_detail.quantity
     }

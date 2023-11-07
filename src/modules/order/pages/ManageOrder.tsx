@@ -1,5 +1,4 @@
 import { Container, Grid, Typography, Divider, Button } from '@mui/material';
-import React from 'react'
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import { useNavigate } from 'react-router-dom';

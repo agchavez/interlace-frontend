@@ -44,6 +44,7 @@ export interface UpdateProductoPalletParams {
   palletIndex: number;
   date: Date | null;
   pallets: number | null;
+  cajas: number | undefined;
   id: number;
   disable?: boolean;
 }
@@ -181,6 +182,8 @@ export const ProductoEntradaTableRow: FunctionComponent<
                 <TableHead>
                   <TableRow>
                     <TableCell align="right">Pallets</TableCell>
+                    {disable && <TableCell align="right">Cajas disponibles</TableCell>}
+
                     <TableCell align="right">Fecha</TableCell>
                     {!disable && <TableCell align="right">Acciones</TableCell>}
                   </TableRow>
