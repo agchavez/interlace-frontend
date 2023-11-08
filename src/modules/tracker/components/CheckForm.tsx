@@ -49,7 +49,8 @@ import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import ArticleTwoToneIcon from '@mui/icons-material/ArticleTwoTone';
+import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 
 import {
   useGetDriverQuery,
@@ -339,7 +340,37 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
+                    <Typography
+                      variant="body1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Documento
+                    </Typography>
+                    {!disable && (
+                      <Button onClick={() => setOpenArchivoModal(true)} size="small" variant="text" color="primary" style={{height:20}} startIcon={<CloudUploadTwoToneIcon />}>
+                        Cargar
+                      </Button>
+                    )}
+                  </Box>
+                  <Divider />
+                  {
+                    seguimiento.is_archivo_up ?
+                    <Chip
+                      onClick={handleClickDescargar}
+                      label={seguimiento.archivo_name}
+                      variant='outlined'
+                      color="secondary"
+                      icon={<CloudDownloadTwoToneIcon color="secondary"/>}
+                      size="medium"
+                      sx={{mt:1}}
+                    />
+                    :
+                      '--'
+                  }
+                </Grid>
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -461,42 +492,7 @@ export const CheckForm = ({
                     </Typography>
                   </pre>
                 </Grid>
-                <Grid item xs={12}>
-                  <Grid
-                    container
-                    direction="row"
-                    justifyContent="space-between"
-                  >
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={400}
-                      color={"gray.500"}
-                    >
-                      Documento
-                    </Typography>
-                    {!disable && (
-                      <Button onClick={() => setOpenArchivoModal(true)}>
-                        Cargar
-                      </Button>
-                    )}
-                  </Grid>
-                  <Divider />
-                  {
-                    seguimiento.is_archivo_up ?
-                    <Chip
-                      onClick={handleClickDescargar}
-                      label={seguimiento.archivo_name}
-                      variant='outlined'
-                      color="info"
-                      icon={<ArticleTwoToneIcon color="info"/>}
-                      size="small"
-                      sx={{mt:1}}
-                    />
-                    :
-                      '--'
-                  }
-                </Grid>
+                
                 {user !== null &&
                   +user?.id === seguimiento.user &&
                   disable &&

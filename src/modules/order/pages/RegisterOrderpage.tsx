@@ -126,6 +126,9 @@ export const RegisterOrderpage = () => {
                                         <Table size="small" aria-label="a dense table" sx={{ marginTop: 2 }}>
                                             <TableHead>
                                                 <TableRow>
+                                                <StyledTableCell align="left">
+                                                        Tracking
+                                                    </StyledTableCell>
                                                     <StyledTableCell align="left">
                                                         No. SAP
                                                     </StyledTableCell>
@@ -134,6 +137,9 @@ export const RegisterOrderpage = () => {
                                                     </StyledTableCell>
                                                     <StyledTableCell align="left">
                                                         Pallets
+                                                    </StyledTableCell>
+                                                    <StyledTableCell align="left">
+                                                        Pallets disponibles
                                                     </StyledTableCell>
                                                     <StyledTableCell align="left">
                                                         Fecha Expiración
@@ -145,11 +151,17 @@ export const RegisterOrderpage = () => {
                                             </TableHead>
                                             <TableBody>
                                                 <TableRow>
+                                                <TableCell>
+                                                        TKR-001233
+                                                    </TableCell>
                                                     <TableCell>
                                                         124122313
                                                     </TableCell>
                                                     <TableCell>
                                                         COCA COLA 2.5L PET
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        10
                                                     </TableCell>
                                                     <TableCell>
                                                         10
