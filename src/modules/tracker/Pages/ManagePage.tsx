@@ -25,12 +25,10 @@ import { setManageQueryParams } from "../../../store/ui/uiSlice";
 import { useAppDispatch } from "../../../store/store";
 import {
   chanceStatusTracking,
-  downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 import { EditNoteOutlined } from "@mui/icons-material";
 import ExportManageMenu from "../components/ExportManageMenu";
 import { optionsTypeTracker } from "../../../utils/common";
-import ArticleTwoToneIcon from "@mui/icons-material/ArticleTwoTone";
 
 const tableBase = {
   localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -299,31 +297,6 @@ export const ManagePage = () => {
         );
       },
     },
-
-    {
-      field: "archivo_name",
-      flex: 1,
-      headerClassName: "base__header",
-      headerName: "Documento",
-      width: 150,
-      minWidth: 150,
-      renderCell: (params) => {
-        console.log(params);
-        const handleClickDescargar = () => {
-          dispatch(downloadFile(params.row.id));
-        };
-        return (
-          <Chip
-            onClick={handleClickDescargar}
-            label={params.value}
-            variant="outlined"
-            color="info"
-            size="small"
-            icon={<ArticleTwoToneIcon color="info" />}
-          />
-        );
-      },
-    },
     {
       field: "ver",
       headerName: "Acciones",
@@ -365,6 +338,7 @@ export const ManagePage = () => {
     const userId = user && data.onlyMyTreckers ? [+user.id] : undefined;
     const queryProcess: TrackerQueryParams = {
       ...query,
+      distributor_center: data.distribution_center ? [data.distribution_center]: undefined,
       search: data.search,
       trailer: data.trailer ? [data.trailer] : undefined,
       transporter: data.transporter ? [data.transporter] : undefined,
@@ -373,6 +347,7 @@ export const ManagePage = () => {
       date_before: data.date_before,
       status: data.status,
       user: userId,
+      id: data.id ? data.id : undefined,
       onlyMyTreckers: data.onlyMyTreckers,
       type: data.type,
     };

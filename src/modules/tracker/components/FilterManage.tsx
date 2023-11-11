@@ -12,18 +12,36 @@ import {
   TextField,
   Grid,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { FC, useEffect } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
-import { useForm } from "react-hook-form";
-import { TrailerSelect, TransporterSelect } from "../../ui/components";
+import { Controller, useForm } from "react-hook-form";
+import { TrailerSelect } from "../../ui/components";
 import { FilterDate } from "../../../interfaces/tracking";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { format } from "date-fns";
 import { useAppSelector } from "../../../store";
 
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+
 export interface FormFilterTrack {
   search: string;
+  id? : number | null;
   trailer?: number;
   transporter?: number;
   date_after: string;
@@ -32,6 +50,7 @@ export interface FormFilterTrack {
   status: "COMPLETE" | "PENDING" | "EDITED";
   onlyMyTreckers: boolean;
   type?: "IMPORT" | "LOCAL";
+  distribution_center?: number;
 }
 
 interface FilterManageProps {
@@ -46,9 +65,11 @@ export const FilterManage: FC<FilterManageProps> = ({
 }) => {
   const { manageQueryParams } = useAppSelector((state) => state.ui);
   const { user } = useAppSelector((state) => state.auth);
+  const { disctributionCenters } = useAppSelector((state) => state.maintenance);
   const { control, register, watch, setValue, getValues } =
     useForm<FormFilterTrack>({
       defaultValues: {
+        id: manageQueryParams.id ? Number(manageQueryParams.id) : null,
         search: manageQueryParams.search,
         trailer: manageQueryParams?.trailer?.[0],
         transporter: manageQueryParams.transporter
@@ -63,6 +84,7 @@ export const FilterManage: FC<FilterManageProps> = ({
             ? manageQueryParams.onlyMyTreckers
             : user?.list_groups.includes("SUPERVISOR"),
         type: manageQueryParams.type,
+        distribution_center: manageQueryParams.distributor_center ? manageQueryParams.distributor_center[0] : (user?.centro_distribucion || undefined),  
       },
     });
 
@@ -70,17 +92,7 @@ export const FilterManage: FC<FilterManageProps> = ({
     const data = getValues();
     handleFilter(data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    watch("date_after"),
-    watch("date_before"),
-    watch("date_range"),
-    watch("search"),
-    watch("trailer"),
-    watch("transporter"),
-    watch("status"),
-    watch("onlyMyTreckers"),
-    watch("type"),
-  ]);
+  }, [ watch("date_after"), watch("date_before"), watch("date_range"), watch("search"), watch("trailer"), watch("transporter"), watch("status"), watch("onlyMyTreckers"), watch("type"), watch("distribution_center"), watch('id') ]);
 
   const handleReset = () => {
     setValue("search", "");
@@ -89,6 +101,8 @@ export const FilterManage: FC<FilterManageProps> = ({
     setValue("date_after", "");
     setValue("date_before", "");
     setValue("date_range", FilterDate.TODAY);
+    setValue("distribution_center", undefined);
+    setValue("id", null);
     setValue(
       "onlyMyTreckers",
       user?.list_groups.includes("SUPERVISOR") !== undefined
@@ -158,6 +172,7 @@ export const FilterManage: FC<FilterManageProps> = ({
       setValue("date_after", manageQueryParams.date_after!);
       setValue("date_before", manageQueryParams.date_before!);
       setValue("date_range", manageQueryParams.filter_date!);
+      setValue("distribution_center", manageQueryParams.distributor_center ? manageQueryParams.distributor_center[0] : (user?.centro_distribucion || undefined));
       if (manageQueryParams.onlyMyTreckers !== undefined) {
         setValue("onlyMyTreckers", manageQueryParams.onlyMyTreckers);
       }
@@ -214,6 +229,19 @@ export const FilterManage: FC<FilterManageProps> = ({
                   {...register("search")}
                 />
               </Grid>
+              <Grid item xs={12} sx={{ mt: 1 }}>
+                <TextField
+                  id="outlined-basic"
+                  label="Tracking"
+                  variant="outlined"
+                  autoComplete="off"
+                  size="small"
+                  type="number"
+                  fullWidth
+                  {...register("id")}
+                  value={watch("id")}
+                />
+              </Grid>
             </Grid>
           </List>
           <Divider />
@@ -227,11 +255,39 @@ export const FilterManage: FC<FilterManageProps> = ({
                 />
               </Grid>
               <Grid item xs={12}>
-                <TransporterSelect
+              <ListItem disablePadding >
+                <Controller
+                  name="distribution_center"
                   control={control}
-                  name="transporter"
-                  transporterId={watch("transporter")}
+                  render={({ field }) => (
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="distribution_center">
+                        Centro de distribución
+                      </InputLabel>
+                      <Select
+                        labelId="distribution_center"
+                        id="distribution_center"
+                        {...field}
+                        value={watch('distribution_center')}
+                        disabled={user?.centro_distribucion ? true : false}
+                        label="Centro de distribución"
+                        sx={{
+                          maxHeight: 300,
+                        }}
+                        MenuProps={MenuProps}
+                        
+                      >
+                        
+                        {disctributionCenters.map((item) => (
+                          <MenuItem key={item.id} value={item.id}>
+                            {item.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 />
+            </ListItem>
               </Grid>
             </Grid>
             <ListItem disablePadding sx={{ pl: 1, pr: 1, mt: 1 }}></ListItem>
@@ -391,6 +447,7 @@ export const FilterManage: FC<FilterManageProps> = ({
           </List>
           <Divider />
           <List>
+            
             <ListItem disablePadding sx={{ pl: 2 }}>
               <ListItemText primary={"Usuario"} />
             </ListItem>
