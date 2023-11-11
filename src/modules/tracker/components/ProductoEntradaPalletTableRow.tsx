@@ -177,9 +177,9 @@ export const ProductoEntradaPalletTableRow: FunctionComponent<
           pallets
         )}
       </TableCell>
-      <TableCell align="right">
+      {disable && <TableCell align="right">
           {historyRow.availableQuantity}
-      </TableCell>
+      </TableCell>}
       <TableCell component="th" scope="row" align="right">
         {!disable ? (
           <DatePicker
