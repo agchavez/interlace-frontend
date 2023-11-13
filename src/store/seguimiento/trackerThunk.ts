@@ -366,7 +366,8 @@ export const uploadFile = (indexSeguimiento: number, trackerId: number, dataFile
     }
 }
 
-export const downloadFile = (trackerId: number): AppThunk => async (dispatch, getState) => {
+export const downloadFile = (trackerId: number, onStopLoading?: () => void
+    ): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoading(true))
         const { token } = getState().auth;
@@ -410,6 +411,7 @@ export const downloadFile = (trackerId: number): AppThunk => async (dispatch, ge
         handleApiError(error);
     } finally {
         dispatch(setLoading(false))
+        onStopLoading && onStopLoading()
     }
 }
 
