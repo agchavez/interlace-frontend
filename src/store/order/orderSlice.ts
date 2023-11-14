@@ -42,7 +42,21 @@ export const orderSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
-    reset: (state) => (state = initialState),
+    reset: (state) => {
+      state.order = {
+        order_detail: [],
+        status: null,
+        observations: null,
+        distributor_center: null,
+        user: null,
+        location: null,
+        id: null,
+        created_at: null,
+        location_data: null,
+      };
+      state.order_detail_delete = [];
+      state.changed = false;
+    },
     setChanged: (state, action: PayloadAction<boolean>) => {
       state.changed = action.payload;
     },
@@ -78,6 +92,7 @@ export const orderSlice = createSlice({
       const { index, orderDetail } = action.payload;
       let ordenacual = order.order_detail[index];
       ordenacual = { ...ordenacual, ...orderDetail };
+      order.order_detail[index] = ordenacual;
       state.changed=true
     },
     removeOrderDetail: (

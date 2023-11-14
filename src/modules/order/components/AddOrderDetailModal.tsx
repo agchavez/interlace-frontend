@@ -64,7 +64,10 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   handleClose,
 }) => {
   const [readQR, setReadQR] = useState(false);
-  const [qrReaded, setQrReaded] = useState(false);
+  const [
+    qrReaded,
+    setQrReaded,
+  ] = useState(false);
   const [idTrackerDetailProduct, setIdtrackerDetailProduct] =
     useState<number>(-1);
   const [tracker, setTracker] = useState<Tracker | null>(null);
@@ -167,7 +170,10 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setFocus("idTracker");
+      console.log(qrReaded);
+      
     }, 100);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, setFocus]);
 
   useEffect(() => {
@@ -277,7 +283,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       </IconButton>
       <DialogContent dividers>
         <Box>
-          <Container maxWidth="xl">
+          <Container maxWidth={false}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Typography variant="body2" component="h2"></Typography>
@@ -299,15 +305,13 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                     <QRCodeScanner id="qrreader-1" onRead={handleReadQR} />
                   </Grid>
                 )}
+                </Grid>
+                <Grid item xs={12}>
                 <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef} autoComplete="off">
-                  <Grid
-                    container
-                    spacing={2}
-                    display={readQR && !qrReaded ? "none" : "block"}
-                  >
-                    {readQR && (
+                  <Grid container spacing={3}>
+                    {readQR && watch("idTracker") && (
                       <Grid item xs={12} md={6}>
-                        <Typography
+                        <Typography 
                           variant="body1"
                           component="h1"
                           fontWeight={600}
@@ -322,7 +326,8 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                           fontWeight={400}
                           color={"gray.500"}
                         >
-                          {watch("idTracker")}
+                          {/* 5 CEROS MENOS EL ID COMO CATIDAD */}
+                          TRK-{ watch("idTracker") && watch("idTracker").toString().padStart(5, "0") }
                         </Typography>
                       </Grid>
                     )}
@@ -345,12 +350,13 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                           setValue("idTracker", value);
                           setValue("idTrackerDetail", "");
                         }}
+                        value={watch("idTracker")}
                         error={errors.idTracker ? true : false}
                         helperText={errors.idTracker?.message}
                         disabled={readQR}
                       />
                     </Grid>
-                    {readQR && (
+                    {readQR && tracker && (
                       <Grid item xs={12} md={6}>
                         <Typography
                           variant="body1"
@@ -412,7 +418,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    {readQR && (
+                    {readQR && tracker && (
                       <Grid item xs={12} md={6}>
                         <Typography
                           variant="body1"
@@ -496,7 +502,8 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    { (!readQR || (readQR && tracker)) && 
+                      <Grid item xs={12} md={6}>
                       <TextField
                         fullWidth
                         id="outlined-basic"
@@ -505,18 +512,20 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         size="small"
                         type="number"
                         inputProps={{ min: 0 }}
-                        value={watch("quantity")}
+                        
                         onChange={(e) => {
                           if (e.target.value === "") return;
                           const value = parseInt(e.target.value);
                           setValue("quantity", value.toString());
                         }}
+                        value={watch("quantity")}
                         error={errors.quantity ? true : false}
                         helperText={errors.quantity?.message}
                       />
+                    </Grid>}
                     </Grid>
-                  </Grid>
                 </form>
+                
               </Grid>
             </Grid>
           </Container>
