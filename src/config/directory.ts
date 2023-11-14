@@ -114,6 +114,18 @@ export const permisions = [
         ]
     },
     {
+        url: "/order/manage",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/order/register",
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url: "/report/por-expirar",
         permissions: [
             "tracker.view_trackerdetailproductmodel",

@@ -116,7 +116,10 @@ export interface Tracker {
   completed_date: string | null;
   type: TrackerType;
   location_data: LocationType | null;
-  tracker_detail_output: TrackerDeailOutput[]
+  tracker_detail_output: TrackerDeailOutput[];
+  observation: string | null;
+  archivo_name: string | null;
+  is_archivo_up: boolean;
 }
 
 export type TrackerType = 'LOCAL' | 'IMPORT';
@@ -139,7 +142,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   status?: 'COMPLETE' | 'PENDING' | 'EDITED';
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
-  type?: "IMPORT" | "LOCAL"
+  type?: "IMPORT" | "LOCAL",
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {
@@ -291,6 +294,7 @@ export interface TrackerProductDetail {
   expiration_date: string;
   quantity: number;
   tracker_detail: number;
+  available_quantity: number;
   product_name: string;
   product_sap_code: string;
   tracker_detail_id: number;
@@ -298,7 +302,7 @@ export interface TrackerProductDetail {
   shift?: string;
 }
 
-export interface LastTrackerOutputResult{
+export interface LastTrackerOutputResult {
   results: LastTrackerOutput[];
   tracker_completed_today: number;
   total_hele: number;

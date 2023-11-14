@@ -8,39 +8,45 @@ import { parseTrackerSeguimiento } from '../../../store/seguimiento/trackerThunk
 import { ArrowBack } from '@mui/icons-material';
 
 export const DetailPage = () => {
-    const {id } = useParams<{id: string}>();
+    const { id } = useParams<{ id: string }>();
     const navigae = useNavigate();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {data, error, isLoading} = useGetTrackerByIdQuery(id || skipToken,
+    const { data, error, isLoading } = useGetTrackerByIdQuery(id || skipToken,
         {
             skip: !id
         }
     );
-    if(isLoading) return <div>Cargando...</div>
-    if(error || !data) return <Navigate to="/tracker/manage" />
+    if (isLoading) return <div>Cargando...</div>
+    if (error || !data) return <Navigate to="/tracker/manage" />
 
     return (
         <>
             <Container maxWidth="xl" sx={{ marginTop: 2 }}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} display={'flex'} alignContent={'center'}>
-                    <IconButton
-                            onClick={()=>navigae(-1)}
-                            title='Regresar'
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <IconButton
+                                onClick={() => navigae(-1)}
+                                title='Regresar'
                             >
-                                <ArrowBack 
+                                <ArrowBack
                                     color='primary'
                                     fontSize='medium'
                                 />
                             </IconButton>
-                        <Typography variant="h4" component="h1" fontWeight={400}>
-                            TRK-{id?.padStart(5, '0')}
+                            <Typography variant="h4" component="h1" fontWeight={400}>
+                                TRK-{id?.padStart(5, '0')}
+                            </Typography>
+                        </div>
+                        <Typography variant="h6" component="h2" fontWeight={200} sx={{ marginLeft: 6  }}>
+                            {data.distributor_center_data?.name}
                         </Typography>
                         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
-                        </Grid>
-                        <Grid item xs={12}>
+                    </Grid>
+                    
+                    <Grid item xs={12}>
                         <CheckForm
-                            disable = {true}
+                            disable={true}
                             indice={0}
                             seguimiento={parseTrackerSeguimiento(data)}
                         />

@@ -90,7 +90,7 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
                     IN-OUT TRACKINGS
                   </Typography>
                   <Typography variant="body1" component="p" fontWeight={200}>
-                    DH01 - CD LA GRANJA
+                    {user? user?.centro_distribucion_name : ""}
                   </Typography>
                 </div>
                 </Card>

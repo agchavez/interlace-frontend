@@ -5,6 +5,7 @@ import {
   Chip,
   Divider,
   Grid,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -35,15 +36,30 @@ import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
   chanceStatusTracking,
+  downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { format } from "date-fns-tz";
 import { ProductoEntradaTableRow } from "./ProductoEntradaTableRow";
-import { EditNote } from "@mui/icons-material";
+import { EditNote, EditTwoTone } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
+import TrakerPDFDocument from "./TrackerPDF";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
+import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+
+import {
+  useGetDriverQuery,
+  useGetLocationsQuery,
+  useGetOperatorByDistributionCenterQuery,
+} from "../../../store/maintenance/maintenanceApi";
+import ObservationModal from "./ObservationModal";
+import ArchivoModal from "./ArchivoModal";
+import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -66,23 +82,13 @@ export const CheckForm = ({
 }) => {
   const dispatch = useAppDispatch();
   const [open, setopen] = useState(false);
+  const [openObservationModal, setOpenObservationModal] = useState(false);
+  const [openArchivoModal, setOpenArchivoModal] = useState(false);
   const { outputType } = useAppSelector((state) => state.maintenance);
   const centro_distribucion = useAppSelector(
     (state) => state.auth.user?.centro_distribucion
   );
   const user = useAppSelector((state) => state.auth.user);
-  // function updateSeguimientoDatosOperador(datos: DatosOperador): unknown {
-  //     if (!seguimiento) return;
-
-  //     dispatch(updateSeguimiento({
-  //         ...seguimiento,
-  //         datosOperador: {
-  //             ...seguimiento.datosOperador,
-  //             ...datos
-  //         },
-  //         index: indice
-  //     }))
-  // }
   const { control, register, watch } = useForm<CheckFormType>({
     defaultValues: {
       ...seguimiento,
@@ -90,6 +96,29 @@ export const CheckForm = ({
       driver: seguimiento.driver !== null ? seguimiento.driver : undefined,
     },
   });
+  const { data: dataDriver, isLoading: loadingDriver } = useGetDriverQuery({
+    id: seguimiento.driver !== null ? seguimiento.driver : undefined,
+    limit: 1,
+    offset: 0,
+  });
+  const { data: dataOp1, isLoading: loadingOP1 } =
+    useGetOperatorByDistributionCenterQuery({
+      id: seguimiento.driver !== null ? seguimiento.opm1 : undefined,
+      limit: 1,
+      offset: 0,
+    });
+  const { data: dataOp2, isLoading: loadingOP2 } =
+    useGetOperatorByDistributionCenterQuery({
+      limit: 1,
+      offset: 0,
+      id: seguimiento.driver !== null ? seguimiento.opm2 : undefined,
+    });
+  const { data: dataOutputLocation, isLoading: loadingOutputData } =
+    useGetLocationsQuery({
+      id: seguimiento.driver !== null ? seguimiento.outputLocation : undefined,
+      limit: 1,
+      offset: 0,
+    });
   const tiempoEntrada = seguimiento?.timeStart
     ? new Date(seguimiento?.timeStart)
     : null;
@@ -112,16 +141,82 @@ export const CheckForm = ({
       )
     );
   };
+
+  const handleClickDescargar = () => {
+    dispatch(downloadFile(seguimiento.id));
+  };
+
+  const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
+
   return (
     <>
       <AgregarProductoSalida
         open={openOutput}
         handleClose={() => setopenOutput(false)}
       />
+      <ObservationModal
+        open={openObservationModal}
+        seguimiento={seguimiento}
+        handleClose={() => setOpenObservationModal(false)}
+      />
+      <ArchivoModal
+        open={openArchivoModal}
+        seguimiento={seguimiento}
+        handleClose={() => setOpenArchivoModal(false)}
+      />
+      <SelectOrderTrackerModal
+        open={openOrderModal}
+        handleClose={() => setopenOrderModal(false)}
+        />
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
-      <Grid container spacing={2} sx={{ marginTop: 2, marginBottom: 5 }}>
+      <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
+        <Grid
+          item
+          xs={12}
+          container
+          justifyContent="flex-end"
+          justifyItems="flex-end"
+          alignItems="center"
+          gap={1}
+        >
+          <PDFDownloadLink
+            fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
+            document={
+              <TrakerPDFDocument
+                seguimiento={seguimiento}
+                outputTypeData={outputTypeData}
+                driver={dataDriver?.results[0]}
+                op1={
+                  seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                    ? dataOp1?.results[0]
+                    : undefined
+                }
+                op2={
+                  seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                    ? dataOp2?.results[0]
+                    : undefined
+                }
+                outputLocation={dataOutputLocation?.results[0]}
+              />
+            }
+          >
+            {({ loading: pdfLoading }) => {
+              const loading =
+                pdfLoading ||
+                loadingDriver ||
+                loadingOP1 ||
+                loadingOP2 ||
+                loadingOutputData;
+              return (
+                <IconButton color="secondary" disabled={loading}>
+                  <PictureAsPdfTwoToneIcon fontSize="large" />
+                </IconButton>
+              );
+            }}
+          </PDFDownloadLink>
+        </Grid>
         <Grid item xs={12}>
           <Card
             sx={{
@@ -157,6 +252,25 @@ export const CheckForm = ({
             <Divider />
             <Box sx={{ padding: 2 }}>
               <Grid container spacing={2}>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Rastra
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    {seguimiento?.rastra.code}
+                  </Typography>
+                </Grid>
                 <Grid item xs={12} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
@@ -233,6 +347,37 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
+                    <Typography
+                      variant="body1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Documento
+                    </Typography>
+                    {!disable && (
+                      <Button onClick={() => setOpenArchivoModal(true)} size="small" variant="text" color="primary" style={{height:20}} startIcon={<CloudUploadTwoToneIcon />}>
+                        Cargar
+                      </Button>
+                    )}
+                  </Box>
+                  <Divider />
+                  {
+                    seguimiento.is_archivo_up ?
+                    <Chip
+                      onClick={handleClickDescargar}
+                      label={seguimiento.archivo_name}
+                      variant='outlined'
+                      color="secondary"
+                      icon={<CloudDownloadTwoToneIcon color="secondary"/>}
+                      size="medium"
+                      sx={{mt:1}}
+                    />
+                    :
+                      '--'
+                  }
+                </Grid>
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -282,7 +427,7 @@ export const CheckForm = ({
                   </Grid>
                 )}
                 {disable && (
-                  <Grid item xs={12} md={6} lg={4} xl={4}>
+                  <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
                       variant="body1"
                       component="h1"
@@ -304,15 +449,15 @@ export const CheckForm = ({
                           seguimiento?.status === "COMPLETE"
                             ? "Completado"
                             : seguimiento?.status === "PENDING"
-                            ? "Pendiente"
-                            : "En atención"
+                              ? "Pendiente"
+                              : "En atención"
                         }
                         color={
                           seguimiento?.status === "COMPLETE"
                             ? "success"
                             : seguimiento?.status === "PENDING"
-                            ? "warning"
-                            : "info"
+                              ? "warning"
+                              : "info"
                         }
                         size="medium"
                         variant="outlined"
@@ -320,6 +465,41 @@ export const CheckForm = ({
                     </Typography>
                   </Grid>
                 )}
+                <Grid item xs={12}>
+                  <Grid
+                    container
+                    direction="row"
+                    justifyContent="space-between"
+                  >
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={400}
+                      color={"gray.500"}
+                    >
+                      Observaciones
+                    </Typography>
+                    {!disable && (
+                      <Button onClick={() => setOpenObservationModal(true)}>
+                        Editar
+                      </Button>
+                    )}
+                  </Grid>
+                  <Divider />
+                  <pre>
+                    <Typography
+                      variant="body1"
+                      component="h1"
+                      fontWeight={600}
+                      color={"gray.500"}
+                      // que se acomode al texto
+                      style={{ whiteSpace: "pre-wrap" }}
+                    >
+                      {seguimiento?.observation || "--"}
+                    </Typography>
+                  </pre>
+                </Grid>
+                
                 {user !== null &&
                   +user?.id === seguimiento.user &&
                   disable &&
@@ -400,7 +580,7 @@ export const CheckForm = ({
                 }
               />
             </Grid>
-            <Grid item xs={10} md={10}>
+            <Grid item xs={12} md={10}>
               {seguimiento.type === "LOCAL" ? (
                 <DriverSelect
                   control={control}
@@ -580,8 +760,8 @@ export const CheckForm = ({
                 >
                   {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
                     ? formatDistance(tiempoEntrada, tiempoSalida, {
-                        locale: es,
-                      })
+                      locale: es,
+                    })
                     : "--:--:--"}
                 </Typography>
               </Grid>
@@ -803,6 +983,18 @@ export const CheckForm = ({
                   locationId={watch("outputLocation")}
                 />
               </Grid>
+              <Grid item xs={12} md={6} lg={4} xl={4}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        color="secondary"
+                        startIcon={<EditTwoTone />}
+                        onClick={() => setopenOrderModal(true)}
+                      >
+                        Pedido
+                      </Button>
+                    </Grid>
               {outputTypeData && (
                 <>
                   {outputTypeData?.required_details && !disable && (

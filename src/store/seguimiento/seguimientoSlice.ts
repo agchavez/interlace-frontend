@@ -25,6 +25,7 @@ export interface DatosOperador {
 export interface DetalleCargaPalet {
     id?: number;
     pallets?: number;
+    availableQuantity?: number;
     date?: string;
     amount?: number
 }
@@ -67,6 +68,11 @@ export interface DetalleCargaSalida extends Product {
     expiration_date: string;
 }
 
+export interface UploadDataBody {
+    archivo: File | null;
+    archivo_name: string | null;
+}
+
 export interface DetalleCargaIdx extends DetalleCarga {
     index: number,
 }
@@ -78,6 +84,7 @@ export interface Seguimiento {
     transporter: TransporterData,
     userName?: string;
     distributorCenter: number;
+    distributorCenterName: string;
     completed?: string;
     plateNumber: string;
     completed_date: string | null;
@@ -103,6 +110,9 @@ export interface Seguimiento {
     detallesSalida?: DetalleCargaSalida[]
     originLocationData: LocationType | null;
     accounted: number | null;
+    observation: string | null;
+    archivo_name: string | null;
+    is_archivo_up: boolean;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
