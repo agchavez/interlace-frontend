@@ -42,7 +42,7 @@ import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { format } from "date-fns-tz";
 import { ProductoEntradaTableRow } from "./ProductoEntradaTableRow";
-import { EditNote } from "@mui/icons-material";
+import { EditNote, EditTwoTone } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
@@ -59,6 +59,7 @@ import {
 } from "../../../store/maintenance/maintenanceApi";
 import ObservationModal from "./ObservationModal";
 import ArchivoModal from "./ArchivoModal";
+import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -145,6 +146,8 @@ export const CheckForm = ({
     dispatch(downloadFile(seguimiento.id));
   };
 
+  const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
+
   return (
     <>
       <AgregarProductoSalida
@@ -161,6 +164,10 @@ export const CheckForm = ({
         seguimiento={seguimiento}
         handleClose={() => setOpenArchivoModal(false)}
       />
+      <SelectOrderTrackerModal
+        open={openOrderModal}
+        handleClose={() => setopenOrderModal(false)}
+        />
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
@@ -976,6 +983,18 @@ export const CheckForm = ({
                   locationId={watch("outputLocation")}
                 />
               </Grid>
+              <Grid item xs={12} md={6} lg={4} xl={4}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        color="secondary"
+                        startIcon={<EditTwoTone />}
+                        onClick={() => setopenOrderModal(true)}
+                      >
+                        Pedido
+                      </Button>
+                    </Grid>
               {outputTypeData && (
                 <>
                   {outputTypeData?.required_details && !disable && (
