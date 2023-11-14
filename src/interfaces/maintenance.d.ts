@@ -88,6 +88,17 @@ export interface LocationType {
     distributor_center:       number | null;
 }
 
+export interface CreateLocationBody {
+    name:                     string;
+    code:                     string;
+}
+
+export interface CreateRouteBody {
+    code:                     string;
+    distributor_center:                     number;
+    location:                     number;
+}
+
 //groups
 
 export interface Group {

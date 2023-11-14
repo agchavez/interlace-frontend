@@ -1,4 +1,5 @@
-import { BaseQueryParams, LocationType } from './maintenance';
+import { BaseQueryParams, LocationType } from "./maintenance";
+import { OrderStatusType } from "./orders";
 export interface Rastra {
   id: number;
   transportista: string;
@@ -39,7 +40,6 @@ export interface Product {
   days_not_accept_product: number;
 }
 
-
 export interface ProductQuerySearch extends BaseQueryParams {
   search?: string;
   id?: number;
@@ -55,12 +55,9 @@ export interface OutputType {
   required_details: boolean;
 }
 
-
 export interface OutputTypeQuerySearch extends BaseQueryParams {
   search?: string;
 }
-
-
 
 export interface CheckFormType {
   plateNumber: string;
@@ -122,13 +119,13 @@ export interface Tracker {
   is_archivo_up: boolean;
 }
 
-export type TrackerType = 'LOCAL' | 'IMPORT';
+export type TrackerType = "LOCAL" | "IMPORT";
 
 export enum FilterDate {
-  TODAY = 'Hoy',
-  WEEK = 'Esta semana',
-  MONTH = 'Este mes',
-  YEAR = 'Este año',
+  TODAY = "Hoy",
+  WEEK = "Esta semana",
+  MONTH = "Este mes",
+  YEAR = "Este año",
 }
 export interface TrackerQueryParams extends BaseQueryParams {
   search?: string;
@@ -139,10 +136,17 @@ export interface TrackerQueryParams extends BaseQueryParams {
   user?: number[];
   date_after?: string;
   date_before?: string;
-  status?: 'COMPLETE' | 'PENDING' | 'EDITED';
+  status?: "COMPLETE" | "PENDING" | "EDITED";
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
-  type?: "IMPORT" | "LOCAL",
+  type?: "IMPORT" | "LOCAL";
+}
+
+export interface OrderQueryParams extends BaseQueryParams {
+  location?: number;
+  distributor_center?: number;
+  status?: OrderStatusType;
+  id?: number;
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {
@@ -152,12 +156,12 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   tracker_detail__tracker?: number;
   tracker_detail__product?: number;
   tracker_detail__tracker__distributor_center?: number;
-  tracker_detail__tracker__status?: 'COMPLETE' | 'PENDING' | 'EDITED';
+  tracker_detail__tracker__status?: "COMPLETE" | "PENDING" | "EDITED";
   tracker_detail__tracker__user?: string;
   expiration_date?: string;
   created_at__gte?: string;
   created_at__lte?: string;
-  shift?: 'A' | 'B' | 'C';
+  shift?: "A" | "B" | "C";
   ordering?: string;
 }
 
@@ -171,6 +175,12 @@ export interface NearExpirationQueryParams {
   product?: number;
   distributor_center?: number;
   days?: number;
+}
+
+export interface OrderQueryParams {
+  limit: number;
+  offset: number;
+  search?: string;
 }
 
 export interface TrackerDeailOutput {
@@ -218,18 +228,18 @@ export interface AddDetalleBody {
 
 export interface AddDetalleData {
   quantity: number;
-  product: Product
+  product: Product;
 }
 
 export interface AddDetallePalletData {
-  expiration_date: string | null,
-  quantity: number | null,
-  tracker_detail: number | null
+  expiration_date: string | null;
+  quantity: number | null;
+  tracker_detail: number | null;
 }
 
 export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
-  id: number,
-  tracker_detail: number
+  id: number;
+  tracker_detail: number;
 }
 
 export interface AddDetallePalletResponse {
@@ -242,7 +252,6 @@ export interface AddDetallePalletResponse {
   product_sap_code: string;
   tracker_detail_id: number;
   tracker_id: number;
-
 }
 
 export interface TrackerDetailResponse {
@@ -257,7 +266,7 @@ export interface TrackerDetailResponse {
 
 export interface ProductData {
   id: number;
-  created_at: null;
+  created_at: string;
   name: string;
   sap_code: string;
   brand: string;
@@ -285,7 +294,7 @@ export interface ProductData {
   ton: string;
   block_t1: number;
   days_not_accept_product: number;
-
+  is_output: boolean;
 }
 
 export interface TrackerProductDetail {
@@ -309,7 +318,6 @@ export interface LastTrackerOutputResult {
   total_pallets: number;
 }
 
-
 export interface LastTrackerOutput {
   required_details: boolean;
   tracking?: number;
@@ -324,7 +332,7 @@ export interface NearExpirationProductResponse {
   product_name: string;
   sap_code: string;
   distributor_center: string;
-  expiration_list: HistoryNearExpiration[]
+  expiration_list: HistoryNearExpiration[];
 }
 
 export interface HistoryNearExpiration {
@@ -346,4 +354,3 @@ export interface AddOutProductBody {
   quantity: number;
   expiration_date: string | null;
 }
-

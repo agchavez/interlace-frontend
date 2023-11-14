@@ -37,6 +37,29 @@ export const trackerApi = createApi({
     })
 })
 
+export const trackerDetailApi = createApi({
+    reducerPath: 'trackerDetailApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getTrackerDetail: builder.query<TrackerProductDetail, TrackerProductDetailQueryParams>({
+            query: (params) => ({
+                url: `/tracker-detail-product/${params.id}/`,
+                method: 'GET',
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
 export const trackerPalletsApi = createApi({
     reducerPath: 'trackerPalletsApi',
     baseQuery: fetchBaseQuery({
@@ -120,6 +143,9 @@ export const {
     useGetTrackerByIdQuery
 } = trackerApi
 
+export const {
+    useGetTrackerDetailQuery
+} = trackerDetailApi
 
 export const {
     useGetTrackerPalletsQuery
