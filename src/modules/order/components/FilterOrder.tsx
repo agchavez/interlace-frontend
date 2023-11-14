@@ -142,7 +142,7 @@ export const FilterOrder: FC<FolterOrderProps> = ({
                         labelId="distributor_center"
                         id="distributor_center"
                         {...field}
-                        // disabled={user?.centro_distribucion ? true : false}
+                        disabled={user?.centro_distribucion ? true : false}
                         label="Centro de distribución"
                         sx={{
                           maxHeight: 300,
