@@ -7,7 +7,7 @@ interface QRCodeScannerProps {
 const QRCodeScanner = ({ id, onRead: cb }: QRCodeScannerProps) => {
   useEffect(() => {
     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    let html5QrcodeScanner = new Html5Qrcode(id);
+    const html5QrcodeScanner = new Html5Qrcode(id);
     async function onScanSuccess(decodedText: string) {
       await html5QrcodeScanner.stop();
       cb && cb(decodedText);

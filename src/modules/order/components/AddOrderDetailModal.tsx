@@ -75,6 +75,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const dispatch = useAppDispatch();
 
+  /// eslint-disable-next-line react-hooks/exhaustive-deps
   const schema: yup.ObjectSchema<any> = useMemo(() => {
     const quantity = yup
       .number()
@@ -113,8 +114,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     defaultValues: {
       idTrackerDetail: "",
       idTrackerDetailProduct: "",
-      idTracker: 0,
-      quantity: "0",
     },
     resolver: yupResolver(schema),
   });
@@ -125,7 +124,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     isLoading: trackerLoading,
     error: trackerError,
     refetch: refetchTracker,
-  } = useGetTrackerByIdQuery(watch("idTracker").toString());
+  } = useGetTrackerByIdQuery(watch("idTracker")?.toString());
   useEffect(() => {
     if (trackerLoading || trackerFetching) return;
     if (trackerError) {
@@ -138,10 +137,12 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     if (!trackerData) return;
     const resp = trackerData;
     setTracker(resp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackerFetching, trackerLoading]);
 
   useEffect(() => {
     refetchTracker();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("idTracker")]);
 
   useEffect(() => {
@@ -150,7 +151,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       if (idTrackerDetailProduct >= 0)
         toast.error("id de detalle no encontrado");
       setMaxqt(0);
-      setValue("quantity", "0");
+      setValue("quantity", "");
       setValue("idTrackerDetail", "");
       return;
     }
@@ -159,6 +160,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     setValue("quantity", resp.available_quantity.toString());
     setMaxqt(resp.available_quantity);
     setTrackerDetail(resp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idTrackerDetailProduct, isLoading, isFetching]);
 
   // FOcus al abrir el modal
@@ -172,6 +174,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     reset();
     setIdtrackerDetailProduct(-1)
     if (readQR) setQrReaded(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readQR]);
 
   const handleSubmitForm = async (data: FormValues) => {
@@ -231,6 +234,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     );
     if (tracker_detail === undefined) return [];
     return tracker_detail.tracker_product_detail;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("idTrackerDetail"), watch("idTracker"), idTrackerDetailProduct]);
 
   const expirationdate = useMemo(() => {
@@ -243,6 +247,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
           (productDetail) =>
             productDetail.id === parseInt(watch("idTrackerDetailProduct"))
         )?.expiration_date;
+        // eslint-disable-next-line react-hooks/exhaustive-deps 
   }, [tracker]); 
 
   return (
@@ -294,7 +299,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                     <QRCodeScanner id="qrreader-1" onRead={handleReadQR} />
                   </Grid>
                 )}
-                <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef}>
+                <form onSubmit={handleSubmit(handleSubmitForm)} ref={formRef} autoComplete="off">
                   <Grid
                     container
                     spacing={2}
@@ -457,7 +462,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                               setValue("quantity", productDet.available_quantity.toString())
                             } else {
                               setMaxqt(0);
-                              setValue("quantity", "0")
+                              setValue("quantity", "")
                             }
                             setValue(
                               "idTrackerDetailProduct",
