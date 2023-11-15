@@ -27,7 +27,18 @@ export const orderApi = createApi({
         };
       },
     }),
+    getOrderById: builder.query<Order, number>({
+      query: (id) => {
+        return {
+          url: `/order/${id}/`,
+          method: "GET",
+        };
+      }
+    }),
   }),
 });
 
-export const { useGetOrderQuery } = orderApi;
+export const { 
+  useGetOrderQuery,
+  useGetOrderByIdQuery, 
+} = orderApi;

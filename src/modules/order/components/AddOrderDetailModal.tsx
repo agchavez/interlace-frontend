@@ -127,7 +127,9 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     isLoading: trackerLoading,
     error: trackerError,
     refetch: refetchTracker,
-  } = useGetTrackerByIdQuery(watch("idTracker")?.toString());
+  } = useGetTrackerByIdQuery(watch("idTracker")?.toString(), {
+    skip: !watch("idTracker") || watch("idTracker") <= 0,
+  });
   useEffect(() => {
     if (trackerLoading || trackerFetching) return;
     if (trackerError) {
@@ -144,7 +146,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   }, [trackerFetching, trackerLoading]);
 
   useEffect(() => {
-    refetchTracker();
+    if (watch("idTracker") && watch("idTracker") >= 0)  refetchTracker();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("idTracker")]);
 
@@ -264,7 +266,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       maxWidth="md"
     >
       <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-        Nuevo Detalle de Orden
+        Nuevo detalle de pedido
       </DialogTitle>
       <IconButton
         aria-label="close"
@@ -352,7 +354,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         }}
                         value={watch("idTracker")}
                         error={errors.idTracker ? true : false}
-                        helperText={errors.idTracker?.message}
+                        helperText={errors.idTracker? "Este campo es requerido" : ""}
                         disabled={readQR}
                       />
                     </Grid>

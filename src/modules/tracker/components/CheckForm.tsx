@@ -164,10 +164,10 @@ export const CheckForm = ({
         seguimiento={seguimiento}
         handleClose={() => setOpenArchivoModal(false)}
       />
-      <SelectOrderTrackerModal
+      {openOrderModal && <SelectOrderTrackerModal
         open={openOrderModal}
         handleClose={() => setopenOrderModal(false)}
-        />
+        />}
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
