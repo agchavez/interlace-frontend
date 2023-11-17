@@ -20,10 +20,15 @@ export const orderApi = createApi({
   endpoints: (builder) => ({
     getOrder: builder.query<BaseApiResponse<Order>, OrderQueryParams>({
       query: (params) => {
+        const { status_choice, ...rest } = params;
+        const status_choice_proc = status_choice?.map((status) => 'status_choice=' + status) || '';
         return {
-          url: `/order/`,
+          url: `/order/?${status_choice_proc && status_choice_proc.join('&')}`,
           method: "GET",
-          params,
+          params: {
+            ...rest,
+
+          }
         };
       },
     }),

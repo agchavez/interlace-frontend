@@ -32,7 +32,6 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({ open
     });
 
     const [body, setbody] = useState<OrderDetailCreateBody[]>([]);
-    console.log(body);
     
     const handleAdd = (detail: OrderDetail, quantity: number, checked: boolean) => {
         // Encuentra el índice del detalle en el estado actual
@@ -111,6 +110,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({ open
                                 control={control}
                                 name="order"
                                 label="Pedido"
+                                ignoreCompleted={true}
                                 onChange={(value) => { setid(value?.id ?? null) }}
                             />
                         </Grid>

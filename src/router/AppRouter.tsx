@@ -20,6 +20,8 @@ const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
 const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
+const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
+
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
@@ -108,7 +110,13 @@ export function AppRouter() {
                                 } />
                             </PrivateRoute>
                         } />
-
+                        <Route path="/inventory/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    InventoryRouter
+                                } />
+                            </PrivateRoute>
+                        } />
                         <Route path="*" element={<>Error</>} />
                     </Routes>
                 </div>

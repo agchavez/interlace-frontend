@@ -1,6 +1,6 @@
 import XLSX from 'xlsx'
 
-type CellType = string | number | null;
+export type CellType = string | number | null;
 
 interface exportToCSVOptions {
     data: CellType[][];

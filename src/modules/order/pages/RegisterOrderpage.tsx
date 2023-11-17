@@ -269,7 +269,7 @@ export const RegisterOrderpage = () => {
                     alignItems="center"
                     display="flex"
                   >
-                    <Chip
+                    {watch("location") && <Chip
                       label={
                         (dataRoute?.results &&
                           dataRoute?.results.length > 0 &&
@@ -279,7 +279,7 @@ export const RegisterOrderpage = () => {
                       color="secondary"
                       size="medium"
                       sx={{ marginRight: 1 }}
-                    />
+                    />}
                   </Grid>
                 )}
                 <Grid item xs={12}>
