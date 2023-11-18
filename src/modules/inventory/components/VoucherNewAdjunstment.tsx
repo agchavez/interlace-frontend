@@ -30,7 +30,7 @@ interface PropsAcc {
 const AccordionTableResult: FC<PropsAcc> = ({ data, dataErr }) => {
     return (
         <>
-            <Accordion elevation={0}>
+            <Accordion elevation={2}>
                 <AccordionSummary
                     expandIcon={<GridExpandMoreIcon />}
                     aria-controls="panel1a-content"

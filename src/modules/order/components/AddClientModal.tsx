@@ -6,19 +6,17 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
   TextField,
   Typography,
   styled,
 } from "@mui/material";
 import { FunctionComponent, useRef, useEffect } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { toast } from "sonner";
 import { createLocationAndRoute } from "../../../store/order";
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
 
 interface CreateCheckProps {
   open: boolean;
@@ -103,24 +101,10 @@ const AddClientModal: FunctionComponent<CreateCheckProps> = ({
       fullWidth={true}
       maxWidth="md"
     >
-      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+      <BootstrapDialogTitle id="customized-dialog-title" onClose={() => { handleClose && handleClose({}, "backdropClick") }}>
         Nuevo Cliente
-      </DialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={() => handleClose && handleClose({}, "backdropClick")}
-        sx={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-          textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-          cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-        }}
-        color="primary"
-      >
-        <CloseIcon />
-      </IconButton>
+      </BootstrapDialogTitle>
+     
       <DialogContent dividers>
         <Box>
           <Container maxWidth="xl">

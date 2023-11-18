@@ -14,6 +14,7 @@ import {
   TableBody,
   Chip,
   CircularProgress,
+  Paper,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -41,6 +42,9 @@ import { format, toDate } from "date-fns-tz";
 import { useGetRouteQuery } from "../../../store/maintenance/maintenanceApi";
 import { DeleteOrderModal } from "../components/DeleteOrderModal";
 import { OrderDetail } from "../../../interfaces/orders";
+import { FileUploader } from "react-drag-drop-files";
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { toast } from "sonner";
 interface OrderData {
   location: number;
   observations: string;
@@ -60,6 +64,7 @@ export const RegisterOrderpage = () => {
 
   const [urlSearchParams] = useSearchParams();
   const edit = urlSearchParams.get("edit");
+  const type = urlSearchParams.get("type");
   const orderId = urlSearchParams.get("orderId");
 
   const [openAddClientModal, setOpenAddClientModal] = useState(false);
@@ -112,6 +117,7 @@ export const RegisterOrderpage = () => {
         })
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [edit]);
 
   useEffect(() => {
@@ -121,14 +127,17 @@ export const RegisterOrderpage = () => {
       reset({ observations: observations, location: location });
       navigate(`?edit=${true}&orderId=${order.id}`, { replace: true });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order.id]);
 
   useEffect(() => {
     dispatch(changeOrder({ location: watch("location") }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("location")]);
 
   useEffect(() => {
     dispatch(changeOrder({ observations: watch("observations") }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("observations")]);
 
   const handleClickSave = () => {
@@ -162,6 +171,18 @@ export const RegisterOrderpage = () => {
 
   const disabled = order.id !== null && order.status !== "PENDING";
 
+  const [file, setfile] = useState<{ file: File | null, fileName: string | null }>({ file: null, fileName: null });
+  const [dragging, setDragging] = useState(false);
+  const handleFileChange = (file: File) => {
+    // Solo se admiten .xlsx
+    if (file.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
+      toast.error("Solo se admiten archivos .xlsx");
+      return;
+    }
+    setfile({ file: file, fileName: file.name });
+  }
+
+
   return (
     <>
       <AddClientModal
@@ -191,7 +212,7 @@ export const RegisterOrderpage = () => {
                 variant="contained"
                 color="success"
                 size="medium"
-                disabled={!changedData || (order.order_detail.length === 0)}
+                disabled={!changedData || (order.order_detail.length === 0 && !file.file)}
                 endIcon={<CheckTwoToneIcon fontSize="small" />}
                 onClick={handleClickSave}
               >
@@ -331,7 +352,7 @@ export const RegisterOrderpage = () => {
                   </Divider>
                 </Grid>
                 <Grid item xs={12} md={8} lg={10}></Grid>
-                {!disabled && (
+                {!disabled && type !== 'excel' && (
                   <Grid item xs={12} md={4} lg={2}>
                     <Button
                       variant="outlined"
@@ -345,53 +366,106 @@ export const RegisterOrderpage = () => {
                     </Button>
                   </Grid>
                 )}
-                <Grid item xs={12}>
-                  <TableContainer sx={{ maxHeight: 400 }}>
-                    <Table
-                      size="small"
-                      aria-label="a dense table"
-                      sx={{ marginTop: 2 }}
+                {type === 'excel' ?
+                  <Grid item xs={12} md={12} lg={12}>
+                    <Typography variant="body1" textAlign="start" sx={{ mb: 1 }} color="text.secondary">
+                      Adjuntar archivo, solo se admiten archivos .xlsx
+                    </Typography>
+                    <FileUploader
+                      name="file"
+                      label="Arrastre un archivo o haga click para seleccionar uno"
+                      dropMessageStyle={{ backgroundColor: "red" }}
+                      maxSize={20}
+                      multiple={false}
+                      onDraggingStateChange={(d: boolean) => setDragging(d)}
+                      onDrop={handleFileChange}
+                      onSelect={handleFileChange}
+                      onSizeError={() => toast.error("No se admiten archivos de archivos mayores a 20 MB")}
                     >
-                      <TableHead>
-                        <TableRow>
-                          <StyledTableCell align="left">
-                            Tracking
-                          </StyledTableCell>
-                          <StyledTableCell align="left">
-                            No. SAP
-                          </StyledTableCell>
-                          <StyledTableCell align="left">
-                            Producto
-                          </StyledTableCell>
-                          <StyledTableCell align="left">Cajas</StyledTableCell>
-                          <StyledTableCell align="left">
-                            Cajas disponibles
-                          </StyledTableCell>
-                          <StyledTableCell align="left">
-                            Fecha Expiración
-                          </StyledTableCell>
-                          {!disabled && (
-                            <StyledTableCell align="right">
-                              Acciones
+                      <Paper
+                        style={{
+                          width: "100%",
+                          height: 200,
+                          border: "2px dashed #aaaaaa",
+                          borderRadius: 5,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          position: "relative",
+                          overflow: "hidden",
+                          backgroundColor: dragging ? "#F0E68C" : "transparent",
+                        }}
+                      >
+                        <CloudUploadIcon
+                          style={{
+                            fontSize: 40,
+                            color: "#aaaaaa",
+                          }}
+                        />
+                        <Typography
+                          variant="body1"
+                          style={{ color: "#aaaaaa" }}
+                          textAlign="center"
+                        >
+                          {dragging
+                            ? "Suelta el Archivo"
+                            : file.file != null
+                              ? file.fileName
+                              : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
+                        </Typography>
+                        <input type="file" style={{ display: "none" }} />
+                      </Paper>
+                    </FileUploader>
+                  </Grid>
+                  : <Grid item xs={12}>
+                    <TableContainer sx={{ maxHeight: 400 }}>
+                      <Table
+                        size="small"
+                        aria-label="a dense table"
+                        sx={{ marginTop: 2 }}
+                      >
+                        <TableHead>
+                          <TableRow>
+                            <StyledTableCell align="left">
+                              Tracking
                             </StyledTableCell>
-                          )}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {order.order_detail.map((detail, index) => {
-                          return (
-                            <Row
-                              key={detail.id}
-                              index={index}
-                              disabled={disabled}
-                              row={detail}
-                            />
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Grid>
+                            <StyledTableCell align="left">
+                              No. SAP
+                            </StyledTableCell>
+                            <StyledTableCell align="left">
+                              Producto
+                            </StyledTableCell>
+                            <StyledTableCell align="left">Cajas</StyledTableCell>
+                            <StyledTableCell align="left">
+                              Cajas disponibles
+                            </StyledTableCell>
+                            <StyledTableCell align="left">
+                              Fecha Expiración
+                            </StyledTableCell>
+                            {!disabled && (
+                              <StyledTableCell align="right">
+                                Acciones
+                              </StyledTableCell>
+                            )}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {order.order_detail.map((detail, index) => {
+                            return (
+                              <Row
+                                key={detail.id}
+                                index={index}
+                                disabled={disabled}
+                                row={detail}
+                              />
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>}
               </Grid>
             </form>
           </Grid>

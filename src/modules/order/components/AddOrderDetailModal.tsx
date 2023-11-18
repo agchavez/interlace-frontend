@@ -35,6 +35,7 @@ import {
 } from "../../../store/seguimiento/trackerApi";
 import { addOrderDetailState } from "../../../store/order";
 import { Tracker, TrackerProductDetail } from "../../../interfaces/tracking";
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
 
 interface CreateCheckProps {
   open: boolean;
@@ -265,9 +266,9 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       fullWidth={true}
       maxWidth="md"
     >
-      <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+      <BootstrapDialogTitle onClose={() => handleClose && handleClose({}, "backdropClick")} id="form-dialog-title">
         Nuevo detalle de pedido
-      </DialogTitle>
+      </BootstrapDialogTitle>
       <IconButton
         aria-label="close"
         onClick={() => handleClose && handleClose({}, "backdropClick")}

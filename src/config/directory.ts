@@ -109,9 +109,8 @@ export const permisions = [
     {
         url: "/report/shift",
         permissions: [
-            "any"
-            // "tracker.view_trackerdetailproductmodel",
-            // "report.report_shift",
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_shift",
         ]
     },
     {
@@ -129,9 +128,8 @@ export const permisions = [
     {
         url: "/report/por-expirar",
         permissions: [
-            "any"
-            // "tracker.view_trackerdetailproductmodel",
-            // "report.report_risk_stock_ege",
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_risk_stock_ege",
         ]
     },
     {

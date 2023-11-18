@@ -1,6 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, styled, Typography, CircularProgress } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, styled, Typography, CircularProgress } from '@mui/material';
 import { FC, useState, useEffect } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "sonner";
 import { useAppDispatch } from '../../../store/store';
 import { createLocationAndRoute } from '../../../store/inventory/thunk';
@@ -8,6 +7,7 @@ import { InventarioMovimentResult } from '../../../interfaces/tracking';
 import { SaveAltTwoTone } from '@mui/icons-material';
 import { NewAdjustmentForm } from './NewAdjustmentForm';
 import { VoucherNewAdjunstment } from './VoucherNewAdjunstment';
+import BootstrapDialogTitle from '../../ui/components/BoostrapDialog';
 
 interface NewAdjustmentModalProps {
     isOpen: boolean
@@ -96,12 +96,12 @@ export const NewAdjustmentModal: FC<NewAdjustmentModalProps> = ({ isOpen, onClos
                 fullWidth={true}
                 maxWidth="md"
             >
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                <BootstrapDialogTitle onClose={loading ? undefined : onClose} id="customized-dialog-title">
                     <Typography variant="h6" component="div" fontWeight={400}>
                         {page.page === 'form' ? "Reajuste de inventario" : "Comprobante de registros"}
                     </Typography>
-                </DialogTitle>
-                <IconButton
+                </BootstrapDialogTitle>
+                {/* <IconButton
                     aria-label="close"
                     onClick={() => loading ? undefined : onClose()}
                     sx={{
@@ -115,7 +115,7 @@ export const NewAdjustmentModal: FC<NewAdjustmentModalProps> = ({ isOpen, onClos
                     color="primary"
                 >
                     <CloseIcon />
-                </IconButton>
+                </IconButton> */}
                 <DialogContent dividers>
                     { page.page === 'form' &&
                         <NewAdjustmentForm
