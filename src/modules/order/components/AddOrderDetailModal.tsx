@@ -6,12 +6,10 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Divider,
   FormControl,
   FormControlLabel,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -22,7 +20,6 @@ import {
   styled,
 } from "@mui/material";
 import { FunctionComponent, useRef, useEffect, useState, useMemo } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import * as yup from "yup";
@@ -65,10 +62,10 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   handleClose,
 }) => {
   const [readQR, setReadQR] = useState(false);
-  const [
-    qrReaded,
-    setQrReaded,
-  ] = useState(false);
+  // const [
+  //   qrReaded,
+  //   setQrReaded,
+  // ] = useState(false);
   const [idTrackerDetailProduct, setIdtrackerDetailProduct] =
     useState<number>(-1);
   const [tracker, setTracker] = useState<Tracker | null>(null);
@@ -78,6 +75,10 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   const loading = useAppSelector((state) => state.maintenance.loading);
   const formRef = useRef<HTMLFormElement>(null);
   const dispatch = useAppDispatch();
+
+  const {
+    order,
+  } = useAppSelector((state) => state.order);
 
   /// eslint-disable-next-line react-hooks/exhaustive-deps
   const schema: yup.ObjectSchema<any> = useMemo(() => {
@@ -173,8 +174,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   useEffect(() => {
     setTimeout(() => {
       setFocus("idTracker");
-      console.log(qrReaded);
-      
     }, 100);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, setFocus]);
@@ -182,12 +181,25 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   useEffect(() => {
     reset();
     setIdtrackerDetailProduct(-1)
-    if (readQR) setQrReaded(false);
+    // if (readQR) setQrReaded(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [readQR]);
 
   const handleSubmitForm = async (data: FormValues) => {
     if (trackerDetailProduct === null) return;
+    if (+data.quantity  === 0){
+      toast.error("La cantidad debe ser mayor a 0");
+      return;
+    }
+    // Si ya existe el detalle en el tracker lanzar error
+    if (
+      order.order_detail.find(
+        (x) => +x.tracker_detail_product === +data.idTrackerDetailProduct
+      )
+    ) {
+      toast.error("El pedido ya contiene este detalle");
+      return;
+    }
     dispatch(
       addOrderDetailState(trackerDetailProduct.tracker_detail_id, {
         id: null,
@@ -227,7 +239,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
         const palletId = pathParts[pathParts.length - 1];
         setValue("idTrackerDetailProduct", palletId);
         setIdtrackerDetailProduct(parseInt(palletId));
-        setQrReaded(true);
+        // setQrReaded(true);
       } else {
         toast.error("Codigo QR invalido");
       }
@@ -269,21 +281,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       <BootstrapDialogTitle onClose={() => handleClose && handleClose({}, "backdropClick")} id="form-dialog-title">
         Nuevo detalle de pedido
       </BootstrapDialogTitle>
-      <IconButton
-        aria-label="close"
-        onClick={() => handleClose && handleClose({}, "backdropClick")}
-        sx={{
-          position: "absolute",
-          right: 8,
-          top: 8,
-          color: (theme) => theme.palette.grey[500],
-          textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-          cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-        }}
-        color="primary"
-      >
-        <CloseIcon />
-      </IconButton>
       <DialogContent dividers>
         <Box>
           <Container maxWidth={false}>

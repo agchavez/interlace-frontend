@@ -106,3 +106,17 @@ export interface ProductData {
   days_not_accept_product: number;
   is_output: boolean;
 }
+
+
+export interface OrderExcelResponse {
+  order:        Order;
+  order_detail: OrderDetail[];
+  errors:       Error[];
+}
+
+export interface Error {
+  tracker_id:        number;
+  codigo_sap:        number;
+  fecha_vencimiento: Date;
+  cantidad:          number;
+}

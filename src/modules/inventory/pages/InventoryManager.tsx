@@ -5,9 +5,9 @@ import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
 import BookmarkRemoveTwoToneIcon from '@mui/icons-material/BookmarkRemoveTwoTone';
 import CachedTwoToneIcon from '@mui/icons-material/CachedTwoTone';
 import { useGetInventoryQuery } from "../../../store/inventory/api";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { InventarioMoviment } from "../../../interfaces/tracking";
+import { InventarioMoviment, InventarioMovimentQueryParams } from '../../../interfaces/tracking';
 import { tableBase } from '../../ui/index';
 import { format } from "date-fns";
 import { NewAdjustmentModal } from "../components/NewAdjustmentModal";
@@ -40,15 +40,28 @@ const getTypoMov = (value: string) => {
 }
 const InventoryManager = () => {
 
+    
+    const [query, setquery] = useState<InventarioMovimentQueryParams>({
+        limit: 15,
+        offset: 0,
+    });
     const [paginationModel, setPaginationModel] = useState<{
         pageSize: number;
         page: number;
     }>({
-        pageSize: 10,
+        pageSize: 15,
         page: 0,
     });
 
-    const [query, setquery] = useState()
+    useEffect(() => {
+        setquery((query) => ({
+            ...query,
+            limit: paginationModel.pageSize,
+            offset: paginationModel.page * paginationModel.pageSize,
+        }));
+    }, [paginationModel]);
+    
+
     const { data, isLoading, isFetching, refetch, } = useGetInventoryQuery(query);
 
     const columns: GridColDef<InventarioMoviment>[] = [
@@ -113,6 +126,10 @@ const InventoryManager = () => {
         { field: 'user_name', headerName: 'Usuario', width: 200 },
 
     ];
+
+    useEffect(() => {
+        refetch();
+    }, [refetch, query]);
     const [openAdd, setopenAdd] = useState(false)
     return (
         <>

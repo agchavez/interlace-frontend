@@ -20,6 +20,7 @@ import {
 import { AxiosError, AxiosResponse } from "axios";
 import { TrackerDetailResponse } from "../../interfaces/tracking";
 import { CreateLocationBody, CreateRouteBody, LocationType, Route } from "../../interfaces/maintenance";
+import { OrderExcelResponse } from '../../interfaces/orders';
 // Restablecer contraseña de usuario
 export const createOrder = (order: OrderCreateBody): AppThunk => {
   return async (dispatch, getState) => {
@@ -58,6 +59,36 @@ export const createOrder = (order: OrderCreateBody): AppThunk => {
     }
   };
 };
+
+export const createOrderByExcel = (
+  file: File, location: number, obs: string, onCompleted: (data: OrderExcelResponse) => void
+): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      dispatch(setLoadingOrder(true));
+      const {
+        auth,
+      } = getState() as RootState;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("location", location.toString());
+      formData.append("observations", obs);
+      const resp = await backendApi.post<OrderExcelResponse, AxiosResponse<OrderExcelResponse>>(
+        `/order-detail/load-excel/`,
+        formData,
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      );
+      if (resp.status === 201) {
+        toast.success("Pedido guardado con exito");
+      }
+      onCompleted(resp.data);
+    } catch (error) {
+      errorApiHandler(error, "No se pudo guardar el Pedido");
+    } finally {
+      dispatch(setLoadingOrder(false));
+    }
+  };
+}
 
 export const createLocationAndRoute = (locationRouteData: LocationRouteCreateData): AppThunk => {
   return async (dispatch, getState) => {

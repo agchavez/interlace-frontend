@@ -31,6 +31,7 @@ import { useAppDispatch, useAppSelector } from "../../../store";
 import {
   changeOrder,
   createOrder,
+  createOrderByExcel,
   getOrder,
   removeOrderDetail,
   setChanged,
@@ -41,7 +42,7 @@ import AddOrderDetailModal from "../components/AddOrderDetailModal";
 import { format, toDate } from "date-fns-tz";
 import { useGetRouteQuery } from "../../../store/maintenance/maintenanceApi";
 import { DeleteOrderModal } from "../components/DeleteOrderModal";
-import { OrderDetail } from "../../../interfaces/orders";
+import { OrderDetail, OrderExcelResponse } from '../../../interfaces/orders';
 import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
@@ -62,7 +63,7 @@ export const RegisterOrderpage = () => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [urlSearchParams] = useSearchParams();
+  const [urlSearchParams, setParams] = useSearchParams();
   const edit = urlSearchParams.get("edit");
   const type = urlSearchParams.get("type");
   const orderId = urlSearchParams.get("orderId");
@@ -146,6 +147,10 @@ export const RegisterOrderpage = () => {
     );
   };
 
+  const handleComple = (data: OrderExcelResponse) => {
+    setParams({ edit: "true", orderId: data.order.id.toString() });
+  };
+    
   const handleSubmitForm = (data: OrderData) => {
     if (!user?.centro_distribucion) return;
     if (order.id) {
@@ -157,15 +162,19 @@ export const RegisterOrderpage = () => {
         })
       );
     } else {
-      dispatch(
-        createOrder({
-          status: "PENDING",
-          distributor_center: user.centro_distribucion,
-          observations: data.observations,
-          location: data.location,
-          user: +user.id,
-        })
-      );
+      if (type === "excel") {
+        dispatch(createOrderByExcel(file.file!, watch("location"), watch("observations"), handleComple));
+      }else{
+        dispatch(
+          createOrder({
+            status: "PENDING",
+            distributor_center: user.centro_distribucion,
+            observations: data.observations,
+            location: data.location,
+            user: +user.id,
+          })
+          );
+        }
     }
   };
 
@@ -199,7 +208,7 @@ export const RegisterOrderpage = () => {
         <Grid container spacing={1}>
           <Grid item xs={12} display="flex" justifyContent="space-between">
             <div style={{ display: "flex", alignItems: "center" }}>
-              <IconButton onClick={() => navigate(-1)} title="Regresar">
+              <IconButton onClick={() => navigate('/order/manage', {replace: true})} title="Regresar">
                 <ArrowBack color="primary" fontSize="medium" />
               </IconButton>
               <Typography variant="h5" component="h1" fontWeight={400}>
@@ -232,10 +241,7 @@ export const RegisterOrderpage = () => {
           <Grid item xs={12} sx={{ marginTop: 2 }}>
             <form
               ref={formRef}
-              onSubmit={handleSubmit(handleSubmitForm, (err) =>
-                console.log(err)
-              )}
-            >
+              onSubmit={handleSubmit(handleSubmitForm, () => {})}>
               <Grid container spacing={2}>
                 <Grid item xs={8} md={8} lg={4}>
                   {disabled ? (
@@ -335,6 +341,7 @@ export const RegisterOrderpage = () => {
                         size="small"
                         multiline
                         rows={3}
+                        value={watch("observations") || ""}
                         error={errors.observations?.message ? true : false}
                         helperText={errors.observations?.message}
                       />
@@ -344,6 +351,18 @@ export const RegisterOrderpage = () => {
                     </>
                   )}
                 </Grid>
+                {order.id && <Grid item xs={12}>
+                  <Typography
+                    variant="h4"
+                    component="h1"
+                    fontWeight={400}
+                    color={"white"}
+                    align="center"
+                    bgcolor={"#1c2536"}
+                  >
+                    ORD-{order.id?.toString().padStart(0, "0")}
+                  </Typography>
+                </Grid>}
                 <Grid item xs={12}>
                   <Divider>
                     <Typography variant="body1" component="h2" fontWeight={400}>
@@ -502,7 +521,7 @@ const Row = ({
       )}
       <TableCell>
         TRK-
-        {row.tracking_id.toString().padStart(8, "0")}
+        {row.tracking_id.toString().padStart(5, "0")}
       </TableCell>
       <TableCell>{row.product_data?.sap_code}</TableCell>
       <TableCell>{row.product_data?.name}</TableCell>

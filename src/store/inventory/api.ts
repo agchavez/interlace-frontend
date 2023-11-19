@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from '../store';
-import { InventarioMoviment } from '../../interfaces/tracking';
+import { InventarioMoviment, InventarioMovimentQueryParams } from '../../interfaces/tracking';
 import { BaseApiResponse } from '../../interfaces/api';
 
 export const inventoryApi = createApi({
@@ -16,8 +16,11 @@ export const inventoryApi = createApi({
     },
   }),
     endpoints: (builder) => ({
-        getInventory: builder.query<BaseApiResponse<InventarioMoviment>, unknown>({
-            query: () => "/inventory-movement/"
+        getInventory: builder.query<BaseApiResponse<InventarioMoviment>, InventarioMovimentQueryParams>({
+            query: (params) => ({
+                url: "/inventory-movement/",
+                params,
+            }),
         }),
     }),
 });

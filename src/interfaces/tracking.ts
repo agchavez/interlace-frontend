@@ -379,6 +379,11 @@ export interface InventarioMoviment {
   user:                    number;
 }
 
+export interface InventarioMovimentQueryParams {
+  limit: number;
+  offset: number;
+}
+
 export interface InventarioMovimentResult {
   data:       DatuInventarioMoviment[];
   data_error: DataError[];
