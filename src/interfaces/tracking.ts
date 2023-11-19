@@ -53,6 +53,8 @@ export interface OutputType {
   created_at_time: string;
   name: string;
   required_details: boolean;
+  required_orders: boolean;
+  required_: boolean;
 }
 
 export interface OutputTypeQuerySearch extends BaseQueryParams {
@@ -117,6 +119,7 @@ export interface Tracker {
   observation: string | null;
   archivo_name: string | null;
   is_archivo_up: boolean;
+  order: number | null;
 }
 
 export type TrackerType = "LOCAL" | "IMPORT";
@@ -320,6 +323,7 @@ export interface LastTrackerOutputResult {
 
 export interface LastTrackerOutput {
   required_details: boolean;
+  required_orders: boolean;
   tracking?: number;
   sap_code?: string;
   product_name?: string;

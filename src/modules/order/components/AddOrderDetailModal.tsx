@@ -78,7 +78,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const dispatch = useAppDispatch();
 
-  /// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const schema: yup.ObjectSchema<any> = useMemo(() => {
     const quantity = yup
       .number()

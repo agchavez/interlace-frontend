@@ -67,6 +67,14 @@ export interface OrderDetailCreateBody {
 }
 
 export interface OrderDetailHistory {
+  id?: number;
+  created_at: string;
+  quantity: number;
+  order_detail: number;
+  tracker: number;
+}
+
+export interface OrderDetailHistoryUtil extends OrderDetailHistory {
   id: number;
   created_at: string;
   quantity: number;

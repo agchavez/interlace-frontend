@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
+import { OrderDetailHistory } from "../../interfaces/orders";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -54,6 +55,10 @@ interface AddDetalleCargaPalletData extends DetalleCargaPalet {
 interface RemoveDetalle {
     segIdx: number;
     detalleIdx: number;
+}
+
+export interface OrderDetailHistoryIdx extends OrderDetailHistory {
+    trackerIndex: number;
 }
 
 export interface DetalleCarga extends Product {
@@ -113,6 +118,8 @@ export interface Seguimiento {
     observation: string | null;
     archivo_name: string | null;
     is_archivo_up: boolean;
+    order_histories?: OrderDetailHistory[];
+    order: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -224,13 +231,14 @@ export const seguimientoSlice = createSlice({
         removeSeguimientoActual: (state) => {
             state.seguimientos.splice(state.seguimeintoActual || 0, 1);
             state.seguimeintoActual = state.seguimientos.length - 1;
+        },
+
+        setOrderHistories: (state, action: PayloadAction<{trackerIndex: number, order_histories: OrderDetailHistory[]}>)=>{
+            const index = action.payload.trackerIndex
+            const seguimiento = state.seguimientos[index]
+            const order_histories = action.payload.order_histories
+            seguimiento.order_histories = order_histories
         }
-
-
-
-
-
-
     }
 })
 
@@ -248,5 +256,6 @@ export const {
     removeDetalleCargaSalida,
     setLoading,
     setSeguimientos,
-    removeSeguimientoActual
+    removeSeguimientoActual,
+    setOrderHistories
 } = seguimientoSlice.actions;
