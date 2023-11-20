@@ -271,6 +271,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                 onChange={(value) => {
                   setid(value?.id ?? null);
                 }}
+                ignoreCompleted={true}
               />
             </Grid>
             <Grid item xs={3} md={2}></Grid>

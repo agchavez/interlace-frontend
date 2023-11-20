@@ -61,9 +61,9 @@ export interface OrderDetail {
 
 export interface OrderDetailCreateBody {
   quantity: number;
-  order_: number;
   tracker_detail_product: number;
   expiration_date: string;
+  order_detail_id: number;
 }
 
 export interface OrderDetailHistory {
