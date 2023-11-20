@@ -22,7 +22,9 @@ import { useState } from "react";
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
 
 import { useAppDispatch } from "../../../store";
-import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import {
+  Seguimiento,
+} from "../../../store/seguimiento/seguimientoSlice";
 import AgregarProductoModal from "./AgregarProductoModal";
 import { AutoCompleteBase } from "../../ui/components/BaseAutocomplete";
 import { useAppSelector } from "../../../store/store";
@@ -49,8 +51,8 @@ import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
-import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+import CloudDownloadTwoToneIcon from "@mui/icons-material/CloudDownloadTwoTone";
+import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
 
 import {
   useGetDriverQuery,
@@ -89,7 +91,7 @@ export const CheckForm = ({
     (state) => state.auth.user?.centro_distribucion
   );
   const user = useAppSelector((state) => state.auth.user);
-  const { control, register, watch } = useForm<CheckFormType>({
+  const { control, register, watch, setValue } = useForm<CheckFormType>({
     defaultValues: {
       ...seguimiento,
       outputType: seguimiento.outputType?.toString(),
@@ -164,10 +166,15 @@ export const CheckForm = ({
         seguimiento={seguimiento}
         handleClose={() => setOpenArchivoModal(false)}
       />
-      {openOrderModal && <SelectOrderTrackerModal
-        open={openOrderModal}
-        handleClose={() => setopenOrderModal(false)}
-        />}
+      {openOrderModal && (
+        <SelectOrderTrackerModal
+          open={openOrderModal}
+          handleClose={() => setopenOrderModal(false)}
+          seguimiento={seguimiento}
+          indice={indice}
+          setLocalidadValue={(value: number)=>setValue("outputLocation", value)}
+        />
+      )}
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
@@ -348,7 +355,14 @@ export const CheckForm = ({
                   </Typography>
                 </Grid>
                 <Grid item xs={12} md={6} lg={4} xl={3}>
-                  <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      mt: 0,
+                    }}
+                  >
                     <Typography
                       variant="body1"
                       fontWeight={400}
@@ -357,26 +371,32 @@ export const CheckForm = ({
                       Documento
                     </Typography>
                     {!disable && (
-                      <Button onClick={() => setOpenArchivoModal(true)} size="small" variant="text" color="primary" style={{height:20}} startIcon={<CloudUploadTwoToneIcon />}>
+                      <Button
+                        onClick={() => setOpenArchivoModal(true)}
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        style={{ height: 20 }}
+                        startIcon={<CloudUploadTwoToneIcon />}
+                      >
                         Cargar
                       </Button>
                     )}
                   </Box>
                   <Divider />
-                  {
-                    seguimiento.is_archivo_up ?
+                  {seguimiento.is_archivo_up ? (
                     <Chip
                       onClick={handleClickDescargar}
                       label={seguimiento.archivo_name}
-                      variant='outlined'
+                      variant="outlined"
                       color="secondary"
-                      icon={<CloudDownloadTwoToneIcon color="secondary"/>}
+                      icon={<CloudDownloadTwoToneIcon color="secondary" />}
                       size="medium"
-                      sx={{mt:1}}
+                      sx={{ mt: 1 }}
                     />
-                    :
-                      '--'
-                  }
+                  ) : (
+                    "--"
+                  )}
                 </Grid>
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
@@ -449,15 +469,15 @@ export const CheckForm = ({
                           seguimiento?.status === "COMPLETE"
                             ? "Completado"
                             : seguimiento?.status === "PENDING"
-                              ? "Pendiente"
-                              : "En atención"
+                            ? "Pendiente"
+                            : "En atención"
                         }
                         color={
                           seguimiento?.status === "COMPLETE"
                             ? "success"
                             : seguimiento?.status === "PENDING"
-                              ? "warning"
-                              : "info"
+                            ? "warning"
+                            : "info"
                         }
                         size="medium"
                         variant="outlined"
@@ -499,7 +519,7 @@ export const CheckForm = ({
                     </Typography>
                   </pre>
                 </Grid>
-                
+
                 {user !== null &&
                   +user?.id === seguimiento.user &&
                   disable &&
@@ -760,8 +780,8 @@ export const CheckForm = ({
                 >
                   {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
                     ? formatDistance(tiempoEntrada, tiempoSalida, {
-                      locale: es,
-                    })
+                        locale: es,
+                      })
                     : "--:--:--"}
                 </Typography>
               </Grid>
@@ -983,7 +1003,10 @@ export const CheckForm = ({
                   locationId={watch("outputLocation")}
                 />
               </Grid>
-              <Grid item xs={12} md={6} lg={4} xl={4}>
+              {outputTypeData && (
+                <>
+                  {outputTypeData.required_orders && !disable && (
+                    <Grid item xs={12} md={6} lg={4} xl={4}>
                       <Button
                         variant="outlined"
                         size="small"
@@ -995,8 +1018,7 @@ export const CheckForm = ({
                         Pedido
                       </Button>
                     </Grid>
-              {outputTypeData && (
-                <>
+                  )}
                   {outputTypeData?.required_details && !disable && (
                     <Grid item xs={12} md={6} lg={4} xl={4}>
                       <Button

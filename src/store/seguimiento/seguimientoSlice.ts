@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
+import { OrderDetailHistory } from "../../interfaces/orders";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -56,6 +57,10 @@ interface RemoveDetalle {
     detalleIdx: number;
 }
 
+export interface OrderDetailHistoryIdx extends OrderDetailHistory {
+    trackerIndex: number;
+}
+
 export interface DetalleCarga extends Product {
     amount: number;
     history?: DetalleCargaPalet[];
@@ -65,6 +70,7 @@ export interface DetalleCarga extends Product {
 export interface DetalleCargaSalida extends Product {
     amount: number;
     idDetalle: number;
+    idProducto: number;
     expiration_date: string;
 }
 
@@ -113,6 +119,7 @@ export interface Seguimiento {
     observation: string | null;
     archivo_name: string | null;
     is_archivo_up: boolean;
+    order: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -203,10 +210,10 @@ export const seguimientoSlice = createSlice({
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date, idProducto:product.id })
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date, idProducto:product.id }]
             }
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
@@ -224,13 +231,7 @@ export const seguimientoSlice = createSlice({
         removeSeguimientoActual: (state) => {
             state.seguimientos.splice(state.seguimeintoActual || 0, 1);
             state.seguimeintoActual = state.seguimientos.length - 1;
-        }
-
-
-
-
-
-
+        },
     }
 })
 
@@ -248,5 +249,5 @@ export const {
     removeDetalleCargaSalida,
     setLoading,
     setSeguimientos,
-    removeSeguimientoActual
+    removeSeguimientoActual,
 } = seguimientoSlice.actions;
