@@ -23,8 +23,9 @@ import { Controller, useForm } from "react-hook-form";
 import { TrailerSelect } from "../../ui/components";
 import { FilterDate } from "../../../interfaces/tracking";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import { format } from "date-fns";
+import { isValid, format } from "date-fns";
 import { useAppSelector } from "../../../store";
+import { DatePicker } from "@mui/x-date-pickers";
 
 
 const ITEM_HEIGHT = 48;
@@ -100,7 +101,7 @@ export const FilterManage: FC<FilterManageProps> = ({
     setValue("date_after", "");
     setValue("date_before", "");
     setValue("date_range", FilterDate.TODAY);
-    setValue("distribution_center", undefined);
+    setValue("distribution_center", (user?.centro_distribucion || undefined));
     setValue("id", null);
     setValue(
       "onlyMyTreckers",
@@ -110,49 +111,49 @@ export const FilterManage: FC<FilterManageProps> = ({
     );
   };
 
-  const handleFilterDate = (value: FilterDate) => {
-    setValue("date_range", value);
-    const date = new Date();
-    let valueDate;
-    let start_date;
-    let end_date;
+  // const handleFilterDate = (value: FilterDate) => {
+  //   setValue("date_range", value);
+  //   const date = new Date();
+  //   let valueDate;
+  //   let start_date;
+  //   let end_date;
 
-    switch (value) {
-      case FilterDate.TODAY:
-        start_date = format(date, "yyyy-MM-dd");
-        end_date = format(date, "yyyy-MM-dd");
-        break;
-      case FilterDate.WEEK:
-        valueDate = new Date(
-          date.getFullYear(),
-          date.getMonth(),
-          date.getDate() - 7
-        );
-        start_date = format(valueDate, "yyyy-MM-dd");
-        end_date = format(date, "yyyy-MM-dd");
-        break;
-      case FilterDate.MONTH:
-        valueDate = new Date(date.getFullYear(), date.getMonth(), 1);
-        start_date = format(valueDate, "yyyy-MM-dd");
-        end_date = format(date, "yyyy-MM-dd");
-        break;
-      case FilterDate.YEAR:
-        valueDate = new Date(
-          date.getFullYear(),
-          date.getMonth() - date.getMonth(),
-          1
-        );
-        start_date = format(valueDate, "yyyy-MM-dd");
-        end_date = format(date, "yyyy-MM-dd");
-        break;
-      default:
-        start_date = format(date, "yyyy-MM-dd");
-        end_date = format(date, "yyyy-MM-dd");
-        break;
-    }
-    setValue("date_after", start_date);
-    setValue("date_before", end_date);
-  };
+  //   switch (value) {
+  //     case FilterDate.TODAY:
+  //       start_date = format(date, "yyyy-MM-dd");
+  //       end_date = format(date, "yyyy-MM-dd");
+  //       break;
+  //     case FilterDate.WEEK:
+  //       valueDate = new Date(
+  //         date.getFullYear(),
+  //         date.getMonth(),
+  //         date.getDate() - 7
+  //       );
+  //       start_date = format(valueDate, "yyyy-MM-dd");
+  //       end_date = format(date, "yyyy-MM-dd");
+  //       break;
+  //     case FilterDate.MONTH:
+  //       valueDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  //       start_date = format(valueDate, "yyyy-MM-dd");
+  //       end_date = format(date, "yyyy-MM-dd");
+  //       break;
+  //     case FilterDate.YEAR:
+  //       valueDate = new Date(
+  //         date.getFullYear(),
+  //         date.getMonth() - date.getMonth(),
+  //         1
+  //       );
+  //       start_date = format(valueDate, "yyyy-MM-dd");
+  //       end_date = format(date, "yyyy-MM-dd");
+  //       break;
+  //     default:
+  //       start_date = format(date, "yyyy-MM-dd");
+  //       end_date = format(date, "yyyy-MM-dd");
+  //       break;
+  //   }
+  //   setValue("date_after", start_date);
+  //   setValue("date_before", end_date);
+  // };
 
   useEffect(() => {
     if (open) {
@@ -290,7 +291,7 @@ export const FilterManage: FC<FilterManageProps> = ({
             <ListItem disablePadding sx={{ pl: 1, pr: 1, mt: 1 }}></ListItem>
           </List>
           <Divider />
-          <List>
+          {/* <List>
             <ListItem disablePadding sx={{ pl: 2 }}>
               <ListItemText primary={"Fecha registro"} />
             </ListItem>
@@ -374,6 +375,54 @@ export const FilterManage: FC<FilterManageProps> = ({
                 />
               </FormGroup>
             </ListItem>
+          </List> */}
+          <List>
+            <Grid container sx={{ p: 1 }} spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" fontWeight={200}>
+                  Fecha de registro
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="date_after"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Mayor que"
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                      value={ isValid(new Date(watch("date_after") )) ? new Date(watch("date_after")) : null}
+                      inputRef={field.ref}
+                      format="dd/MM/yyyy"
+                      onChange={(date) => {
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+
+                  name="date_before"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Menor que"
+                      format="dd/MM/yyyy"
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                      value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
+                      inputRef={field.ref}
+                      onChange={(date) => {
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
           </List>
           <Divider />
           <List>
