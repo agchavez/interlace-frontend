@@ -90,6 +90,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
               action = {
                 detalleCargaSalida: {
                   ...d.product_data,
+                  tracker_detail_product: d.tracker_detail_product,
                   amount: 0,
                   idDetalle: -1,
                   idProducto: d.product_data.id,

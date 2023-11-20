@@ -423,6 +423,7 @@ export const addOutProduct =
         quantity: data.quantity,
         product: data.product.id,
         expiration_date: data.expiration_date,
+        tracker_detail_product: null,
       };
       const { status, data: trackerDetail } = await backendApi.post<
         TrackerDeailOutput,
@@ -440,6 +441,7 @@ export const addOutProduct =
             amount: data.quantity,
             idDetalle: trackerDetail.id,
             expiration_date: trackerDetail.expiration_date,
+            tracker_detail_product: trackerDetail.tracker_detail_product,
           })
         );
       }
@@ -670,6 +672,7 @@ export const saveOrderHistories =
               tracker: seguimiento.id,
               quantity: ds.detalleCargaSalida.amount,
               expiration_date: ds.detalleCargaSalida.expiration_date,
+              tracker_detail_product: ds.detalleCargaSalida.tracker_detail_product,
             };
             const response = backendApi.post<
               TrackerDeailOutput,
@@ -698,6 +701,7 @@ export const saveOrderHistories =
                 tracker: seguimiento.id,
                 quantity: ds.detalleCargaSalida.amount,
                 expiration_date: ds.detalleCargaSalida.expiration_date,
+                tracker_detail_product: ds.detalleCargaSalida.tracker_detail_product,
               };
               const response = backendApi.post<
                 TrackerDeailOutput,
@@ -886,6 +890,7 @@ const parseOutputDetailSalida = (
     amount: tracker_detail.quantity,
     created_at: tracker_detail.created_at,
     idDetalle: tracker_detail.id,
+    tracker_detail_product: tracker_detail.tracker_detail_product,
     idProducto: tracker_detail.product_data.id,
     expiration_date: tracker_detail.expiration_date,
   };

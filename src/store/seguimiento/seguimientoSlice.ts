@@ -72,6 +72,7 @@ export interface DetalleCargaSalida extends Product {
     idDetalle: number;
     idProducto: number;
     expiration_date: string;
+    tracker_detail_product: number | null;
 }
 
 export interface UploadDataBody {
@@ -202,7 +203,7 @@ export const seguimientoSlice = createSlice({
                 detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number, expiration_date: string }>) => {
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number, expiration_date: string, tracker_detail_product: number | null }>) => {
             const { segIndex, product, amount, idDetalle, expiration_date } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             if (seguimiento.detallesSalida) {
@@ -210,10 +211,10 @@ export const seguimientoSlice = createSlice({
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date, idProducto:product.id })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date, idProducto:product.id, tracker_detail_product: action.payload.tracker_detail_product })
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date, idProducto:product.id }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date, idProducto:product.id, tracker_detail_product: action.payload.tracker_detail_product }]
             }
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {

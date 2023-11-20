@@ -194,6 +194,7 @@ export interface TrackerDeailOutput {
   quantity: number;
   tracker: number;
   product: number;
+  tracker_detail_product: number | null;
   expiration_date: string;
 }
 export interface DistributorCenterData {
@@ -359,6 +360,7 @@ export interface AddOutProductBody {
   product: number;
   quantity: number;
   expiration_date: string | null;
+  tracker_detail_product: number | null;
 }
 
 
