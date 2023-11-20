@@ -43,6 +43,7 @@ interface HistoryRow {
   quantity: number;
   trackerId: number;
   daysExpiration: number;
+  available_quantity: number;
 }
 
 function Row(props: { row: NearExpirationProduct }) {
@@ -82,6 +83,7 @@ function Row(props: { row: NearExpirationProduct }) {
                   <TableCell>#Tracking</TableCell>
                     <TableCell>Fecha</TableCell>
                     <TableCell>Pallets</TableCell>
+                    <TableCell>Cajas disponibles</TableCell>
                     <TableCell>Días Restantes</TableCell>
                     <TableCell align="center">
                       Ver
@@ -98,6 +100,7 @@ function Row(props: { row: NearExpirationProduct }) {
                         {historyRow.expirationDate}
                       </TableCell>
                       <TableCell>{historyRow.quantity}</TableCell>
+                      <TableCell>{historyRow.available_quantity}</TableCell>
                       <TableCell>{historyRow.daysExpiration}</TableCell>
                       <TableCell align="center">
                       <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + historyRow.trackerId)}>
@@ -142,7 +145,7 @@ export default function NearExpirationTable({
               <TableCell>Código Sap</TableCell>
               <TableCell>Producto</TableCell>
               <TableCell align="center">Fechas Registradas</TableCell>
-              <TableCell align="right">Pallets Total</TableCell>
+              <TableCell align="right">Cajas Totales</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

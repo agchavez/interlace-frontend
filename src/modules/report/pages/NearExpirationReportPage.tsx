@@ -87,12 +87,13 @@ export const NearExpirationReportPage = () => {
         sap_code: r.sap_code,
         registeredDates: r.expiration_list.length,
         total: r.expiration_list
-          .map((ex) => ex.quantity)
+          .map((ex) => ex.available_quantity)
           .reduce((p, c) => p + c, 0),
         history: r.expiration_list.map((elr) => ({
           expirationDate: format(parseISO(elr.expiration_date.split("T")[0]), "dd/MM/yyyy"),
           quantity: elr.quantity,
           trackerId: elr.tracker_id,
+          available_quantity: elr.available_quantity,
           daysExpiration: differenceInDays(
             parseISO(elr.expiration_date),
             new Date()

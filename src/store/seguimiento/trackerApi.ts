@@ -4,6 +4,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
 import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
+import { format } from 'date-fns';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -22,7 +23,9 @@ export const trackerApi = createApi({
                 url: `/tracker/`,
                 method: 'GET',
                 params: {
-                    ...params
+                    ...params,
+                    date_after: params.date_after ? format(new Date(params.date_after), 'yyyy-MM-dd') : null,
+                    date_before: params.date_before ? format(new Date(params.date_before), 'yyyy-MM-dd') : null,
                 }
             }),
             keepUnusedDataFor: 120000

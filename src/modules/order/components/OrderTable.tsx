@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { CircularProgress, TablePagination } from "@mui/material";
+import { Chip, CircularProgress, TablePagination } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Order } from "../../../interfaces/orders";
 import { format, toDate } from "date-fns-tz";
@@ -101,12 +101,18 @@ function Row(props: { row: Order; refetch?: () => void }) {
           {row.location_data.name} - {row.location_data.code}
         </TableCell>
         <TableCell>{row.observations}</TableCell>
-        <TableCell>{statusValues[row.status]}</TableCell>
+        <TableCell>
+          <Chip
+            label={statusValues[row.status]}
+            variant="outlined"
+            color='secondary'
+          />
+        </TableCell>
         <TableCell align="right">
           {row.status === "PENDING" && (
             <>
               <IconButton
-                color="info"
+                color="secondary"
                 onClick={() => handleClickEditar(row.id)}
               >
                 <EditTwoToneIcon />

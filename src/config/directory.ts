@@ -133,6 +133,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/inventory",
+        permissions: [
+            'inventory.view_inventorymodel',
+        ]
+    },
+    {
         url: "/auth/login",
         permissions: [
             "any"

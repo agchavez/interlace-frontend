@@ -149,6 +149,7 @@ export interface OrderQueryParams extends BaseQueryParams {
   location?: number;
   distributor_center?: number;
   status?: OrderStatusType;
+  status_choice?: OrderStatusType[];
   id?: number;
 }
 
@@ -343,6 +344,7 @@ export interface HistoryNearExpiration {
   expiration_date: string;
   quantity: number;
   tracker_id: number;
+  available_quantity: number;
 }
 
 export interface AddOutProductData {
@@ -357,4 +359,65 @@ export interface AddOutProductBody {
   product: number;
   quantity: number;
   expiration_date: string | null;
+}
+
+
+export interface InventarioMoviment {
+  id:                      number;
+  distributor_center_name: string;
+  product_name:            string;
+  product_sap_code:        string;
+  tracker:                 string;
+  user_name:               string;
+  created_at:              Date;
+  module:                  string;
+  origin_id:               number;
+  is_applied:              boolean;
+  applied_date:            Date;
+  movement_type:           string;
+  reason:                  null | string;
+  initial_quantity:        number;
+  final_quantity:          number | null;
+  quantity:                number;
+  tracker_detail_product:  number;
+  user:                    number;
+}
+
+export interface InventarioMovimentQueryParams {
+  limit: number;
+  offset: number;
+}
+
+export interface InventarioMovimentResult {
+  data:       DatuInventarioMoviment[];
+  data_error: DataError[];
+}
+
+export interface DatuInventarioMoviment {
+  id:                      number;
+  distributor_center_name: string;
+  product_name:            string;
+  product_sap_code:        string;
+  tracker:                 string;
+  user_name:               string;
+  final_quantity:          null;
+  created_at:              Date;
+  module:                  string;
+  origin_id:               number;
+  is_applied:              boolean;
+  applied_date:            null;
+  movement_type:           string;
+  reason:                  string;
+  initial_quantity:        number;
+  quantity:                number;
+  tracker_detail_product:  number;
+  user:                    number;
+}
+
+export interface DataError {
+  tracker_id:        number;
+  codigo_sap:        number;
+  fecha_vencimiento: Date;
+  cantidad:          number;
+  error:             string;
 }

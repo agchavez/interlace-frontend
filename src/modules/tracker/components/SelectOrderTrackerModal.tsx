@@ -52,6 +52,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
+
 export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   open,
   handleClose,
@@ -205,6 +206,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         } else {
           action = "add";
         }
+
       } else if (event === "unchecked") {
         if (trackerOutputForDetail) {
           action = "delete";

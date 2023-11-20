@@ -1,4 +1,4 @@
-import { Container, Grid, Typography, Divider, Button } from "@mui/material";
+import { Container, Grid, Typography, Divider, Button, MenuItem } from "@mui/material";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import PostAddTwoToneIcon from "@mui/icons-material/PostAddTwoTone";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,8 @@ import { reset, useGetOrderQuery } from "../../../store/order";
 import { useAppDispatch } from "../../../store";
 import { FilterOrder, FormFilterOrder } from "../components/FilterOrder";
 import { setOrderQueryParams } from "../../../store/ui/uiSlice";
+import CodeIcon from '@mui/icons-material/Code';
+import { StyledMenu } from "../../ui/components/StyledMenu";
 
 const ManageOrder = () => {
   const navigate = useNavigate();
@@ -30,10 +32,21 @@ const ManageOrder = () => {
   });
 
   const { data, isLoading, isFetching, refetch } = useGetOrderQuery(query);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {
     refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
+
   useEffect(() => {
     setquery((query) => ({
       ...query,
@@ -42,9 +55,9 @@ const ManageOrder = () => {
     }));
   }, [paginationModel]);
 
-  const handleClickNuevo = () => {
+  const handleClickNuevo = (excel: boolean) => {
     dispatch(reset())
-    navigate(`/order/register`)
+    navigate(excel ? `/order/register/?type=excel` : `/order/register/`);
   };
 
   const handleFilter = (data: FormFilterOrder) => {
@@ -88,15 +101,38 @@ const ManageOrder = () => {
             >
               Filtrar
             </Button>
+            {/* excel */}
             <Button
-              variant="outlined"
-              color="secondary"
-              sx={{ marginRight: 1 }}
-              endIcon={<PostAddTwoToneIcon />}
-              onClick={handleClickNuevo}
-            >
-              Nuevo
-            </Button>
+        id="demo-customized-button"
+        aria-controls={open ? "demo-customized-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={open ? "true" : undefined}
+        variant="contained"
+        disableElevation
+        onClick={handleClick}
+        endIcon={<PostAddTwoToneIcon />
+        }
+      >
+        Registrar
+      </Button>
+      <StyledMenu
+        id="demo-customized-menu"
+        MenuListProps={{
+          "aria-labelledby": "demo-customized-button",
+        }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => handleClickNuevo(false)} disableRipple>
+          <PostAddTwoToneIcon />
+          <Typography ml={1}>Registro manual</Typography>
+        </MenuItem>
+        <MenuItem onClick={() => handleClickNuevo(true)} disableRipple>
+          <CodeIcon />
+          <Typography ml={1}>Registro excel</Typography>
+        </MenuItem>
+      </StyledMenu>
           </Grid>
           <Grid item xs={12}>
             <OrderTable

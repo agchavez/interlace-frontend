@@ -1,7 +1,7 @@
 
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, Grid, Typography, styled } from "@mui/material";
 import { FunctionComponent } from "react";
-import CloseIcon from '@mui/icons-material/Close';
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -22,24 +22,11 @@ interface DeleteCheckProps {
 
 export const DeleteOrderModal: FunctionComponent<DeleteCheckProps> = ({ title, message, open, handleClose, onDelete }) => {    
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-            {title}
-        </DialogTitle>
-        <IconButton
-            aria-label="close"
-            onClick={() => handleClose && handleClose({}, "backdropClick")}
-            sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-                textDecoration: 'underline', // Agrega un subrayado para hacerlo parecer un enlace
-                cursor: 'pointer', // Cambia el cursor al estilo "mano" para indicar que es interactivo
-            }}
-            color="primary"
-        >
-            <CloseIcon />
-        </IconButton>
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={()=> handleClose && handleClose( {}, 'escapeKeyDown')}>
+            <Typography variant="h6" component="span" fontWeight={400} color={'gray.700'}>
+                {title}
+            </Typography>
+        </BootstrapDialogTitle>
         <DialogContent dividers >
             <Box >
                 <Container maxWidth="xl">

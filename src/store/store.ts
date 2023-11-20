@@ -11,6 +11,7 @@ import { maintenanceSlice } from './maintenance/maintenanceSlice';
 import { nearExpirationProductsApi, trackerApi, trackerDetailApi, trackerOutputApi, trackerPalletsApi } from './seguimiento/trackerApi';
 import { uiSlice } from './ui/uiSlice';
 import { orderApi, orderSlice } from "./order";
+import { inventoryApi } from "./inventory/api";
 
 export const store = configureStore({
     reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
         [nearExpirationProductsApi.reducerPath]: nearExpirationProductsApi.reducer,
         [orderApi.reducerPath]: orderApi.reducer,
         [orderSlice.name]: orderSlice.reducer,
+        [inventoryApi.reducerPath]: inventoryApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -40,6 +42,7 @@ export const store = configureStore({
         .concat(nearExpirationProductsApi.middleware)
         .concat(trackerDetailApi.middleware)
         .concat(orderApi.middleware)
+        .concat(inventoryApi.middleware)
     ,
     devTools: true
 })

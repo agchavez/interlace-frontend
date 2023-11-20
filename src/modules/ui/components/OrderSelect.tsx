@@ -15,6 +15,7 @@ interface OrderSelectProps<
   name: Path<TField>;
   placeholder?: string;
   disabled?: boolean;
+  ignoreCompleted: boolean;
   onChange?: (value: Order | null) => void;
   orderId?: number;
   label?: string;
@@ -31,7 +32,8 @@ props: OrderSelectProps<TField>
     limit: 10,
     offset: 0,
     search: "",
-    id: props.orderId
+    id: props.orderId,
+    status_choice: props.ignoreCompleted ? ["IN_PROCESS", "PENDING"] : undefined,
   });
   
   const {
