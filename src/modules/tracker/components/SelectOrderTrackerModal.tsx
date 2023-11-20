@@ -22,25 +22,25 @@ import { StyledTableCell } from "./CheckForm";
 import { useForm } from "react-hook-form";
 import { OrderSelect } from "../../ui/components/OrderSelect";
 import { useGetOrderByIdQuery } from "../../../store/order";
-import {
-  OrderDetail,
-  OrderDetailCreateBody,
-  OrderDetailHistory,
-} from "../../../interfaces/orders";
+import { OrderDetail, OrderDetailCreateBody } from "../../../interfaces/orders";
 import { useAppDispatch } from "../../../store";
 import {
-  OrderDetailHistoryUtil,
+  DetalleCargaSalidaUtil,
   OrderDetailHistoryUtilActionType,
-  getOrderHistories,
   saveOrderHistories,
+  updateTracking,
 } from "../../../store/seguimiento/trackerThunk";
-import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
+import {
+  DetalleCargaSalida,
+  Seguimiento,
+} from "../../../store/seguimiento/seguimientoSlice";
 
 interface SelectOrderTrackerModalProps {
   open: boolean;
   handleClose: () => void;
   seguimiento: Seguimiento;
   indice: number;
+  setLocalidadValue: (value: number) => unknown
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -57,13 +57,13 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   handleClose,
   seguimiento,
   indice,
+  setLocalidadValue
 }) => {
   const { control, setValue } = useForm();
   const [id, setid] = useState<number | null>(seguimiento.order);
-  const histories = seguimiento.order_histories;
-  const [orderActions, setOrderActions] = useState<OrderDetailHistoryUtil[]>(
-    []
-  );
+  const [trackerOutputActions, setTrackerOutputActions] = useState<
+    (DetalleCargaSalidaUtil | null)[]
+  >([]);
   const { data: order, refetch } = useGetOrderByIdQuery(id ?? 0, {
     skip: !id,
   });
@@ -73,28 +73,37 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
 
   useEffect(() => {
     if (order) {
-      const actions: OrderDetailHistoryUtil[] = order.order_detail.map((d) => {
-        const id_order_detail_history =
-          histories && histories.find((odh) => odh.order_detail === d.id);
-        const action: OrderDetailHistoryUtil = {
-          action: "noaction",
-          created_at: "",
-          quantity: 0,
-          order_detail: d.id ?? 0,
-          tracker: seguimiento.id,
-          id: id_order_detail_history?.id,
-        };
-        return action;
-      });
-      setOrderActions(actions);
+      const actions: (DetalleCargaSalidaUtil | null)[] = order.order_detail.map(
+        (d) => {
+          const detalle_salida = seguimiento.detallesSalida?.find(
+            (ds) =>
+              ds.expiration_date === d.expiration_date &&
+              ds.sap_code === d.product_data?.sap_code
+          );
+          let action: DetalleCargaSalidaUtil | null = null;
+          if (detalle_salida) {
+            action = { detalleCargaSalida: detalle_salida, action: "noaction" };
+            detalle_salida.amount;
+          } else {
+            if (d.product_data) {
+              action = {
+                detalleCargaSalida: {
+                  ...d.product_data,
+                  amount: 0,
+                  idDetalle: -1,
+                  idProducto: d.product_data.id,
+                  expiration_date: d.expiration_date,
+                },
+                action: "noaction",
+              };
+            }
+          }
+          return action;
+        }
+      );
+      setTrackerOutputActions(actions);
     }
-  }, [order, histories, seguimiento.id]);
-
-  useEffect(() => {
-    if (order) {
-      dispatch(getOrderHistories(indice, seguimiento.id));
-    }
-  }, [dispatch, indice, order, seguimiento.id]);
+  }, [order, seguimiento.id, seguimiento.detallesSalida]);
 
   useEffect(() => {
     setValue("order", seguimiento.order);
@@ -151,46 +160,71 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   }, [handleClose]);
 
   const handleClickConfirmar = () => {
-    if(orderActions.some(oa => oa.action !== "noaction")) {
+    if (
+      trackerOutputActions.some((oa) =>
+        oa === null ? false : oa.action !== "noaction"
+      )
+    ) {
       dispatch(
-        saveOrderHistories(indice, seguimiento.id, orderActions, () => {})
+        saveOrderHistories(
+          indice,
+          seguimiento,
+          trackerOutputActions,
+          () => {
+            dispatch(updateTracking(indice, seguimiento.id, {destination_location:order?.location}))
+            if(order !== undefined)setLocalidadValue(order.location)
+          },
+          id as number
+        )
       );
     }
     handleClose();
   };
 
   const onChangeRow: ChangeAction = (detail, event, quantity) => {
-    const index = orderActions.findIndex((oa) => oa.order_detail === detail.id);
-    const history_for_detail = histories
-      ? histories.findIndex((h) => h.order_detail === detail.id) > -1
+    const index = trackerOutputActions.findIndex((oa) =>
+      oa === null
+        ? false
+        : oa.detalleCargaSalida.sap_code === detail.product_data?.sap_code &&
+          oa.detalleCargaSalida.expiration_date === detail.expiration_date
+    );
+    const trackerOutputForDetail = seguimiento.detallesSalida
+      ? seguimiento.detallesSalida.findIndex(
+          (ds) =>
+            ds.sap_code === detail.product_data?.sap_code &&
+            ds.expiration_date === detail.expiration_date
+        ) > -1
       : false;
     if (index > -1) {
       let action: OrderDetailHistoryUtilActionType = "noaction";
       let updateAction = true;
-      const oa = { ...orderActions[index] };
+      const oa = { ...trackerOutputActions[index] } as DetalleCargaSalidaUtil;
       if (event === "checked") {
-        if (history_for_detail) {
+        if (trackerOutputForDetail) {
           updateAction = false;
         } else {
           action = "add";
         }
       } else if (event === "unchecked") {
-        if (history_for_detail) {
+        if (trackerOutputForDetail) {
           action = "delete";
         } else {
           action = "noaction";
         }
       } else if (event === "ch-q") {
-        if (history_for_detail) {
+        if (trackerOutputForDetail) {
           action = "update";
         } else {
           updateAction = false;
         }
       }
-      setOrderActions((prev) => {
+      setTrackerOutputActions((prev) => {
         const newOrderActions = [...prev];
         const newValue = { ...oa };
-        quantity !== undefined && (newValue.quantity = quantity);
+        const detalleCargaSalida = { ...newValue.detalleCargaSalida };
+        quantity !== undefined && (detalleCargaSalida.amount = quantity);
+        quantity !== undefined &&
+          (newValue.detalleCargaSalida = detalleCargaSalida);
         updateAction && (newValue.action = action);
         newOrderActions.splice(index, 1, newValue);
         return newOrderActions;
@@ -254,6 +288,13 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                 </Typography>
               </Typography>
             </Grid>
+            {order?.status === "COMPLETED" && (
+              <Grid item xs={12} sx={{ marginTop: 2, color: "red" }}>
+                <Typography variant="body1" component="p">
+                  No se puede seleccionar una pedido que ya esté completado
+                </Typography>
+              </Grid>
+            )}
             <Grid item xs={12} sx={{ marginTop: 2 }}>
               <Typography variant="h6" component="h2">
                 Detalle del pedido
@@ -289,15 +330,17 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {order?.order_detail.map((detail) => (
-                      <TableRowComponent
-                        key={detail.id}
-                        handleAdd={handleAdd}
-                        detail={detail}
-                        histories={histories}
-                        changeAction={onChangeRow}
-                      />
-                    ))}
+                    {order?.order_detail
+                      .filter((detail) => detail.quantity_available !== 0)
+                      .map((detail) => (
+                        <TableRowComponent
+                          key={detail.id}
+                          handleAdd={handleAdd}
+                          detail={detail}
+                          detallesSalida={seguimiento.detallesSalida}
+                          changeAction={onChangeRow}
+                        />
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -305,7 +348,16 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button autoFocus onClick={handleClickConfirmar} color="primary" disabled={!orderActions.some(oa=>oa.action!=="noaction")}>
+          <Button
+            autoFocus
+            onClick={handleClickConfirmar}
+            color="primary"
+            disabled={
+              !trackerOutputActions.some((oa) =>
+                oa === null ? false : oa.action !== "noaction"
+              ) || order?.status === "COMPLETED"
+            }
+          >
             Confirmar
           </Button>
         </DialogActions>
@@ -322,13 +374,13 @@ type ChangeAction = (
 ) => unknown;
 interface TableRowComponentProps {
   detail: OrderDetail;
-  histories?: OrderDetailHistory[];
+  detallesSalida?: DetalleCargaSalida[];
   handleAdd: (detail: OrderDetail, quantity: number, checked: boolean) => void;
   changeAction: ChangeAction;
 }
 const TableRowComponent: FC<TableRowComponentProps> = ({
   detail,
-  histories,
+  detallesSalida,
   handleAdd,
   changeAction,
 }) => {
@@ -342,30 +394,49 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
 
   const { register, setValue, watch } = useForm<{ quantity: number | null }>();
   useEffect(() => {
-    if (histories && isChecked) {
+    if (detallesSalida && isChecked) {
       setValue(
         "quantity",
-        histories.find((h) => h.order_detail === detail.id)?.quantity ?? null
+        detallesSalida.find(
+          (ds) =>
+            ds.sap_code === detail.product_data?.sap_code &&
+            ds.expiration_date === detail.expiration_date
+        )?.amount ?? null
       );
     }
-  }, [detail.id, histories, isChecked, setValue]);
+  }, [
+    detail.id,
+    detallesSalida,
+    isChecked,
+    setValue,
+    detail.product_data?.sap_code,
+    detail.expiration_date,
+  ]);
 
   useEffect(() => {
-    const checked = histories
-      ? histories.findIndex((h) => h.order_detail === detail.id) > -1
+    const checked = detallesSalida
+      ? detallesSalida.findIndex(
+          (ds) =>
+            ds.sap_code === detail.product_data?.sap_code &&
+            ds.expiration_date === detail.expiration_date
+        ) > -1
       : false;
     setIsChecked(checked);
     if (checked) {
       setIsTextEnabled(checked);
     }
-  }, [detail.id, histories]);
+  }, [
+    detail.expiration_date,
+    detail.id,
+    detail.product_data?.sap_code,
+    detallesSalida,
+  ]);
 
   useEffect(() => {
     if (isChecked) {
       setIsTextEnabled(true);
     }
   }, [isChecked]);
-
 
   return (
     <TableRow
@@ -414,9 +485,9 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
           {...register(`quantity`)}
           value={watch(`quantity`) ?? ""}
           disabled={!isTextEnabled}
-          onBlur={(e) =>
-            changeAction(detail, "ch-q", parseInt(e.currentTarget.value))
-          }
+          onBlur={(e) => {
+            changeAction(detail, "ch-q", parseInt(e.currentTarget.value));
+          }}
           // onChange={() => changeAction(detail, "ch-q")}
         />
       </StyledTableCell>

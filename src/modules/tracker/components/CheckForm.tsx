@@ -91,7 +91,7 @@ export const CheckForm = ({
     (state) => state.auth.user?.centro_distribucion
   );
   const user = useAppSelector((state) => state.auth.user);
-  const { control, register, watch } = useForm<CheckFormType>({
+  const { control, register, watch, setValue } = useForm<CheckFormType>({
     defaultValues: {
       ...seguimiento,
       outputType: seguimiento.outputType?.toString(),
@@ -172,6 +172,7 @@ export const CheckForm = ({
           handleClose={() => setopenOrderModal(false)}
           seguimiento={seguimiento}
           indice={indice}
+          setLocalidadValue={(value: number)=>setValue("outputLocation", value)}
         />
       )}
       {open && (

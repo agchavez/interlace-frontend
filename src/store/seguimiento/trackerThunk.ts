@@ -31,7 +31,6 @@ import {
   removeDetalleCargaSalida,
   removeSeguimiento,
   setLoading,
-  setOrderHistories,
   setSeguimientoActual,
   setSeguimientos,
   updateDetalleCargaPallet,
@@ -40,7 +39,6 @@ import {
 import { AxiosResponse } from "axios";
 import { handleApiError } from "../../utils/error";
 import { OrderDetailHistory } from "../../interfaces/orders";
-import { BaseApiResponse } from "../../interfaces/api";
 
 // listar data inicial de mantenimiento
 export const getOpenTrackings = (): AppThunk => async (dispatch, getState) => {
@@ -618,9 +616,13 @@ export const removeFile =
     }
   };
 
-
-  export type OrderDetailHistoryUtilActionType = "add" | "update" | "delete" | "noaction";
-export interface OrderDetailHistoryUtil extends OrderDetailHistory {
+export type OrderDetailHistoryUtilActionType =
+  | "add"
+  | "update"
+  | "delete"
+  | "noaction";
+export interface DetalleCargaSalidaUtil {
+  detalleCargaSalida: DetalleCargaSalida;
   action: OrderDetailHistoryUtilActionType;
 }
 
@@ -628,59 +630,128 @@ export interface OrderDetailHistoryUtil extends OrderDetailHistory {
 export const saveOrderHistories =
   (
     indexSeguimiento: number,
-    idSeguimiento: number,
-    order_histories: OrderDetailHistoryUtil[],
-    cb: (() => unknown) | undefined
+    seguimiento: Seguimiento,
+    detalle_carga_salida: (DetalleCargaSalidaUtil | null)[],
+    cb: (() => unknown) | undefined,
+    newOrderId: number
   ): AppThunk =>
   async (dispatch, getState) => {
     try {
       dispatch(setLoading(true));
       const { token } = getState().auth;
 
-      const promises = order_histories
-        .map((oh) => {
-          if (oh.action === "add") {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { action, ...data } = oh;
+      if (newOrderId !== seguimiento.order) {
+        const { data: tracker } = await backendApi.patch<
+          Tracker,
+          AxiosResponse<Tracker>
+        >(
+          `/tracker/${seguimiento.id}/`,
+          { order: newOrderId },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        dispatch(
+          updateSeguimiento({
+            index: indexSeguimiento,
+            ...parseTrackerSeguimiento(tracker),
+          })
+        );
+      }
+
+      const promises = detalle_carga_salida
+        .map((ds) => {
+          if (ds === null) return;
+          if (ds.action === "add") {
+            const data: AddOutProductBody = {
+              product: ds.detalleCargaSalida.idProducto,
+              tracker: seguimiento.id,
+              quantity: ds.detalleCargaSalida.amount,
+              expiration_date: ds.detalleCargaSalida.expiration_date,
+            };
             const response = backendApi.post<
-            OrderDetailHistory,
-            AxiosResponse<OrderDetailHistory>
-            >(`/order-history/`, data, {
+              TrackerDeailOutput,
+              AxiosResponse<TrackerDeailOutput>
+            >(`/tracker-detail-output/`, data, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             });
             return response;
-          } else if (oh.action === "delete") {
-            const response = backendApi.delete(`/order-history/${oh.id}/`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
+          } else if (ds.action === "delete") {
+            if (newOrderId !== seguimiento.order) return;
+            const response = backendApi.delete(
+              `/tracker-detail-output/${ds.detalleCargaSalida.id}/`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
             return response;
-          } else if(oh.action === "update") {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { action, ...data } = oh;
-            if (!data.id) return;
-            const response = backendApi.patch<
-              OrderDetailHistory,
-              AxiosResponse<OrderDetailHistory>
-            >(`/order-history/${data.id}/`, data, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            return response;
+          } else if (ds.action === "update") {
+            if (newOrderId !== seguimiento.order) {
+              const data: AddOutProductBody = {
+                product: ds.detalleCargaSalida.idProducto,
+                tracker: seguimiento.id,
+                quantity: ds.detalleCargaSalida.amount,
+                expiration_date: ds.detalleCargaSalida.expiration_date,
+              };
+              const response = backendApi.post<
+                TrackerDeailOutput,
+                AxiosResponse<TrackerDeailOutput>
+              >(`/tracker-detail-output/`, data, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              return response;
+            } else {
+              const data: Partial<AddOutProductBody> = {
+                tracker: seguimiento.id,
+                quantity: ds.detalleCargaSalida.amount,
+              };
+              if (!ds.detalleCargaSalida.id) return;
+              const response = backendApi.patch<
+                OrderDetailHistory,
+                AxiosResponse<OrderDetailHistory>
+              >(
+                `/tracker-detail-output/${ds.detalleCargaSalida.idDetalle}/`,
+                data,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              return response;
+            }
           } else {
-            return
+            return;
           }
         })
         .filter((p) => p !== undefined);
       await Promise.allSettled(promises).then(async (value) => {
         const all_tompleted = value.every((pr) => pr.status === "fulfilled");
         if (all_tompleted) {
+          const { data: tracker } = await backendApi.get<
+            Tracker,
+            AxiosResponse<Tracker>
+          >(`/tracker/${seguimiento.id}/`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          dispatch(
+            updateSeguimiento({
+              index: indexSeguimiento,
+              ...parseTrackerSeguimiento(tracker),
+            })
+          );
           toast.success("Detalles guardados con éxito");
-        } else { 
+        } else {
           value.forEach(async (result, index) => {
             const promesa = promises[index];
             if (result.status === "rejected" && promesa) {
@@ -692,66 +763,8 @@ export const saveOrderHistories =
             }
           });
         }
-    });
-
-      //   const seguimientos =
-      //     getState().seguimiento.seguimientos[indexSeguimiento];
-      //   const { data, status } = await backendApi.post<
-      //     Tracker,
-      //     AxiosResponse<Tracker>
-      //   >(`/tracker/`, body, {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //     },
-      //   });
-      //   if (status < 400) {
-      //     dispatch(
-      //       updateSeguimiento({
-      //         index: indexSeguimiento,
-      //         ...parseTrackerSeguimiento(data),
-      //       })
-      //     );
-      //   }
-      toast.success("Historial de pedido guardado exitosamente");
-      cb && cb();
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      dispatch(getOrderHistories(indexSeguimiento, idSeguimiento))
-      dispatch(setLoading(false));
-    }
-  };
-
-// Order History
-export const getOrderHistories =
-  (
-    indexSeguimiento: number,
-    idSeguimiento: number,
-  ): AppThunk =>
-  async (dispatch, getState) => {
-    try {
-      dispatch(setLoading(true));
-      const { token } = getState().auth;
-      const response = await backendApi.get<
-        OrderDetailHistory,
-        AxiosResponse<BaseApiResponse<OrderDetailHistory>>
-      >(`/order-history/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        params: {
-            tracker: idSeguimiento
-        }
       });
-      if (response.status < 400) {
-        const order_histories = response.data.results;
-        dispatch(
-          setOrderHistories({
-            trackerIndex: indexSeguimiento,
-            order_histories: order_histories,
-          })
-        );
-      }
+      cb && cb();
     } catch (error) {
       handleApiError(error);
     } finally {
@@ -800,7 +813,7 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
     observation: tracker.observation,
     archivo_name: tracker.archivo_name,
     is_archivo_up: tracker.is_archivo_up,
-    order: tracker.order
+    order: tracker.order,
   };
   tracker.destination_location !== null &&
     (seguimiento.outputLocation = tracker.destination_location);
@@ -873,6 +886,7 @@ const parseOutputDetailSalida = (
     amount: tracker_detail.quantity,
     created_at: tracker_detail.created_at,
     idDetalle: tracker_detail.id,
+    idProducto: tracker_detail.product_data.id,
     expiration_date: tracker_detail.expiration_date,
   };
   return detalleSalida;

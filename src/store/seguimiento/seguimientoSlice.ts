@@ -70,6 +70,7 @@ export interface DetalleCarga extends Product {
 export interface DetalleCargaSalida extends Product {
     amount: number;
     idDetalle: number;
+    idProducto: number;
     expiration_date: string;
 }
 
@@ -118,7 +119,6 @@ export interface Seguimiento {
     observation: string | null;
     archivo_name: string | null;
     is_archivo_up: boolean;
-    order_histories?: OrderDetailHistory[];
     order: number | null;
 }
 
@@ -210,10 +210,10 @@ export const seguimientoSlice = createSlice({
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date, idProducto:product.id })
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date, idProducto:product.id }]
             }
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
@@ -232,13 +232,6 @@ export const seguimientoSlice = createSlice({
             state.seguimientos.splice(state.seguimeintoActual || 0, 1);
             state.seguimeintoActual = state.seguimientos.length - 1;
         },
-
-        setOrderHistories: (state, action: PayloadAction<{trackerIndex: number, order_histories: OrderDetailHistory[]}>)=>{
-            const index = action.payload.trackerIndex
-            const seguimiento = state.seguimientos[index]
-            const order_histories = action.payload.order_histories
-            seguimiento.order_histories = order_histories
-        }
     }
 })
 
@@ -257,5 +250,4 @@ export const {
     setLoading,
     setSeguimientos,
     removeSeguimientoActual,
-    setOrderHistories
 } = seguimientoSlice.actions;
