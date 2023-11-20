@@ -1,5 +1,5 @@
 import { Button, Divider, Grid, Paper, TextField, Typography } from '@mui/material';
-import React, { FC, useState } from 'react'
+import { FC, useState } from 'react'
 import { FileUploader } from 'react-drag-drop-files';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';

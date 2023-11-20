@@ -39,7 +39,7 @@ export const createOrder = (order: OrderCreateBody): AppThunk => {
       );
       if (resp.status === 201) {
         const details = order_detail.map((detail) => {
-          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id });
+          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id, order_detail_id: detail.id || 0 });
         });
         Promise.all(details).then(async () => {
           const response = await backendApi.get<Order>(
@@ -167,7 +167,7 @@ export const updateOrder = (
             return 
             // dispatch(updateOrderDetail(detail.id, detail));
           }
-          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id });
+          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id, order_detail_id: detail.id || 0 });
         });
         await Promise.all(details)
           .then(async () => {
