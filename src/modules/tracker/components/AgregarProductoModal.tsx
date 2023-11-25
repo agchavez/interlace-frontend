@@ -5,16 +5,15 @@ import {
     Container, 
     Dialog, 
     DialogActions, 
-    DialogContent, DialogTitle, Grid, IconButton, TextField, Typography, styled } from "@mui/material";
+    DialogContent, Grid, TextField, Typography, styled } from "@mui/material";
 import { FunctionComponent, useRef, useEffect, useState } from 'react';
-import CloseIcon from '@mui/icons-material/Close';
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { Product } from '../../../interfaces/tracking';
 import { ProductSelect } from "../../ui/components/ProductSelect";
 import { getArticlesByBarcode } from '../../../store/maintenance/maintenanceThunk';
 import { addDetalle } from "../../../store/seguimiento/trackerThunk";
-
+import DialogTitle from "../../ui/components/BoostrapDialog";
 interface CreateCheckProps {
     open: boolean;
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;
@@ -108,24 +107,9 @@ const AgregarProductoModal: FunctionComponent<CreateCheckProps> = ({ open, handl
     return (
         <>
             <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="md">
-                <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+                <DialogTitle onClose={() => handleClose && handleClose({}, "backdropClick")} id="customized-dialog-title">
                     Agregar
                 </DialogTitle>
-                <IconButton
-                    aria-label="close"
-                    onClick={() => handleClose && handleClose({}, "backdropClick")}
-                    sx={{
-                        position: 'absolute',
-                        right: 8,
-                        top: 8,
-                        color: (theme) => theme.palette.grey[500],
-                        textDecoration: 'underline', // Agrega un subrayado para hacerlo parecer un enlace
-                        cursor: 'pointer', // Cambia el cursor al estilo "mano" para indicar que es interactivo
-                    }}
-                    color="primary"
-                >
-                    <CloseIcon />
-                </IconButton>
                 <DialogContent dividers>
                     <Box>
                         <Container maxWidth="xl">

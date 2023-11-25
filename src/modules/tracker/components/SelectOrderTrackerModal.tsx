@@ -4,9 +4,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
   Table,
   TableBody,
   TableContainer,
@@ -16,7 +14,6 @@ import {
   styled,
 } from "@mui/material";
 import { FC, useState, useEffect } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import TableRow from "@mui/material/TableRow";
 import { StyledTableCell } from "./CheckForm";
 import { useForm } from "react-hook-form";
@@ -34,6 +31,7 @@ import {
   DetalleCargaSalida,
   Seguimiento,
 } from "../../../store/seguimiento/seguimientoSlice";
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
 
 interface SelectOrderTrackerModalProps {
   open: boolean;
@@ -242,26 +240,11 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         fullWidth={true}
         maxWidth="lg"
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <BootstrapDialogTitle onClose={() => handleClose()} id="customized-dialog-title">
           <Typography variant="h6" component="div" fontWeight={400}>
             Configuración de pedido
           </Typography>
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={() => handleClose()}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-            cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-          }}
-          color="primary"
-        >
-          <CloseIcon />
-        </IconButton>
+        </BootstrapDialogTitle>
         <DialogContent dividers>
           <Grid container spacing={1}>
             <Grid item xs={6}>
