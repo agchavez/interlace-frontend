@@ -107,7 +107,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     id: idTrackerDetailProduct,
     limit: 1,
     offset: 0,
-  });
+  }, {skip: idTrackerDetailProduct < 1});
 
   const {
     handleSubmit,
@@ -166,7 +166,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     }
     if (!data) return;
     const resp = data;
-    setValue("quantity", resp.available_quantity.toString());
     setMaxqt(resp.available_quantity);
     setTrackerDetail(resp);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -216,7 +215,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       })
     );
     reset();
-    handleClose && handleClose({}, "backdropClick");
   };
 
   const handleClickCreate = () => {
@@ -272,6 +270,12 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
         )?.expiration_date;
         // eslint-disable-next-line react-hooks/exhaustive-deps 
   }, [tracker]); 
+
+  const watchIdTracker = watch("idTracker")
+  const watchIdTrackerDetail = watch("idTrackerDetail")
+  useEffect(()=>{
+    setMaxqt(0)
+  }, [watchIdTracker, watchIdTrackerDetail])
 
   return (
     <BootstrapDialog
@@ -346,6 +350,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         variant="outlined"
                         size="small"
                         type="number"
+                        inputProps={{ min: 0 }}
                         {...register("idTracker")}
                         onChange={(e) => {
                           const value = parseInt(e.target.value);
@@ -467,7 +472,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                             );
                             if (productDet !== undefined) {
                               setMaxqt(productDet.available_quantity);
-                              setValue("quantity", productDet.available_quantity.toString())
                             } else {
                               setMaxqt(0);
                               setValue("quantity", "")
@@ -506,25 +510,37 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                     </Grid>
                     { (!readQR || (readQR && tracker)) && 
                       <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        id="outlined-basic"
-                        label="Cantidad"
-                        variant="outlined"
-                        size="small"
-                        type="number"
-                        inputProps={{ min: 0 }}
-                        
-                        onChange={(e) => {
-                          if (e.target.value === "") return;
-                          const value = parseInt(e.target.value);
-                          setValue("quantity", value.toString());
-                        }}
-                        value={watch("quantity")}
-                        error={errors.quantity ? true : false}
-                        helperText={errors.quantity?.message}
-                      />
-                    </Grid>}
+                        <Grid container alignItems="center" gap={1}>
+                          <Grid item flexGrow={1}>
+                          <TextField
+                            fullWidth
+                            id="outlined-basic"
+                            label="Cantidad"
+                            variant="outlined"
+                            size="small"
+                            type="number"
+                            inputProps={{ min: 0, max:maxqt }}
+                            
+                            onChange={(e) => {
+                              if (e.target.value === "") return;
+                              const value = parseInt(e.target.value);
+                              setValue("quantity", value.toString());
+                            }}
+                            value={watch("quantity")}
+                            error={errors.quantity ? true : false}
+                            helperText={errors.quantity?.message}
+                            />
+                          </Grid>
+                          {
+                            maxqt > 0 &&
+                            <Grid>
+                              <Typography>
+                                {maxqt}
+                              </Typography>
+                            </Grid>
+                          }
+                        </Grid>
+                      </Grid>}
                     </Grid>
                 </form>
                 

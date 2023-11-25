@@ -15,6 +15,8 @@ import {
   Chip,
   CircularProgress,
   Paper,
+  Collapse,
+  Box,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -28,6 +30,9 @@ import * as yup from "yup";
 import { useRef, useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+
 import {
   changeOrder,
   createOrder,
@@ -448,6 +453,8 @@ export const RegisterOrderpage = () => {
                         <TableHead>
                           <TableRow>
                             <StyledTableCell align="left">
+                            </StyledTableCell>
+                            <StyledTableCell align="left">
                               Tracking
                             </StyledTableCell>
                             <StyledTableCell align="left">
@@ -503,43 +510,96 @@ const Row = ({
   index: number;
   disabled: boolean;
 }) => {
+  const [open, setOpen] = useState(false);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const dispatch = useAppDispatch();
   const handleClickDeleteOrderDetail = (index: number) => {
     dispatch(removeOrderDetail({ index }));
   };
   return (
-    <TableRow key={row.id}>
-      {openModalDelete && (
-        <DeleteOrderModal
+    <>
+      <TableRow key={row.id}>
+        {openModalDelete && (
+          <DeleteOrderModal
           title="Eliminar Detalle de Pedido"
           message="¿Está seguro que desea eliminar el detalle de pedido?"
           open={openModalDelete}
           handleClose={() => setOpenModalDelete(false)}
           onDelete={() => handleClickDeleteOrderDetail(index)}
-        />
-      )}
-      <TableCell>
-        TRK-
-        {row.tracking_id.toString().padStart(5, "0")}
-      </TableCell>
-      <TableCell>{row.product_data?.sap_code}</TableCell>
-      <TableCell>{row.product_data?.name}</TableCell>
-      <TableCell>{row.quantity}</TableCell>
-      <TableCell>{row.quantity_available}</TableCell>
-      <TableCell>
-        {format(
-          toDate(new Date(row.expiration_date).toISOString().split("T")[0]),
-          "yyyy-MM-dd"
-        )}
-      </TableCell>
-      {!disabled && (
-        <TableCell align="right">
-          <IconButton color="error" onClick={() => setOpenModalDelete(true)}>
-            <DeleteTwoToneIcon fontSize="medium" />
+          />
+          )} 
+        <TableCell>
+          <IconButton
+            aria-label="expand row"
+            size="small"
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-      )}
-    </TableRow>
+        <TableCell>
+          TRK-
+          {row.tracking_id.toString().padStart(5, "0")}
+        </TableCell>
+        <TableCell>{row.product_data?.sap_code}</TableCell>
+        <TableCell>{row.product_data?.name}</TableCell>
+        <TableCell>{row.quantity}</TableCell>
+        <TableCell>{row.quantity_available}</TableCell>
+        <TableCell>
+          {format(
+            toDate(new Date(row.expiration_date).toISOString().split("T")[0]),
+            "yyyy-MM-dd"
+            )}
+        </TableCell>
+        {!disabled && (
+          <TableCell align="right">
+            <IconButton color="error" onClick={() => setOpenModalDelete(true)}>
+              <DeleteTwoToneIcon fontSize="medium" />
+            </IconButton>
+          </TableCell>
+        )}
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1 }}>
+              <Typography variant="h6" gutterBottom component="div">
+                Detalles
+              </Typography>
+              <Table size="small" aria-label="purchases">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Tracking</TableCell>
+                    <TableCell>Cajas</TableCell>
+                    <TableCell>Fecha</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {row.order_detail_history.map((historyRow) => (
+                    <TableRow key={historyRow.id}>
+                      <TableCell>
+                        TRK-
+                        {historyRow.tracker.toString().padStart(8, "0")}
+                      </TableCell>
+                      <TableCell>{historyRow.quantity}</TableCell>
+                      <TableCell>
+                      {format(
+                          toDate(
+                            new Date(historyRow.created_at)
+                              .toISOString()
+                              .split("T")[0]
+                          ),
+                          "yyyy-MM-dd"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
   );
 };
