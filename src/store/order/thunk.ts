@@ -41,14 +41,7 @@ export const createOrder = (order: OrderCreateBody): AppThunk => {
         const details = order_detail.map((detail) => {
           return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id, order_detail_id: detail.id || 0 });
         });
-        Promise.all(details).then(async () => {
-          const response = await backendApi.get<Order>(
-            `/order/${resp.data.id}/`,
-            {
-              headers: { Authorization: `Bearer ${auth.token}` },
-            }
-          );
-          dispatch(setOrder(response.data));
+        Promise.allSettled(details).then(async () => {
           toast.success("Pedido guardado con exito");
         });
       }
@@ -223,7 +216,7 @@ export const getOrder = (id: number, cb?:()=>void): AppThunk => {
         cb && cb()
       }
     } catch (error) {
-      console.log("error")
+      console.log("error", error)
       errorApiHandler(error, "No se pudo obtener el pedido");
     } finally {
       dispatch(setLoadingOrder(false));

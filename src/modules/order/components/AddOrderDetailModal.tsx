@@ -107,7 +107,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     id: idTrackerDetailProduct,
     limit: 1,
     offset: 0,
-  });
+  }, {skip: idTrackerDetailProduct < 1});
 
   const {
     handleSubmit,
@@ -216,7 +216,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       })
     );
     reset();
-    handleClose && handleClose({}, "backdropClick");
   };
 
   const handleClickCreate = () => {
@@ -346,6 +345,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         variant="outlined"
                         size="small"
                         type="number"
+                        inputProps={{ min: 0 }}
                         {...register("idTracker")}
                         onChange={(e) => {
                           const value = parseInt(e.target.value);
@@ -513,7 +513,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         variant="outlined"
                         size="small"
                         type="number"
-                        inputProps={{ min: 0 }}
+                        inputProps={{ min: 0, max:maxqt }}
                         
                         onChange={(e) => {
                           if (e.target.value === "") return;

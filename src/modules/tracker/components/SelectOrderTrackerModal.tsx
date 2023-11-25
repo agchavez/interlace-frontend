@@ -486,6 +486,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
           color="secondary"
           size="small"
           type="number"
+          inputProps={{ min: 0, max:detail.quantity_available }}
           {...register(`quantity`)}
           value={watch(`quantity`) ?? ""}
           disabled={!isTextEnabled}
