@@ -32,13 +32,14 @@ import {
   Seguimiento,
 } from "../../../store/seguimiento/seguimientoSlice";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import { toast } from "sonner";
 
 interface SelectOrderTrackerModalProps {
   open: boolean;
   handleClose: () => void;
   seguimiento: Seguimiento;
   indice: number;
-  setLocalidadValue: (value: number) => unknown
+  setLocalidadValue: (value: number) => unknown;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -50,13 +51,12 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-
 export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   open,
   handleClose,
   seguimiento,
   indice,
-  setLocalidadValue
+  setLocalidadValue,
 }) => {
   const { control, setValue } = useForm();
   const [id, setid] = useState<number | null>(seguimiento.order);
@@ -107,6 +107,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
 
   useEffect(() => {
     setValue("order", seguimiento.order);
+    setid(seguimiento.order)
   }, [open, seguimiento.order, setValue]);
 
   const handleAdd = (
@@ -165,14 +166,58 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         oa === null ? false : oa.action !== "noaction"
       )
     ) {
+      if (
+        trackerOutputActions.some((oa) => {
+          if (oa === null || oa.action === "noaction") {
+            return false;
+          } else {
+            const idx =
+              order?.order_detail.findIndex((order_d) => {
+                return (
+                  order_d.product_data?.sap_code ===
+                    oa.detalleCargaSalida.sap_code &&
+                  oa.detalleCargaSalida.expiration_date ===
+                    order_d.expiration_date
+                );
+              });
+            if (idx === undefined || idx < 0 ) {
+              return true;
+            }
+            const disponible = order?.order_detail[idx];
+            if (disponible === undefined) {
+              return true;
+            }
+
+            if (oa.detalleCargaSalida.amount > disponible.quantity_available) {
+              toast.error(
+                `la cantidad seleccionada del producto ${oa.detalleCargaSalida.name} supera a la cantidad disponible`
+              );
+              return true;
+            }
+            if (oa.detalleCargaSalida.amount < 1) {
+              toast.error(
+                `La cantidad debe ser de al menos 1 producto: ${oa.detalleCargaSalida.name}`
+              );
+              return true;
+            }
+            return false;
+          }
+        })
+      ) {
+        return;
+      }
       dispatch(
         saveOrderHistories(
           indice,
           seguimiento,
           trackerOutputActions,
           () => {
-            dispatch(updateTracking(indice, seguimiento.id, {destination_location:order?.location}))
-            if(order !== undefined)setLocalidadValue(order.location)
+            dispatch(
+              updateTracking(indice, seguimiento.id, {
+                destination_location: order?.location,
+              })
+            );
+            if (order !== undefined) setLocalidadValue(order.location);
           },
           id as number
         )
@@ -205,7 +250,6 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         } else {
           action = "add";
         }
-
       } else if (event === "unchecked") {
         if (trackerOutputForDetail) {
           action = "delete";
@@ -240,7 +284,10 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         fullWidth={true}
         maxWidth="lg"
       >
-        <BootstrapDialogTitle onClose={() => handleClose()} id="customized-dialog-title">
+        <BootstrapDialogTitle
+          onClose={() => handleClose()}
+          id="customized-dialog-title"
+        >
           <Typography variant="h6" component="div" fontWeight={400}>
             Configuración de pedido
           </Typography>
@@ -469,7 +516,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
           color="secondary"
           size="small"
           type="number"
-          inputProps={{ min: 0, max:detail.quantity_available }}
+          inputProps={{ min: 1, max: detail.quantity_available }}
           {...register(`quantity`)}
           value={watch(`quantity`) ?? ""}
           disabled={!isTextEnabled}
