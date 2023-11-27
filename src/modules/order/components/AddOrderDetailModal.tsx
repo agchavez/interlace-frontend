@@ -201,6 +201,10 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
       toast.error("El pedido ya contiene este detalle");
       return;
     }
+    if ( parseInt(data.quantity) > maxqt ) {
+      toast.error("La cantidad de cajas elegida supera a la cantidad máxima")
+      return
+    }
     dispatch(
       addOrderDetailState(trackerDetailProduct.tracker_detail_id, {
         id: null,
