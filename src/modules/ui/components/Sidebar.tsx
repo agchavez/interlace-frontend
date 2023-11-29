@@ -36,6 +36,11 @@ const items: SideBarItem[] = [
         href: "/",
         id: "dashboard",
       },
+      {
+        text: "IN-OUT",
+        href: "/tracker/view",
+        id: "vista",
+      },
     ],
     id: "inicio",
   },
@@ -73,11 +78,6 @@ const items: SideBarItem[] = [
         text: "Pedidos",
         href: "/order/manage",
         id: "order",
-      },
-      {
-        text: "IN-OUT",
-        href: "/tracker/view",
-        id: "vista",
       },
       
 
