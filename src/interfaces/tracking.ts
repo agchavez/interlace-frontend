@@ -139,7 +139,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   user?: number[];
   date_after?: string;
   date_before?: string;
-  status?: 'COMPLETE' | 'PENDING' | 'EDITED';
+  status?: string;
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
   type?: "IMPORT" | "LOCAL",
