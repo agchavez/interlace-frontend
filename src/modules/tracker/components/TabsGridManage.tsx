@@ -222,7 +222,7 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
         // },
         {
             field: "time_invested",
-            headerName: "TAT (Tiempo Invertido)",
+            headerName: "TAT",
             flex: 1,
             width: 180,
             minWidth: 180,
@@ -369,8 +369,8 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
             field: "invoice_number",
             headerName: "No. Factura",
             flex: 1,
-            width: 130,
-            minWidth: 130,
+            width: 200,
+            minWidth: 200,
             renderCell: (params) => {
                 return (
                     <Typography variant="body2">

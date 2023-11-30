@@ -22,7 +22,8 @@ export const trackerApi = createApi({
                 url: `/tracker/`,
                 method: 'GET',
                 params: {
-                    ...params
+                    ...params,
+                    distributor_center: params.distributor_center?.length  === 0 ? undefined : params.distributor_center![0]
                 }
             }),
             keepUnusedDataFor: 120000

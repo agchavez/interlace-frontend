@@ -629,7 +629,7 @@ export const CheckForm = ({
                 />
               </Grid>
             )}
-            <Grid item xs={12} md={6}>
+            {/* <Grid item xs={12} md={6}>
               {seguimiento?.type === "LOCAL" ? (
                 <TextField
                   fullWidth
@@ -662,7 +662,7 @@ export const CheckForm = ({
                   }
                 />
               )}
-            </Grid>
+            </Grid> */}
 
             <Grid item xs={12} md={6}>
               <TextField

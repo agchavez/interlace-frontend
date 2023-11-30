@@ -36,13 +36,14 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   };
 
   const fetchData = async () => {
+    const distributor_center = query.distributor_center?.length  === 0 ? undefined : query.distributor_center![0]
     const response = await backendApi.get<BaseApiResponse<Tracker>>(
       `/tracker/`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { ...query, offset: 0, limit: t1Count },
+        params: { ...query, offset: 0, limit: t1Count, distributor_center: distributor_center },
       }
     );
     return response.data;
@@ -69,7 +70,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       trackerData = data.results.map((tr) => {
         return [
           format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
-          "TRK-" + tr.id.toString().padStart(10, "0"),
+          "TRK-" + tr.id.toString().padStart(5, "0"),
           tr.distributor_center_data.name,
           tr.container_number,
           tr.plate_number,
@@ -85,12 +86,11 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "Tracking",
         "Centro de Distribución",
         "Transferencia de entrada",
-        "Transferencia de salida",
         "Traslado 5001",
         "Transferencia de Salida",
         "Contabilizado",
         "Usuario",
-        "TAT (Tiempo invertido)",
+        "TAT",
         "Observaciones",
       ];
       trackerData = data.results.map((tr) => {
@@ -98,17 +98,17 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         const tiempoEntrada = tr.input_date && new Date(tr.input_date);
         return [
           format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
-          "TRK-" + tr.id.toString().padStart(10, "0"),
+          "TRK-" + tr.id.toString().padStart(5, "0"),
           tr.distributor_center_data.name,
           tr.input_document_number,
-          tr.output_document_number,
           tr.transfer_number,
           tr.output_document_number,
           tr.accounted,
           tr.user_name,
           (tiempoSalida && tiempoEntrada
-          ? Math.floor((tiempoSalida.getTime() - tiempoEntrada.getTime()) / (1000 * 60)) // Calcula la diferencia en minutos
-          : "") + " min",
+            // Solo tomar 2 decimales
+          ? ((tiempoSalida.getTime() - tiempoEntrada.getTime()) / (1000 * 60)).toFixed(2) // Calcula la diferencia en minutos
+          : ""),
           tr.observation,
         ];
       });
