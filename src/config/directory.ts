@@ -113,18 +113,18 @@ export const permisions = [
             "report.report_shift",
         ]
     },
-    {
-        url: "/order/manage",
-        permissions: [
-            "any"
-        ]
-    },
-    {
-        url: "/order/register",
-        permissions: [
-            "any"
-        ]
-    },
+    // {
+    //     url: "/order/manage",
+    //     permissions: [
+    //         "any"
+    //     ]
+    // },
+    // {
+    //     url: "/order/register",
+    //     permissions: [
+    //         "any"
+    //     ]
+    // },
     {
         url: "/report/por-expirar",
         permissions: [
