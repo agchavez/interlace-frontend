@@ -6,13 +6,12 @@ import { EditNoteOutlined, LocalShippingOutlined } from "@mui/icons-material";
 import PublicTwoToneIcon from '@mui/icons-material/PublicTwoTone';
 import { FC, useEffect, useState } from "react";
 import { Tracker, TrackerQueryParams } from '../../../interfaces/tracking';
-import { Typography, Chip, IconButton, Grid, Box, Tabs, Tab, CircularProgress } from '@mui/material';
+import { Typography, IconButton, Grid, Box, Tabs, Tab } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { chanceStatusTracking, downloadFile } from '../../../store/seguimiento/trackerThunk';
+import { chanceStatusTracking } from '../../../store/seguimiento/trackerThunk';
 import { formatDistance } from "date-fns";
 import { es } from "date-fns/locale";
-import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
 
 
 const tableBase = {
@@ -241,16 +240,16 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
                 );
             },
         },
-        {
-            field: "archivo_name",
-            headerName: "Documentos Adjuntos",
-            flex: 1,
-            width: 170,
-            minWidth: 170,
-            renderCell: (params) => {
-               return <ChipFile tracker={params.row} />;
-            },
-        },
+        // {
+        //     field: "archivo_name",
+        //     headerName: "Documentos Adjuntos",
+        //     flex: 1,
+        //     width: 170,
+        //     minWidth: 170,
+        //     renderCell: (params) => {
+        //        return <ChipFile tracker={params.row} />;
+        //     },
+        // },
 
         {
             field: "ver",
@@ -428,16 +427,16 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
                 );
             },
         },
-        {
-            field: "archivo_name",
-            headerName: "Documentos Adjuntos",
-            flex: 1,
-            width: 170,
-            minWidth: 170,
-            renderCell: (params) => {
-               return <ChipFile tracker={params.row} />;
-            },
-        },
+        // {
+        //     field: "archivo_name",
+        //     headerName: "Documentos Adjuntos",
+        //     flex: 1,
+        //     width: 170,
+        //     minWidth: 170,
+        //     renderCell: (params) => {
+        //        return <ChipFile tracker={params.row} />;
+        //     },
+        // },
 
         {
             field: "ver",
@@ -539,32 +538,32 @@ function a11yProps(index: number) {
 }
 
 
-const ChipFile: FC<{ tracker: Tracker }> = ({ tracker }) => {
-    const dispatch = useAppDispatch();
-    const [loading, setloading] = useState(false)
-    const handleClickDescargar = () => {
-        setloading(true)
-        dispatch(downloadFile(tracker.id, () => {
-            setloading(false)
-        }))
-    };
+// const ChipFile: FC<{ tracker: Tracker }> = ({ tracker }) => {
+//     const dispatch = useAppDispatch();
+//     const [loading, setloading] = useState(false)
+//     const handleClickDescargar = () => {
+//         setloading(true)
+//         dispatch(downloadFile(tracker.id, () => {
+//             setloading(false)
+//         }))
+//     };
 
-    if (tracker.is_archivo_up == false) {
-        return (
-            <>--</>
-        );
-    }
-    return (
-        <Chip
-            onClick={handleClickDescargar}
-            label={loading ? "Descargando..." : "Descargar"}
-            variant='outlined'
-            color="secondary"
-            icon={
-                loading ? <CircularProgress size={20} /> :
-                    <CloudDownloadTwoToneIcon color="secondary" />}
-            size="medium"
-            sx={{ mt: 1 }}
-        />
-    );
-}
+//     if (tracker.is_archivo_up == false) {
+//         return (
+//             <>--</>
+//         );
+//     }
+//     return (
+//         <Chip
+//             onClick={handleClickDescargar}
+//             label={loading ? "Descargando..." : "Descargar"}
+//             variant='outlined'
+//             color="secondary"
+//             icon={
+//                 loading ? <CircularProgress size={20} /> :
+//                     <CloudDownloadTwoToneIcon color="secondary" />}
+//             size="medium"
+//             sx={{ mt: 1 }}
+//         />
+//     );
+// }
