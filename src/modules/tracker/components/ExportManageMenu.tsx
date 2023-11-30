@@ -12,8 +12,8 @@ import backendApi from "../../../config/apiConfig";
 import { BaseApiResponse } from "../../../interfaces/api";
 import { useAppSelector } from "../../../store";
 import { StyledMenu } from "../../ui/components/StyledMenu";
-import { format } from "date-fns";
-import { optionsTypeTracker } from "../../../utils/common";
+import { format, formatDistance } from "date-fns";
+import { es } from "date-fns/locale";
 interface ExportManageProps {
   disabled: boolean;
   query: TrackerQueryParams;
@@ -52,45 +52,74 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   const handleExport = async (type: "csv" | "xlsx") => {
     setLoading(true);
     handleClose();
+    let headers: string[] = []
+    let trackerData:(string | number | null)[][] = []
     const data = await fetchData();
-    const headers = [
-      "Tracking",
-      "Tipo",
-      "Centro de Distribución",
-      "Trailer",
-      "Transferencia de entrada",
-      "No. Factura",
-      "Traslado 5001",
-      "Transferencia de salida",
-      "Contabilizado",
-      "Estado",
-      "Registrado el",
-      "Completado el",
-      "Usuario",
-    ];
-    const trackerData = data.results.map((tr) => {
-      return [
-        "TRK-" + tr.id.toString().padStart(10, "0"),
-        optionsTypeTracker[tr.type],
-        tr.distributor_center_data.name,
-        tr.tariler_data.code,
-        tr.input_document_number,
-        tr.invoice_number,
-        tr.transfer_number,
-        tr.output_document_number,
-        tr.accounted,
-        tr.status == "COMPLETE"
-          ? "Completado"
-          : tr.status == "PENDING"
-          ? "Pendiente"
-          : "En atención",
-        format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
-        tr.completed_date
-          ? format(new Date(tr.completed_date), "dd/MM/yyyy hh:mm")
-          : "-",
-        tr.user_name,
+    if(query.type === "IMPORT" ){
+      headers = [
+        "Fecha",
+        "Tracking",
+        "Centro de Distribución",
+        "# Contenedor",
+        "# Placa",
+        "No. Factura",
+        "Traslado 5001",
+        "Usuario",
+        "TAT (Tiempo Invertido)",
+        "Observaciones",
       ];
-    });
+      trackerData = data.results.map((tr) => {
+        const tiempoSalida = tr.output_date;
+        const tiempoEntrada = tr.input_date;
+        return [
+          format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
+          "TRK-" + tr.id.toString().padStart(10, "0"),
+          tr.distributor_center_data.name,
+          tr.container_number,
+          tr.plate_number,
+          tr.invoice_number,
+          tr.transfer_number,
+          tr.user_name,
+          tiempoSalida && tiempoEntrada
+            ? formatDistance(new Date(tiempoSalida), new Date(tiempoEntrada), {
+                locale: es,
+            })
+            : "",
+          tr.observation,
+        ];
+      });
+    } else {
+      headers = [
+        "Fecha",
+        "Tracking",
+        "Centro de Distribución",
+        "Transferencia de entrada",
+        "Traslado 5001",
+        "Contabilizado",
+        "Usuario",
+        "TAT (Tiempo invertido)",
+        "Observaciones",
+      ];
+      trackerData = data.results.map((tr) => {
+        const tiempoSalida = tr.output_date;
+        const tiempoEntrada = tr.input_date;
+        return [
+          format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
+          "TRK-" + tr.id.toString().padStart(10, "0"),
+          tr.distributor_center_data.name,
+          tr.input_document_number,
+          tr.transfer_number,
+          tr.accounted,
+          tr.user_name,
+          tiempoSalida && tiempoEntrada
+            ? formatDistance(new Date(tiempoSalida), new Date(tiempoEntrada), {
+                locale: es,
+            })
+            : "",
+          tr.observation,
+        ];
+      });
+    }
     if (type == "csv") {
       await exportToCSV({
         data: [headers, ...trackerData],
