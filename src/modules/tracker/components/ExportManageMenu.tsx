@@ -12,8 +12,7 @@ import backendApi from "../../../config/apiConfig";
 import { BaseApiResponse } from "../../../interfaces/api";
 import { useAppSelector } from "../../../store";
 import { StyledMenu } from "../../ui/components/StyledMenu";
-import { format, formatDistance } from "date-fns";
-import { es } from "date-fns/locale";
+import { format, } from "date-fns";
 interface ExportManageProps {
   disabled: boolean;
   query: TrackerQueryParams;
@@ -65,12 +64,9 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "No. Factura",
         "Traslado 5001",
         "Usuario",
-        "TAT (Tiempo Invertido)",
         "Observaciones",
       ];
       trackerData = data.results.map((tr) => {
-        const tiempoSalida = tr.output_date;
-        const tiempoEntrada = tr.input_date;
         return [
           format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
           "TRK-" + tr.id.toString().padStart(10, "0"),
@@ -80,11 +76,6 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
           tr.invoice_number,
           tr.transfer_number,
           tr.user_name,
-          tiempoSalida && tiempoEntrada
-            ? formatDistance(new Date(tiempoSalida), new Date(tiempoEntrada), {
-                locale: es,
-            })
-            : "",
           tr.observation,
         ];
       });
@@ -94,6 +85,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "Tracking",
         "Centro de Distribución",
         "Transferencia de entrada",
+        "Transferencia de salida",
         "Traslado 5001",
         "Contabilizado",
         "Usuario",
@@ -101,21 +93,20 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "Observaciones",
       ];
       trackerData = data.results.map((tr) => {
-        const tiempoSalida = tr.output_date;
-        const tiempoEntrada = tr.input_date;
+        const tiempoSalida = tr.output_date && new Date(tr.output_date);
+        const tiempoEntrada = tr.input_date && new Date(tr.input_date);
         return [
           format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
           "TRK-" + tr.id.toString().padStart(10, "0"),
           tr.distributor_center_data.name,
           tr.input_document_number,
+          tr.output_document_number,
           tr.transfer_number,
           tr.accounted,
           tr.user_name,
-          tiempoSalida && tiempoEntrada
-            ? formatDistance(new Date(tiempoSalida), new Date(tiempoEntrada), {
-                locale: es,
-            })
-            : "",
+          (tiempoSalida && tiempoEntrada
+          ? Math.floor((tiempoSalida.getTime() - tiempoEntrada.getTime()) / (1000 * 60)) // Calcula la diferencia en minutos
+          : "") + " min",
           tr.observation,
         ];
       });

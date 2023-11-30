@@ -17,7 +17,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { Controller, useForm } from "react-hook-form";
 import { TrailerSelect } from "../../ui/components";
@@ -48,7 +48,7 @@ export interface FormFilterTrack {
   date_after: string;
   date_before: string;
   date_range: FilterDate;
-  status: "COMPLETE" | "PENDING" | "EDITED";
+  status: string;
   onlyMyTreckers: boolean;
   type?: "IMPORT" | "LOCAL";
   distribution_center?: number;
@@ -67,6 +67,7 @@ export const FilterManage: FC<FilterManageProps> = ({
   const { manageQueryParams } = useAppSelector((state) => state.ui);
   const { user } = useAppSelector((state) => state.auth);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
+  const [estados, setEstados] = useState({COMPLETE:true, PENDING:true, EDITED:true})
   const { control, register, watch, setValue, getValues } =
     useForm<FormFilterTrack>({
       defaultValues: {
@@ -90,9 +91,11 @@ export const FilterManage: FC<FilterManageProps> = ({
 
   useEffect(() => {
     const data = getValues();
-    handleFilter(data);
+    const clavesTrue = Object.entries(estados).filter(([, value]) => value === true).map(([key])=>key);
+    const resultado = clavesTrue.join(",");
+    handleFilter({...data, status: resultado});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ watch("date_after"), watch("date_before"), watch("date_range"), watch("search"), watch("trailer"), watch("transporter"), watch("status"), watch("onlyMyTreckers"), watch("type"), watch("distribution_center"), watch('id') ]);
+  }, [ estados, watch("date_after"), watch("date_before"), watch("date_range"), watch("search"), watch("trailer"), watch("transporter"), watch("status"), watch("onlyMyTreckers"), watch("type"), watch("distribution_center"), watch('id') ]);
 
   const handleReset = () => {
     setValue("search", "");
@@ -389,7 +392,7 @@ export const FilterManage: FC<FilterManageProps> = ({
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      label="Mayor que"
+                      label="Del"
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
                       value={ isValid(new Date(watch("date_after") )) ? new Date(watch("date_after")) : null}
                       inputRef={field.ref}
@@ -409,7 +412,7 @@ export const FilterManage: FC<FilterManageProps> = ({
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      label="Menor que"
+                      label="Al"
                       format="dd/MM/yyyy"
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
                       value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
@@ -434,8 +437,8 @@ export const FilterManage: FC<FilterManageProps> = ({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "COMPLETE"}
-                      onChange={() => setValue("status", "COMPLETE")}
+                      checked={estados.COMPLETE}
+                      onChange={(value) => setEstados((prev)=>({...prev, COMPLETE:value.currentTarget.checked}))}
                     />
                   }
                   label={
@@ -453,8 +456,8 @@ export const FilterManage: FC<FilterManageProps> = ({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "PENDING"}
-                      onChange={() => setValue("status", "PENDING")}
+                      checked={estados.PENDING}
+                      onChange={(value) => setEstados((prev)=>({...prev, PENDING:value.currentTarget.checked}))}
                     />
                   }
                   label={
@@ -472,8 +475,8 @@ export const FilterManage: FC<FilterManageProps> = ({
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "EDITED"}
-                      onChange={() => setValue("status", "EDITED")}
+                      checked={estados.EDITED}
+                      onChange={(value) => setEstados((prev)=>({...prev, EDITED:value.currentTarget.checked}))}
                     />
                   }
                   label={
