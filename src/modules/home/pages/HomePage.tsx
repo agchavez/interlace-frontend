@@ -296,7 +296,7 @@ export default function HomePage() {
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                     >
                                         <TableCell align="left" component="th" scope="row">
-                                            TRK-{row.id.toString().padStart(8, '0')}
+                                            TRK-{row.id.toString().padStart(5, '0')}
                                         </TableCell>
                                         <TableCell align="left">{
                                             formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })
@@ -353,7 +353,7 @@ export default function HomePage() {
                                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                     >
                                         <TableCell align="left" component="th" scope="row">
-                                            TRK-{row.id.toString().padStart(8, '0')}
+                                            TRK-{row.id.toString().padStart(5, '0')}
                                         </TableCell>
                                         <TableCell align="left">{
                                             row?.transfer_number
