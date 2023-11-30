@@ -51,6 +51,7 @@ export interface FormFilterTrack {
   status: string;
   onlyMyTreckers: boolean;
   type?: "IMPORT" | "LOCAL";
+  shift: "A" | "B" | "C" | undefined;
   distribution_center?: number;
 }
 
@@ -95,7 +96,7 @@ export const FilterManage: FC<FilterManageProps> = ({
     const resultado = clavesTrue.join(",");
     handleFilter({...data, status: resultado});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ estados, watch("date_after"), watch("date_before"), watch("date_range"), watch("search"), watch("trailer"), watch("transporter"), watch("status"), watch("onlyMyTreckers"), watch("type"), watch("distribution_center"), watch('id') ]);
+  }, [ estados, watch("date_after"), watch("date_before"), watch("date_range"), watch("search"), watch("trailer"), watch("transporter"), watch("status"), watch("onlyMyTreckers"), watch("type"), watch("distribution_center"), watch('id'), watch('shift')]);
 
   const handleReset = () => {
     setValue("search", "");
@@ -422,6 +423,33 @@ export const FilterManage: FC<FilterManageProps> = ({
                         field.onChange(format(new Date(date), 'yyyy-MM-dd'));
                       }}
                     />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="shift"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="shift">Turno</InputLabel>
+                      <Select
+                        labelId="shift"
+                        id="shift"
+                        {...field}
+                        label="Turno"
+                        MenuProps={MenuProps}
+                      >
+                        <MenuItem value="">
+                          <>Todos</>
+                        </MenuItem>
+                        <MenuItem value="A">A</MenuItem>
+                        <MenuItem value="B">B</MenuItem>
+                        <MenuItem value="C">C</MenuItem>
+
+                      </Select>
+
+                    </FormControl>
                   )}
                 />
               </Grid>

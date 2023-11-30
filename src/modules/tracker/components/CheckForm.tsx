@@ -36,7 +36,7 @@ import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
   chanceStatusTracking,
-  downloadFile,
+  // downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -49,8 +49,8 @@ import { ShowRoute } from "./ShowRoute";
 import TrakerPDFDocument from "./TrackerPDF";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
-import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+// import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+// import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 
 import {
   useGetDriverQuery,
@@ -142,9 +142,9 @@ export const CheckForm = ({
     );
   };
 
-  const handleClickDescargar = () => {
-    dispatch(downloadFile(seguimiento.id));
-  };
+  // const handleClickDescargar = () => {
+  //   dispatch(downloadFile(seguimiento.id));
+  // };
 
   const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
 
@@ -347,7 +347,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                {/* <Grid item xs={12} md={6} lg={4} xl={3}>
                   <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
                     <Typography
                       variant="body1"
@@ -377,7 +377,7 @@ export const CheckForm = ({
                     :
                       '--'
                   }
-                </Grid>
+                </Grid> */}
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -629,7 +629,7 @@ export const CheckForm = ({
                 />
               </Grid>
             )}
-            {/* <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6}>
               {seguimiento?.type === "LOCAL" ? (
                 <TextField
                   fullWidth
@@ -662,7 +662,7 @@ export const CheckForm = ({
                   }
                 />
               )}
-            </Grid> */}
+            </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField

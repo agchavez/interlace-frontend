@@ -143,6 +143,7 @@ export interface TrackerQueryParams extends BaseQueryParams {
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
   type?: "IMPORT" | "LOCAL",
+  shift?: 'A' | 'B' | 'C';
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {

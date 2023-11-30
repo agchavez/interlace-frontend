@@ -99,7 +99,7 @@ export const ManagePage = () => {
       user: userId,
       id: data.id ? data.id : undefined,
       onlyMyTreckers: data.onlyMyTreckers,
-      type: data.type,
+      shift: data.shift,
     };
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
