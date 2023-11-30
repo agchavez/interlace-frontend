@@ -394,26 +394,6 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
             },
         },
         {
-            field: "time_invested",
-            headerName: "TAT (Tiempo Invertido)",
-            flex: 1,
-            width: 180,
-            minWidth: 180,
-            renderCell: (params: GridCellParams<Tracker>) => {
-                const tiempoSalida = params.row.output_date;
-                const tiempoEntrada = params.row.input_date;
-                return (
-                    <Typography variant="body2">
-                        {tiempoSalida && tiempoEntrada
-                            ? formatDistance(new Date(tiempoSalida), new Date(tiempoEntrada), {
-                                locale: es,
-                            })
-                            : "--:--:--"}
-                    </Typography>
-                );
-            },
-        },
-        {
             field: "observation",
             headerName: "Observaciones",
             flex: 1,
