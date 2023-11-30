@@ -87,6 +87,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "Transferencia de entrada",
         "Transferencia de salida",
         "Traslado 5001",
+        "Transferencia de Salida",
         "Contabilizado",
         "Usuario",
         "TAT (Tiempo invertido)",
@@ -102,6 +103,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
           tr.input_document_number,
           tr.output_document_number,
           tr.transfer_number,
+          tr.output_document_number,
           tr.accounted,
           tr.user_name,
           (tiempoSalida && tiempoEntrada

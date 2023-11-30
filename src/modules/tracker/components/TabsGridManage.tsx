@@ -120,6 +120,20 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
             },
         },
         {
+            field: "output_document_number",
+            headerName: "Transferencia de Salida",
+            flex: 1,
+            width: 180,
+            minWidth: 180,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.value ? params.value : "-"}
+                    </Typography>
+                );
+            },
+        },
+        {
             field: "accounted",
             headerName: "Contabilizado",
             flex: 1,
