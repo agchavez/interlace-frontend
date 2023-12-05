@@ -86,6 +86,28 @@ const items: SideBarItem[] = [
     id: "movimientos",
   },
   {
+    text: "T2",
+    subItems: [
+      {
+        text: "Preventa",
+        href: "/tracker-t2/pre-sale",
+        id: "nuevo",
+      },
+      {
+        text: "Gestión",
+        href: "/tracker-t2/manage",
+        id: "order",
+      },
+      {
+        text: "Revision Preventa",
+        href: "/tracker-t2/pre-sale-check",
+        id: "order",
+      },
+    ],
+    icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
+    id: "movimientos",
+  },
+  {
     text: "REPORTE",
     subItems: [
       { text: "Movimientos", href: "/movimientos/crear", id: "nuevo" },
