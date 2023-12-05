@@ -147,6 +147,24 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker-t2/pre-sale",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/tracker-t2/pre-sale-check",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/tracker-t2/manage",
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url: "",
         permissions: [
             "any"
