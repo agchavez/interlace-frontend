@@ -4,6 +4,7 @@ import {
   Divider,
   Grid,
   Paper,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useRef, useState } from "react";
@@ -11,12 +12,14 @@ import { FileUploader } from "react-drag-drop-files";
 import { toast } from "sonner";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useForm } from "react-hook-form";
+import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 
 const PreSalePage = () => {
   const [file, setfile] = useState<{
     file: File | null;
     fileName: string | null;
   }>({ file: null, fileName: null });
+  const [obs, setobs] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -60,18 +63,38 @@ const PreSalePage = () => {
             color="success"
             size="medium"
             onClick={handleClickSave}
+            disabled={file.file === null}
+            startIcon={<CloudUploadTwoToneIcon />}
           >
-            Cargar
+            Cargar preventa
           </Button>
         </Grid>
+      </Grid>
+      <Grid item xs={12} md={12} lg={12}>
+        <Typography variant="body2" textAlign="start" sx={{ mb: 1 }}>
+          Cargar archivo de preventa para el T2, al finalizar presione el botón "Cargar"
+        </Typography>
         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
       </Grid>
       <form ref={formRef} onSubmit={handleSubmit(handleSubmitForm, () => {})}>
         <Grid item xs={12} md={12} lg={12}>
+          <TextField
+            id="outlined-basic"
+            label="Observaciones"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={4}
+            sx={{ marginTop: 2 }}
+            onChange={(e) => setobs(e.target.value)}
+            value={obs}
+          />
+        </Grid>
+        <Grid item xs={12} md={12} lg={12}>
           <Typography
             variant="body1"
             textAlign="start"
-            sx={{ mb: 1 }}
+            sx={{ mb: 1 , marginTop: 2}}
             color="text.secondary"
           >
             Adjuntar archivo, solo se admiten archivos .xlsx

@@ -5,6 +5,7 @@ import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
 import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 import { format } from 'date-fns';
+import { DatesT2Tracking } from '../../interfaces/trackingT2';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -140,6 +141,34 @@ export const nearExpirationProductsApi = createApi({
         }),
     })
 })
+
+export const t2TrackingApi = createApi({
+    reducerPath: 't2TrackingApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getDatesT2Tracking : builder.query<BaseApiResponse<DatesT2Tracking>, string>({
+            query: (id) => ({
+                url: `/tracker-detail-product/available-dates/?product_id=${id}`,
+                method: 'GET',
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const {
+    useGetDatesT2TrackingQuery
+} = t2TrackingApi
+
 
 export const {
     useGetTrackerQuery,

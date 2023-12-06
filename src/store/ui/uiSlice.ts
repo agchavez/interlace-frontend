@@ -3,6 +3,7 @@ import { DashboardQueryParams } from '../../interfaces/login';
 import { format } from "date-fns";
 import { OrderQueryParams, TrackerQueryParams } from '../../interfaces/tracking';
 import { FormFilterShiftManage } from "../../modules/report/components/FilterShiftManage";
+import { FormFilterT2 } from '../../modules/tracker_t2/components/FilterPreSale';
 
 
 enum FilterDate {
@@ -20,6 +21,7 @@ export interface uiState {
     manageQueryParams: TrackerQueryParams;
     orderQueryParams: OrderQueryParams;
     reportPallets: FormFilterShiftManage;
+    managerT2QueryParams: FormFilterT2;
 }
 
 const initialState: uiState = {
@@ -49,7 +51,13 @@ const initialState: uiState = {
         limit: 10,
         offset: 0,
         status: "PENDING",
-    }
+    },
+    managerT2QueryParams: {
+        date_after: format(new Date(), "yyyy-MM-dd"),
+        date_before: format(new Date(), "yyyy-MM-dd"),
+        search: "",
+        status: "PENDING",
+    },
 }
 
 export const uiSlice = createSlice({
@@ -70,7 +78,11 @@ export const uiSlice = createSlice({
         },
         setOrderQueryParams: (state, action: PayloadAction<OrderQueryParams>) => {
             state.orderQueryParams = action.payload
+        },
+        setManagerT2QueryParams: (state, action: PayloadAction<FormFilterT2>) => {
+            state.managerT2QueryParams = action.payload
         }
+
 
     }
 })
@@ -81,5 +93,6 @@ export const {
     setDashboardQueryParams,
     setManageQueryParams,
     setQueryReportPallets,
-    setOrderQueryParams
+    setOrderQueryParams,
+    setManagerT2QueryParams
 } = uiSlice.actions;

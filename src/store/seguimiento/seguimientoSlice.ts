@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
 import { OrderDetailHistory } from "../../interfaces/orders";
+import { OutputT2 } from '../../interfaces/trackingT2';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -131,11 +132,21 @@ interface seguimientoInterface {
     seguimientos: Seguimiento[]
     seguimeintoActual?: number;
     loading: boolean;
+    t2Tracking: {
+        loading: boolean;
+        t2Trackings:OutputT2[],
+        t2TrackingActual:OutputT2 | null
+    }
 }
 
 const initialState: seguimientoInterface = {
     seguimientos: [],
     loading: false,
+    t2Tracking: {
+        loading: false,
+        t2Trackings: [],
+        t2TrackingActual: null
+    }
 }
 
 export const seguimientoSlice = createSlice({
@@ -233,6 +244,15 @@ export const seguimientoSlice = createSlice({
             state.seguimientos.splice(state.seguimeintoActual || 0, 1);
             state.seguimeintoActual = state.seguimientos.length - 1;
         },
+        setT2Trackings: (state, action: PayloadAction<OutputT2[]>) => {
+            state.t2Tracking.t2Trackings = action.payload
+        },
+        setT2Tracking: (state, action: PayloadAction<OutputT2>) => {
+            state.t2Tracking.t2TrackingActual = action.payload
+        },
+        setLoadT2Tracking: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loading = action.payload
+        }
     }
 })
 
@@ -251,4 +271,7 @@ export const {
     setLoading,
     setSeguimientos,
     removeSeguimientoActual,
+    setT2Trackings,
+    setT2Tracking,
+    setLoadT2Tracking
 } = seguimientoSlice.actions;

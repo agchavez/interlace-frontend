@@ -7,6 +7,7 @@ import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import DashboardTwoToneIcon from "@mui/icons-material/DashboardTwoTone";
 import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
+import ContentPasteGoTwoToneIcon from '@mui/icons-material/ContentPasteGoTwoTone';
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
@@ -104,7 +105,7 @@ const items: SideBarItem[] = [
         id: "order",
       },
     ],
-    icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
+    icon: <ContentPasteGoTwoToneIcon sx={{ width: "30px" }} color="primary" />,
     id: "movimientos",
   },
   {
