@@ -20,7 +20,10 @@ export interface OutputDetailT2 {
     id:               number;
     product_name:     string;
     product_sap_code: string;
-    details:          OutputDetailT2Detail[];
+    details:          {
+        total_quantity: number;
+        details: OutputDetailT2Detail[]
+    };
     created_at:       Date;
     quantity:         string;
     observations:     null;
@@ -55,4 +58,15 @@ export interface DetailDatesT2Tracking {
     id:                 number;
     available_quantity: number;
     tracker_id:         number;
+}
+
+
+export interface T2TrackingDetailBody {
+    list:        ListT2TrackingDetail[];
+    list_delete: number[];
+}
+
+export interface ListT2TrackingDetail {
+    quantity:               number;
+    tracker_detail_product: number;
 }

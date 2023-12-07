@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
 import { OrderDetailHistory } from "../../interfaces/orders";
-import { OutputT2 } from '../../interfaces/trackingT2';
+import { OutputT2, OutputDetailT2 } from '../../interfaces/trackingT2';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -134,6 +134,7 @@ interface seguimientoInterface {
     loading: boolean;
     t2Tracking: {
         loading: boolean;
+        loadingDetail: boolean;
         t2Trackings:OutputT2[],
         t2TrackingActual:OutputT2 | null
     }
@@ -144,6 +145,7 @@ const initialState: seguimientoInterface = {
     loading: false,
     t2Tracking: {
         loading: false,
+        loadingDetail: false,
         t2Trackings: [],
         t2TrackingActual: null
     }
@@ -252,7 +254,23 @@ export const seguimientoSlice = createSlice({
         },
         setLoadT2Tracking: (state, action: PayloadAction<boolean>) => {
             state.t2Tracking.loading = action.payload
-        }
+        },
+        updateDetailT2Tracking: (state, action: PayloadAction<OutputDetailT2>) => {
+            const { t2TrackingActual } = state.t2Tracking
+            if (t2TrackingActual) {
+                const index = t2TrackingActual.output_detail_t2.findIndex((det) => det.id === action.payload.id)
+                if (index !== -1) {
+                    t2TrackingActual.output_detail_t2[index] = action.payload
+                }
+
+            }
+        },
+        setLoadingT2Tracking: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loading = action.payload
+        },
+        setLoadingT2TrackingDetail: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loadingDetail = action.payload
+        },
     }
 })
 
@@ -273,5 +291,8 @@ export const {
     removeSeguimientoActual,
     setT2Trackings,
     setT2Tracking,
-    setLoadT2Tracking
+    setLoadT2Tracking,
+    updateDetailT2Tracking,
+    setLoadingT2Tracking,
+    setLoadingT2TrackingDetail
 } = seguimientoSlice.actions;
