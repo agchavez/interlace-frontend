@@ -1,4 +1,4 @@
-import React, { FC  , useState } from "react";
+import React, { FC, useState } from "react";
 import {
     Accordion,
     AccordionDetails,
@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import { updateT2TrackingDetail, updateStatusT2TrackingDetail } from '../../../store/seguimiento/t2TrackingThunk';
 import { toast } from 'sonner';
 import { RejectedItemModal } from "./RejectedItemModal";
+import { ListOutTrackerDetail } from './ListOutTrackerDetail';
 
 // Función para manejar el cambio de expansión del acordeón
 const handleChange = (panel: number, expanded: number | false, setExpanded: React.Dispatch<React.SetStateAction<number | false>>) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -54,87 +55,104 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
     })
     return (
         <>
-        <RejectedItemModal 
-            isOpen={rejected.isOpen}
-            onClose={() => setrejected({ isOpen: false, data })}
-            data={rejected.data}
-        />
+            <RejectedItemModal
+                isOpen={rejected.isOpen}
+                onClose={() => setrejected({ isOpen: false, data })}
+                data={rejected.data}
+            />
 
-        <Accordion expanded={expanded === data.id} onChange={handleChange(data.id, expanded, setExpanded)} sx={{ marginBottom: '10px', marginTop: '10px' }}>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`${data.id}bh-content`}
-                id={`${data.id}bh-header`}
+            <Accordion expanded={expanded === data.id} onChange={handleChange(data.id, expanded, setExpanded)} sx={{ marginBottom: '10px', marginTop: '10px' }}>
+                <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls={`${data.id}bh-content`}
+                    id={`${data.id}bh-header`}
                 >
-                {
-                    status === 'CHECKED' && 
-                    <>
-                    <IconButton aria-label="check" size="small" onClick={(e) => {
-                        e.stopPropagation()
-                        dispatch(updateStatusT2TrackingDetail(data.id, data.status === 'AUTHORIZED' ? 'CHECKED' : 'AUTHORIZED', ''))
-                    }}>
-                        {
-                            data.status === 'AUTHORIZED' ? <ThumbUpIcon sx={{ color: 'green' }} /> : <ThumbUpAltTwoToneIcon />
-                        }
-                    </IconButton> 
-                    <IconButton aria-label="check" size="small" onClick={(e) => {
-                        e.stopPropagation()
-                        if (data.status === 'CHECKED') {
-                            setrejected({ isOpen: true, data})
-                        }else{
-                            dispatch(updateStatusT2TrackingDetail(data.id, 'CHECKED', ''))
-                        }
-                    }
-                }>
-                        {
-                            data.status === 'REJECTED' ? <ThumbDownOffAltTwoToneIcon sx={{ color: 'red' }} /> : <ThumbDownOffAltTwoToneIcon />
-                        }
-                    </IconButton>
+
+
+                    {
+                        status === 'CHECKED' &&
+                        <>
+                            <IconButton aria-label="check" size="small" onClick={(e) => {
+                                e.stopPropagation()
+                                dispatch(updateStatusT2TrackingDetail(data.id, data.status === 'AUTHORIZED' ? 'CHECKED' : 'AUTHORIZED', ''))
+                            }}>
+                                {
+                                    data.status === 'AUTHORIZED' ? <ThumbUpIcon sx={{ color: 'green' }} /> : <ThumbUpAltTwoToneIcon />
+                                }
+                            </IconButton>
+                            <IconButton aria-label="check" size="small" onClick={(e) => {
+                                e.stopPropagation()
+                                if (data.status === 'CHECKED') {
+                                    setrejected({ isOpen: true, data })
+                                } else {
+                                    dispatch(updateStatusT2TrackingDetail(data.id, 'CHECKED', ''))
+                                }
+                            }
+                            }>
+                                {
+                                    data.status === 'REJECTED' ? <ThumbDownOffAltTwoToneIcon sx={{ color: 'red' }} /> : <ThumbDownOffAltTwoToneIcon />
+                                }
+                            </IconButton>
 
                         </>
-                }
-                <Typography sx={{ width: '90%', flexShrink: 0 }}>
-                    {data.product_sap_code + ' - ' + data.product_name}
-                    <Typography sx={{ color: 'gray' }}>
-                        {data.observations}
+                    }
+                    <Typography sx={{ width: '90%', flexShrink: 0 }}>
+                        {data.product_sap_code + ' - ' + data.product_name}
+                        <Typography sx={{ color: 'gray' }}>
+                            {data.observations}
+                        </Typography>
                     </Typography>
-                </Typography>
-                <Typography sx={{ color: data.details.total_quantity === +data.quantity ? 'green' : 'red' }}>
-                    {data.details.total_quantity} de {data.quantity}
-                </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-                <Grid container spacing={2}>
-                    {
-                        isLoading || isFetching ? <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-                            <CircularProgress />
-                        </Box> : null
-                    }
-                    {
-                        datesData?.results.length === 0 && !isLoading && !isFetching ? 
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-                        <Alert severity="warning" sx={{ width: '100%' }}>
-                            No hay fechas disponibles para este item
-                            </Alert> 
-                        </Box> : null
-                    }
-                    {
-                        datesData?.results.map((date) => {
-                            return (
-                                <RenderDateContent
-                                data={date}
-                                key={date.details[0] ? date.details[0].id : Math.random()}
-                                itemId={data.id}
-                                selected={data.details} 
-                                totalItems={+data.quantity}
-                                />
-                                );
-                            })
-                        }
-                </Grid>
-            </AccordionDetails>
-        </Accordion>
-</>
+                    <Typography sx={{ color: data.details.total_quantity === +data.quantity ? 'green' : 'red' }}>
+                        {data.details.total_quantity} de {data.quantity}
+                    </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+
+                            {
+                                !['CREATED', 'REJECTED'].includes(data.status) ?
+
+                                    <ListOutTrackerDetail
+                                        data={data.details.details}
+                                        total_quantity={data.details.total_quantity}
+                                    />
+                                    : <>
+                                        {
+                                            isLoading || isFetching ? <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                                <CircularProgress />
+                                            </Box> : null
+                                        }
+                                        {
+                                            datesData?.results.length === 0 && !isLoading && !isFetching ?
+                                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                                    <Alert severity="warning" sx={{ width: '100%' }}>
+                                                        No hay fechas disponibles para este item
+                                                    </Alert>
+                                                </Box> : null
+                                        }
+                                        {
+                                            datesData?.results.map((date) => {
+                                                return (
+                                                    <RenderDateContent
+                                                        data={date}
+                                                        key={date.details[0] ? date.details[0].id : Math.random()}
+                                                        itemId={data.id}
+                                                        selected={data.details}
+                                                        totalItems={+data.quantity}
+                                                    />
+                                                );
+                                            })
+                                        }
+                                    </>
+
+                            }
+                        </Grid>
+
+                    </Grid>
+                </AccordionDetails>
+            </Accordion>
+        </>
     );
 };
 
@@ -152,12 +170,12 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
     const isSelected = selected.details.filter((element) => element.expiration_date === data.expiration_date) ? selected.details.filter((element) => element.expiration_date === data.expiration_date)[0] : null;
     const dispatch = useAppDispatch();
     const [check, setCheck] = useState<boolean>(isSelected ? true : false);
-    
+
     const handlClick = () => {
-        
+
         setCheck(!check);
         if (!check) {
-            
+
             const dataBody: T2TrackingDetailBody = {
                 list: data.details.map((element: DetailDatesT2Tracking) => {
                     return {
@@ -170,7 +188,7 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
             const sum = dataBody.list.reduce((a, b) => a + b.quantity, 0);
             if (sum + selected.total_quantity > totalItems) {
                 toast.error('La cantidad seleccionada supera la cantidad total del item, ingrese una cantidad menor');
-            }else{
+            } else {
                 dispatch(updateT2TrackingDetail(itemId, dataBody));
             }
         } else {
@@ -191,11 +209,11 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
             if (quantity + selected.total_quantity - (isSelected ? isSelected.quantity : 0) > totalItems) {
                 toast.error('La cantidad seleccionada supera la cantidad total del item, ingrese una cantidad menor');
                 return;
-            } 
+            }
 
             // Ordenar por available_quantity mayor a menor
             const sortedDetails = data.details.slice().sort((a, b) => b.available_quantity - a.available_quantity);
-    
+
             sortedDetails.forEach((element) => {
                 if (localQuantity > 0) {
                     if (localQuantity >= element.available_quantity) {
@@ -216,17 +234,17 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
                     }
                 }
             });
-    
+
             // Realizar operaciones relacionadas con dispatch y actualización del estado aquí
             const dataBody: T2TrackingDetailBody = {
                 list: list,
-                list_delete: isSelected? isSelected.details.map((element) => element.id) : [],
+                list_delete: isSelected ? isSelected.details.map((element) => element.id) : [],
             };
-            
+
             dispatch(updateT2TrackingDetail(itemId, dataBody));
         }
     };
-    
+
 
 
     return (
@@ -260,7 +278,7 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
                         itemId={itemId}
                         isSelected={isSelected}
                     />
-                        
+
                     <Typography>
                         de {data.total}
                     </Typography>
@@ -282,7 +300,7 @@ interface RenderInputProps {
 
 // Función para renderizar el contenido de la fecha
 const RenderInput: FC<RenderInputProps> = ({ data, onBlur, isSelected }) => {
-    
+
     const { setValue, watch } = useForm<{ quantity: number | null }>({
         defaultValues: {
             quantity: isSelected ? isSelected.quantity : null,
@@ -297,26 +315,26 @@ const RenderInput: FC<RenderInputProps> = ({ data, onBlur, isSelected }) => {
     };
 
     return <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder={
-                isSelected ? isSelected.quantity.toString()
+        sx={{ ml: 1, flex: 1 }}
+        placeholder={
+            isSelected ? isSelected.quantity.toString()
                 : data.total.toString()}
-            type="number"
-            autoComplete="off"
-            onChange={(e) => {
-                setValue('quantity', +e.target.value);
-            }}
-            value={watch('quantity')}
-            onBlur={handleOnBlur}
-            // TODO: desactivar el submit al presionar enter
-            onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleOnBlur();
-                }
-            }}
-            
-        />
+        type="number"
+        autoComplete="off"
+        onChange={(e) => {
+            setValue('quantity', +e.target.value);
+        }}
+        value={watch('quantity')}
+        onBlur={handleOnBlur}
+        // TODO: desactivar el submit al presionar enter
+        onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleOnBlur();
+            }
+        }}
+
+    />
 }
 
 
@@ -330,10 +348,10 @@ export const CheckForm = () => {
                 t2TrackingActual?.output_detail_t2.map((data) => {
                     return (
                         <div key={data.id}>
-                            <RenderAccordion 
-                                data={data} 
+                            <RenderAccordion
+                                data={data}
                                 status={t2TrackingActual.status}
-                                expanded={expanded} 
+                                expanded={expanded}
                                 setExpanded={setExpanded} />
                         </div>
                     );

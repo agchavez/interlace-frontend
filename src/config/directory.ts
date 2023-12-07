@@ -165,6 +165,13 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker-t2/detail/:id",
+        reg: /\/tracker-t2\/detail\/\d+/,
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url: "",
         permissions: [
             "any"

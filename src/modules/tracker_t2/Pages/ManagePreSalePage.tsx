@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { Container, Grid, Typography, Button, Divider, Chip } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Container, Grid, Typography, Button, Divider, Chip, IconButton } from "@mui/material";
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import { DataGrid, GridCellParams, GridColDef } from "@mui/x-data-grid";
-import { OutputT2 } from '../../../interfaces/trackingT2';
+import { OutputT2, OutputT2QueryParams } from '../../../interfaces/trackingT2';
 import { format } from "date-fns";
 import { tableBase } from '../../ui/index';
 import { useNavigate } from "react-router-dom";
 import { FormFilterT2, FilterPreSale } from '../components/FilterPreSale';
 import { useAppDispatch } from '../../../store/store';
 import { setManagerT2QueryParams } from "../../../store/ui/uiSlice";
+import { useGetT2TrackingQuery } from "../../../store/seguimiento/trackerApi";
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const ManagePreSalePage = () => {
     const [openFilter, setOpenFilter] = useState(false);
@@ -17,6 +19,13 @@ const ManagePreSalePage = () => {
     const handleFilter = (data: FormFilterT2) => {
         dispatch(setManagerT2QueryParams(data));
     }
+    const [query, setquery] = useState<OutputT2QueryParams>({
+        limit: 15,
+        offset: 0,
+        status: []
+    });
+
+    const {data, isLoading, isFetching} = useGetT2TrackingQuery(query);
 
     const columns: GridColDef<OutputT2>[] = [
         {
@@ -42,7 +51,7 @@ const ManagePreSalePage = () => {
             renderCell: (params) => {
                 return (
                     <Typography variant="body2">
-                        TRK-{params.value.toString().padStart(5, "0")}
+                        T2OUT-{params.value.toString().padStart(1, "0")}
                     </Typography>
                 );
             },
@@ -69,7 +78,7 @@ const ManagePreSalePage = () => {
             },
         },
         {
-            field: "user_checker_name",
+            field: "user_check_name",
             headerName: "Usuario validador",
             flex: 1,
             width: 170,
@@ -97,6 +106,7 @@ const ManagePreSalePage = () => {
             minWidth: 170,
             renderCell: (params: GridCellParams<OutputT2>) => {
                 return <Chip
+                    variant="outlined"
                     label={params.row.status}
                     color={params.row.status === "CREATED" ? "warning" : 
                     params.row.status === "CHECKED" ? "info" : "success"}
@@ -104,6 +114,35 @@ const ManagePreSalePage = () => {
                     sx={{ textTransform: "capitalize" }}
                 />;
 
+            },
+        },
+        {
+            field: "count_details",
+            headerName: "Cantidad de detalles",
+            flex: 1,
+            width: 170,
+            minWidth: 170,
+            renderCell: (params) => {
+                return <Typography variant="body2">{params.value}</Typography>;
+            }
+        },
+        {
+            field: "ver",
+            headerName: "Ver",
+            flex: 0,
+            width: 80,
+            renderCell: (params) => {
+                return (
+                    <>
+                        <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => navigate("/tracker-t2/detail/" + params.row.id)}
+                        >
+                            <ArrowForwardIcon />
+                        </IconButton>
+                    </>
+                );
             },
         },
     ];
@@ -116,6 +155,14 @@ const ManagePreSalePage = () => {
         page: 0,
     });
 
+
+    useEffect(() => {
+        setquery((query) => ({
+            ...query,
+            limit: paginationModel.pageSize,
+            offset: paginationModel.page * paginationModel.pageSize,
+        }));
+    }, [paginationModel]);
     
 
     return <>
@@ -152,16 +199,15 @@ const ManagePreSalePage = () => {
                 <DataGrid
                     {...tableBase}
                     columns={columns}
-                    rows={[]}
+                    rows={data?.results || []}
                     paginationMode="server"
-                    rowCount={0}
+                    rowCount={data?.count || 0}
                     pagination
-                    getRowHeight={() => 'auto'}
                     paginationModel={paginationModel}
                     onPaginationModelChange={setPaginationModel}
-                    loading={false}
+                    loading={isLoading || isFetching}
                     onRowDoubleClick={(params) =>
-                        navigate(`/tracker/detail/${params.id}`)
+                        navigate(`/tracker-t2/detail/${params.id}`)
                     }
                 />
                 </Grid>

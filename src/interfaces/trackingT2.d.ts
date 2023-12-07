@@ -1,12 +1,17 @@
+
 import { DistributorCenterData } from "./tracking";
+import { BaseQueryParams } from './maintenance';
 
 export interface OutputT2 {
     id:                   number;
     output_detail_t2:     OutputDetailT2[];
+    count_details:        number | undefined;
     distributor_center_data: DistributorCenterData;
     user_name:            string;
     user_authorizer_name: null;
     user_applied_name:    null;
+    user_check_name:    null;
+    last_update:         Date;
     created_at:           Date;
     status:               Status;
     observations:         null;
@@ -14,6 +19,14 @@ export interface OutputT2 {
     user_authorizer:      null;
     user_applied:         null;
     distributor_center:   number;
+}
+
+export interface OutputT2QueryParams extends BaseQueryParams {
+    distributor_center?: number;
+    created_at__gte?: string;
+    created_at__lte?: string;
+    status: Status[];
+    id?: number;
 }
 
 export interface OutputDetailT2 {
@@ -53,6 +66,8 @@ export interface DatesT2Tracking {
     total:           number;
     details:         Detail[];
 }
+
+
 
 export interface DetailDatesT2Tracking {
     id:                 number;
