@@ -67,7 +67,7 @@ const PreSalePage = () => {
       <Grid container spacing={1} sx={{ marginTop: 2 }}>
         <Grid item xs={12} display="flex" justifyContent="space-between">
           <Typography variant="h5" component="h1" fontWeight={400}>
-            T2 - Preventa
+            T2 - Carga de preventa
           </Typography>
           <Button
             variant="contained"

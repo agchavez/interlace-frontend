@@ -138,7 +138,7 @@ const T2DetailPage = () => {
                                         {data?.user_applied_name || '--'}
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Typography
                                         variant="body1"
                                         component="h1"
@@ -161,7 +161,7 @@ const T2DetailPage = () => {
                                     </Typography>
                                 </Grid>
 
-                                <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
                                     <Typography
                                         variant="body1"
                                         component="h1"

@@ -208,7 +208,7 @@ const ManagePreSalePage = () => {
             <Grid container spacing={1}>
                 <Grid item xs={12}>
                     <Typography variant="h5" component="h1" fontWeight={400}>
-                        T2 - Gestión de preventa
+                        T2 - Gestión
                     </Typography>
                     <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
                 </Grid>

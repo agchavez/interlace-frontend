@@ -2,7 +2,7 @@ import backendApi from "../../config/apiConfig";
 import { AppThunk } from "../store";
 import { handleApiError } from "../../utils/error";
 import { OutputT2, T2TrackingDetailBody, OutputDetailT2 } from '../../interfaces/trackingT2';
-import { removeSeguimientoT2, setLoadT2Tracking, setLoadingT2TrackingDetail, setT2Trackings, updateDetailT2Tracking } from "./seguimientoSlice";
+import { orderingT2Selected, removeSeguimientoT2, setLoadT2Tracking, setLoadingT2TrackingDetail, setT2Trackings, updateDetailT2Tracking } from "./seguimientoSlice";
 import { toast } from 'sonner';
 
 
@@ -83,7 +83,13 @@ export const changeStatusT2Tracking = (status: StatusT2, onClose: () => void
         } = getState().seguimiento.t2Tracking;
         if (!t2TrackingActual) return;
         // si es APPLIED llamar otro endpoint
-        if (status === 'APPLIED') {
+        if (status === 'AUTHORIZED') {
+            await backendApi.patch<OutputT2>(`/output-t2/${t2TrackingActual.id}/`, {status}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            
             const { data} = await backendApi.post<OutputT2>(`/output-t2/${t2TrackingActual.id}/apply/`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -101,14 +107,12 @@ export const changeStatusT2Tracking = (status: StatusT2, onClose: () => void
                 Authorization: `Bearer ${token}`,
             },
         });
-        // Si es status AUTHORIZED, NO ELIMINAR EL SEGUIMIENTO
-        if (status !== 'AUTHORIZED') {
-            dispatch(removeSeguimientoT2(data.id));
-        }
+        
         toast.success('Actualización de estado', {
             description: 'Se ha actualizado correctamente el estado del seguimiento',
         });
         onClose();
+        dispatch(removeSeguimientoT2(data.id));
     } catch (error) {
         handleApiError(error);
     } finally {
@@ -139,6 +143,7 @@ export const updateStatusT2TrackingDetail = (
         });
         
         dispatch(updateDetailT2Tracking(data));
+        dispatch(orderingT2Selected(null));
         
         onClose && onClose();
     } catch (error) {

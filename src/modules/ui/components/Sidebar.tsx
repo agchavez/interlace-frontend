@@ -90,7 +90,7 @@ const items: SideBarItem[] = [
     text: "T2",
     subItems: [
       {
-        text: "Preventa",
+        text: "Cargar Preventa",
         href: "/tracker-t2/pre-sale",
         id: "nuevo",
       },
@@ -100,7 +100,7 @@ const items: SideBarItem[] = [
         id: "order",
       },
       {
-        text: "Revision Preventa",
+        text: "Revision",
         href: "/tracker-t2/pre-sale-check",
         id: "order",
       },
