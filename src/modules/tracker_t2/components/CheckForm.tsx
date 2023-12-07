@@ -8,20 +8,25 @@ import {
     Paper,
     IconButton,
     InputBase,
-    Box
+    Box,
+    Alert
 } from '@mui/material';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import ThumbDownOffAltTwoToneIcon from '@mui/icons-material/ThumbDownOffAltTwoTone';
+import ThumbUpAltTwoToneIcon from '@mui/icons-material/ThumbUpAltTwoTone';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useAppSelector, useAppDispatch } from '../../../store/store';
-import { OutputDetailT2, OutputDetailT2Detail, DatesT2Tracking, T2TrackingDetailBody, DetailDatesT2Tracking, ListT2TrackingDetail } from '../../../interfaces/trackingT2';
+import { OutputDetailT2, OutputDetailT2Detail, DatesT2Tracking, T2TrackingDetailBody, DetailDatesT2Tracking, ListT2TrackingDetail, Status } from '../../../interfaces/trackingT2';
 import { useGetDatesT2TrackingQuery } from "../../../store/seguimiento/trackerApi";
 import { format } from "date-fns";
 import { CircularProgress } from '@mui/material';
 import { useForm } from "react-hook-form";
-import { updateT2TrackingDetail } from '../../../store/seguimiento/t2TrackingThunk';
+import { updateT2TrackingDetail, updateStatusT2TrackingDetail } from '../../../store/seguimiento/t2TrackingThunk';
 import { toast } from 'sonner';
+import { RejectedItemModal } from "./RejectedItemModal";
 
 // Función para manejar el cambio de expansión del acordeón
 const handleChange = (panel: number, expanded: number | false, setExpanded: React.Dispatch<React.SetStateAction<number | false>>) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -32,21 +37,67 @@ interface renderCheckFormProps {
     data: OutputDetailT2;
     expanded: number | false
     setExpanded: React.Dispatch<React.SetStateAction<number | false>>
-
+    status: Status;
 }
 
 // Función para renderizar el contenido del acordeón
-const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded }) => {
-    const { data: datesData, isLoading, isFetching } = useGetDatesT2TrackingQuery(data.product.toString(), { refetchOnMountOrArgChange: true });
+const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded, status }) => {
+    const { data: datesData, isLoading, isFetching } = useGetDatesT2TrackingQuery({
+        id: data.product,
+        output_id: data.id
+    }, { refetchOnMountOrArgChange: true, skip: expanded === data.id ? false : true });
+
+    const dispatch = useAppDispatch();
+    const [rejected, setrejected] = useState({
+        isOpen: false,
+        data
+    })
     return (
+        <>
+        <RejectedItemModal 
+            isOpen={rejected.isOpen}
+            onClose={() => setrejected({ isOpen: false, data })}
+            data={rejected.data}
+        />
+
         <Accordion expanded={expanded === data.id} onChange={handleChange(data.id, expanded, setExpanded)} sx={{ marginBottom: '10px', marginTop: '10px' }}>
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls={`${data.id}bh-content`}
                 id={`${data.id}bh-header`}
-            >
+                >
+                {
+                    status === 'CHECKED' && 
+                    <>
+                    <IconButton aria-label="check" size="small" onClick={(e) => {
+                        e.stopPropagation()
+                        dispatch(updateStatusT2TrackingDetail(data.id, data.status === 'AUTHORIZED' ? 'CHECKED' : 'AUTHORIZED', ''))
+                    }}>
+                        {
+                            data.status === 'AUTHORIZED' ? <ThumbUpIcon sx={{ color: 'green' }} /> : <ThumbUpAltTwoToneIcon />
+                        }
+                    </IconButton> 
+                    <IconButton aria-label="check" size="small" onClick={(e) => {
+                        e.stopPropagation()
+                        if (data.status === 'CHECKED') {
+                            setrejected({ isOpen: true, data})
+                        }else{
+                            dispatch(updateStatusT2TrackingDetail(data.id, 'CHECKED', ''))
+                        }
+                    }
+                }>
+                        {
+                            data.status === 'REJECTED' ? <ThumbDownOffAltTwoToneIcon sx={{ color: 'red' }} /> : <ThumbDownOffAltTwoToneIcon />
+                        }
+                    </IconButton>
+
+                        </>
+                }
                 <Typography sx={{ width: '90%', flexShrink: 0 }}>
                     {data.product_sap_code + ' - ' + data.product_name}
+                    <Typography sx={{ color: 'gray' }}>
+                        {data.observations}
+                    </Typography>
                 </Typography>
                 <Typography sx={{ color: data.details.total_quantity === +data.quantity ? 'green' : 'red' }}>
                     {data.details.total_quantity} de {data.quantity}
@@ -60,21 +111,30 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                         </Box> : null
                     }
                     {
+                        datesData?.results.length === 0 && !isLoading && !isFetching ? 
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                        <Alert severity="warning" sx={{ width: '100%' }}>
+                            No hay fechas disponibles para este item
+                            </Alert> 
+                        </Box> : null
+                    }
+                    {
                         datesData?.results.map((date) => {
                             return (
                                 <RenderDateContent
-                                    data={date}
-                                    key={date.details[0] ? date.details[0].id : Math.random()}
-                                    itemId={data.id}
-                                    selected={data.details} 
-                                    totalItems={+data.quantity}
-                                    />
-                            );
-                        })
-                    }
+                                data={date}
+                                key={date.details[0] ? date.details[0].id : Math.random()}
+                                itemId={data.id}
+                                selected={data.details} 
+                                totalItems={+data.quantity}
+                                />
+                                );
+                            })
+                        }
                 </Grid>
             </AccordionDetails>
         </Accordion>
+</>
     );
 };
 
@@ -270,7 +330,11 @@ export const CheckForm = () => {
                 t2TrackingActual?.output_detail_t2.map((data) => {
                     return (
                         <div key={data.id}>
-                            <RenderAccordion data={data} expanded={expanded} setExpanded={setExpanded} />
+                            <RenderAccordion 
+                                data={data} 
+                                status={t2TrackingActual.status}
+                                expanded={expanded} 
+                                setExpanded={setExpanded} />
                         </div>
                     );
                 })

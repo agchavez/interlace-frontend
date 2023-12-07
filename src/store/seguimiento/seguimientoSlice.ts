@@ -248,6 +248,9 @@ export const seguimientoSlice = createSlice({
         },
         setT2Trackings: (state, action: PayloadAction<OutputT2[]>) => {
             state.t2Tracking.t2Trackings = action.payload
+            if (action.payload.length > 0) {
+                state.t2Tracking.t2TrackingActual = action.payload[0]
+            }
         },
         setT2Tracking: (state, action: PayloadAction<OutputT2>) => {
             state.t2Tracking.t2TrackingActual = action.payload
@@ -271,7 +274,21 @@ export const seguimientoSlice = createSlice({
         setLoadingT2TrackingDetail: (state, action: PayloadAction<boolean>) => {
             state.t2Tracking.loadingDetail = action.payload
         },
-    }
+        // Eliminar de la lista de seguimientos
+        removeSeguimientoT2: (state, action: PayloadAction<number>) => {
+            /// Eliminar de la lista de seguimientos de T2
+            const { t2Trackings } = state.t2Tracking
+            const cortado = t2Trackings.filter((track) => track.id !== action.payload)
+            state.t2Tracking.t2Trackings = cortado;
+            /// El seguimiento actual de T2 es el primero de la lista en caso de que exista
+            if (cortado.length > 0) {
+                state.t2Tracking.t2TrackingActual = cortado[0]
+            } else {
+                state.t2Tracking.t2TrackingActual = null
+            }
+            
+        }
+    }   
 })
 
 export const {
@@ -294,5 +311,6 @@ export const {
     setLoadT2Tracking,
     updateDetailT2Tracking,
     setLoadingT2Tracking,
-    setLoadingT2TrackingDetail
+    setLoadingT2TrackingDetail,
+    removeSeguimientoT2
 } = seguimientoSlice.actions;

@@ -46,7 +46,7 @@ export interface DetailDetail {
     tracker_detail: number;
 }
 
-export type Status = "CREATED" | "APPLIED" | "CHECKED";
+export type Status = "CREATED" | "APPLIED" | "CHECKED" | 'REJECTED' | 'AUTHORIZED'
 
 export interface DatesT2Tracking {
     expiration_date: Date;

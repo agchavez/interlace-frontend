@@ -155,9 +155,9 @@ export const t2TrackingApi = createApi({
         }
     }),
     endpoints: (builder) => ({
-        getDatesT2Tracking : builder.query<BaseApiResponse<DatesT2Tracking>, string>({
-            query: (id) => ({
-                url: `/tracker-detail-product/available-dates/?product_id=${id}`,
+        getDatesT2Tracking : builder.query<BaseApiResponse<DatesT2Tracking>, {id: number, output_id: number}>({
+            query: ({id, output_id}) => ({
+                url: `/tracker-detail-product/available-dates/?product_id=${id}&output_id=${output_id}`,
                 method: 'GET',
             }),
             keepUnusedDataFor: 120000
