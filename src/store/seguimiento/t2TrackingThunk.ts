@@ -5,6 +5,29 @@ import { OutputT2, T2TrackingDetailBody, OutputDetailT2 } from '../../interfaces
 import { removeSeguimientoT2, setLoadT2Tracking, setLoadingT2TrackingDetail, setT2Trackings, updateDetailT2Tracking } from "./seguimientoSlice";
 import { toast } from 'sonner';
 
+
+// Caargar nuevo seguimiento de t2
+export const createT2Tracking = (dataBody: FormData, onCompleted: (id: number) => void): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoadT2Tracking(true));
+        const { token } = getState().auth;
+        const resp = await backendApi.post<{
+            id: number;
+        }>(`/output-t2/`, dataBody, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        toast.success('Salida T2', {
+            description: 'Se ha registrado correctamente',
+        });
+        onCompleted(resp.data.id);
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoadT2Tracking(false));
+    }
+}
 export const getT2Trackings = (): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoadT2Tracking(true));

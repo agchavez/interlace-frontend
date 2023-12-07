@@ -23,8 +23,8 @@ export interface OutputT2 {
 
 export interface OutputT2QueryParams extends BaseQueryParams {
     distributor_center?: number;
-    created_at__gte?: string;
-    created_at__lte?: string;
+    date_after?: string;
+    date_before?: string;
     status: Status[];
     id?: number;
 }

@@ -56,7 +56,7 @@ const initialState: uiState = {
         date_after: format(new Date(), "yyyy-MM-dd"),
         date_before: format(new Date(), "yyyy-MM-dd"),
         search: "",
-        status: "PENDING",
+        status: ['APPLIED']
     },
 }
 

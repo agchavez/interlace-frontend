@@ -4,6 +4,9 @@ import { useAppSelector } from "../../../store";
 import { Box, Drawer, Typography, IconButton, Divider, List, Grid, TextField, FormControlLabel, Checkbox, ListItem, ListItemText, FormGroup, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import { Status } from "../../../interfaces/trackingT2";
+import { DatePicker } from "@mui/x-date-pickers";
+import { format, isValid } from "date-fns";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -21,7 +24,7 @@ export interface FormFilterT2 {
     id? : number | null;
     date_after: string;
     date_before: string;
-    status: "COMPLETE" | "PENDING" | "EDITED";
+    status: Status[];
     distribution_center?: number;
   }
 
@@ -62,11 +65,22 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
         setValue("search", "");
         setValue("date_after", "");
         setValue("date_before", "");
-        setValue("status", "PENDING");
+        setValue("status", ['APPLIED']);
         setValue("distribution_center", user?.centro_distribucion || undefined);
         setValue("id", null);
         };
 
+      const handleStatusSelect = (checked: boolean, value: Status) => {
+        const status = getValues("status");
+        if (checked) {
+          setValue("status", [...status, value]);
+        } else {
+          setValue(
+            "status",
+            status.filter((item) => item !== value)
+          );
+        }
+      };
     return (
         <Drawer anchor="right" open={open} onClose={handleClose}>
         <Box
@@ -172,6 +186,55 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
             <ListItem disablePadding sx={{ pl: 1, pr: 1, mt: 1 }}></ListItem>
           </List>
             <Divider />
+            <List>
+            <Grid container sx={{ p: 1 }} spacing={2}>
+              <Grid item xs={12}>
+                <Typography variant="subtitle2" fontWeight={200}>
+                  Fecha de registro
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="date_after"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Mayor que"
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                      value={ isValid(new Date(watch("date_after") )) ? new Date(watch("date_after")) : null}
+                      inputRef={field.ref}
+                      format="dd/MM/yyyy"
+                      onChange={(date) => {
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+
+                  name="date_before"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Menor que"
+                      format="dd/MM/yyyy"
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                      value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
+                      inputRef={field.ref}
+                      onChange={(date) => {
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+          </List>
+          <Divider />
           <List>
             <ListItem disablePadding sx={{ pl: 2 }}>
               <ListItemText primary={"Estado"} />
@@ -181,8 +244,8 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "COMPLETE"}
-                      onChange={() => setValue("status", "COMPLETE")}
+                      checked={watch("status").includes("APPLIED")}
+                      onChange={() => handleStatusSelect(!watch("status").includes("APPLIED"), "APPLIED")}
                     />
                   }
                   label={
@@ -200,8 +263,8 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "PENDING"}
-                      onChange={() => setValue("status", "PENDING")}
+                      checked={watch("status").includes("CREATED")}
+                      onChange={() => handleStatusSelect(!watch("status").includes("CREATED"), "CREATED")}
                     />
                   }
                   label={
@@ -219,8 +282,8 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                 <FormControlLabel
                   control={
                     <Checkbox
-                      checked={watch("status") === "EDITED"}
-                      onChange={() => setValue("status", "EDITED")}
+                      checked={watch("status").includes("CHECKED")}
+                      onChange={() => handleStatusSelect(!watch("status").includes("CHECKED"), "CHECKED")}
                     />
                   }
                   label={
@@ -231,7 +294,26 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                       lineHeight="2rem"
                     >
                       {" "}
-                      En atención{" "}
+                      Revisado{" "}
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={watch("status").includes("REJECTED")}
+                      onChange={() => handleStatusSelect(!watch("status").includes("REJECTED"), "REJECTED")}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      fontWeight={200}
+                      lineHeight="2rem"
+                    >
+                      {" "}
+                      Rechazado{" "}
                     </Typography>
                   }
                 />

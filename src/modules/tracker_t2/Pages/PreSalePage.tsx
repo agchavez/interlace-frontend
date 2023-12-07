@@ -1,5 +1,6 @@
 import {
   Button,
+  CircularProgress,
   Container,
   Divider,
   Grid,
@@ -13,6 +14,9 @@ import { toast } from "sonner";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useForm } from "react-hook-form";
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+import { createT2Tracking } from '../../../store/seguimiento/t2TrackingThunk';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
+import { useNavigate } from "react-router-dom";
 
 const PreSalePage = () => {
   const [file, setfile] = useState<{
@@ -22,7 +26,11 @@ const PreSalePage = () => {
   const [obs, setobs] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const {
+    loading
+  } = useAppSelector(state => state.seguimiento.t2Tracking);
   const handleClickSave = () => {
     formRef.current?.dispatchEvent(
       new Event("submit", { cancelable: true, bubbles: true })
@@ -48,7 +56,10 @@ const PreSalePage = () => {
   });
 
   const handleSubmitForm = () => {
-    console.log("submit")
+    const formData = new FormData();
+    formData.append("file", file.file as Blob);
+    formData.append("observations", obs as string);
+    dispatch(createT2Tracking(formData, (id: number) => navigate(`/tracker-t2/detail/${id}`)));
   };
 
   return (
@@ -63,8 +74,10 @@ const PreSalePage = () => {
             color="success"
             size="medium"
             onClick={handleClickSave}
-            disabled={file.file === null}
-            startIcon={<CloudUploadTwoToneIcon />}
+            disabled={file.file === null || loading}
+            startIcon={
+              loading ? <CircularProgress size={20} color="inherit" /> :
+                <CloudUploadTwoToneIcon />}
           >
             Cargar preventa
           </Button>
@@ -76,7 +89,7 @@ const PreSalePage = () => {
         </Typography>
         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
       </Grid>
-      <form ref={formRef} onSubmit={handleSubmit(handleSubmitForm, () => {})}>
+      <form ref={formRef} onSubmit={handleSubmit(handleSubmitForm, () => { })}>
         <Grid item xs={12} md={12} lg={12}>
           <TextField
             id="outlined-basic"
@@ -94,7 +107,7 @@ const PreSalePage = () => {
           <Typography
             variant="body1"
             textAlign="start"
-            sx={{ mb: 1 , marginTop: 2}}
+            sx={{ mb: 1, marginTop: 2 }}
             color="text.secondary"
           >
             Adjuntar archivo, solo se admiten archivos .xlsx
@@ -142,8 +155,8 @@ const PreSalePage = () => {
                 {dragging
                   ? "Suelta el Archivo"
                   : file.file != null
-                  ? file.fileName
-                  : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
+                    ? file.fileName
+                    : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
               </Typography>
               <input type="file" style={{ display: "none" }} />
             </Paper>

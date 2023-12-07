@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { tableBase } from '../../ui/index';
 import { useNavigate } from "react-router-dom";
 import { FormFilterT2, FilterPreSale } from '../components/FilterPreSale';
-import { useAppDispatch } from '../../../store/store';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { setManagerT2QueryParams } from "../../../store/ui/uiSlice";
 import { useGetT2TrackingQuery } from "../../../store/seguimiento/trackerApi";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -15,6 +15,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 const ManagePreSalePage = () => {
     const [openFilter, setOpenFilter] = useState(false);
     const navigate = useNavigate();
+    const { managerT2QueryParams } = useAppSelector((state) => state.ui);
+
     const dispatch = useAppDispatch();
     const handleFilter = (data: FormFilterT2) => {
         dispatch(setManagerT2QueryParams(data));
@@ -24,9 +26,26 @@ const ManagePreSalePage = () => {
         offset: 0,
         status: []
     });
+    const { data, isLoading, isFetching, refetch } = useGetT2TrackingQuery(query);
 
-    const {data, isLoading, isFetching} = useGetT2TrackingQuery(query);
+    useEffect(() => {
+        setquery((prev) => {
+            return {
+                ...prev,
+            date_after: format(new Date(managerT2QueryParams.date_after), "yyyy-MM-dd"),
+            date_before: format(new Date(managerT2QueryParams.date_before), "yyyy-MM-dd"),
+            status: managerT2QueryParams.status,
+            distributor_center: managerT2QueryParams.distribution_center,
+            id: managerT2QueryParams.id ? managerT2QueryParams.id : undefined,
+            };
+        });
+    }, [managerT2QueryParams]);
 
+    useEffect(() => {
+        refetch();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [query]);
+    
     const columns: GridColDef<OutputT2>[] = [
         {
             field: "created_at",
@@ -68,7 +87,7 @@ const ManagePreSalePage = () => {
             },
         },
         {
-            field: "user_name",  
+            field: "user_name",
             headerName: "Usuario registro",
             flex: 1,
             width: 170,
@@ -99,20 +118,34 @@ const ManagePreSalePage = () => {
             }
         },
         {
-            field: "status",  
+            field: "status",
             headerName: "Estado",
             flex: 1,
             width: 170,
             minWidth: 170,
             renderCell: (params: GridCellParams<OutputT2>) => {
+                const data = params.row;
                 return <Chip
+                    sx={{ mt: 0.5 }}
+                    label={
+                        data?.status === "APPLIED"
+                            ? "Completado"
+                            : data?.status === "REJECTED"
+                                ? "Rechazado"
+                                : data?.status === "AUTHORIZED"
+                                    ? "Autorizado"
+                                    : "En revisión"
+                    }
+                    color={
+                        data?.status === "APPLIED"
+                            ? "success"
+                            : data?.status === "REJECTED"
+                                ? "error"
+                                : "info"
+                    }
+                    size="medium"
                     variant="outlined"
-                    label={params.row.status}
-                    color={params.row.status === "CREATED" ? "warning" : 
-                    params.row.status === "CHECKED" ? "info" : "success"}
-                    size="small"
-                    sx={{ textTransform: "capitalize" }}
-                />;
+                />
 
             },
         },
@@ -163,7 +196,7 @@ const ManagePreSalePage = () => {
             offset: paginationModel.page * paginationModel.pageSize,
         }));
     }, [paginationModel]);
-    
+
 
     return <>
         <FilterPreSale
@@ -195,21 +228,21 @@ const ManagePreSalePage = () => {
                     </Button>
                 </Grid>
                 <Grid item xs={12}>
-                    
-                <DataGrid
-                    {...tableBase}
-                    columns={columns}
-                    rows={data?.results || []}
-                    paginationMode="server"
-                    rowCount={data?.count || 0}
-                    pagination
-                    paginationModel={paginationModel}
-                    onPaginationModelChange={setPaginationModel}
-                    loading={isLoading || isFetching}
-                    onRowDoubleClick={(params) =>
-                        navigate(`/tracker-t2/detail/${params.id}`)
-                    }
-                />
+
+                    <DataGrid
+                        {...tableBase}
+                        columns={columns}
+                        rows={data?.results || []}
+                        paginationMode="server"
+                        rowCount={data?.count || 0}
+                        pagination
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        loading={isLoading || isFetching}
+                        onRowDoubleClick={(params) =>
+                            navigate(`/tracker-t2/detail/${params.id}`)
+                        }
+                    />
                 </Grid>
             </Grid>
         </Container>
