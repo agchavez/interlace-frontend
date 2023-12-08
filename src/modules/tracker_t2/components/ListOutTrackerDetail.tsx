@@ -31,6 +31,7 @@ export const ListOutTrackerRow: FC<ListOutTrackerRowProps> = ({ total_quantity, 
           {detail.expiration_date.toString()}
         </TableCell>
         <TableCell align="right">{detail.quantity}</TableCell>
+        <TableCell align="right">{detail.code_name}</TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -93,6 +94,13 @@ interface ListOutTrackerDetailProps {
 }
 
 export const ListOutTrackerDetail: FC<ListOutTrackerDetailProps> = ({ total_quantity, data }) => {
+  if (data.length === 0) {
+    return (
+      <Typography variant="body1" gutterBottom component="div" align="center" sx={{ marginTop: 0 }} color="text.secondary">
+        No hay información para mostrar
+      </Typography>
+    );
+  }
   return (
     <Table size="small" aria-label="a dense table">
       <TableHead>
@@ -100,6 +108,7 @@ export const ListOutTrackerDetail: FC<ListOutTrackerDetailProps> = ({ total_quan
           <StyledTableCell>Detalle</StyledTableCell>
           <StyledTableCell align="right">Fecha de vencimiento</StyledTableCell>
           <StyledTableCell align="right">Cant. de cajas</StyledTableCell>
+          <StyledTableCell align="right">Lote</StyledTableCell>
         </TableRow>
       </TableHead>
       <TableBody>

@@ -35,7 +35,7 @@ export const RejectedItemModal: FC<RejectedItemModalProps> = ({ isOpen, onClose,
     const dispatch = useAppDispatch();
     const handleClickRechazar = (dataForm:{motivo:string}) => {
         if (data === undefined) return;
-        dispatch(updateStatusT2TrackingDetail(data?.id, "REJECTED", dataForm.motivo, handleClose))
+        dispatch(updateStatusT2TrackingDetail({id: data?.id, status: "REJECTED",  reason: dataForm.motivo}, handleClose))
     };
 
     const handleClose = () => {

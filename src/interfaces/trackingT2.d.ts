@@ -48,6 +48,8 @@ export interface OutputDetailT2 {
 export interface OutputDetailT2Detail {
     expiration_date: Date;
     quantity:        number;
+    lote:            number | null;
+    code_name:       string | null;
     details:         DetailDetail[];
 }
 
@@ -57,6 +59,9 @@ export interface DetailDetail {
     quantity:       string;
     output_detail:  number;
     tracker_detail: number;
+    tracker_id:     number;
+    lote:           number | null;
+    code_name:      string | null;
 }
 
 export type Status = "CREATED" | "APPLIED" | "CHECKED" | 'REJECTED' | 'AUTHORIZED'

@@ -15,6 +15,9 @@ export const CompleteModal: FC<CompleteModalProps> = ({ isOpen, onClose }) => {
     } = useAppSelector((state) => state.seguimiento.t2Tracking);
 
     const isAllChecked = useMemo(() => {
+        if (t2TrackingActual?.status === "REJECTED"){
+            return t2TrackingActual?.output_detail_t2.every((item) => item.status !== 'REJECTED')
+        }
         return t2TrackingActual?.output_detail_t2.every((item) => item.status === (t2TrackingActual?.status === 'CREATED' ? 'CHECKED' : 'AUTHORIZED'))
     }, [t2TrackingActual]);
     const dispatch = useAppDispatch();
@@ -43,8 +46,8 @@ export const CompleteModal: FC<CompleteModalProps> = ({ isOpen, onClose }) => {
                     </Typography>
                     <Alert severity={isAllChecked ? 'success' : 'warning'}>
                         {isAllChecked ?
-                            t2TrackingActual?.status === 'CREATED' ? 'Todos los items están revisados' : 'Todos los items están autorizados'
-                            : t2TrackingActual?.status === 'CREATED' ? 'No todos los items están revisados' : 'No todos los items están autorizados'}
+                            t2TrackingActual?.status && ["CREATED", "REJECTED"].includes(t2TrackingActual?.status) ? 'Todos los items están revisados' : 'Todos los items están autorizados'
+                            : t2TrackingActual?.status && ["CREATED", "REJECTED"].includes(t2TrackingActual?.status) ? 'No todos los items están revisados' : 'No todos los items están autorizados'}
                     </Alert>
 
                 </DialogContent>

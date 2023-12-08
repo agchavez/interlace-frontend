@@ -142,13 +142,22 @@ export const changeStatusT2Tracking = (status: StatusT2, onClose: () => void
     }
 }
 
+interface Trackingt2DetailBody {
+    id: number;
+    status?: 'AUTHORIZED' | 'CHECKED' | 'REJECTED';
+    reason?: string;
+    lote?: number;
+    listIds?: number[];
+}
+
 // actualizar statado del detalle de t2 tracking
 export const updateStatusT2TrackingDetail = (
-    id: number, status: 'AUTHORIZED' | 'CHECKED' | 'REJECTED', reason?: string, onClose?: () => void
+    body: Trackingt2DetailBody, onClose?: () => void
 ): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoadingT2TrackingDetail(true));
         const { token } = getState().auth;
+        const { id, status, reason, lote } = body;
         if (status === 'REJECTED' && !reason) {
             toast.error('Error', {
                 description: 'Debe ingresar una razón para rechazar el movimiento',
@@ -157,6 +166,8 @@ export const updateStatusT2TrackingDetail = (
         }
         const { data} = await backendApi.patch<OutputDetailT2>(`/output-detail-t2/${id}/`, {
             status,
+            lote,
+            list_ids: body.listIds,
             observations: reason,
         }, {
             headers: {

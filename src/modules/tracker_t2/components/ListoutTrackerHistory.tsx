@@ -11,7 +11,7 @@ export const ListoutTrackerHistory: FC<Props> = ({ detail }) => {
        
         <TableCell component="th" scope="row" align="right">
           {/* el codigo tiene que tener 5 digitos se pueden poner 00000 si solo es 1  */}
-          TRK-{detail.tracker_detail.toString().padStart(5, "0")}
+          TRK-{detail.tracker_id.toString().padStart(5, "0")}
         </TableCell>
         <TableCell align="right">
           {detail.quantity}

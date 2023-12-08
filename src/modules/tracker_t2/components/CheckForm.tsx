@@ -21,13 +21,15 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import { useAppSelector, useAppDispatch } from '../../../store/store';
 import { OutputDetailT2, OutputDetailT2Detail, DatesT2Tracking, T2TrackingDetailBody, DetailDatesT2Tracking, ListT2TrackingDetail, Status } from '../../../interfaces/trackingT2';
 import { useGetDatesT2TrackingQuery } from "../../../store/seguimiento/trackerApi";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { CircularProgress } from '@mui/material';
 import { useForm } from "react-hook-form";
 import { updateT2TrackingDetail, updateStatusT2TrackingDetail } from '../../../store/seguimiento/t2TrackingThunk';
 import { toast } from 'sonner';
 import { RejectedItemModal } from "./RejectedItemModal";
 import { ListOutTrackerDetail } from './ListOutTrackerDetail';
+import { LotSelect } from "../../ui/components/LotSelect";
+import { LotType } from '../../../interfaces/maintenance';
 
 // Función para manejar el cambio de expansión del acordeón
 const handleChange = (panel: number, expanded: number | false, setExpanded: React.Dispatch<React.SetStateAction<number | false>>) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -74,7 +76,7 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                         <>
                             <IconButton aria-label="check" size="small" onClick={(e) => {
                                 e.stopPropagation()
-                                dispatch(updateStatusT2TrackingDetail(data.id, data.status === 'AUTHORIZED' ? 'CHECKED' : 'AUTHORIZED', ''))
+                                dispatch(updateStatusT2TrackingDetail({id: data.id, status: data.status === 'AUTHORIZED' ? 'CHECKED' : 'AUTHORIZED', reason: ""}))
                             }}>
                                 {
                                     data.status === 'AUTHORIZED' ? <ThumbUpIcon sx={{ color: 'green' }} /> : <ThumbUpAltTwoToneIcon />
@@ -85,7 +87,7 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                                 if (data.status === 'CHECKED') {
                                     setrejected({ isOpen: true, data })
                                 } else {
-                                    dispatch(updateStatusT2TrackingDetail(data.id, 'CHECKED', ''))
+                                    dispatch(updateStatusT2TrackingDetail({id: data.id,status: 'CHECKED', reason: ""}))
                                 }
                             }
                             }>
@@ -108,16 +110,16 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                 </AccordionSummary>
                 <AccordionDetails>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
-
-                            {
-                                !['CREATED', 'REJECTED'].includes(data.status) ?
+                    {
+                                !['CREATED', 'REJECTED'].includes(status) ?
 
                                     <ListOutTrackerDetail
                                         data={data.details.details}
                                         total_quantity={data.details.total_quantity}
                                     />
-                                    : <>
+                                    :  <Grid item xs={12}>
+
+                            
                                         {
                                             isLoading || isFetching ? <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
                                                 <CircularProgress />
@@ -131,6 +133,7 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                                                     </Alert>
                                                 </Box> : null
                                         }
+                                        <Grid container spacing={2}>
                                         {
                                             datesData?.results.map((date) => {
                                                 return (
@@ -144,11 +147,8 @@ const RenderAccordion: FC<renderCheckFormProps> = ({ data, expanded, setExpanded
                                                 );
                                             })
                                         }
-                                    </>
-
-                            }
-                        </Grid>
-
+                                        </Grid>
+                        </Grid>}
                     </Grid>
                 </AccordionDetails>
             </Accordion>
@@ -170,7 +170,15 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
     const isSelected = selected.details.filter((element) => element.expiration_date === data.expiration_date) ? selected.details.filter((element) => element.expiration_date === data.expiration_date)[0] : null;
     const dispatch = useAppDispatch();
     const [check, setCheck] = useState<boolean>(isSelected ? true : false);
-
+    const {control, setValue} = useForm<{lote: number | null}>({
+        defaultValues: {
+            lote: isSelected?.lote  
+    }});
+    
+    const handleSelect = (value: LotType | null)=>{
+        setValue('lote', value?.id || null)
+        dispatch(updateStatusT2TrackingDetail({id: itemId, lote: value?.id, listIds: isSelected?.details.map(detail=> detail.id)}))
+    }
     const handlClick = () => {
 
         setCheck(!check);
@@ -258,7 +266,7 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
 
                 <Typography variant="body1" component="h1" fontWeight={400} marginLeft={'10px'}>
                     {
-                        format(new Date(data.expiration_date), 'dd/MM/yyyy')
+                        format(new Date(parseISO(data.expiration_date.toString())), 'dd/MM/yyyy')
                     }
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -286,6 +294,17 @@ const RenderDateContent: FC<RenderCheckProps> = ({ data, selected, itemId, total
                         <ExpandMoreIcon />
                     </IconButton>
                 </Box>
+                {isSelected && <Box sx={{p: '10px'}}>
+                    <LotSelect
+                        control={control}
+                        name="lote"
+                        onChange={handleSelect}
+                        lotId={isSelected?.lote || undefined}
+                        placeholder="Lote"
+                        registered={true}
+                        />
+                </Box>}
+
             </Paper>
         </Grid>
     );
