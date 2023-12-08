@@ -32,7 +32,7 @@ import { LotSelect } from "../../ui/components/LotSelect";
 import { LotType } from '../../../interfaces/maintenance';
 
 // Función para manejar el cambio de expansión del acordeón
-const handleChange = (panel: number, expanded: number | false, setExpanded: React.Dispatch<React.SetStateAction<number | false>>) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+const handleChange = (panel: number, _expanded: number | false, setExpanded: React.Dispatch<React.SetStateAction<number | false>>) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
 };
 
