@@ -92,21 +92,21 @@ const items: SideBarItem[] = [
       {
         text: "Cargar Preventa",
         href: "/tracker-t2/pre-sale",
-        id: "nuevo",
+        id: "outregister",
       },
       {
         text: "Gestión",
         href: "/tracker-t2/manage",
-        id: "order",
+        id: "outmanage",
       },
       {
         text: "Revision",
         href: "/tracker-t2/pre-sale-check",
-        id: "order",
+        id: "outcheck",
       },
     ],
     icon: <ContentPasteGoTwoToneIcon sx={{ width: "30px" }} color="primary" />,
-    id: "movimientos",
+    id: "t2",
   },
   {
     text: "REPORTE",
@@ -175,7 +175,6 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <>
       <Grid item xs={2} className={`sidebar__root`}>

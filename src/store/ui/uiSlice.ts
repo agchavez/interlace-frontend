@@ -28,12 +28,12 @@ const initialState: uiState = {
     loading: false,
     dashboardQueryParams: {
         filterDate: FilterDate.TODAY,
-        start_date: format(new Date(), "yyyy-MM-dd"),
-        end_date: format(new Date(), "yyyy-MM-dd")
+        start_date: format(new Date(), "yyyy-MM-dd 00:00:00"),
+        end_date: format(new Date(), "yyyy-MM-dd 23:59:59"),
     },
     reportPallets: {
-        date_after: format(new Date(), "yyyy-MM-dd"),
-        date_before: format(new Date(), "yyyy-MM-dd"),
+        date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
+        date_before: format(new Date(), "yyyy-MM-dd 23:59:59"),
         shift: undefined,
         distribution_center: undefined,
         product: undefined,
@@ -43,8 +43,8 @@ const initialState: uiState = {
         limit: 15,
         offset: 0,
         status: "COMPLETE",
-        date_before: format(new Date(), "yyyy-MM-dd"),
-        date_after: format(new Date(), "yyyy-MM-dd"),
+        date_before: format(new Date(), "yyyy-MM-dd 23:59:59"),
+        date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
         filter_date: FilterDate.TODAY,
     },
     orderQueryParams: {
@@ -53,8 +53,8 @@ const initialState: uiState = {
         status: "PENDING",
     },
     managerT2QueryParams: {
-        date_after: format(new Date(), "yyyy-MM-dd"),
-        date_before: format(new Date(), "yyyy-MM-dd"),
+        date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
+        date_before: format(new Date(), "yyyy-MM-dd 23:59:59"),
         search: "",
         status: ['APPLIED']
     },

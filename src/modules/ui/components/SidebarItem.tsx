@@ -28,6 +28,7 @@ const SidebarItem: FunctionComponent<SidebarItemProps> = ({ subItems, icon, text
     const handleClick = () => {
         setOpen(!open)
     }
+    
     const selected = subItems?.find((item) => item.selected)
     return (
 

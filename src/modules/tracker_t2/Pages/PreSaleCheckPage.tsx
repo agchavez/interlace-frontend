@@ -173,7 +173,8 @@ const PreSalePage = () => {
                         <Grid
                             item xs={12} md={3} lg={3} xl={2} style={{ display: "flex", justifyContent: "flex-end" }}
                         >
-                            {t2TrackingActual?.status === "CHECKED" && <Button
+                            {t2TrackingActual?.status === "CHECKED" 
+                            && <Button
                                 variant="contained"
                                 color="error"
                                 size="medium"

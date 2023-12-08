@@ -28,6 +28,28 @@ export const createT2Tracking = (dataBody: FormData, onCompleted: (id: number) =
         dispatch(setLoadT2Tracking(false));
     }
 }
+
+// Eliminar seguimiento de t2
+export const deleteT2Tracking = (id: string, onClose: () => void): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoadT2Tracking(true));
+        const { token } = getState().auth;
+        await backendApi.delete(`/output-t2/${id}/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        dispatch(removeSeguimientoT2(+id));
+        toast.success('Salida T2', {
+            description: 'Se ha eliminado correctamente',
+        });
+        onClose();
+    } catch (error) {
+        handleApiError(error);
+    } finally {
+        dispatch(setLoadT2Tracking(false));
+    }
+}
 export const getT2Trackings = (): AppThunk => async (dispatch, getState) => {
     try {
         dispatch(setLoadT2Tracking(true));

@@ -24,7 +24,12 @@ const ManagePreSalePage = () => {
     const [query, setquery] = useState<OutputT2QueryParams>({
         limit: 15,
         offset: 0,
-        status: []
+        date_after: format(new Date(managerT2QueryParams.date_after), "yyyy-MM-dd"),
+        date_before: format(new Date(managerT2QueryParams.date_before), "yyyy-MM-dd"),
+        status: managerT2QueryParams.status,
+        distributor_center: managerT2QueryParams.distribution_center,
+        id: managerT2QueryParams.id ? managerT2QueryParams.id : undefined,
+        
     });
     const { data, isLoading, isFetching, refetch } = useGetT2TrackingQuery(query);
 
