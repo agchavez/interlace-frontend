@@ -51,6 +51,7 @@ import { OrderDetail, OrderExcelResponse } from '../../../interfaces/orders';
 import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
+import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 interface OrderData {
   location: number;
   observations: string;
@@ -227,7 +228,9 @@ export const RegisterOrderpage = () => {
                 color="success"
                 size="medium"
                 disabled={!changedData || (order.order_detail.length === 0 && !file.file)}
-                endIcon={<CheckTwoToneIcon fontSize="small" />}
+                endIcon={
+                  type === "excel" ? <CloudUploadTwoToneIcon fontSize="small" /> :
+                <CheckTwoToneIcon fontSize="small" />}
                 onClick={handleClickSave}
               >
                 {changedData ? "Guardar" : "Guardado"}

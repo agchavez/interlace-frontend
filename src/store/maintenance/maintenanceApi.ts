@@ -20,6 +20,7 @@ import {
   CreateLocationBody,
 } from "../../interfaces/maintenance";
 import { Product, ProductQuerySearch } from "../../interfaces/tracking";
+import { LotType, LotTypeQuerySearch } from '../../interfaces/maintenance';
 
 export const maintenanceApi = createApi({
   reducerPath: "maintenanceApi",
@@ -148,13 +149,36 @@ export const maintenanceApi = createApi({
           params: {
             ...params,
             id: params.id ? params.id : undefined,
-            distributor_center: params.distributorCenter
-              ? params.distributorCenter
+            distributor_center: params.distributor_center
+              ? params.distributor_center
               : undefined,
           },
         };
       },
     }),
+    getLot: builder.query<BaseApiResponse<LotType>, LotTypeQuerySearch>({
+      query: (params) => {
+        return {
+          url: `/lot/`,
+          method: "GET",
+          params: {
+            ...params,
+            id: params.id ? params.id : undefined,
+          },
+        };
+      }
+    }),
+    postLot: builder.mutation<LotType, {code: string}>({
+      query: ({code}) => {
+        return {
+          url: `/lot/`,
+          method: "POST",
+          body: {
+            code
+          },
+        };
+      }
+    })
   }),
 });
 
@@ -169,4 +193,6 @@ export const {
   useRegisterTrailerMutation,
   useGetRouteQuery,
   usePostLocationsMutation,
+  useGetLotQuery,
+  usePostLotMutation
 } = maintenanceApi;

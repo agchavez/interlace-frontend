@@ -618,6 +618,7 @@ export const CheckForm = ({
                   variant="outlined"
                   size="small"
                   disabled={disable}
+                  autoComplete="off"
                   {...register("driverImport")}
                   onBlur={(e) =>
                     sendDataToBackend("driver_import", e.target.value || null)
@@ -639,6 +640,7 @@ export const CheckForm = ({
                   variant="outlined"
                   size="small"
                   disabled={disable}
+                  autoComplete="off"
                   {...register("containernumber")}
                   onBlur={(e) =>
                     sendDataToBackend(
@@ -658,6 +660,7 @@ export const CheckForm = ({
                   variant="outlined"
                   size="small"
                   type="number"
+                  autoComplete="off"
                   disabled={disable}
                   {...register("documentNumber")}
                   onBlur={(e) =>
@@ -675,6 +678,7 @@ export const CheckForm = ({
                   variant="outlined"
                   size="small"
                   type="text"
+                  autoComplete="off"
                   disabled={disable}
                   {...register("invoiceNumber")}
                   onBlur={(e) =>
@@ -693,6 +697,7 @@ export const CheckForm = ({
                 size="small"
                 disabled={disable}
                 type="number"
+                autoComplete="off"
                 {...register("transferNumber")}
                 onBlur={(e) =>
                   sendDataToBackend("transfer_number", e.target.value || null)

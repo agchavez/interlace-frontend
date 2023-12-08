@@ -18,6 +18,7 @@ import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
 const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
+const TrackerT2Router = lazy(() => import('../modules/tracker_t2/TrackerT2Router'));
 const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
@@ -88,6 +89,13 @@ export function AppRouter() {
                             <PrivateRoute access={status === 'authenticated'} path="/">
                                 <LazyLoading Children={
                                     TrackerRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/tracker-t2/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    TrackerT2Router
                                 } />
                             </PrivateRoute>
                         } />

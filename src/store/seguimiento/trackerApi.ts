@@ -5,6 +5,7 @@ import { RootState } from '..'
 import { BaseApiResponse } from '../../interfaces/api';
 import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 import { format } from 'date-fns';
+import { DatesT2Tracking, OutputT2, OutputT2QueryParams } from '../../interfaces/trackingT2';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -140,6 +141,64 @@ export const nearExpirationProductsApi = createApi({
         }),
     })
 })
+
+export const t2TrackingApi = createApi({
+    reducerPath: 't2TrackingApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token
+            if (token) {
+                headers.set('authorization', `Bearer ${token}`)
+            }
+            return headers
+        }
+    }),
+    endpoints: (builder) => ({
+        getDatesT2Tracking : builder.query<BaseApiResponse<DatesT2Tracking>, {id: number, output_id: number}>({
+            query: ({id, output_id}) => ({
+                url: `/tracker-detail-product/available-dates/?product_id=${id}&output_id=${output_id}`,
+                method: 'GET',
+            }),
+            keepUnusedDataFor: 120000
+        }),
+        getT2Tracking: builder.query<BaseApiResponse<OutputT2>, OutputT2QueryParams>({
+            query: (params) => {
+              const {
+                status,
+                ...rest
+              } = params;
+          
+              const formattedStatus = status
+                ? status.map((s) => `status=${s}`).join('&')
+                : null;
+          
+              return ({
+                url: `/output-t2/?${formattedStatus}`,
+                method: 'GET',
+                params: {
+                  ...rest,
+                },
+              });
+            },
+            keepUnusedDataFor: 120000,
+          }),
+          getT2TrackingById: builder.query<OutputT2, string>({
+            query: (id) => ({
+                url: `/output-t2/${id}/`,
+                method: 'GET',
+            }),
+            keepUnusedDataFor: 120000
+        }),
+    })
+})
+
+export const {
+    useGetDatesT2TrackingQuery,
+    useGetT2TrackingQuery,
+    useGetT2TrackingByIdQuery
+} = t2TrackingApi
+
 
 export const {
     useGetTrackerQuery,
