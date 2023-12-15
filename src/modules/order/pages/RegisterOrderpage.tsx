@@ -402,7 +402,7 @@ export const RegisterOrderpage = () => {
                       name="file"
                       label="Arrastre un archivo o haga click para seleccionar uno"
                       dropMessageStyle={{ backgroundColor: "red" }}
-                      maxSize={20}
+                      maxSize={10}
                       multiple={false}
                       onDraggingStateChange={(d: boolean) => setDragging(d)}
                       onDrop={handleFileChange}

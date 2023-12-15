@@ -17,10 +17,12 @@ export const inventoryApi = createApi({
   }),
     endpoints: (builder) => ({
         getInventory: builder.query<BaseApiResponse<InventarioMoviment>, InventarioMovimentQueryParams>({
-            query: (params) => ({
+            query: (params) => {
+              const par = {...params, product: params.productos.map(pr=>pr.id).join(','), distributor_center: params.distributor_center.map(dc => dc.id).join(',')}
+              return({
                 url: "/inventory-movement/",
-                params,
-            }),
+                params:par,
+            })},
         }),
     }),
 });
