@@ -177,6 +177,7 @@ export interface NearExpirationQueryParams {
   limit: number;
   offset: number;
   product?: number;
+  productos: Product[];
   distributor_center?: number;
   days?: number;
 }

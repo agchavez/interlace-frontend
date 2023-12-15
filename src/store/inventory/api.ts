@@ -18,7 +18,7 @@ export const inventoryApi = createApi({
     endpoints: (builder) => ({
         getInventory: builder.query<BaseApiResponse<InventarioMoviment>, InventarioMovimentQueryParams>({
             query: (params) => {
-              const par = {...params, product: params.productos.map(pr=>pr.id).join(','), distributor_center: params.distributor_center.map(dc => dc.id).join(',')}
+              const par = {...params, product: params.productos.map(pr=>pr.id), distributor_center: params.distributor_center.map(dc => dc.id)}
               return({
                 url: "/inventory-movement/",
                 params:par,

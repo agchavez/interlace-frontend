@@ -134,7 +134,7 @@ export const nearExpirationProductsApi = createApi({
                 url: `/report/next-win/`,
                 method: 'GET',
                 params: {
-                    ...params,
+                    ...params, productos:params.productos.map(pro => pro.id)
                 }
             }),
             keepUnusedDataFor: 120000

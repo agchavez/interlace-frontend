@@ -1,5 +1,5 @@
-import { Button, Container, Divider, Grid, Typography } from "@mui/material";
-import { NearExpirationQueryParams } from "../../../interfaces/tracking";
+import { Box, Button, Chip, Container, Divider, Grid, IconButton, Typography } from "@mui/material";
+import { NearExpirationQueryParams, Product } from "../../../interfaces/tracking";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../../../store/store";
 import { useGetNearExpirationProductsQuery } from "../../../store/seguimiento/trackerApi";
@@ -14,6 +14,8 @@ import {
   FilterNearExpiration,
   FormFilterNearExpiration,
 } from "../components/FilterNearExpiration";
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+
 export const NearExpirationReportPage = () => {
   const user = useAppSelector((state) => state.auth.user);
 
@@ -35,6 +37,7 @@ export const NearExpirationReportPage = () => {
     offset: 0,
     distributor_center: user?.centro_distribucion || undefined,
     days: 60,
+    productos: []
   });
 
   const {
@@ -49,7 +52,7 @@ export const NearExpirationReportPage = () => {
       const newQuery = {
         ...query,
         distributor_center: data.distribution_center,
-        product: data.product ? data.product : undefined,
+        productos: data.productos,
         days: data.days === null ? undefined : data.days,
       };
       return newQuery;
@@ -102,13 +105,26 @@ export const NearExpirationReportPage = () => {
       };
     });
 
+    const handleClickDeleteProductFilter = (product: Product)=>{
+        const productos = query.productos
+        const result = productos.filter(producto => producto.sap_code !== product.sap_code)
+        const queryProcess: NearExpirationQueryParams = {
+        ...query,
+        productos: result,
+        };
+        queryProcess.product = undefined
+        setquery(queryProcess);
+    }
+
   return (
     <>
-      <FilterNearExpiration
+      { 
+        <FilterNearExpiration
         open={openFilter}
         handleClose={() => setopenFilter(false)}
         handleFilter={handleFilter}
-      />
+        query={query}
+      />}
       <Container maxWidth="xl" sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -168,6 +184,41 @@ export const NearExpirationReportPage = () => {
               }
               turno={getTurnoFromCurrentTime()}
             />
+          </Grid>
+          <Grid item xs={12}>
+          <Grid container spacing={1}>
+            {
+              query.productos.length > 0 &&
+              <Grid item>
+                  <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
+                      <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
+                          <Grid item>
+                              <Typography>
+                                  Producto:
+                              </Typography>
+                          </Grid>
+                          {
+                              query.productos.map(product =>{
+                                return <Grid item key={product.sap_code}>
+                                    <Chip
+                                        label={product.sap_code}
+                                        onDelete={() => handleClickDeleteProductFilter(product)}
+                                        variant="outlined"
+                                        color="secondary"
+                                        deleteIcon={
+                                            <IconButton sx={{m:0}}>
+                                                <HighlightOffIcon />
+                                            </IconButton>
+                                        }
+                                        />
+                                  </Grid>
+                              })
+                          }
+                      </Grid>
+                  </Box>
+              </Grid>
+            }
+          </Grid>
           </Grid>
           <Grid item xs={12}>
             <NearExpirationTable
