@@ -17,6 +17,7 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { setInventoryQueryParams } from "../../../store/ui/uiSlice";
 import { DistributionCenter } from "../../../interfaces/maintenance";
+import { Link } from "react-router-dom";
 
 const getTypoMov = (value: string) => {
     switch (value) {
@@ -77,9 +78,11 @@ const InventoryManager = () => {
 
     const columns: GridColDef<InventarioMoviment>[] = [
         { field: 'Tracking', headerName: 'Tracking', width: 100, renderCell: (params) => (
-            <Typography variant="body2" component="h2" fontWeight={400}>
-                TRK-{params.row.tracker.toString().padStart(5, '0')}
-            </Typography>
+            <Link to={`/tracker/detail/${params.row.tracker}`} style={{ textDecoration: 'none' }}>
+                <Typography variant="body2" component="h2" fontWeight={400} color="secondary">
+                    TRK-{params.row.tracker.toString().padStart(5, '0')}
+                </Typography>
+            </Link>
         ) },
         { field: 'distributor_center_name', headerName: 'Centro de distribución', width: 170, minWidth: 170 },
         { field: 'product_name', headerName: 'Producto', width: 300, minWidth: 300 },
