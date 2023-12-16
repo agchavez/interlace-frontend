@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { OrderDetail, OrderStatusType } from "../../interfaces/orders";
+import { OrderDetail, OrderStatusType, OutOrder } from "../../interfaces/orders";
 import { LocationType } from "../../interfaces/maintenance";
 
 export interface OrderStore {
@@ -11,7 +11,8 @@ export interface OrderStore {
   distributor_center: number | null;
   user: number | null;
   location: number | null;
-  location_data: LocationType | null
+  location_data: LocationType | null;
+  out_order: OutOrder | null;
 }
 
 interface orderInterface {
@@ -34,6 +35,7 @@ const initialState: orderInterface = {
     id: null,
     created_at: null,
     location_data: null,
+    out_order: null,
   },
   order_detail_delete: [],
 };
@@ -53,6 +55,7 @@ export const orderSlice = createSlice({
         id: null,
         created_at: null,
         location_data: null,
+        out_order: null
       };
       state.order_detail_delete = [];
       state.changed = false;
