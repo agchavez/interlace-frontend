@@ -58,7 +58,7 @@ const PreSalePage = () => {
   const handleSubmitForm = () => {
     const formData = new FormData();
     formData.append("file", file.file as Blob);
-    formData.append("observations", obs as string);
+    formData.append("observations", obs ? obs : "");
     dispatch(createT2Tracking(formData, (id: number) => navigate(`/tracker-t2/detail/${id}`)));
   };
 

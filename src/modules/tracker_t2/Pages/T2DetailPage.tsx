@@ -4,17 +4,31 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Chip,
 import { ArrowBack } from '@mui/icons-material';
 import { useGetT2TrackingByIdQuery } from '../../../store/seguimiento/trackerApi';
 import { skipToken } from '@reduxjs/toolkit/dist/query';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ListOutTrackerDetail } from '../components/ListOutTrackerDetail';
 import { useAppSelector } from '../../../store/store';
 import { useState } from 'react';
 import { DeleteT2Modal } from '../components/DeleteT2Modal';
+import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+import { exportToXLSX } from '../../../utils/exportToCSV';
+import { toast } from 'sonner';
 
+interface T2Export {
+    product_sap_code: string;
+    product_name: string;
+    quantity_requested: string;
+    quantity_applied: string;
+    expiration_date: string;
+    lot: string;
+    tracking: number;
+    quantity_available: string;
+}
 const T2DetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const [deleteOpen, setdeleteOpen] = useState(false);
+    const [loadingExport, setloadingExport] = useState<boolean>(false);
     const { loading } = useAppSelector(state => state.seguimiento.t2Tracking);
     const navigae = useNavigate();
     const user = useAppSelector((state) => state.auth.user);
@@ -30,10 +44,64 @@ const T2DetailPage = () => {
         setdeleteOpen(true);
     }
 
+    const handleExport = async () => {
+        setloadingExport(true);
+        const dataExport: T2Export[] = [];
+        data?.output_detail_t2.forEach((item) => {
+            item.details.details.forEach((detail) => {
+                detail.details.forEach((detail2) => {
+                    dataExport.push({
+                        product_sap_code: item.product_sap_code,
+                        product_name: item.product_name,
+                        quantity_requested: item.quantity,
+                        quantity_applied: detail2.quantity,
+                        expiration_date:format(new Date(parseISO(detail.expiration_date.toString())), 'dd/MM/yyyy'),
+                        lot: detail.code_name || '',
+                        tracking: detail2.tracker_id,
+                        quantity_available: detail2.quantity
+                    })
+                })
+            })
+        })
+        if (dataExport.length === 0 ){
+            toast.error(
+                "No hay datos para exportar"
+            )
+            setloadingExport(false);
+            return;
+        }
+
+        const headers = [
+            "Tracking",
+            "Turno",
+            "Codigo",
+            "Producto",
+            "Pallets",
+            "Fecha vencimiento",
+        ];
+
+        await exportToXLSX({
+            data: [headers, ...dataExport.map((tr) => [
+                "TRK-" + tr.tracking.toString().padStart(5, "0"),
+                tr.lot || "",
+                tr.product_sap_code,
+                tr.product_name,
+                tr.quantity_available,
+                tr.expiration_date,
+            ])],
+            filename: `reporte_t2_${format(
+                new Date(),
+                "dd-MM-yyyy"
+            )}.xlsx`,
+        });
+        
+        setloadingExport(false);            
+    }
+    
     if (isLoading) return <Container maxWidth="xl" sx={{ marginTop: 2 }}>
         <Box sx={{ marginBottom: 2 }}>
-        <LinearProgress variant="indeterminate" value={10} />
-    </Box></Container>
+            <LinearProgress variant="indeterminate" value={10} />
+        </Box></Container>
     if (error || !data) return <Navigate to="/tracker-t2/manage" />
 
     return (
@@ -64,12 +132,25 @@ const T2DetailPage = () => {
                                     T2OUT-{id?.padStart(1, '0')}
                                 </Typography>
                             </div>
-                            {data.status !== 'APPLIED' && user?.list_permissions?.includes('tracker.delete_outputt2model') &&
-                                <Button variant="contained" sx={{ marginTop: 1 }} color="error" onClick={handleDelete} disabled={loading}
-                                    startIcon={loading ? <CircularProgress size={20} /> : null}
-                                >
-                                    Eliminar
-                                </Button>}
+                            <div>
+                                <Button variant="outlined" 
+                                    sx={{ marginTop: 1, marginRight: 1 }} 
+                                    onClick={handleExport}
+                                    color="success" 
+                                    disabled={loadingExport}
+                                    startIcon={
+                                        loadingExport ? <CircularProgress size={20} color='success' /> :
+                                            <CloudDownloadTwoToneIcon />}>
+                                    Exportar
+                                </Button>
+                                {data.status !== 'APPLIED' && user?.list_permissions?.includes('tracker.delete_outputt2model') &&
+                                    <Button variant="contained" sx={{ marginTop: 1 }} color="error" onClick={handleDelete} disabled={loading}
+                                        startIcon={loading ? <CircularProgress size={20} /> : null}
+                                    >
+                                        Eliminar
+                                    </Button>}
+                            </div>
+
                         </Box>
                         <Typography variant="h6" component="h2" fontWeight={200} sx={{ marginLeft: 6 }}>
                             {data.distributor_center_data?.name}

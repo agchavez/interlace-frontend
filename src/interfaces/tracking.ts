@@ -167,6 +167,9 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   created_at__lte?: string;
   shift?: "A" | "B" | "C";
   ordering?: string;
+  available_quantity__gt?: number;
+  available_quantity__lt?: number;
+  available_quantity?: number;
 }
 
 export interface LastTrackerOutputQueryParams {

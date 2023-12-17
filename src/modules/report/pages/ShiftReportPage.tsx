@@ -89,7 +89,20 @@ export const ShiftReportPage = () => {
                 );
             },
         },
-
+        {
+            field: "available_quantity",
+            headerName: "Cajas disponibles",
+            flex: 0,
+            width: 200,
+            minWidth: 200,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.value}
+                    </Typography>
+                );
+            },
+        },
         {
             field: "expiration_date",
             headerName: "Fecha de vencimiento",
@@ -215,6 +228,9 @@ export const ShiftReportPage = () => {
             shift: data.shift,
             expiration_date: data.expiration_date ? format(new Date(data.expiration_date), "yyyy-MM-dd") : undefined,
             tracker_detail__product: data.product ? data.product : undefined,
+            available_quantity: data.avalibleQuantity=== 'equal' ? 0 : undefined,
+            available_quantity__gt: data.avalibleQuantity === 'greater' ? 0 : undefined,
+            available_quantity__lt: data.avalibleQuantity === 'less' ? 0 : undefined,
         }));
 
     };

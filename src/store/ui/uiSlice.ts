@@ -40,6 +40,7 @@ const initialState: uiState = {
         distribution_center: undefined,
         product: undefined,
         expiration_date: null,
+        avalibleQuantity: 'all',
     },
     manageQueryParams: {
         limit: 15,
