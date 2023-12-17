@@ -40,6 +40,7 @@ interface FormValues {
   type: OutOrderType | null;
   document_number: string | null;
   document: File | null;
+  vehicle: string;
 }
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -89,7 +90,8 @@ const OutOrderModal: FunctionComponent<CreateCheckProps> = ({
         type: data.type,
         document_number: data.document_number,
         document: data.document??undefined,
-        document_name: data.document?.name
+        document_name: data.document?.name,
+        vehicle: data.vehicle,
       })
     );
     reset();
@@ -198,6 +200,23 @@ const OutOrderModal: FunctionComponent<CreateCheckProps> = ({
                       />
                     </Grid>
                     <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        id="outlined-basic"
+                        label="Vehículo"
+                        variant="outlined"
+                        size="small"
+                        {...register("vehicle")}
+                        onChange={(e) => {
+                          if (e.target.value === "") return;
+                          const value = e.target.value;
+                          setValue("vehicle", value);
+                        }}
+                        error={errors.vehicle ? true : false}
+                        helperText={errors.vehicle?.message}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
                       <FileUploader
                         name="file"
                         label="Arrastre un archivo o haga click para seleccionar uno"
@@ -223,6 +242,7 @@ const OutOrderModal: FunctionComponent<CreateCheckProps> = ({
                             cursor: "pointer",
                             position: "relative",
                             overflow: "hidden",
+                            height: 100,
                             gap: 2,
                             backgroundColor: dragging
                               ? "#F0E68C"

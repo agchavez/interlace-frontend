@@ -139,6 +139,7 @@ export interface OutOrderData {
   document_number: string;
   document?: File;
   document_name?: string;
+  vehicle: string;
 }
 
 export interface OutOrderBody {
@@ -157,4 +158,5 @@ export interface OutOrder {
   document_number: string;
   document_name: string|null;
   order: number;
+  vehicle: string;
 }
