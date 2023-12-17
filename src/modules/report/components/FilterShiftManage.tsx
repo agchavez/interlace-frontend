@@ -265,6 +265,11 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
           <Divider />
           <List>
             <Grid container sx={{ p: 1 }} spacing={2}>
+            <Grid item xs={12}>
+                <Typography variant="subtitle2" fontWeight={200}>
+                  Cajas
+                </Typography>
+              </Grid>
               <Grid item xs={12}>
                 <Controller
                   name="avalibleQuantity"

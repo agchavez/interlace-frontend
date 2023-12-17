@@ -103,13 +103,14 @@ export const permisions = [
     {
         url: "/movimientos/crear",
         permissions: [
-            "any",
+            "report.report_tracker",
         ]
     },
     {
         url: "/report/shift",
         permissions: [
-            "any",
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_shift",
         ]
     },
     {
