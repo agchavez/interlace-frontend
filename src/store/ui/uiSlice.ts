@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DashboardQueryParams } from '../../interfaces/login';
 import { format } from "date-fns";
-import { OrderQueryParams, TrackerQueryParams } from '../../interfaces/tracking';
+import { InventarioMovimentQueryParams, OrderQueryParams, TrackerQueryParams } from '../../interfaces/tracking';
 import { FormFilterShiftManage } from "../../modules/report/components/FilterShiftManage";
 import { FormFilterT2 } from '../../modules/tracker_t2/components/FilterPreSale';
+import { FormFilterInventory } from "../../modules/inventory/components/FilterInventory";
 
 
 enum FilterDate {
@@ -22,6 +23,7 @@ export interface uiState {
     orderQueryParams: OrderQueryParams;
     reportPallets: FormFilterShiftManage;
     managerT2QueryParams: FormFilterT2;
+    inventoryQueryParams: InventarioMovimentQueryParams;
 }
 
 const initialState: uiState = {
@@ -58,11 +60,18 @@ const initialState: uiState = {
         search: "",
         status: ['APPLIED']
     },
+    inventoryQueryParams: {
+        limit: 10,
+        offset: 0,
+        productos: [],
+        distributor_center: [],
+        module: [],
+    }
 }
 
 export const uiSlice = createSlice({
     name: "ui",
-    initialState,
+    initialState, 
     reducers: {
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload
@@ -81,8 +90,10 @@ export const uiSlice = createSlice({
         },
         setManagerT2QueryParams: (state, action: PayloadAction<FormFilterT2>) => {
             state.managerT2QueryParams = action.payload
-        }
-
+        },
+        setInventoryQueryParams: (state, action: PayloadAction<FormFilterInventory>) => {
+            state.inventoryQueryParams = action.payload
+        },
 
     }
 })
@@ -94,5 +105,6 @@ export const {
     setManageQueryParams,
     setQueryReportPallets,
     setOrderQueryParams,
-    setManagerT2QueryParams
+    setManagerT2QueryParams, 
+    setInventoryQueryParams,
 } = uiSlice.actions;

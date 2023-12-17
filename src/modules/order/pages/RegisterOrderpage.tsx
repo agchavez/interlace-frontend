@@ -32,11 +32,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CloudDownloadTwoToneIcon from "@mui/icons-material/CloudDownloadTwoTone";
 
 import {
   changeOrder,
   createOrder,
   createOrderByExcel,
+  downloadDocument,
   getOrder,
   removeOrderDetail,
   setChanged,
@@ -52,10 +54,22 @@ import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+import OutOrderModal from "../components/OutOrderModal";
 interface OrderData {
   location: number;
   observations: string;
 }
+
+const FleetDict = {
+  "PROPIEDAD":"Propiedad",
+  "TERCERA":"Tercera",
+}
+
+const TypeOutOrderDict = {
+  "T1":"T1",
+  "T2":"T2",
+}
+
 
 const schema = yup.object().shape({
   observations: yup.string().required("Campo requerido"),
@@ -77,6 +91,7 @@ export const RegisterOrderpage = () => {
   const [openAddClientModal, setOpenAddClientModal] = useState(false);
   const [openAddOrderDetailtModal, setOpenAddOrderDetailModal] =
     useState(false);
+  const [openOutOrderModal, setOpenOutOrderModal] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const {
     order,
@@ -178,7 +193,7 @@ export const RegisterOrderpage = () => {
             observations: data.observations,
             location: data.location,
             user: +user.id,
-          })
+          }, navigate)
           );
         }
     }
@@ -197,6 +212,9 @@ export const RegisterOrderpage = () => {
     setfile({ file: file, fileName: file.name });
   }
 
+  const handleClickDescargar = () => {
+    order.out_order?.id && dispatch(downloadDocument(order.out_order?.id));
+  };
 
   return (
     <>
@@ -208,6 +226,13 @@ export const RegisterOrderpage = () => {
         <AddOrderDetailModal
           open={openAddOrderDetailtModal}
           handleClose={() => setOpenAddOrderDetailModal(false)}
+        />
+      )}
+      {openOutOrderModal && (
+        <OutOrderModal
+          open={openOutOrderModal}
+          handleClose={() => setOpenOutOrderModal(false)}
+          order={order}
         />
       )}
       <Container maxWidth="xl" sx={{ marginTop: 2 }}>
@@ -222,6 +247,16 @@ export const RegisterOrderpage = () => {
               </Typography>
             </div>
             {loading && <CircularProgress />}
+            {((!disabled || order.status === "PENDING") && order.id !== null) && (
+              <Button
+                variant="contained"
+                color="success"
+                size="medium"
+                onClick={()=> setOpenOutOrderModal(true)}
+              >
+                Salida de orden
+              </Button>
+            )}
             {!disabled && (
               <Button
                 variant="contained"
@@ -371,6 +406,110 @@ export const RegisterOrderpage = () => {
                     ORD-{order.id?.toString().padStart(0, "0")}
                   </Typography>
                 </Grid>}
+                {
+                  order.out_order &&
+                  <>
+                    <Grid item xs={12}>
+                      <Divider>
+                        <Typography variant="body1" component="h2" fontWeight={400}>
+                          Salida del Pedido
+                        </Typography>
+                      </Divider>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Flota
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {FleetDict[order.out_order.fleet]}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Tipo
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {TypeOutOrderDict[order.out_order.type]}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Número de Documento
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {order.out_order.document_number}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Documento
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {order.out_order.document_name ? (
+                              <Chip
+                                onClick={handleClickDescargar}
+                                label={order.out_order.document_name}
+                                variant="outlined"
+                                color="secondary"
+                                icon={<CloudDownloadTwoToneIcon color="secondary" />}
+                                size="medium"
+                                sx={{ mt: 1 }}
+                              />
+                            ) : (
+                              "--"
+                            )}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </>
+                }
                 <Grid item xs={12}>
                   <Divider>
                     <Typography variant="body1" component="h2" fontWeight={400}>
@@ -402,7 +541,7 @@ export const RegisterOrderpage = () => {
                       name="file"
                       label="Arrastre un archivo o haga click para seleccionar uno"
                       dropMessageStyle={{ backgroundColor: "red" }}
-                      maxSize={20}
+                      maxSize={10}
                       multiple={false}
                       onDraggingStateChange={(d: boolean) => setDragging(d)}
                       onDrop={handleFileChange}
