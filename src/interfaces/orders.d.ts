@@ -128,3 +128,35 @@ export interface Error {
   fecha_vencimiento: Date;
   cantidad:          number;
 }
+
+
+export type FleetType = "PROPIEDAD" | "TERCERA"
+export type OutOrderType = "T1" | "T2"
+export interface OutOrderData {
+  order: number;
+  fleet: FleetType;
+  type: OutOrderType;
+  document_number: string;
+  document?: File;
+  document_name?: string;
+  vehicle: string;
+}
+
+export interface OutOrderBody {
+  order: number;
+  fleet: FleetType;
+  type: OutOrderType;
+  document_number: string;
+  document?: File;
+}
+
+export interface OutOrder {
+  id: number;
+  created_at: string;
+  fleet: FleetType;
+  type: OutOrderType;
+  document_number: string;
+  document_name: string|null;
+  order: number;
+  vehicle: string;
+}

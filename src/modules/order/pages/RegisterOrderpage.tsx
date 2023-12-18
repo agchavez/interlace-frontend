@@ -17,8 +17,9 @@ import {
   Paper,
   Collapse,
   Box,
+  Card,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
+import { ArrowBack, OutboundOutlined } from "@mui/icons-material";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { LocationSelect } from "../../ui/components/LocationSelect";
@@ -32,11 +33,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CloudDownloadTwoToneIcon from "@mui/icons-material/CloudDownloadTwoTone";
 
 import {
   changeOrder,
   createOrder,
   createOrderByExcel,
+  downloadDocument,
   getOrder,
   removeOrderDetail,
   setChanged,
@@ -52,10 +55,22 @@ import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
+import OutOrderModal from "../components/OutOrderModal";
 interface OrderData {
   location: number;
   observations: string;
 }
+
+const FleetDict = {
+  "PROPIEDAD": "Propiedad",
+  "TERCERA": "Tercera",
+}
+
+const TypeOutOrderDict = {
+  "T1": "T1",
+  "T2": "T2",
+}
+
 
 const schema = yup.object().shape({
   observations: yup.string().required("Campo requerido"),
@@ -77,6 +92,7 @@ export const RegisterOrderpage = () => {
   const [openAddClientModal, setOpenAddClientModal] = useState(false);
   const [openAddOrderDetailtModal, setOpenAddOrderDetailModal] =
     useState(false);
+  const [openOutOrderModal, setOpenOutOrderModal] = useState(false);
   const user = useAppSelector((state) => state.auth.user);
   const {
     order,
@@ -156,7 +172,7 @@ export const RegisterOrderpage = () => {
   const handleComple = (data: OrderExcelResponse) => {
     setParams({ edit: "true", orderId: data.order.id.toString() });
   };
-    
+
   const handleSubmitForm = (data: OrderData) => {
     if (!user?.centro_distribucion) return;
     if (order.id) {
@@ -170,7 +186,7 @@ export const RegisterOrderpage = () => {
     } else {
       if (type === "excel") {
         dispatch(createOrderByExcel(file.file!, watch("location"), watch("observations"), handleComple));
-      }else{
+      } else {
         dispatch(
           createOrder({
             status: "PENDING",
@@ -178,9 +194,9 @@ export const RegisterOrderpage = () => {
             observations: data.observations,
             location: data.location,
             user: +user.id,
-          })
-          );
-        }
+          }, navigate)
+        );
+      }
     }
   };
 
@@ -197,6 +213,9 @@ export const RegisterOrderpage = () => {
     setfile({ file: file, fileName: file.name });
   }
 
+  const handleClickDescargar = () => {
+    order.out_order?.id && dispatch(downloadDocument(order.out_order?.id));
+  };
 
   return (
     <>
@@ -210,32 +229,53 @@ export const RegisterOrderpage = () => {
           handleClose={() => setOpenAddOrderDetailModal(false)}
         />
       )}
+      {openOutOrderModal && (
+        <OutOrderModal
+          open={openOutOrderModal}
+          handleClose={() => setOpenOutOrderModal(false)}
+          order={order}
+        />
+      )}
       <Container maxWidth="xl" sx={{ marginTop: 2 }}>
         <Grid container spacing={1}>
           <Grid item xs={12} display="flex" justifyContent="space-between">
             <div style={{ display: "flex", alignItems: "center" }}>
-              <IconButton onClick={() => navigate('/order/manage', {replace: true})} title="Regresar">
+              <IconButton onClick={() => navigate('/order/manage', { replace: true })} title="Regresar">
                 <ArrowBack color="primary" fontSize="medium" />
               </IconButton>
               <Typography variant="h5" component="h1" fontWeight={400}>
                 Registro de pedidos de T1
               </Typography>
             </div>
-            {loading && <CircularProgress />}
-            {!disabled && (
-              <Button
-                variant="contained"
-                color="success"
-                size="medium"
-                disabled={!changedData || (order.order_detail.length === 0 && !file.file)}
-                endIcon={
-                  type === "excel" ? <CloudUploadTwoToneIcon fontSize="small" /> :
-                <CheckTwoToneIcon fontSize="small" />}
-                onClick={handleClickSave}
-              >
-                {changedData ? "Guardar" : "Guardado"}
-              </Button>
-            )}
+            <div>
+              {((!disabled || order.status === "PENDING") && order.id !== null) && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="medium"
+                  onClick={() => setOpenOutOrderModal(true)}
+                  disabled={loading}
+                  endIcon={loading ? <CircularProgress size={20} /> : <OutboundOutlined fontSize="small" />}
+                >
+                  Dar salida
+                </Button>
+              )}
+              {!disabled && (
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="medium"
+                  sx={{ marginLeft: 1 }}
+                  disabled={!changedData || (order.order_detail.length === 0 && !file.file) || loading}
+                  endIcon={
+                    type === "excel" ? <CloudUploadTwoToneIcon fontSize="small" /> :
+                      <CheckTwoToneIcon fontSize="small" />}
+                  onClick={handleClickSave}
+                >
+                  {changedData ? "Guardar" : "Guardado"}
+                </Button>
+              )}
+            </div>
           </Grid>
           <Grid item xs={12}>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
@@ -249,9 +289,19 @@ export const RegisterOrderpage = () => {
           <Grid item xs={12} sx={{ marginTop: 2 }}>
             <form
               ref={formRef}
-              onSubmit={handleSubmit(handleSubmitForm, () => {})}>
+              onSubmit={handleSubmit(handleSubmitForm, () => { })}>
               <Grid container spacing={2}>
-                <Grid item xs={8} md={8} lg={4}>
+                <Grid item xs={12}>
+                <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Divider>
+                        <Typography variant="h6" component="h2" fontWeight={400}>
+                          Datos generales del pedido
+                        </Typography>
+                      </Divider>
+                    </Grid>
+                <Grid item xs={12} md={6} lg={4}>
                   {disabled ? (
                     <>
                       <Typography
@@ -269,7 +319,17 @@ export const RegisterOrderpage = () => {
                         fontWeight={400}
                         color={"gray.500"}
                       >
-                        {order.location_data?.name} -{order.location_data?.code}
+                        {order.location_data?.name} -{order.location_data?.code} {watch("location") && <Chip
+                      label={
+                        (dataRoute?.results &&
+                          dataRoute?.results.length > 0 &&
+                          dataRoute?.results[0].code) ||
+                        ""
+                      }
+                      color="secondary"
+                      size="medium"
+                      sx={{ marginRight: 1 }}
+                    />}
                       </Typography>
                     </>
                   ) : (
@@ -295,29 +355,7 @@ export const RegisterOrderpage = () => {
                     </Button>
                   </Grid>
                 )}
-                {watch("location") !== null && (
-                  <Grid
-                    item
-                    xs={12}
-                    md={12}
-                    lg={6}
-                    alignItems="center"
-                    display="flex"
-                  >
-                    {watch("location") && <Chip
-                      label={
-                        (dataRoute?.results &&
-                          dataRoute?.results.length > 0 &&
-                          dataRoute?.results[0].code) ||
-                        ""
-                      }
-                      color="secondary"
-                      size="medium"
-                      sx={{ marginRight: 1 }}
-                    />}
-                  </Grid>
-                )}
-                <Grid item xs={12}>
+                <Grid item xs={12} md={12} lg={12}>
                   {disabled ? (
                     <>
                       <Typography
@@ -359,6 +397,139 @@ export const RegisterOrderpage = () => {
                     </>
                   )}
                 </Grid>
+                </Grid>
+                </Card>
+                </Grid>
+                {
+                  order.out_order &&
+                  <>
+                  <Grid item xs={12}>
+                <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Divider>
+                        <Typography variant="h6" component="h2" fontWeight={400}>
+                          Salida de pedido
+                        </Typography>
+                      </Divider>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Flota
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {FleetDict[order.out_order.fleet]}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Tipo
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {TypeOutOrderDict[order.out_order.type]}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Número de Documento
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {order.out_order.document_number}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Número de Documento
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {order.out_order.vehicle}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6} lg={4} xl={3}>
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={400}
+                            color={"gray.500"}
+                          >
+                            Documento
+                          </Typography>
+                          <Divider />
+                          <Typography
+                            variant="body1"
+                            component="h1"
+                            fontWeight={600}
+                            color={"gray.500"}
+                          >
+                            {order.out_order.document_name ? (
+                              <Chip
+                                onClick={handleClickDescargar}
+                                label={order.out_order.document_name}
+                                variant="outlined"
+                                color="secondary"
+                                icon={<CloudDownloadTwoToneIcon color="secondary" />}
+                                size="medium"
+                                sx={{ mt: 1 }}
+                              />
+                            ) : (
+                              "--"
+                            )}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    </Grid>
+                  
+                  </Card>
+                </Grid>
+                  </>
+                }
                 {order.id && <Grid item xs={12}>
                   <Typography
                     variant="h4"
@@ -371,6 +542,7 @@ export const RegisterOrderpage = () => {
                     ORD-{order.id?.toString().padStart(0, "0")}
                   </Typography>
                 </Grid>}
+                
                 <Grid item xs={12}>
                   <Divider>
                     <Typography variant="body1" component="h2" fontWeight={400}>
@@ -402,7 +574,7 @@ export const RegisterOrderpage = () => {
                       name="file"
                       label="Arrastre un archivo o haga click para seleccionar uno"
                       dropMessageStyle={{ backgroundColor: "red" }}
-                      maxSize={20}
+                      maxSize={10}
                       multiple={false}
                       onDraggingStateChange={(d: boolean) => setDragging(d)}
                       onDrop={handleFileChange}
@@ -524,13 +696,13 @@ const Row = ({
       <TableRow key={row.id}>
         {openModalDelete && (
           <DeleteOrderModal
-          title="Eliminar Detalle de Pedido"
-          message="¿Está seguro que desea eliminar el detalle de pedido?"
-          open={openModalDelete}
-          handleClose={() => setOpenModalDelete(false)}
-          onDelete={() => handleClickDeleteOrderDetail(index)}
+            title="Eliminar Detalle de Pedido"
+            message="¿Está seguro que desea eliminar el detalle de pedido?"
+            open={openModalDelete}
+            handleClose={() => setOpenModalDelete(false)}
+            onDelete={() => handleClickDeleteOrderDetail(index)}
           />
-          )} 
+        )}
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -552,7 +724,7 @@ const Row = ({
           {format(
             toDate(new Date(row.expiration_date).toISOString().split("T")[0]),
             "yyyy-MM-dd"
-            )}
+          )}
         </TableCell>
         {!disabled && (
           <TableCell align="right">
@@ -586,7 +758,7 @@ const Row = ({
                       </TableCell>
                       <TableCell>{historyRow.quantity}</TableCell>
                       <TableCell>
-                      {format(
+                        {format(
                           toDate(
                             new Date(historyRow.created_at)
                               .toISOString()

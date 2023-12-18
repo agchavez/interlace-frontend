@@ -58,7 +58,7 @@ const PreSalePage = () => {
   const handleSubmitForm = () => {
     const formData = new FormData();
     formData.append("file", file.file as Blob);
-    formData.append("observations", obs as string);
+    formData.append("observations", obs ? obs : "");
     dispatch(createT2Tracking(formData, (id: number) => navigate(`/tracker-t2/detail/${id}`)));
   };
 
@@ -116,7 +116,7 @@ const PreSalePage = () => {
             name="file"
             label="Arrastre un archivo o haga click para seleccionar uno"
             dropMessageStyle={{ backgroundColor: "red" }}
-            maxSize={20}
+            maxSize={10}
             multiple={false}
             onDraggingStateChange={(d: boolean) => setDragging(d)}
             onDrop={handleFileChange}

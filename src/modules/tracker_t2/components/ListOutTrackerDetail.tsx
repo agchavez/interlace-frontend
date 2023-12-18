@@ -5,6 +5,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { OutputDetailT2Detail } from '../../../interfaces/trackingT2';
 import { StyledTableCell } from '../../tracker/components/CheckForm';
 import { ListoutTrackerHistory } from './ListoutTrackerHistory';
+import { format, parseISO } from 'date-fns';
 
 interface ListOutTrackerRowProps {
   total_quantity: number;
@@ -28,7 +29,7 @@ export const ListOutTrackerRow: FC<ListOutTrackerRowProps> = ({ total_quantity, 
           </IconButton>
         </TableCell>
         <TableCell component="th" align="right">
-          {detail.expiration_date.toString()}
+          {format(new Date(parseISO(detail.expiration_date.toString())), 'dd/MM/yyyy')}
         </TableCell>
         <TableCell align="right">{detail.quantity}</TableCell>
         <TableCell align="right">{detail.code_name}</TableCell>

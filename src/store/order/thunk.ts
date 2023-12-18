@@ -16,13 +16,15 @@ import {
   OrderCreateBody,
   OrderDetail,
   OrderDetailCreateBody,
+  OutOrder,
+  OutOrderData,
 } from "../../interfaces/orders";
 import { AxiosError, AxiosResponse } from "axios";
 import { TrackerDetailResponse } from "../../interfaces/tracking";
 import { CreateLocationBody, CreateRouteBody, LocationType, Route } from "../../interfaces/maintenance";
 import { OrderExcelResponse } from '../../interfaces/orders';
 // Restablecer contraseña de usuario
-export const createOrder = (order: OrderCreateBody): AppThunk => {
+export const createOrder = (order: OrderCreateBody, navigate?:(to:string)=>void): AppThunk => {
   return async (dispatch, getState) => {
     try {
       dispatch(setLoadingOrder(true));
@@ -43,6 +45,7 @@ export const createOrder = (order: OrderCreateBody): AppThunk => {
         });
         Promise.allSettled(details).then(async () => {
           toast.success("Pedido guardado con exito");
+          navigate && navigate(`/order/register?edit=true&orderId=${resp.data.id}`)
         });
       }
     } catch (error) {
@@ -367,3 +370,98 @@ export const addOrderDetailState = (
     }
   };
 };
+
+export const addOutOrder = (
+  orderOutData: OutOrderData
+): AppThunk => {
+  return async (dispatch, getState) => {
+    try {
+      dispatch(setLoadingOrder(true));
+      const { auth, } = getState() as RootState;
+      const orderOutBody = new FormData()
+      orderOutBody.append("fleet", orderOutData.fleet)
+      orderOutBody.append("order", orderOutData.order.toString())
+      orderOutBody.append("type", orderOutData.type)
+      orderOutBody.append("document_number", orderOutData.document_number)
+      orderOutData.document_name && orderOutBody.append("document_name", orderOutData.document_name)
+      orderOutData.document && orderOutBody.append("document", orderOutData.document)
+      const response = await backendApi.post<OutOrder, AxiosResponse<OutOrder>>(
+        `/out-order/`,
+        orderOutBody,
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      );
+      if (response.status === 201) {
+        const resp = await backendApi.get<Order>(`/order/${orderOutData.order}/`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        dispatch(setOrder(resp.data));
+      }
+    } catch (error) {
+      errorApiHandler(error, "No se pudo guardar la Salida de Pedido");
+    } finally {
+      dispatch(setLoadingOrder(false));
+    }
+  };
+};
+
+
+export const downloadDocument =
+  (outOrderId: number, onStopLoading?: () => void): AppThunk =>
+  async (dispatch, getState) => {
+    try {
+      dispatch(setLoadingOrder(true));
+      const { token } = getState().auth;
+      const { seguimientos, seguimeintoActual } = getState().seguimiento;
+      const response = await backendApi.get(`/out-order/${outOrderId}/get-file/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+      if (response.status >= 400) {
+        toast.error("No se ha podido descargar");
+        return;
+      }
+      if (response.status !== 200) {
+        toast.error(
+          `Error al descargar el archivo. Código de estado: ${response.status}`
+        );
+        return;
+      }
+      const contentDisposition = response.headers["content-disposition"];
+      let fileName;
+      const filenameMatch = contentDisposition.match(
+        /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/
+      );
+      if (contentDisposition) {
+        if (filenameMatch) {
+          fileName = filenameMatch[1]
+            .trim()
+            .replace(/^("+|"+)$/g, "")
+            .replace(/"/g, "");
+        } else {
+          fileName =
+            seguimeintoActual !== undefined
+              ? seguimientos[seguimeintoActual].id
+              : "archivo_tracking";
+        }
+      }
+      const blob = new Blob([response.data], {
+        type: "application/octet-stream",
+      });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = decodeURIComponent(fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Liberar la URL del objeto
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      errorApiHandler(error, "No se pudo guardar la Salida de Pedido");
+    } finally {
+      dispatch(setLoadingOrder(false));
+      onStopLoading && onStopLoading();
+    }
+  };

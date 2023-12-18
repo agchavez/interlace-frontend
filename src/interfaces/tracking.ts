@@ -1,4 +1,5 @@
-import { BaseQueryParams, LocationType } from "./maintenance";
+import { TypeChart } from "../modules/home/components/TATGraph";
+import { BaseQueryParams, DistributionCenter, LocationType } from "./maintenance";
 import { OrderStatusType } from "./orders";
 export interface Rastra {
   id: number;
@@ -167,6 +168,9 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   created_at__lte?: string;
   shift?: "A" | "B" | "C";
   ordering?: string;
+  available_quantity__gt?: number;
+  available_quantity__lt?: number;
+  available_quantity?: number;
 }
 
 export interface LastTrackerOutputQueryParams {
@@ -177,6 +181,7 @@ export interface NearExpirationQueryParams {
   limit: number;
   offset: number;
   product?: number;
+  productos: Product[];
   distributor_center?: number;
   days?: number;
 }
@@ -388,7 +393,31 @@ export interface InventarioMoviment {
 export interface InventarioMovimentQueryParams {
   limit: number;
   offset: number;
+  tracker?: number;
+  date_before?: string;
+  date_after?: string;
+  movement_type?: "IN"|"OUT"|"BALANCE"
+  user?: number;
+  distributor_center: DistributionCenter[];
+  tracker_detail__product?: number;
+  sap_code?: string;
+  product__name?: string;
+  module: ModuleType[];
+  productos: Product[];
+  producto?: Product;
+  origin_id?: number;
+  is_applied?: boolean;
 }
+
+export interface GraphQueryParams {
+  year: number;
+  actualYear: number;
+  distributor_center: string[];
+  typeChart: TypeChart;
+  encountered: boolean;
+}
+
+export type ModuleType = "T1"|"T2"|"ADMIN"|"ORDER";
 
 export interface InventarioMovimentResult {
   data:       DatuInventarioMoviment[];
@@ -422,4 +451,12 @@ export interface DataError {
   fecha_vencimiento: Date;
   cantidad:          number;
   error:             string;
+}
+
+export interface TATGraphItem {
+  month: number;
+  year: number;
+  distributor_center: number;
+  distributor_center_name: string;
+  avg_time_invested: number;
 }

@@ -54,7 +54,7 @@ props: LotSelectProps<TField>
   }, [query, refetch]);
 
   const handleInputChange = (newInputValue: string) => {
-    if (newInputValue.length > 1) {
+    if (newInputValue.length >= 1) {
       setQuery({
         ...query,
         search: newInputValue
@@ -85,7 +85,7 @@ props: LotSelectProps<TField>
   }, [isRegisteringSuccess, registerLotTypeData, query, error]);
 
   const handleRegister = (newInputValue: string) => {
-    if (newInputValue.length > 1) {
+    if (newInputValue.length >= 1) {
       registerLotType({
         code: newInputValue
       });

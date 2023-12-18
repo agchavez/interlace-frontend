@@ -238,7 +238,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
         className={`sidebar__root ui__sidebar_open`}
       >
         <Grid container direction="column" justifyContent="space-between">
-          <Grid>
+          <Grid item overflow="auto" sx={{ height:"calc(100vh - 7.5rem);" }}>
             {sidebarItems.map((item) => {
               if (item.visible) {
                 return (

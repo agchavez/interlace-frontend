@@ -341,10 +341,23 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
                         </Typography>
                       </Grid>
                     )}
+                    <Grid item xs={2} md={1} display={readQR ? "none" : "block"}>
+                      <Typography
+                        variant="h6"
+                        component="h1"
+                        fontWeight={600}
+                        color={"gray.500"}
+                        align="right"
+                        justifyContent={"flex-end"}
+                        alignContent={"flex-end"}
+                        >
+                          TRK-
+                        </Typography>
+                    </Grid>
                     <Grid
                       item
-                      xs={12}
-                      md={6}
+                      xs={10}
+                      md={5}
                       display={readQR ? "none" : "block"}
                     >
                       <TextField

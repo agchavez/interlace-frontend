@@ -14,7 +14,7 @@ export interface OutputT2 {
     last_update:         Date;
     created_at:           Date;
     status:               Status;
-    observations:         null;
+    observations:         string | null;
     user:                 number;
     user_authorizer:      null;
     user_applied:         null;
