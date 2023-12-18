@@ -150,7 +150,7 @@ export default function HomePage() {
 
     return <Container maxWidth="xl">
 
-        <Grid container sx={{ mt: 3 }} spacing={2} >
+        <Grid container sx={{ mt: 3 , mb: 5}} spacing={2} >
             <Grid item xs={12} justifyContent={"flex-end"} display={"flex"} >
                 <Chip
                     label={query.filterDate}
@@ -378,8 +378,7 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
-
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
                 <Card elevation={2} sx={{
                     p: 2, borderRadius: 2
                 }} >
@@ -391,6 +390,8 @@ export default function HomePage() {
                     <Divider />
                     <TATGraph/>
                 </Card>
+            </Grid>
+            <Grid item xs={12} md={1}>
             </Grid>
         </Grid>
     </Container>
