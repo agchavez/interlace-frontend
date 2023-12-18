@@ -174,8 +174,6 @@ const TATGraph = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, distributor_center]);
 
-  console.log("dis", distributor_center)
-
   return (
     <>
       <Container maxWidth="xl" className="mt-5">
