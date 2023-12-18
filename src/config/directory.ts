@@ -128,16 +128,14 @@ export const permisions = [
     {
         url: "/report/por-expirar",
         permissions: [
-            // "tracker.view_trackerdetailproductmodel",
-            // "report.report_risk_stock_ege"
-            "any"
+            "tracker.view_trackerdetailproductmodel",
+            "report.report_risk_stock_ege"
         ]
     },
     {
         url: "/inventory",
         permissions: [
-            'any',
-            // 'inventory.view_inventorymodel',
+            'inventory.view_inventorymodel',
         ]
     },
     {
