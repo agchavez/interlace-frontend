@@ -1,3 +1,4 @@
+import { TypeChart } from "../modules/home/components/TATGraph";
 import { BaseQueryParams, DistributionCenter, LocationType } from "./maintenance";
 import { OrderStatusType } from "./orders";
 export interface Rastra {
@@ -405,6 +406,14 @@ export interface InventarioMovimentQueryParams {
   is_applied?: boolean;
 }
 
+export interface GraphQueryParams {
+  year: number;
+  actualYear: number;
+  distributor_center: string[];
+  typeChart: TypeChart;
+  encountered: boolean;
+}
+
 export type ModuleType = "T1"|"T2"|"ADMIN"|"ORDER";
 
 export interface InventarioMovimentResult {
@@ -439,4 +448,12 @@ export interface DataError {
   fecha_vencimiento: Date;
   cantidad:          number;
   error:             string;
+}
+
+export interface TATGraphItem {
+  month: number;
+  year: number;
+  distributor_center: number;
+  distributor_center_name: string;
+  avg_time_invested: number;
 }

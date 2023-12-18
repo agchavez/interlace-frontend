@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DashboardQueryParams } from '../../interfaces/login';
 import { format } from "date-fns";
-import { InventarioMovimentQueryParams, OrderQueryParams, TrackerQueryParams } from '../../interfaces/tracking';
+import { GraphQueryParams, InventarioMovimentQueryParams, OrderQueryParams, TrackerQueryParams } from '../../interfaces/tracking';
 import { FormFilterShiftManage } from "../../modules/report/components/FilterShiftManage";
 import { FormFilterT2 } from '../../modules/tracker_t2/components/FilterPreSale';
 import { FormFilterInventory } from "../../modules/inventory/components/FilterInventory";
+import { es } from "date-fns/locale";
+import { TypeChart } from "../../modules/home/components/TATGraph";
 
 
 enum FilterDate {
@@ -15,7 +17,7 @@ enum FilterDate {
 }
 
 
-
+const actualYear = parseInt(format(new Date(), "yyyy", { locale: es }));
 export interface uiState {
     loading: boolean;
     dashboardQueryParams: DashboardQueryParams;
@@ -24,7 +26,15 @@ export interface uiState {
     reportPallets: FormFilterShiftManage;
     managerT2QueryParams: FormFilterT2;
     inventoryQueryParams: InventarioMovimentQueryParams;
+    graphQueryParams: GraphQueryParams;
 }
+
+const storageGraphqueryParams = (()=>{
+    const ls = localStorage.getItem("graph_params")
+    if(ls === null) return
+    const datos = JSON.parse(ls) as GraphQueryParams
+    return datos
+})()
 
 const initialState: uiState = {
     loading: false,
@@ -66,6 +76,13 @@ const initialState: uiState = {
         productos: [],
         distributor_center: [],
         module: [],
+    },
+    graphQueryParams: {
+        year: storageGraphqueryParams?.year||actualYear,
+        actualYear: actualYear, 
+        typeChart: storageGraphqueryParams?.typeChart || TypeChart.BAR,
+        distributor_center: storageGraphqueryParams?.distributor_center || [],
+        encountered: storageGraphqueryParams? true: false,
     }
 }
 
@@ -94,7 +111,10 @@ export const uiSlice = createSlice({
         setInventoryQueryParams: (state, action: PayloadAction<FormFilterInventory>) => {
             state.inventoryQueryParams = action.payload
         },
-
+        setGraphQueryParams: (state, action: PayloadAction<GraphQueryParams>) => {
+            state.graphQueryParams = action.payload
+            localStorage.setItem("graph_params", JSON.stringify(action.payload))
+        },
     }
 })
 
@@ -107,4 +127,5 @@ export const {
     setOrderQueryParams,
     setManagerT2QueryParams, 
     setInventoryQueryParams,
+    setGraphQueryParams
 } = uiSlice.actions;
