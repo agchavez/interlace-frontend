@@ -98,8 +98,8 @@ export default function TATGraphFilter() {
               {
                 // año desde 2022 asta el año actual
                 Array.from(
-                  { length: actualYear - 2021 },
-                  (_, i) => i + 2022
+                  { length: actualYear - 2022 },
+                  (_, i) => i + 2023
                 ).map((y) => (
                   <MenuItem key={y} value={y}>{y}</MenuItem>
                 ))
