@@ -7,7 +7,6 @@ import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import DashboardTwoToneIcon from "@mui/icons-material/DashboardTwoTone";
 import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
-import ContentPasteGoTwoToneIcon from '@mui/icons-material/ContentPasteGoTwoTone';
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
@@ -85,28 +84,6 @@ const items: SideBarItem[] = [
     ],
     icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "movimientos",
-  },
-  {
-    text: "T2",
-    subItems: [
-      {
-        text: "Cargar Preventa",
-        href: "/tracker-t2/pre-sale",
-        id: "outregister",
-      },
-      {
-        text: "Gestión",
-        href: "/tracker-t2/manage",
-        id: "outmanage",
-      },
-      {
-        text: "Revision",
-        href: "/tracker-t2/pre-sale-check",
-        id: "outcheck",
-      },
-    ],
-    icon: <ContentPasteGoTwoToneIcon sx={{ width: "30px" }} color="primary" />,
-    id: "t2",
   },
   {
     text: "REPORTE",
