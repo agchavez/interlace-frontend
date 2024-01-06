@@ -71,7 +71,8 @@ const initialState: uiState = {
         date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
         date_before: format(new Date(), "yyyy-MM-dd 23:59:59"),
         search: "",
-        status: ['APPLIED']
+        status: ['APPLIED'],
+        pre_sale_date: null,
     },
     inventoryQueryParams: {
         limit: 10,

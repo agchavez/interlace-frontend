@@ -1,9 +1,10 @@
 import backendApi from "../../config/apiConfig";
 import { AppThunk } from "../store";
-import { handleApiError } from "../../utils/error";
-import { OutputT2, T2TrackingDetailBody, OutputDetailT2 } from '../../interfaces/trackingT2';
+import { errorApiHandler, handleApiError } from "../../utils/error";
+import { OutputT2, T2TrackingDetailBody, OutputDetailT2, Simulation } from '../../interfaces/trackingT2';
 import { orderingT2Selected, removeSeguimientoT2, setLoadT2Tracking, setLoadingT2TrackingDetail, setT2Trackings, updateDetailT2Tracking } from "./seguimientoSlice";
 import { toast } from 'sonner';
+import axios from "axios";
 
 
 // Caargar nuevo seguimiento de t2
@@ -185,4 +186,37 @@ export const updateStatusT2TrackingDetail = (
         dispatch(setLoadingT2TrackingDetail(false));
     }
 }
+
+
+// Generar simulacio desde un excel
+export const generateSimulation = (file: File, id: number, onCompleted: (id: number) => void): AppThunk => async (dispatch, getState) => {
+    try {
+        dispatch(setLoadT2Tracking(true));
+        const { token } = getState().auth;
+
+        // Configurar la instancia de Axios para esta solicitud sin timeout
+        const noTimeoutApi = axios.create({
+            baseURL: import.meta.env.VITE_JS_APP_API_URL + '/api',
+            timeout: 0,  // Configurar el timeout a 0 para desactivarlo
+        });
+        const formData = new FormData();
+        formData.append('excel', file);
+
+        await noTimeoutApi.post<Simulation>(`/output-t2/${id}/simulate/`, formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        toast.success('Simulación', {
+            description: 'Se ha registrado correctamente',
+        });
+        onCompleted(id);
+    } catch (error) {
+        errorApiHandler(error, 'Error al generar la simulación');
+    } finally {
+        dispatch(setLoadT2Tracking(false));
+    }
+}
+
 

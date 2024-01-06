@@ -3,7 +3,7 @@ import { Container, Grid, Typography, Button, Divider, Chip, IconButton } from "
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import { DataGrid, GridCellParams, GridColDef } from "@mui/x-data-grid";
 import { OutputT2, OutputT2QueryParams } from '../../../interfaces/trackingT2';
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { tableBase } from '../../ui/index';
 import { useNavigate } from "react-router-dom";
 import { FormFilterT2, FilterPreSale } from '../components/FilterPreSale';
@@ -29,6 +29,7 @@ const ManagePreSalePage = () => {
         offset: 0,
         date_after: format(new Date(managerT2QueryParams.date_after), "yyyy-MM-dd"),
         date_before: format(new Date(managerT2QueryParams.date_before), "yyyy-MM-dd"),
+        pre_sale_date: managerT2QueryParams.pre_sale_date? format(new Date(managerT2QueryParams.pre_sale_date), "yyyy-MM-dd") : undefined,
         status: managerT2QueryParams.status,
         distributor_center: managerT2QueryParams.distribution_center,
         id: managerT2QueryParams.id ? managerT2QueryParams.id : undefined,
@@ -40,11 +41,12 @@ const ManagePreSalePage = () => {
         setquery((prev) => {
             return {
                 ...prev,
-            date_after: format(new Date(managerT2QueryParams.date_after), "yyyy-MM-dd"),
-            date_before: format(new Date(managerT2QueryParams.date_before), "yyyy-MM-dd"),
+            date_after: !managerT2QueryParams.pre_sale_date ? format(new Date(managerT2QueryParams.date_after), "yyyy-MM-dd") : undefined,
+            date_before: !managerT2QueryParams.pre_sale_date ? format(new Date(managerT2QueryParams.date_before), "yyyy-MM-dd") : undefined,
             status: managerT2QueryParams.status,
             distributor_center: managerT2QueryParams.distribution_center,
             id: managerT2QueryParams.id ? managerT2QueryParams.id : undefined,
+            pre_sale_date: managerT2QueryParams.pre_sale_date? format(new Date(managerT2QueryParams.pre_sale_date), "yyyy-MM-dd") : undefined,
             };
         });
     }, [managerT2QueryParams]);
@@ -57,14 +59,28 @@ const ManagePreSalePage = () => {
     const columns: GridColDef<OutputT2>[] = [
         {
             field: "created_at",
-            headerName: "Fecha",
+            headerName: "Registro",
             flex: 1,
-            width: 120,
-            minWidth: 120,
+            width: 160,
+            minWidth: 160,
             renderCell: (params) => {
                 return (
                     <Typography variant="body2">
-                        {params.value ? format(new Date(params.value), "dd/MM/yyyy") : "-"}
+                        {params.value ? format(new Date(params.value), "dd/MM/yyyy HH:mm") : "-"}
+                    </Typography>
+                );
+            },
+        },
+        {
+            field: "pre_sale_date",
+            headerName: "Fecha de preventa",
+            flex: 1,
+            width: 160,
+            minWidth: 160,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.value ? format(new Date(parseISO(params.value)), "dd/MM/yyyy") : "-"}
                     </Typography>
                 );
             },

@@ -1,5 +1,5 @@
 import { ArrowBack } from "@mui/icons-material"
-import { Box, Button, Card, CircularProgress, Container, Divider, Grid, IconButton, LinearProgress, Typography } from "@mui/material"
+import { Box, Button, Card, CircularProgress, Container, Divider, Grid, IconButton, LinearProgress, Pagination, Stack, Typography } from "@mui/material"
 import { useGetT2TrackingByIdQuery } from "../../../store/seguimiento/trackerApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -42,6 +42,12 @@ const SimulatedPage = () => {
     const { control, watch, getValues } = useForm<SimulatedForm>({
         defaultValues: simulatedQueryParams
     });
+
+    const [page, setPage] = useState(1);
+    const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, error, isLoading } = useGetT2TrackingByIdQuery(id || skipToken,
         {
@@ -96,7 +102,7 @@ const SimulatedPage = () => {
             'Lote',
             'Tiempo en bodega'
         ];
-        
+
         await exportToXLSX({
             data: [headers, ...dataExport.map((tr) => [
                 tr.ruta,
@@ -105,7 +111,7 @@ const SimulatedPage = () => {
                 tr.cliente,
                 tr.cantidad,
                 tr.fecha,
-                tr.tracker,
+                'TRK-' + tr.tracker.toString().padStart(5, "0"),
                 tr.lote,
                 tr.tiempo
             ])],
@@ -121,12 +127,12 @@ const SimulatedPage = () => {
     useEffect(() => {
         const query = getValues();
         dispatch(setSimulatedQueryParams(query));
-       
+
     } // eslint-disable-next-line react-hooks/exhaustive-deps
         , [watch('client'), watch('ruta'), watch('conductor'), watch('producto')]);
 
     useEffect(() => {
-        if (data) {
+        if (data?.simulation) {
             setloadingLocal(true);
             const client = simulatedQueryParams.client;
             const ruta = simulatedQueryParams.ruta;
@@ -158,13 +164,14 @@ const SimulatedPage = () => {
             } else {
                 setdatalocal(data.simulation.data);
             }
+            setPage(1);
             setloadingLocal(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [simulatedQueryParams]);
-    
+
     useEffect(() => {
-        if (data) {
+        if (data?.simulation) {
             setdatalocal(data.simulation.data);
         }
     } // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,7 +180,7 @@ const SimulatedPage = () => {
         <Box sx={{ marginBottom: 2 }}>
             <LinearProgress variant="indeterminate" value={10} />
         </Box></Container>
-    if (error || !data
+    if (error || !data || data?.simulation === null
     ) return <Navigate to="/tracker-t2/manage" />
 
 
@@ -280,11 +287,24 @@ const SimulatedPage = () => {
                         />
                     </Grid>
                 </Grid>
-                
+
                 <Grid xs={12} sx={{ mt: 2, mb: 2 }}>
-                    <Typography variant="h6" component="h1" fontWeight={400}>
-                        Resultados
-                    </Typography>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                        <Typography variant="h6" component="h1" fontWeight={400}>
+                            Resultados
+                        </Typography>
+                        <Stack spacing={2} sx={{ mt: 2 }} textAlign={'center'}>
+                            <Typography>
+                                <span>
+                                    Registros totales: {datalocal.length}
+                                </span>
+                            </Typography>
+                            <Pagination count={
+                                Math.ceil(datalocal.length / 20)
+                            } page={page} onChange={handleChange} size="large" sx={{ justifyContent: 'center' }} />
+                        </Stack>
+                    </div>
                     <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
                     {
                         datalocal.length === 0 && <Typography variant="h6" component="h1" fontWeight={400}>
@@ -295,7 +315,8 @@ const SimulatedPage = () => {
                         loadingLocal && <LinearProgress variant="indeterminate" value={10} />
                     }
                     {
-                        datalocal.map((item, index) => (
+                        // Paginacion
+                        datalocal.slice((page - 1) * 20, page * 20).map((item, index) => (
                             <Card key={index} sx={{ mt: 2, p: 1 }}>
                                 <Grid container spacing={2} key={index} >
                                     <Grid item xs={6} md={4} lg={4} xl={3}>
@@ -362,14 +383,28 @@ const SimulatedPage = () => {
                                             Tracker:
                                         </Typography>
                                         <Divider sx={{ marginBottom: 0, marginTop: 0 }} />
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <Typography variant="body1" component="p" fontWeight={400}>
-                                                TRK-{item.tracker?.toString().padStart(5, "0")}
-                                            </Typography>
-                                            <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + item.tracker)}>
-                                                <ArrowForwardIcon />
-                                            </IconButton>
-                                        </Box>
+                                        {
+                                            Array.isArray(item.tracker) ? item.tracker.map((tracker) => (
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                                                    <Typography variant="body1" component="p" fontWeight={400}>
+                                                        TRK-{tracker?.toString().padStart(5, "0")}
+                                                    </Typography>
+                                                    <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + tracker)}>
+                                                        <ArrowForwardIcon />
+                                                    </IconButton>
+                                                </Box>
+                                            )) : <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                                                <Typography variant="body1" component="p" fontWeight={400}>
+                                                    TRK-{item.tracker?.toString().padStart(5, "0")}
+                                                </Typography>
+                                                <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + item.tracker)}>
+                                                    <ArrowForwardIcon />
+                                                </IconButton>
+                                            </Box>
+                                        }
+
                                     </Grid>
                                     <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
@@ -397,13 +432,14 @@ const SimulatedPage = () => {
                                         </Typography>
                                         <Divider sx={{ marginBottom: 0, marginTop: 0 }} />
                                         <Typography variant="body1" component="p" fontWeight={400}>
-                                            {item.time_in_warehouse } días
+                                            {item.time_in_warehouse} días
                                         </Typography>
                                     </Grid>
                                 </Grid>
                             </Card>
                         ))
                     }
+
 
                 </Grid>
             </Grid>

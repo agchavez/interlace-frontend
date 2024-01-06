@@ -62,6 +62,7 @@ export interface OutputT2 {
     created_at:           Date;
     status:               Status;
     observations:         string | null;
+    pre_sale_date:        string;
     user:                 number;
     user_authorizer:      null;
     user_applied:         null;
@@ -74,6 +75,7 @@ export interface OutputT2QueryParams extends BaseQueryParams {
     distributor_center?: number;
     date_after?: string;
     date_before?: string;
+    pre_sale_date?: string;
     status: Status[];
     id?: number;
 }

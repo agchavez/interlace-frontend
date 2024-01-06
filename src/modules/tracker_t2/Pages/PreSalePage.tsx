@@ -17,6 +17,8 @@ import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 import { createT2Tracking } from '../../../store/seguimiento/t2TrackingThunk';
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { useNavigate } from "react-router-dom";
+import { DatePicker } from "@mui/x-date-pickers";
+import { format } from "date-fns";
 
 const PreSalePage = () => {
   const [file, setfile] = useState<{
@@ -24,6 +26,8 @@ const PreSalePage = () => {
     fileName: string | null;
   }>({ file: null, fileName: null });
   const [obs, setobs] = useState<string | null>(null);
+  // Fecha de preventa defato mañana
+  const [preSaleDate, setPreSaleDate] = useState<Date | null>(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
   const [dragging, setDragging] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const dispatch = useAppDispatch();
@@ -56,8 +60,14 @@ const PreSalePage = () => {
   });
 
   const handleSubmitForm = () => {
+    // validar la fecha de preventa
+    if (preSaleDate === null) {
+      toast.error("Debe seleccionar una fecha de preventa");
+      return;
+    }
     const formData = new FormData();
     formData.append("file", file.file as Blob);
+    formData.append("pre_sale_date", format(preSaleDate, "yyyy-MM-dd"));
     formData.append("observations", obs ? obs : "");
     dispatch(createT2Tracking(formData, (id: number) => navigate(`/tracker-t2/detail/${id}`)));
   };
@@ -90,6 +100,18 @@ const PreSalePage = () => {
         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
       </Grid>
       <form ref={formRef} onSubmit={handleSubmit(handleSubmitForm, () => { })}>
+        <Grid item xs={12} md={4} lg={3} sx={{ marginTop: 2 }}>
+          <DatePicker
+            label="Fecha de preventa"
+            value={preSaleDate}
+            onChange={(newValue) => {
+              setPreSaleDate(newValue);
+            }}
+            slotProps={{ textField: { size: 'small'} }}
+            format="dd/MM/yyyy"
+            
+          />
+        </Grid>
         <Grid item xs={12} md={12} lg={12}>
           <TextField
             id="outlined-basic"

@@ -19,12 +19,18 @@ const MenuProps = {
   },
 };
 
+const isValidDate = (dateString : string) => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  return regex.test(dateString);
+};
+
 export interface FormFilterT2 {
     search: string;
     id? : number | null;
     date_after: string;
     date_before: string;
     status: Status[];
+    pre_sale_date: string | null;
     distribution_center?: number;
   }
 
@@ -59,15 +65,27 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
         const data = getValues();
         handleFilter(data);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [ watch("date_after"), watch("date_before"), watch("search"), watch("status"), watch("distribution_center"), watch('id') ]);
+      }, [ watch("date_after"), watch("date_before"), watch("search"), watch("status"), watch("distribution_center"), watch('id'), watch('pre_sale_date') ]);
 
       const handleReset = () => {
         setValue("search", "");
-        setValue("date_after", "");
-        setValue("date_before", "");
+        setValue("date_after", format(new Date(), 'yyyy-MM-dd 00:00:00'));
+        setValue("date_before", format(new Date(), 'yyyy-MM-dd 23:59:59'));
         setValue("status", ['APPLIED']);
         setValue("distribution_center", user?.centro_distribucion || undefined);
         setValue("id", null);
+        setValue("pre_sale_date", null);
+        handleFilter({
+          search: "",
+          date_after: format(new Date(), 'yyyy-MM-dd 00:00:00'),
+          date_before: format(new Date(), 'yyyy-MM-dd 23:59:59'),
+          status: ['APPLIED'],
+          distribution_center: user?.centro_distribucion || undefined,
+          id: null,
+          pre_sale_date: null,
+        });
+
+        handleClose && handleClose();
         };
 
       const handleStatusSelect = (checked: boolean, value: Status) => {
@@ -141,6 +159,32 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                   value={watch("id")}
                 />
               </Grid>
+              <Grid item xs={12} sx={{ mt: 1 }}>
+                <Controller
+                  name="pre_sale_date"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label="Fecha de preventa"
+                      slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                      value={
+                        watch("pre_sale_date") ? isValidDate(watch("pre_sale_date") as string)
+                          ? new Date(watch("pre_sale_date") as string)
+                          : null
+                          : null
+                      }
+                      inputRef={field.ref}
+                      format="dd/MM/yyyy"
+                      onChange={(date) => {
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+
+
             </Grid>
           </List>
           <Divider />
