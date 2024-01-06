@@ -3,9 +3,11 @@ import PreSalePage from "./Pages/PreSalePage";
 import PreSaleCheckPage from "./Pages/PreSaleCheckPage";
 import ManagePreSalePage from "./Pages/ManagePreSalePage";
 import T2DetailPage from './Pages/T2DetailPage';
+import SimulatedPage from "./Pages/SimulatedPage";
 
 export const TrackerT2Router = () => {
     return <Routes>
+        <Route path="simulated/:id" element={<SimulatedPage />}/>
         <Route path="pre-sale" element={<PreSalePage />}/>
         <Route path="manage" element={<ManagePreSalePage />}/>
         <Route path="pre-sale-check" element={<PreSaleCheckPage />}/>

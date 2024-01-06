@@ -1,6 +1,6 @@
 
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Chip, Container, Divider, Grid, IconButton, Typography, CircularProgress, LinearProgress } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Chip, Container, Divider, Grid, IconButton, Typography, CircularProgress, LinearProgress, MenuItem } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useGetT2TrackingByIdQuery } from '../../../store/seguimiento/trackerApi';
 import { skipToken } from '@reduxjs/toolkit/dist/query';
@@ -8,12 +8,18 @@ import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { ListOutTrackerDetail } from '../components/ListOutTrackerDetail';
-import { useAppSelector } from '../../../store/store';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { useState } from 'react';
 import { DeleteT2Modal } from '../components/DeleteT2Modal';
 import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
 import { exportToXLSX } from '../../../utils/exportToCSV';
 import { toast } from 'sonner';
+import { StyledMenu } from '../../ui/components/StyledMenu';
+import CodeIcon from '@mui/icons-material/Code';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import DataThresholdingTwoToneIcon from '@mui/icons-material/DataThresholdingTwoTone';
+import { Loadsimulated } from '../components/Loadsimulated';
+import { setSimulatedQueryParams } from '../../../store/ui/uiSlice';
 
 interface T2Export {
     product_sap_code: string;
@@ -28,13 +34,25 @@ interface T2Export {
 const T2DetailPage = () => {
     const { id } = useParams<{ id: string }>();
     const [deleteOpen, setdeleteOpen] = useState(false);
+    const [openLoad, setopenLoad] = useState(false)
     const [loadingExport, setloadingExport] = useState<boolean>(false);
     const { loading } = useAppSelector(state => state.seguimiento.t2Tracking);
     const navigae = useNavigate();
     const user = useAppSelector((state) => state.auth.user);
+    const dispatch = useAppDispatch();
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { data, error, isLoading } = useGetT2TrackingByIdQuery(id || skipToken,
+    const { data, error, isLoading, refetch } = useGetT2TrackingByIdQuery(id || skipToken,
         {
             skip: !id
         }
@@ -112,6 +130,12 @@ const T2DetailPage = () => {
                 id={id!}
             />
 
+            <Loadsimulated
+                isOpen={openLoad}
+                onClose={() => setopenLoad(false)}
+               refresh={() => refetch()}
+            />
+
             <Container maxWidth="xl" sx={{ marginTop: 2 }}>
 
 
@@ -132,9 +156,9 @@ const T2DetailPage = () => {
                                     T2OUT-{id?.padStart(1, '0')}
                                 </Typography>
                             </div>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <Button variant="outlined" 
-                                    sx={{ marginTop: 1, marginRight: 1 }} 
+                                    sx={{marginRight: 1 }} 
                                     onClick={handleExport}
                                     color="success" 
                                     disabled={loadingExport}
@@ -144,11 +168,65 @@ const T2DetailPage = () => {
                                     Exportar
                                 </Button>
                                 {data.status !== 'APPLIED' && user?.list_permissions?.includes('tracker.delete_outputt2model') &&
-                                    <Button variant="contained" sx={{ marginTop: 1 }} color="error" onClick={handleDelete} disabled={loading}
+                                    <Button variant="contained" sx={{ marginTop: 0 }} color="error" onClick={handleDelete} disabled={loading}
                                         startIcon={loading ? <CircularProgress size={20} /> : null}
                                     >
                                         Eliminar
                                     </Button>}
+                                {data.status === 'APPLIED' && user?.list_permissions?.includes('tracker.delete_outputt2model') &&
+                                    <div>
+                                    <Button
+                                      id="demo-customized-button"
+                                      aria-controls={open ? "demo-customized-menu" : undefined}
+                                      aria-haspopup="true"
+                                      aria-expanded={open ? "true" : undefined}
+                                      variant="contained"
+                                      color="secondary"
+                                      onClick={handleClick}
+                                      endIcon={
+                                        loading ? <CircularProgress size={15} /> : <DataThresholdingTwoToneIcon />
+                                      }
+                                      disabled={loading}
+                                    >
+                                      Simulación
+                                    </Button>
+                                    <StyledMenu
+                                      id="demo-customized-menu"
+                                      MenuListProps={{
+                                        "aria-labelledby": "demo-customized-button",
+                                      }}
+                                      anchorEl={anchorEl}
+                                      open={open}
+                                      onClose={handleClose}
+                                    >
+                                      <MenuItem onClick={() => {
+                                        setopenLoad(true)
+                                        handleClose()
+                                      }} disableRipple>
+                                        <CloudDownloadIcon />
+                                        <Typography ml={1}>
+                                            Generar simulación
+                                        </Typography>
+                                      </MenuItem>
+                                      <MenuItem onClick={() => {
+                                        dispatch(setSimulatedQueryParams({
+                                            client: "",
+                                            conductor: "",
+                                            producto: "",
+                                            ruta: "",
+                                        }))
+                                        navigae(`/tracker-t2/simulated/${id}`)
+                                      }} disableRipple
+                                      disabled={data.simulation===null}
+                                      >
+                                        <CodeIcon />
+                                        <Typography ml={1}>
+                                            Ver simulación
+                                        </Typography>
+                                      </MenuItem>
+                                    </StyledMenu>
+                                  </div>
+                                    }
                             </div>
 
                         </Box>
@@ -193,7 +271,29 @@ const T2DetailPage = () => {
                             <Divider />
                             <Box sx={{ padding: 2 }}>
                                 <Grid container spacing={2}>
-
+                                <Grid item xs={12} md={6} lg={4} xl={4}>
+                                        <Typography
+                                            variant="body1"
+                                            component="h1"
+                                            fontWeight={400}
+                                            color={"gray.500"}
+                                        >
+                                            Fecha preventa
+                                        </Typography>
+                                        <Divider />
+                                        <Typography
+                                            variant="body1"
+                                            component="h1"
+                                            fontWeight={600}
+                                            color={"gray.500"}
+                                        >
+                                            {
+                                            format(
+                                                new Date(parseISO(data?.pre_sale_date.toString())),
+                                                "dd/MM/yyyy"
+                                            ) || '--'}
+                                        </Typography>
+                                    </Grid>
                                     <Grid item xs={12} md={6} lg={4} xl={4}>
                                         <Typography
                                             variant="body1"

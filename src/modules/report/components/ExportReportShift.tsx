@@ -58,7 +58,7 @@ export const ExportReportShift: FC<ExportReportShiftProps> = ({ disabled, query,
             "Fecha vencimiento",
         ];
         const trackerData = data.results.map((tr) => [
-            "TRK-" + tr.id.toString().padStart(5, "0"),
+            tr.tracker_id ? "TRK-" + tr.tracker_id.toString().padStart(5, "0") : "",
             tr.shift || "",
             tr.product_sap_code,
             tr.product_name,

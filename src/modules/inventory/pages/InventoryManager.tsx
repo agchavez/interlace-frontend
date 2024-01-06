@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Container, Divider, Grid, IconButton, Typography } from "@mui/material"
+import { Button, Chip, Container, Divider, Grid, Typography } from "@mui/material"
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import PostAddTwoToneIcon from '@mui/icons-material/PostAddTwoTone';
 import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
@@ -12,12 +12,12 @@ import { tableBase } from '../../ui/index';
 import { format } from "date-fns";
 import { NewAdjustmentModal } from "../components/NewAdjustmentModal";
 import { FilterInventory, FormFilterInventory, ModuleSelectOptions } from "../components/FilterInventory";
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { setInventoryQueryParams } from "../../../store/ui/uiSlice";
 import { DistributionCenter } from "../../../interfaces/maintenance";
 import { Link } from "react-router-dom";
+import ChipFilterCategory from "../../ui/components/ChipFilter";
 
 const getTypoMov = (value: string) => {
     switch (value) {
@@ -66,12 +66,12 @@ const InventoryManager = () => {
     });
 
     useEffect(() => {
-        setquery((query) => ({
-            ...query,
+        setquery(() => ({
+            ...inventoryQueryParams,
             limit: paginationModel.pageSize,
             offset: paginationModel.page * paginationModel.pageSize,
         }));
-    }, [paginationModel]);
+    }, [inventoryQueryParams, paginationModel]);
     
 
     const { data, isLoading, isFetching, refetch, } = useGetInventoryQuery(query);
@@ -166,7 +166,7 @@ const InventoryManager = () => {
         const productos = query.productos
         const result = productos.filter(producto => producto.sap_code !== product.sap_code)
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         productos: result,
         };
         setquery(queryProcess);
@@ -177,7 +177,7 @@ const InventoryManager = () => {
         const cds = query.distributor_center
         const result = cds.filter(centroDistribucion => centroDistribucion.id !== distributorCenter.id)
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         distributor_center: result,
         };
         setquery(queryProcess);
@@ -188,7 +188,7 @@ const InventoryManager = () => {
         const modules = query.module
         const result = modules.filter(modulo => modulo !== module)
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         module: result,
         };
         setquery(queryProcess);
@@ -197,7 +197,7 @@ const InventoryManager = () => {
 
     const handleClickDeleteTrackerFilter = ()=>{
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         tracker: undefined,
         };
         setquery(queryProcess);
@@ -206,7 +206,7 @@ const InventoryManager = () => {
 
     const handleClickDeleteDateAfterFilter = ()=>{
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         date_after: undefined,
         };
         setquery(queryProcess);
@@ -215,7 +215,7 @@ const InventoryManager = () => {
 
     const handleClickDeleteDateBeforeFilter = ()=>{
         const queryProcess: InventarioMovimentQueryParams = {
-        ...query,
+        ...inventoryQueryParams,
         date_before: undefined,
         };
         setquery(queryProcess);
@@ -263,171 +263,76 @@ const InventoryManager = () => {
                         <Grid container spacing={1}>
                             {
                                 inventoryQueryParams.productos.length > 0 &&
-                                <Grid item>
-                                    <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                                        <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                                            <Grid item>
-                                                <Typography>
-                                                    Producto:
-                                                </Typography>
-                                            </Grid>
-                                            {
-                                                inventoryQueryParams.productos.map(product =>{
-                                                    return <Grid item key={product.sap_code}>
-                                                        <Chip
-                                                            label={product.sap_code}
-                                                            onDelete={() => handleClickDeleteProductFilter(product)}
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            deleteIcon={
-                                                                <IconButton sx={{m:0}}>
-                                                                    <HighlightOffIcon />
-                                                                </IconButton>
-                                                            }
-                                                            />
-                                                        </Grid>
-                                                })
-                                            }
-                                        </Grid>
-                                    </Box>
-                                </Grid>
+                                <ChipFilterCategory 
+                                    label="Producto: "
+                                    items={inventoryQueryParams.productos.map(product =>{
+                                        return {
+                                            label: product.sap_code,
+                                            id: product.sap_code,
+                                            deleteAction: () => handleClickDeleteProductFilter(product)
+                                        }
+                                    })}
+                                />
                             }
                             {
                                 inventoryQueryParams.tracker &&
-                                <Grid item>
-                                    <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                                        <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                                            <Grid item>
-                                                <Typography>
-                                                    Tracking:
-                                                </Typography>
-                                            </Grid>
-                                            <Grid item>
-                                                <Chip
-                                                    label={`TRK-${inventoryQueryParams.tracker.toString().padStart(5, '0')}`}
-                                                    onDelete={handleClickDeleteTrackerFilter}
-                                                    variant="outlined"
-                                                    color="secondary"
-                                                    deleteIcon={
-                                                        <IconButton sx={{m:0}}>
-                                                            <HighlightOffIcon />
-                                                        </IconButton>
-                                                    }
-                                                    />
-                                            </Grid>
-                                        </Grid>
-                                    </Box>
-                                </Grid>
+                                <ChipFilterCategory 
+                                    label="Tracking: "
+                                    items={[{
+                                            label: `TRK-${inventoryQueryParams.tracker?.toString().padStart(5, '0')}`,
+                                            id: "",
+                                            deleteAction: handleClickDeleteTrackerFilter
+                                        }]}
+                                />
                             }
                             {
                                 inventoryQueryParams.distributor_center.length > 0 &&
-                                <Grid item>
-                                    <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                                        <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                                            <Grid item>
-                                                <Typography>
-                                                    Centro de Distribución:
-                                                </Typography>
-                                            </Grid>
-                                            {
-                                                inventoryQueryParams.distributor_center.map(distributor_center =>{
-                                                    return <Grid item key={distributor_center.id}>
-                                                        <Chip
-                                                            label={distributor_center.name}
-                                                            onDelete={() => handleClickDeleteDistributorCenterFilter(distributor_center)}
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            deleteIcon={
-                                                                <IconButton sx={{m:0}}>
-                                                                    <HighlightOffIcon />
-                                                                </IconButton>
-                                                            }
-                                                            />
-                                                        </Grid>
-                                                })
-                                            }
-                                        </Grid>
-                                    </Box>
-                                </Grid>
+                                <ChipFilterCategory 
+                                    label="Centro de Distribución: "
+                                    items={inventoryQueryParams.distributor_center.map(distributor_center =>{
+                                        return {
+                                            label: distributor_center.name,
+                                            id: distributor_center.id.toString(),
+                                            deleteAction: () => handleClickDeleteDistributorCenterFilter(distributor_center)
+                                        }
+                                    })}
+                                />
                             }
                             {
                                 inventoryQueryParams.module.length > 0 &&
-                                <Grid item>
-                                    <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                                        <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                                            <Grid item>
-                                                <Typography>
-                                                    Módulo:
-                                                </Typography>
-                                            </Grid>
-                                            {
-                                                inventoryQueryParams.module.map((module:string) =>{
-                                                    const modulefind = ModuleSelectOptions.find(mod=>mod.value === module)
-                                                    if(modulefind === undefined) return
-                                                    return <Grid item key={module}>
-                                                        <Chip
-                                                            label={modulefind.value}
-                                                            onDelete={() => handleClickDeleteModuleFilter(modulefind.value)}
-                                                            variant="outlined"
-                                                            color="secondary"
-                                                            deleteIcon={
-                                                                <IconButton sx={{m:0}}>
-                                                                    <HighlightOffIcon />
-                                                                </IconButton>
-                                                            }
-                                                            />
-                                                        </Grid>
-                                                })
-                                            }
-                                        </Grid>
-                                    </Box>
-                                </Grid>
+                                <ChipFilterCategory 
+                                    label="Módulo: "
+                                    items={inventoryQueryParams.module.map(module =>{
+                                        const modulefind = ModuleSelectOptions.find(mod=>mod.value === module)
+                                        return {
+                                            label: modulefind?.text || "",
+                                            id: modulefind?.value || "",
+                                            deleteAction: () => handleClickDeleteModuleFilter(modulefind?.value.toString()||"")
+                                        }
+                                    })}
+                                />
                             }
                             {
                                 (inventoryQueryParams.date_after || inventoryQueryParams.date_before) &&
-                                <Grid item>
-                                    <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                                        <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                                            <Grid item>
-                                                <Typography>
-                                                    Fecha de Registro:
-                                                </Typography>
-                                            </Grid>
-                                            {
-                                                inventoryQueryParams.date_after !== undefined &&
-                                                <Grid item>
-                                                    <Chip
-                                                        label={`Mayor que: ${format(new Date(inventoryQueryParams.date_after), 'dd/MM/yyyy')}`}
-                                                        onDelete={handleClickDeleteDateAfterFilter}
-                                                        variant="outlined"
-                                                        color="secondary"
-                                                        deleteIcon={
-                                                            <IconButton sx={{m:0}}>
-                                                                <HighlightOffIcon />
-                                                            </IconButton>
-                                                        }
-                                                        />
-                                                </Grid>
-                                            }
-                                            {
-                                                inventoryQueryParams.date_before !== undefined &&
-                                                <Grid item>
-                                                    <Chip
-                                                        label={`Menor que: ${format(new Date(inventoryQueryParams.date_before), 'dd/MM/yyyy')}`}
-                                                        onDelete={handleClickDeleteDateBeforeFilter}
-                                                        variant="outlined"
-                                                        color="secondary"
-                                                        deleteIcon={
-                                                            <IconButton sx={{m:0}}>
-                                                                <HighlightOffIcon />
-                                                            </IconButton>
-                                                        }
-                                                        />
-                                                </Grid>
-                                            }
-                                        </Grid>
-                                    </Box>
-                                </Grid>
+                                <ChipFilterCategory 
+                                    label="Fecha de Registro: "
+                                    items={(()=>{
+                                        const date_after ={
+                                            label: `Mayor que: ${inventoryQueryParams.date_after && format(new Date(inventoryQueryParams.date_after), 'dd/MM/yyyy')}`,
+                                            id: "date_after",
+                                            deleteAction: handleClickDeleteDateAfterFilter
+                                        }
+                                        const date_before ={
+                                            label: `Menor que: ${inventoryQueryParams.date_before && format(new Date(inventoryQueryParams.date_before), 'dd/MM/yyyy')}`,
+                                            id: "date_before",
+                                            deleteAction: handleClickDeleteDateBeforeFilter
+                                        }
+                                        const items = []
+                                        inventoryQueryParams.date_after && items.push(date_after)
+                                        inventoryQueryParams.date_before && items.push(date_before)
+                                        return items
+                                    })()}
+                                />
                             }
                         </Grid>
                     </Grid>

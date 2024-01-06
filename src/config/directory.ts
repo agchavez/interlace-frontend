@@ -145,6 +145,43 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker-t2/pre-sale",
+        permissions: [
+            "tracker.add_outputt2model"
+        ]
+    },
+    {
+        url: "/tracker-t2/pre-sale-check",
+        permissions: [
+            "tracker.view_outputt2model",
+            "tracker.change_outputdetailt2model",
+            "tracker.add_trackeroutputt2model",
+            "tracker.change_trackeroutputt2model",
+            "tracker.view_trackeroutputt2model",
+            "tracker.delete_trackeroutputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/manage",
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/detail/:id",
+        reg: /\/tracker-t2\/detail\/\d+/,
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/simulated/:id",
+        reg: /\/tracker-t2\/simulated\/\d+/,
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
         url: "",
         permissions: [
             "any"

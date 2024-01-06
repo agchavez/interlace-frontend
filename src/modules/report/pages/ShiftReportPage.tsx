@@ -4,7 +4,7 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { TrackerProductDetail, TrackerProductDetailQueryParams } from '../../../interfaces/tracking';
 import { tableBase } from '../../ui/index';
 import { useEffect, useState } from 'react';
-import { useAppSelector } from '../../../store/store';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { useGetTrackerPalletsQuery } from '../../../store/seguimiento/trackerApi';
 import { format, parseISO } from 'date-fns';
 import { ExportReportShift } from '../components/ExportReportShift';
@@ -13,6 +13,9 @@ import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
 import { toast } from 'sonner';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
+import ChipFilterCategory from '../../ui/components/ChipFilter';
+import { setQueryReportPallets } from '../../../store/ui/uiSlice';
+import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
 export const ShiftReportPage = () => {
     const user = useAppSelector((state) => state.auth.user);
     const navigate = useNavigate();
@@ -256,13 +259,33 @@ export const ShiftReportPage = () => {
             offset: paginationModel.page * paginationModel.pageSize,
         }));
     }, [paginationModel]);
+
+    const {reportPallets} = useAppSelector(state => state.ui)
+    const dispatch = useAppDispatch()
+
+    const {
+      data: productFilterData,
+      isLoading: isLloadingProduct,
+      isFetching: isFetchingProduct,
+    } = useGetProductQuery(
+      { id: reportPallets.product || 0, limit: 1, offset: 0 },
+      { skip: reportPallets.product === undefined }
+    );
+
+    const productText =
+    (productFilterData &&
+        productFilterData?.results.length > 0 &&
+      `${productFilterData?.results[0].sap_code}`) ||
+    "";
+
+    const { disctributionCenters } = useAppSelector(state => state.maintenance)
     return (
         <>
-            <FilterShiftManage
+            { openFilter && <FilterShiftManage
                 open={openFilter}
                 handleClose={() => setopenFilter(false)}
                 handleFilter={handleFilter}
-            />
+            />}
             <Container maxWidth="xl" sx={{ marginTop: 2 }}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
@@ -310,6 +333,85 @@ export const ShiftReportPage = () => {
                         />
                     </Grid>
                     <Grid item xs={12}>
+                        <Grid container spacing={1}>
+                            {(reportPallets.date_after || reportPallets.date_before) && (
+                                <ChipFilterCategory
+                                    label="Fecha de Registro: "
+                                    items={[
+                                        {
+                                            label: `Mayor que: ${reportPallets.date_after ? format(new Date(reportPallets.date_after), "dd/MM/yyyy") : "-"}`,
+                                            id: "date_after",
+                                        },
+                                        {
+                                            label: `Menor que: ${reportPallets.date_before ? format(new Date(reportPallets.date_before), "dd/MM/yyyy") : "-"}`,
+                                            id: "date_before",
+                                        },
+                                    ]}
+                                />
+                            )}
+                            {(reportPallets.expiration_date) && (
+                                <ChipFilterCategory
+                                    label="Fecha de Vencimiento: "
+                                    items={[
+                                        {
+                                            label: `${reportPallets.expiration_date ? format(new Date(reportPallets.expiration_date), "dd/MM/yyyy") : "-"}`,
+                                            id: "exp",
+                                            deleteAction: ()=> dispatch(setQueryReportPallets({...reportPallets, expiration_date: null}))
+                                        },
+                                    ]}
+                                />
+                            )}
+                            {(reportPallets.shift) && (
+                                <ChipFilterCategory
+                                    label="Turno: "
+                                    items={[
+                                        {
+                                            label: reportPallets.shift,
+                                            id: "shift",
+                                            deleteAction: ()=> dispatch(setQueryReportPallets({...reportPallets, shift: undefined}))
+                                        },
+                                    ]}
+                                />
+                            )}
+                            {(reportPallets.product && !isLloadingProduct &&
+                                !isFetchingProduct) && (
+                                <ChipFilterCategory
+                                    label="Producto: "
+                                    items={[
+                                        {
+                                            label: productText,
+                                            id: "product",
+                                            deleteAction: ()=> dispatch(setQueryReportPallets({...reportPallets, product: undefined}))
+                                        },
+                                    ]}
+                                />
+                            )}
+                            {(reportPallets.distribution_center) && (
+                                <ChipFilterCategory
+                                    label="Centro de Distribución: "
+                                    items={[
+                                        {
+                                            label: disctributionCenters.find(dc => dc.id === reportPallets.distribution_center)?.name ||"",
+                                            id:"distribution_center",
+                                            deleteAction: !user?.centro_distribucion? (()=>dispatch(setQueryReportPallets({...reportPallets, distribution_center: undefined}))): undefined
+                                        }
+                                    ]}
+                                />
+                            )}
+                            {(reportPallets.avalibleQuantity) && (
+                                <ChipFilterCategory
+                                    label="Cajas: "
+                                    items={[
+                                        {
+                                            label: StatusOptions[reportPallets.avalibleQuantity] ,
+                                            id:"avalibleQuantity",
+                                        }
+                                    ]}
+                                />
+                            )}
+                        </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
                         <DataGrid
                             {...tableBase}
                             columns={columns}
@@ -331,3 +433,10 @@ export const ShiftReportPage = () => {
 
 
 export default ShiftReportPage;
+
+const StatusOptions = {
+    "all": "Todos",
+    "equal": "Igual a 0",
+    "less": "Menor a 0",
+    "greater": "Mayor a 0",
+  }

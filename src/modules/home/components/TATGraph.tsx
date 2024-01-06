@@ -130,10 +130,10 @@ const obtenerDatasets = (data: GroupedData, dcs: DistributionCenter[])=>{
 const TATGraph = () => {
   const { graphQueryParams: {year, distributor_center, typeChart}, graphQueryParams } = useAppSelector(state => state.ui)
   const [averages, setAverages] = useState<TATGraphItem[]>([]);
+  const [loading, setLoading] = useState(false);
   const {disctributionCenters} = useAppSelector(state => state.maintenance)
   const dispatch = useAppDispatch()
   // TODO implementar bien el loading
-  const loading = false;
 
   const datasets = useMemo(()=>{
     const datosAgrupados = groupByDistributorCenter(averages);
@@ -152,6 +152,7 @@ const TATGraph = () => {
   const { token } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
+    setLoading(true)
     const fetchData = async () => {
       const response = await backendApi.get<
         TATGraphItem[],
@@ -169,6 +170,7 @@ const TATGraph = () => {
       if (response.status === 200) {
         setAverages(response.data);
       }
+      setLoading(false)
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
