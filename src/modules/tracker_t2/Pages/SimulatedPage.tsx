@@ -109,7 +109,7 @@ const SimulatedPage = () => {
                 tr.lote,
                 tr.tiempo
             ])],
-            filename: `reporte_t2_${format(
+            filename: `reporte_simulacion_${format(
                 new Date(),
                 "dd-MM-yyyy"
             )}.xlsx`,
@@ -280,6 +280,7 @@ const SimulatedPage = () => {
                         />
                     </Grid>
                 </Grid>
+                
                 <Grid xs={12} sx={{ mt: 2, mb: 2 }}>
                     <Typography variant="h6" component="h1" fontWeight={400}>
                         Resultados
@@ -297,7 +298,7 @@ const SimulatedPage = () => {
                         datalocal.map((item, index) => (
                             <Card key={index} sx={{ mt: 2, p: 1 }}>
                                 <Grid container spacing={2} key={index} >
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Ruta:
                                         </Typography>
@@ -306,7 +307,7 @@ const SimulatedPage = () => {
                                             {item.TOUR_ID}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Conductor:
                                         </Typography>
@@ -315,8 +316,8 @@ const SimulatedPage = () => {
                                             {item.Conductor}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
-                                        <Typography variant="body1" component="p" fontWeight={400}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
+                                        <Typography variant="body1" component="p" fontWeight={600}>
                                             Producto:
                                         </Typography>
                                         <Divider sx={{ marginBottom: 0, marginTop: 0 }} />
@@ -324,7 +325,7 @@ const SimulatedPage = () => {
                                             {item.Cod_Mat} - {item.Producto}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Cantidad:
                                         </Typography>
@@ -333,7 +334,7 @@ const SimulatedPage = () => {
                                             {item.Cant_UMV}
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Fechas:
 
@@ -356,7 +357,7 @@ const SimulatedPage = () => {
                                             }
                                         </Typography>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Tracker:
                                         </Typography>
@@ -370,7 +371,7 @@ const SimulatedPage = () => {
                                             </IconButton>
                                         </Box>
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Lote:
                                         </Typography>
@@ -390,13 +391,13 @@ const SimulatedPage = () => {
                                             </Typography>
                                         }
                                     </Grid>
-                                    <Grid item xs={12} md={6} lg={4} xl={3}>
+                                    <Grid item xs={6} md={4} lg={4} xl={3}>
                                         <Typography variant="body1" component="p" fontWeight={600}>
                                             Tiempo en bodega:
                                         </Typography>
                                         <Divider sx={{ marginBottom: 0, marginTop: 0 }} />
                                         <Typography variant="body1" component="p" fontWeight={400}>
-                                            {item.time_in_warehouse || '--'}
+                                            {item.time_in_warehouse } días
                                         </Typography>
                                     </Grid>
                                 </Grid>
