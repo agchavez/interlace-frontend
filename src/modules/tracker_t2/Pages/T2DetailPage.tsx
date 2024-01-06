@@ -1,6 +1,6 @@
 
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Chip, Container, Divider, Grid, IconButton, Typography, CircularProgress, LinearProgress } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Card, Chip, Container, Divider, Grid, IconButton, Typography, CircularProgress, LinearProgress, MenuItem } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useGetT2TrackingByIdQuery } from '../../../store/seguimiento/trackerApi';
 import { skipToken } from '@reduxjs/toolkit/dist/query';
@@ -14,6 +14,10 @@ import { DeleteT2Modal } from '../components/DeleteT2Modal';
 import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
 import { exportToXLSX } from '../../../utils/exportToCSV';
 import { toast } from 'sonner';
+import { StyledMenu } from '../../ui/components/StyledMenu';
+import CodeIcon from '@mui/icons-material/Code';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import DataThresholdingTwoToneIcon from '@mui/icons-material/DataThresholdingTwoTone';
 
 interface T2Export {
     product_sap_code: string;
@@ -32,6 +36,17 @@ const T2DetailPage = () => {
     const { loading } = useAppSelector(state => state.seguimiento.t2Tracking);
     const navigae = useNavigate();
     const user = useAppSelector((state) => state.auth.user);
+
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data, error, isLoading } = useGetT2TrackingByIdQuery(id || skipToken,
@@ -132,9 +147,9 @@ const T2DetailPage = () => {
                                     T2OUT-{id?.padStart(1, '0')}
                                 </Typography>
                             </div>
-                            <div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <Button variant="outlined" 
-                                    sx={{ marginTop: 1, marginRight: 1 }} 
+                                    sx={{marginRight: 1 }} 
                                     onClick={handleExport}
                                     color="success" 
                                     disabled={loadingExport}
@@ -149,6 +164,51 @@ const T2DetailPage = () => {
                                     >
                                         Eliminar
                                     </Button>}
+                                {data.status === 'APPLIED' && user?.list_permissions?.includes('tracker.delete_outputt2model') &&
+                                    <div>
+                                    <Button
+                                      id="demo-customized-button"
+                                      aria-controls={open ? "demo-customized-menu" : undefined}
+                                      aria-haspopup="true"
+                                      aria-expanded={open ? "true" : undefined}
+                                      variant="contained"
+                                      color="secondary"
+                                      onClick={handleClick}
+                                      endIcon={
+                                        loading ? <CircularProgress size={15} /> : <DataThresholdingTwoToneIcon />
+                                      }
+                                      disabled={loading}
+                                    >
+                                      Simulación
+                                    </Button>
+                                    <StyledMenu
+                                      id="demo-customized-menu"
+                                      MenuListProps={{
+                                        "aria-labelledby": "demo-customized-button",
+                                      }}
+                                      anchorEl={anchorEl}
+                                      open={open}
+                                      onClose={handleClose}
+                                    >
+                                      <MenuItem onClick={() => {}} disableRipple>
+                                        <CloudDownloadIcon />
+                                        <Typography ml={1}>
+                                            Generar simulación
+                                        </Typography>
+                                      </MenuItem>
+                                      <MenuItem onClick={() => {
+                                        navigae(`/tracker-t2/simulated/${id}`)
+                                      }} disableRipple
+                                      disabled={data.simulation===null}
+                                      >
+                                        <CodeIcon />
+                                        <Typography ml={1}>
+                                            Ver simulación
+                                        </Typography>
+                                      </MenuItem>
+                                    </StyledMenu>
+                                  </div>
+                                    }
                             </div>
 
                         </Box>

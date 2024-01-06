@@ -2,6 +2,53 @@
 import { DistributorCenterData } from "./tracking";
 import { BaseQueryParams } from './maintenance';
 
+
+export interface Simulation {
+    tour_id_list:   number[];
+    conductor_list: number[];
+    client_ids:     ClientID[];
+    data:           Datum[];
+    product_list:         ProductList[];
+}
+
+export interface ClientID {
+    nombre: string;
+    id:     number;
+}
+
+export interface Datum {
+    TOUR_ID:           number;
+    Entrega:           number;
+    Población:         string;
+    Conductor:         number;
+    Calle:             string;
+    Cod_Mat:           number;
+    Producto:          string;
+    Nombre:            string;
+    UM:                string;
+    Cant_UMV:          number;
+    fecha_vencimiento: string[] | string;
+    tracker:           number[] | number;
+    client_id:         number;
+    lote:              string[] | string;
+    time_in_warehouse:  number;
+}
+
+
+export interface SimulatedForm {
+    client: string;
+    ruta: string;
+    conductor: string;
+    producto: string;
+}
+
+
+export interface ProductList {
+    codigo_sap: string;
+    nombre:     string;
+}
+
+
 export interface OutputT2 {
     id:                   number;
     output_detail_t2:     OutputDetailT2[];
@@ -19,6 +66,8 @@ export interface OutputT2 {
     user_authorizer:      null;
     user_applied:         null;
     distributor_center:   number;
+    simulation:           Simulation;
+    
 }
 
 export interface OutputT2QueryParams extends BaseQueryParams {

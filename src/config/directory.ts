@@ -175,6 +175,13 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker-t2/simulated/:id",
+        reg: /\/tracker-t2\/simulated\/\d+/,
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
         url: "",
         permissions: [
             "any"

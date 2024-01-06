@@ -7,6 +7,7 @@ import { FormFilterT2 } from '../../modules/tracker_t2/components/FilterPreSale'
 import { FormFilterInventory } from "../../modules/inventory/components/FilterInventory";
 import { es } from "date-fns/locale";
 import { TypeChart } from "../../modules/home/components/TATGraph";
+import { SimulatedForm } from "../../interfaces/trackingT2";
 
 
 enum FilterDate {
@@ -27,6 +28,7 @@ export interface uiState {
     managerT2QueryParams: FormFilterT2;
     inventoryQueryParams: InventarioMovimentQueryParams;
     graphQueryParams: GraphQueryParams;
+    simulatedQueryParams: SimulatedForm;
 }
 
 const storageGraphqueryParams = (()=>{
@@ -84,6 +86,12 @@ const initialState: uiState = {
         typeChart: storageGraphqueryParams?.typeChart || TypeChart.BAR,
         distributor_center: storageGraphqueryParams?.distributor_center || [],
         encountered: storageGraphqueryParams? true: false,
+    },
+    simulatedQueryParams: {
+        client: "",
+        ruta: "",
+        conductor: "",
+        producto: "",
     }
 }
 
@@ -116,6 +124,9 @@ export const uiSlice = createSlice({
             state.graphQueryParams = action.payload
             localStorage.setItem("graph_params", JSON.stringify(action.payload))
         },
+        setSimulatedQueryParams: (state, action: PayloadAction<SimulatedForm>) => {
+            state.simulatedQueryParams = action.payload
+        }
     }
 })
 
@@ -128,5 +139,6 @@ export const {
     setOrderQueryParams,
     setManagerT2QueryParams, 
     setInventoryQueryParams,
-    setGraphQueryParams
+    setGraphQueryParams,
+    setSimulatedQueryParams
 } = uiSlice.actions;
