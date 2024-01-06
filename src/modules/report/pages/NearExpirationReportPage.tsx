@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Container, Divider, Grid, IconButton, Typography } from "@mui/material";
+import { Button, Container, Divider, Grid, Typography } from "@mui/material";
 import { NearExpirationQueryParams, Product } from "../../../interfaces/tracking";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "../../../store/store";
@@ -14,7 +14,7 @@ import {
   FilterNearExpiration,
   FormFilterNearExpiration,
 } from "../components/FilterNearExpiration";
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import ChipFilterCategory from "../../ui/components/ChipFilter";
 
 export const NearExpirationReportPage = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -116,6 +116,8 @@ export const NearExpirationReportPage = () => {
         setquery(queryProcess);
     }
 
+    const { disctributionCenters } = useAppSelector(state => state.maintenance)
+    
   return (
     <>
       { 
@@ -187,37 +189,41 @@ export const NearExpirationReportPage = () => {
           </Grid>
           <Grid item xs={12}>
           <Grid container spacing={1}>
-            {
-              query.productos.length > 0 &&
-              <Grid item>
-                  <Box sx={{borderStyle: "dashed", borderRadius:3, borderWidth: 1}}>
-                      <Grid container alignContent="center" alignItems="center" p={0.3} spacing={1}>
-                          <Grid item>
-                              <Typography>
-                                  Producto:
-                              </Typography>
-                          </Grid>
-                          {
-                              query.productos.map(product =>{
-                                return <Grid item key={product.sap_code}>
-                                    <Chip
-                                        label={product.sap_code}
-                                        onDelete={() => handleClickDeleteProductFilter(product)}
-                                        variant="outlined"
-                                        color="secondary"
-                                        deleteIcon={
-                                            <IconButton sx={{m:0}}>
-                                                <HighlightOffIcon />
-                                            </IconButton>
-                                        }
-                                        />
-                                  </Grid>
-                              })
-                          }
-                      </Grid>
-                  </Box>
-              </Grid>
-            }
+            {(query.days) && (
+                <ChipFilterCategory
+                    label="Días: "
+                    items={[
+                        {
+                            label: query.days.toString(),
+                            id:"days",
+                        }
+                    ]}
+                />
+            )}
+            {(query.productos.length > 0) && (
+                <ChipFilterCategory
+                    label="Producto: "
+                    items={query.productos.map((product)=>{
+                      return {
+                        label: product.sap_code,
+                        id:product.sap_code,
+                        deleteAction: ()=>handleClickDeleteProductFilter(product)
+                    }
+                    })}
+                />
+            )}
+            {(query.distributor_center) && (
+                <ChipFilterCategory
+                    label="Centro de Distribución: "
+                    items={[
+                        {
+                            label: disctributionCenters.find(dc => dc.id === query.distributor_center)?.name ||"",
+                            id:"distribution_center",
+                            deleteAction: !user?.centro_distribucion? (()=>setquery({...query, distributor_center: undefined})): undefined
+                        }
+                    ]}
+                />
+            )}
           </Grid>
           </Grid>
           <Grid item xs={12}>
