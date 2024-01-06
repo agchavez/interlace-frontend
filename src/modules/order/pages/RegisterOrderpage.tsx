@@ -120,7 +120,6 @@ export const RegisterOrderpage = () => {
   });
 
   const { data: dataRoute } = useGetRouteQuery({
-    
     distributor_center: user?.centro_distribucion || 0,
     limit: 1,
     offset: 0,

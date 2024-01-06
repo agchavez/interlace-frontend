@@ -13,6 +13,7 @@ export const ShowRoute: FC<ShowRouteProps> = ({ distributorCenterId, locationId 
         limit: 1,
         offset: 0,
         distributor_center: distributorCenterId
+
     })
     const {
         data, isFetching, isLoading, isError, error, isSuccess, refetch
@@ -33,6 +34,7 @@ export const ShowRoute: FC<ShowRouteProps> = ({ distributorCenterId, locationId 
             refetch()
         }
     }, [refetch, query.distributor_center])
+
 
     if (data?.count === 0 || locationId === null || distributorCenterId === null || isFetching || isLoading || isError || error || !isSuccess) {
         return <>

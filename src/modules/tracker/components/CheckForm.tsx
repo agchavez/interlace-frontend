@@ -259,7 +259,7 @@ export const CheckForm = ({
             <Divider />
             <Box sx={{ padding: 2 }}>
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -278,7 +278,7 @@ export const CheckForm = ({
                     {seguimiento?.rastra.code}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -297,7 +297,7 @@ export const CheckForm = ({
                     {seguimiento?.type === "IMPORT" ? "Importación" : "Local"}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -316,7 +316,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.name}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -335,7 +335,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.tractor}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
                     variant="body1"
                     component="h1"
@@ -354,7 +354,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Box
                     sx={{
                       display: "flex",
@@ -420,7 +420,7 @@ export const CheckForm = ({
                   </Grid>
                 )}
                 {disable && seguimiento?.completed_date && (
-                  <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Grid item xs={6} md={6} lg={4} xl={3}>
                     <Typography
                       variant="body1"
                       component="h1"
@@ -447,7 +447,7 @@ export const CheckForm = ({
                   </Grid>
                 )}
                 {disable && (
-                  <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Grid item xs={6} md={6} lg={4} xl={3}>
                     <Typography
                       variant="body1"
                       component="h1"
@@ -720,7 +720,7 @@ export const CheckForm = ({
               </Typography>
             </Divider>
             <Grid container spacing={2} sx={{ marginTop: 2 }}>
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={6} md={6} lg={4}>
                 <Typography
                   variant="body1"
                   component="h1"
@@ -745,7 +745,7 @@ export const CheckForm = ({
                     "00:00:00"}
                 </Typography>
               </Grid>
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={6} md={6} lg={4}>
                 <Typography
                   variant="body1"
                   component="h1"
@@ -791,7 +791,7 @@ export const CheckForm = ({
                 </Typography>
               </Grid>
 
-              <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
+              <Grid item xs={6} md={6} sx={{ marginTop: "4px" }}>
                 <Button
                   variant="outlined"
                   size="small"
@@ -806,7 +806,7 @@ export const CheckForm = ({
                   Registrar entrada
                 </Button>
               </Grid>
-              <Grid item xs={12} md={6} sx={{ marginTop: "4px" }}>
+              <Grid item xs={6} md={6} sx={{ marginTop: "4px" }}>
                 <Button
                   variant="outlined"
                   size="small"

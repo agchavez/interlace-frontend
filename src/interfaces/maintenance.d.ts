@@ -176,6 +176,7 @@ export interface RouteQuerySearch extends BaseQueryParams {
     search?: string;
     distributor_center?: number;
     id?: number;
+    location?: number;
 }
 
 export type PeriodLabel = "A" | "B" | "C"
