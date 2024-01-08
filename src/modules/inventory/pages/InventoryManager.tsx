@@ -53,9 +53,12 @@ const InventoryManager = () => {
     const [query, setquery] = useState<InventarioMovimentQueryParams>({
         limit: 15,
         offset: 0,
-        productos: [],
-        distributor_center: [],
-        module: [],
+        productos: inventoryQueryParams.productos,
+        distributor_center: inventoryQueryParams.distributor_center,
+        module: inventoryQueryParams.module,
+        tracker: inventoryQueryParams.tracker,
+        date_after: inventoryQueryParams.date_after,
+        date_before: inventoryQueryParams.date_before,
     });
     const [paginationModel, setPaginationModel] = useState<{
         pageSize: number;
@@ -222,6 +225,7 @@ const InventoryManager = () => {
         dispatch(setInventoryQueryParams(queryProcess));
     }
 
+    
     return (
         <>
         {openFilter && <FilterInventory open={openFilter} handleFilter={handleFilter} handleClose={()=>setOpenFilter(false)}/>}

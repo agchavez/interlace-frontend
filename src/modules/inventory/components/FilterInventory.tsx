@@ -287,7 +287,7 @@ export const FilterInventory: FC<FilterManageProps> = ({
                       onChange={(date) => {
                         isValid(date) &&
                           date &&
-                          field.onChange(format(new Date(date), "yyyy-MM-dd"));
+                          field.onChange(format(new Date(date), "yyyy-MM-dd 23:59:59"));
                       }}
                     />
                   )}
@@ -317,7 +317,7 @@ export const FilterInventory: FC<FilterManageProps> = ({
                       onChange={(date) => {
                         isValid(date) &&
                           date &&
-                          field.onChange(format(new Date(date), "yyyy-MM-dd"));
+                          field.onChange(format(new Date(date), "yyyy-MM-dd 00:00:00"));
                       }}
                     />
                   )}

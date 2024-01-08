@@ -141,7 +141,7 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                       format="dd/MM/yyyy"
                       onChange={(date) => {
                         isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd'));
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
                       }}
                     />
                   )}
@@ -161,7 +161,7 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                       format="dd/MM/yyyy"
                       onChange={(date) => {
                         isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd'));
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
                       }}
                     />
                   )}
@@ -184,8 +184,8 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                       inputRef={field.ref}
                       format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) &&
-                        field.onChange(date);
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date as string), 'yyyy-MM-dd 00:00:00'));
                       }}
                     />
                   )}
