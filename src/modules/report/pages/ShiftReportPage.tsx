@@ -18,8 +18,8 @@ import { setQueryReportPallets } from '../../../store/ui/uiSlice';
 import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
 export const ShiftReportPage = () => {
     const user = useAppSelector((state) => state.auth.user);
+    const {reportPallets} = useAppSelector(state => state.ui)
     const navigate = useNavigate();
-
     const columns: GridColDef<TrackerProductDetail>[] = [
         {
             field: "id",
@@ -206,7 +206,12 @@ export const ShiftReportPage = () => {
         limit: 15,
         offset: 0,
         ordering: "-created_at",
-        tracker_detail__tracker__distributor_center: user?.centro_distribucion || undefined,
+        tracker_detail__tracker__distributor_center: user?.centro_distribucion || reportPallets.distribution_center || undefined,
+        shift: reportPallets.shift,
+        created_at__gte: reportPallets.date_after ? format(new Date(reportPallets.date_after), "yyyy-MM-dd") : undefined,
+        created_at__lte: reportPallets.date_before ? format(new Date(reportPallets.date_before), "yyyy-MM-dd") : undefined,
+        expiration_date: reportPallets.expiration_date ? format(new Date(reportPallets.expiration_date), "yyyy-MM-dd") : undefined,
+
     });
 
     const {
@@ -260,7 +265,7 @@ export const ShiftReportPage = () => {
         }));
     }, [paginationModel]);
 
-    const {reportPallets} = useAppSelector(state => state.ui)
+    
     const dispatch = useAppDispatch()
 
     const {

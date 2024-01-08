@@ -12,6 +12,7 @@ import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { RoutePermissionsDirectory } from "../../../config/directory";
+import ContentPasteGoTwoToneIcon from '@mui/icons-material/ContentPasteGoTwoTone';
 interface SidebarProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -84,6 +85,28 @@ const items: SideBarItem[] = [
     ],
     icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "movimientos",
+  },
+  {
+    text: "T2",
+    subItems: [
+      {
+        text: "Cargar Preventa",
+        href: "/tracker-t2/pre-sale",
+        id: "outregister",
+      },
+      {
+        text: "Gestión",
+        href: "/tracker-t2/manage",
+        id: "outmanage",
+      },
+      {
+        text: "Revision",
+        href: "/tracker-t2/pre-sale-check",
+        id: "outcheck",
+      },
+    ],
+    icon: <ContentPasteGoTwoToneIcon sx={{ width: "30px" }} color="primary" />,
+    id: "t2",
   },
   {
     text: "REPORTE",
