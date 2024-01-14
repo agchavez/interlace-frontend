@@ -64,8 +64,14 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                     <MenuOutlinedIcon fontSize='medium' color='primary' />
                 </IconButton>} */}
 
-                <div className="nav__img">
-                    <img src={logo} alt="img" width={120} className="p-1" />
+                <div className="nav__img" style={{ display: 'flex', alignItems: 'end' }}>
+                    <img src={logo} alt="img" width={120} className="p-1" style={{ marginRight: '4px' }} />
+                    <Typography variant="body1" component="h1" fontWeight={400} className="p-1" sx={{ 
+                        borderLeft: '2px solid black',
+                        paddingLeft: '4px   ',
+                    }}>
+                        {import.meta.env.VITE_JS_APP_NAME}
+                    </Typography>
                 </div>
             </Grid>
             <Grid item>

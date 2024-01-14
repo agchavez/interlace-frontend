@@ -295,10 +295,10 @@ const SimulatedPage = () => {
                             Resultados
                         </Typography>
                         <Stack spacing={2} sx={{ mt: 2 }} textAlign={'center'}>
-                            <Typography>
-                                <span>
-                                    Registros totales: {datalocal.length}
-                                </span>
+                            <Typography variant="body2" component="h1" fontWeight={400}>
+                                
+                                    Registros totales: {datalocal.length} | {datalocal.length > 0 ? 'Mostrando ' + ((page - 1) * 20 + 1) + ' - ' + (page * 20 > datalocal.length ? datalocal.length : page * 20) : ''}
+                              
                             </Typography>
                             <Pagination count={
                                 Math.ceil(datalocal.length / 20)
