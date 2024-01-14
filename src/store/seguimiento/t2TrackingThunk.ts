@@ -1,7 +1,7 @@
 import backendApi from "../../config/apiConfig";
 import { AppThunk } from "../store";
 import { errorApiHandler, handleApiError } from "../../utils/error";
-import { OutputT2, T2TrackingDetailBody, OutputDetailT2, Simulation } from '../../interfaces/trackingT2';
+import { OutputT2, T2TrackingDetailBody, OutputDetailT2 } from '../../interfaces/trackingT2';
 import { orderingT2Selected, removeSeguimientoT2, setLoadT2Tracking, setLoadingT2TrackingDetail, setT2Trackings, updateDetailT2Tracking } from "./seguimientoSlice";
 import { toast } from 'sonner';
 import axios from "axios";
@@ -202,14 +202,16 @@ export const generateSimulation = (file: File, id: number, onCompleted: (id: num
         const formData = new FormData();
         formData.append('excel', file);
 
-        await noTimeoutApi.post<Simulation>(`/output-t2/${id}/simulate/`, formData, {
+        await noTimeoutApi.post<{
+            msg: string;
+        }>(`/output-t2/${id}/simulate/`, formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
 
         toast.success('Simulación', {
-            description: 'Se ha registrado correctamente',
+            description: 'Se realizo la solicitud de simulación, se le notificará cuando este lista',
         });
         onCompleted(id);
     } catch (error) {
