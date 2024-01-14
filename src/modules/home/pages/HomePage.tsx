@@ -13,6 +13,7 @@ import { GridFilterListIcon } from '@mui/x-data-grid';
 import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import TATGraph from '../components/TATGraph';
 
 enum FilterDate {
     TODAY = 'Hoy',
@@ -377,7 +378,8 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
-            <Grid item xs={12} md={1}>
+            <Grid item xs={12} md={6}>
+                <TATGraph />
             </Grid>
         </Grid>
     </Container>
