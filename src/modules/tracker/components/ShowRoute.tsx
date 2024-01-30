@@ -30,10 +30,10 @@ export const ShowRoute: FC<ShowRouteProps> = ({ distributorCenterId, locationId 
     }, [distributorCenterId, locationId])
 
     useEffect(() => {
-        if (query.distributor_center){
+        if (query.distributor_center && query.location) {
             refetch()
         }
-    }, [refetch, query.distributor_center])
+    }, [refetch, query.distributor_center, query.location])
 
 
     if (data?.count === 0 || locationId === null || distributorCenterId === null || isFetching || isLoading || isError || error || !isSuccess) {
