@@ -639,7 +639,7 @@ export const RegisterOrderpage = () => {
                             </StyledTableCell>
                             <StyledTableCell align="left">Cajas</StyledTableCell>
                             <StyledTableCell align="left">
-                              Cajas disponibles
+                              Cajas Pendientes
                             </StyledTableCell>
                             <StyledTableCell align="left">
                               Fecha Expiración

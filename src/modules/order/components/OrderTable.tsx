@@ -54,7 +54,7 @@ interface HistoryRow {
 
 const statusValues = {
   PENDING: "Pendiente",
-  IN_PROCESS: "En Progreso",
+  IN_PROCESS: "En Proceso",
   COMPLETED: "Completado",
 };
 
@@ -105,7 +105,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
           <Chip
             label={statusValues[row.status]}
             variant="outlined"
-            color='secondary'
+            color={row.status === "COMPLETED" ? "success" : "secondary"}
           />
         </TableCell>
         <TableCell align="right">
@@ -141,7 +141,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
                     <TableCell>No. SAP</TableCell>
                     <TableCell>Producto</TableCell>
                     <TableCell>Cajas</TableCell>
-                    <TableCell>Cajas disponibles</TableCell>
+                    <TableCell>Cajas Pendientes</TableCell>
                     <TableCell>Fecha Expiración</TableCell>
                   </TableRow>
                 </TableHead>
