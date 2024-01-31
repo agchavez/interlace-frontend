@@ -82,7 +82,6 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
   } = useAppSelector((state) => state.order);
 
   /// eslint-disable-next-line react-hooks/exhaustive-deps
-
   const schema: yup.ObjectSchema<any> = useMemo(() => {
     const quantity = yup
       .number()

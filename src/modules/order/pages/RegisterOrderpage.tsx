@@ -56,6 +56,10 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { toast } from "sonner";
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 import OutOrderModal from "../components/OutOrderModal";
+
+import XLSX from 'xlsx'
+
+
 interface OrderData {
   location: number;
   observations: string;
@@ -199,6 +203,23 @@ export const RegisterOrderpage = () => {
     }
   };
 
+  const handleDownload = () => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      ["tracker_id", "codigo_sap", "fecha_vencimiento", "cantidad"],
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Hoja1');
+    XLSX.writeFile(wb, 'carga_pedidos.xlsx');
+    const blob = XLSX.write(wb, { bookType: 'csv', type: 'array' });
+    const blobURL = URL.createObjectURL(new Blob([blob], { type: 'application/octet-stream' }));
+    const a = document.createElement('a');
+    a.href = blobURL;
+    a.download = 'carga_pedidos.xlsx';
+    a.click();
+    URL.revokeObjectURL(blobURL);
+  }
+
+
   const disabled = order.id !== null && order.status !== "PENDING";
 
   const [file, setfile] = useState<{ file: File | null, fileName: string | null }>({ file: null, fileName: null });
@@ -291,242 +312,242 @@ export const RegisterOrderpage = () => {
               onSubmit={handleSubmit(handleSubmitForm, () => { })}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Divider>
-                        <Typography variant="h6" component="h2" fontWeight={400}>
-                          Datos generales del pedido
-                        </Typography>
-                      </Divider>
-                    </Grid>
-                <Grid item xs={12} md={6} lg={4}>
-                  {disabled ? (
-                    <>
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={600}
-                        color={"gray.500"}
-                      >
-                        Cliente
-                      </Typography>
-                      <Divider />
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={400}
-                        color={"gray.500"}
-                      >
-                        {order.location_data?.name} -{order.location_data?.code} {watch("location") && <Chip
-                      label={
-                        (dataRoute?.results &&
-                          dataRoute?.results.length > 0 &&
-                          dataRoute?.results[0].code) ||
-                        ""
-                      }
-                      color="secondary"
-                      size="medium"
-                      sx={{ marginRight: 1 }}
-                    />}
-                      </Typography>
-                    </>
-                  ) : (
-                    <LocationSelect
-                      control={control}
-                      name="location"
-                      label="Cliente"
-                      locationId={watch("location")}
-                    />
-                  )}
-                </Grid>
-                {!disabled && (
-                  <Grid item xs={4} md={4} lg={2}>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      size="medium"
-                      fullWidth
-                      endIcon={<OpenInNewTwoToneIcon fontSize="small" />}
-                      onClick={() => setOpenAddClientModal(true)}
-                    >
-                      Nuevo cliente
-                    </Button>
-                  </Grid>
-                )}
-                <Grid item xs={12} md={12} lg={12}>
-                  {disabled ? (
-                    <>
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={600}
-                        color={"gray.500"}
-                      >
-                        Observaciones
-                      </Typography>
-                      <Divider />
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={400}
-                        color={"gray.500"}
-                      >
-                        {order.observations}
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <TextField
-                        {...register("observations")}
-                        fullWidth
-                        label="Observaciones"
-                        variant="outlined"
-                        required
-                        size="small"
-                        multiline
-                        rows={3}
-                        value={watch("observations") || ""}
-                        error={errors.observations?.message ? true : false}
-                        helperText={errors.observations?.message}
-                      />
-                      {errors.observations && (
-                        <h1>{errors.observations.message}</h1>
+                  <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <Divider>
+                          <Typography variant="h6" component="h2" fontWeight={400}>
+                            Datos generales del pedido
+                          </Typography>
+                        </Divider>
+                      </Grid>
+                      <Grid item xs={12} md={6} lg={4}>
+                        {disabled ? (
+                          <>
+                            <Typography
+                              variant="body1"
+                              component="h1"
+                              fontWeight={600}
+                              color={"gray.500"}
+                            >
+                              Cliente
+                            </Typography>
+                            <Divider />
+                            <Typography
+                              variant="body1"
+                              component="h1"
+                              fontWeight={400}
+                              color={"gray.500"}
+                            >
+                              {order.location_data?.name} -{order.location_data?.code} {watch("location") && <Chip
+                                label={
+                                  (dataRoute?.results &&
+                                    dataRoute?.results.length > 0 &&
+                                    dataRoute?.results[0].code) ||
+                                  ""
+                                }
+                                color="secondary"
+                                size="medium"
+                                sx={{ marginRight: 1 }}
+                              />}
+                            </Typography>
+                          </>
+                        ) : (
+                          <LocationSelect
+                            control={control}
+                            name="location"
+                            label="Cliente"
+                            locationId={watch("location")}
+                          />
+                        )}
+                      </Grid>
+                      {!disabled && (
+                        <Grid item xs={4} md={4} lg={2}>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="medium"
+                            fullWidth
+                            endIcon={<OpenInNewTwoToneIcon fontSize="small" />}
+                            onClick={() => setOpenAddClientModal(true)}
+                          >
+                            Nuevo cliente
+                          </Button>
+                        </Grid>
                       )}
-                    </>
-                  )}
-                </Grid>
-                </Grid>
-                </Card>
+                      <Grid item xs={12} md={12} lg={12}>
+                        {disabled ? (
+                          <>
+                            <Typography
+                              variant="body1"
+                              component="h1"
+                              fontWeight={600}
+                              color={"gray.500"}
+                            >
+                              Observaciones
+                            </Typography>
+                            <Divider />
+                            <Typography
+                              variant="body1"
+                              component="h1"
+                              fontWeight={400}
+                              color={"gray.500"}
+                            >
+                              {order.observations}
+                            </Typography>
+                          </>
+                        ) : (
+                          <>
+                            <TextField
+                              {...register("observations")}
+                              fullWidth
+                              label="Observaciones"
+                              variant="outlined"
+                              required
+                              size="small"
+                              multiline
+                              rows={3}
+                              value={watch("observations") || ""}
+                              error={errors.observations?.message ? true : false}
+                              helperText={errors.observations?.message}
+                            />
+                            {errors.observations && (
+                              <h1>{errors.observations.message}</h1>
+                            )}
+                          </>
+                        )}
+                      </Grid>
+                    </Grid>
+                  </Card>
                 </Grid>
                 {
                   order.out_order &&
                   <>
-                  <Grid item xs={12}>
-                <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
-                  <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <Divider>
-                        <Typography variant="h6" component="h2" fontWeight={400}>
-                          Salida de pedido
-                        </Typography>
-                      </Divider>
+                      <Card sx={{ width: '100%', mt: 2, mb: 2, p: 2 }}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12}>
+                            <Divider>
+                              <Typography variant="h6" component="h2" fontWeight={400}>
+                                Salida de pedido
+                              </Typography>
+                            </Divider>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Grid container spacing={2}>
+                              <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={400}
+                                  color={"gray.500"}
+                                >
+                                  Flota
+                                </Typography>
+                                <Divider />
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={600}
+                                  color={"gray.500"}
+                                >
+                                  {FleetDict[order.out_order.fleet]}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={400}
+                                  color={"gray.500"}
+                                >
+                                  Tipo
+                                </Typography>
+                                <Divider />
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={600}
+                                  color={"gray.500"}
+                                >
+                                  {TypeOutOrderDict[order.out_order.type]}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={400}
+                                  color={"gray.500"}
+                                >
+                                  Número de Documento
+                                </Typography>
+                                <Divider />
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={600}
+                                  color={"gray.500"}
+                                >
+                                  {order.out_order.document_number}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={400}
+                                  color={"gray.500"}
+                                >
+                                  Número de Documento
+                                </Typography>
+                                <Divider />
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={600}
+                                  color={"gray.500"}
+                                >
+                                  {order.out_order.vehicle}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} md={6} lg={4} xl={3}>
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={400}
+                                  color={"gray.500"}
+                                >
+                                  Documento
+                                </Typography>
+                                <Divider />
+                                <Typography
+                                  variant="body1"
+                                  component="h1"
+                                  fontWeight={600}
+                                  color={"gray.500"}
+                                >
+                                  {order.out_order.document_name ? (
+                                    <Chip
+                                      onClick={handleClickDescargar}
+                                      label={order.out_order.document_name}
+                                      variant="outlined"
+                                      color="secondary"
+                                      icon={<CloudDownloadTwoToneIcon color="secondary" />}
+                                      size="medium"
+                                      sx={{ mt: 1 }}
+                                    />
+                                  ) : (
+                                    "--"
+                                  )}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+
+                      </Card>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12} md={6} lg={4} xl={3}>
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={400}
-                            color={"gray.500"}
-                          >
-                            Flota
-                          </Typography>
-                          <Divider />
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={600}
-                            color={"gray.500"}
-                          >
-                            {FleetDict[order.out_order.fleet]}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={3}>
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={400}
-                            color={"gray.500"}
-                          >
-                            Tipo
-                          </Typography>
-                          <Divider />
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={600}
-                            color={"gray.500"}
-                          >
-                            {TypeOutOrderDict[order.out_order.type]}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={3}>
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={400}
-                            color={"gray.500"}
-                          >
-                            Número de Documento
-                          </Typography>
-                          <Divider />
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={600}
-                            color={"gray.500"}
-                          >
-                            {order.out_order.document_number}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={3}>
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={400}
-                            color={"gray.500"}
-                          >
-                            Número de Documento
-                          </Typography>
-                          <Divider />
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={600}
-                            color={"gray.500"}
-                          >
-                            {order.out_order.vehicle}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={12} md={6} lg={4} xl={3}>
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={400}
-                            color={"gray.500"}
-                          >
-                            Documento
-                          </Typography>
-                          <Divider />
-                          <Typography
-                            variant="body1"
-                            component="h1"
-                            fontWeight={600}
-                            color={"gray.500"}
-                          >
-                            {order.out_order.document_name ? (
-                              <Chip
-                                onClick={handleClickDescargar}
-                                label={order.out_order.document_name}
-                                variant="outlined"
-                                color="secondary"
-                                icon={<CloudDownloadTwoToneIcon color="secondary" />}
-                                size="medium"
-                                sx={{ mt: 1 }}
-                              />
-                            ) : (
-                              "--"
-                            )}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    </Grid>
-                  
-                  </Card>
-                </Grid>
                   </>
                 }
                 {order.id && <Grid item xs={12}>
@@ -541,7 +562,7 @@ export const RegisterOrderpage = () => {
                     ORD-{order.id?.toString().padStart(0, "0")}
                   </Typography>
                 </Grid>}
-                
+
                 <Grid item xs={12}>
                   <Divider>
                     <Typography variant="body1" component="h2" fontWeight={400}>
@@ -549,74 +570,88 @@ export const RegisterOrderpage = () => {
                     </Typography>
                   </Divider>
                 </Grid>
+
                 <Grid item xs={12} md={8} lg={10}></Grid>
                 {!disabled && type !== 'excel' && (
-                  <Grid item xs={12} md={4} lg={2}>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      size="medium"
-                      fullWidth
-                      endIcon={<OpenInNewTwoToneIcon fontSize="small" />}
-                      onClick={() => setOpenAddOrderDetailModal(true)}
-                    >
-                      Agregar
-                    </Button>
-                  </Grid>
+                  <>
+                    <Grid item xs={12} md={4} lg={2}>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="medium"
+                        fullWidth
+                        endIcon={<OpenInNewTwoToneIcon fontSize="small" />}
+                        onClick={() => setOpenAddOrderDetailModal(true)}
+                      >
+                        Agregar
+                      </Button>
+                    </Grid>
+                  </>
                 )}
                 {type === 'excel' ?
-                  <Grid item xs={12} md={12} lg={12}>
-                    <Typography variant="body1" textAlign="start" sx={{ mb: 1 }} color="text.secondary">
-                      Adjuntar archivo, solo se admiten archivos .xlsx
-                    </Typography>
-                    <FileUploader
-                      name="file"
-                      label="Arrastre un archivo o haga click para seleccionar uno"
-                      dropMessageStyle={{ backgroundColor: "red" }}
-                      maxSize={10}
-                      multiple={false}
-                      onDraggingStateChange={(d: boolean) => setDragging(d)}
-                      onDrop={handleFileChange}
-                      onSelect={handleFileChange}
-                      onSizeError={() => toast.error("No se admiten archivos de archivos mayores a 20 MB")}
-                    >
-                      <Paper
-                        style={{
-                          width: "100%",
-                          height: 200,
-                          border: "2px dashed #aaaaaa",
-                          borderRadius: 5,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          position: "relative",
-                          overflow: "hidden",
-                          backgroundColor: dragging ? "#F0E68C" : "transparent",
-                        }}
+                  <>
+                    <Grid item xs={12}>
+                      <Typography variant="body1" textAlign="start" sx={{ mb: 1 }} color="text.secondary">
+                        Descargue la plantilla para registrar los productos del pedido
+                        <Button variant="text" color="primary" size="small" sx={{ ml: 1 }} endIcon={<CloudDownloadTwoToneIcon />} onClick={handleDownload}>
+                          Descargar plantilla
+                        </Button>
+                      </Typography>
+                      <Divider />
+                    </Grid>
+                    <Grid item xs={12} md={12} lg={12}>
+                      <Typography variant="body1" textAlign="start" sx={{ mb: 1 }} color="text.secondary">
+                        Adjuntar archivo, solo se admiten archivos .xlsx
+                      </Typography>
+                      <FileUploader
+                        name="file"
+                        label="Arrastre un archivo o haga click para seleccionar uno"
+                        dropMessageStyle={{ backgroundColor: "red" }}
+                        maxSize={10}
+                        multiple={false}
+                        onDraggingStateChange={(d: boolean) => setDragging(d)}
+                        onDrop={handleFileChange}
+                        onSelect={handleFileChange}
+                        onSizeError={() => toast.error("No se admiten archivos de archivos mayores a 20 MB")}
                       >
-                        <CloudUploadIcon
+                        <Paper
                           style={{
-                            fontSize: 40,
-                            color: "#aaaaaa",
+                            width: "100%",
+                            height: 200,
+                            border: "2px dashed #aaaaaa",
+                            borderRadius: 5,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            position: "relative",
+                            overflow: "hidden",
+                            backgroundColor: dragging ? "#F0E68C" : "transparent",
                           }}
-                        />
-                        <Typography
-                          variant="body1"
-                          style={{ color: "#aaaaaa" }}
-                          textAlign="center"
                         >
-                          {dragging
-                            ? "Suelta el Archivo"
-                            : file.file != null
-                              ? file.fileName
-                              : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
-                        </Typography>
-                        <input type="file" style={{ display: "none" }} />
-                      </Paper>
-                    </FileUploader>
-                  </Grid>
+                          <CloudUploadIcon
+                            style={{
+                              fontSize: 40,
+                              color: "#aaaaaa",
+                            }}
+                          />
+                          <Typography
+                            variant="body1"
+                            style={{ color: "#aaaaaa" }}
+                            textAlign="center"
+                          >
+                            {dragging
+                              ? "Suelta el Archivo"
+                              : file.file != null
+                                ? file.fileName
+                                : "Arrastra y suelta archivos aquí o haz clic para seleccionar archivos"}
+                          </Typography>
+                          <input type="file" style={{ display: "none" }} />
+                        </Paper>
+                      </FileUploader>
+                    </Grid>
+                  </>
                   : <Grid item xs={12}>
                     <TableContainer sx={{ maxHeight: 400 }}>
                       <Table
