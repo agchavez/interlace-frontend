@@ -97,7 +97,7 @@ export const ManagePage = () => {
       filter_date: data.date_range,
       date_after: data.date_after,
       date_before: data.date_before,
-      status: data.status,
+      status: data.status as "COMPLETE" | "PENDING" | "EDITED",
       user: userId,
       id: data.id ? data.id : undefined,
       onlyMyTreckers: data.onlyMyTreckers,
