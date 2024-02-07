@@ -5,17 +5,14 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   FormControl,
   Grid,
-  IconButton,
   InputLabel,
   MenuItem,
   Select,
   styled,
 } from "@mui/material";
 import { FunctionComponent, useEffect, useRef, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -23,6 +20,7 @@ import { useAppDispatch } from "../../../store";
 import { TrailerSelect, TransporterSelect } from "../../ui/components";
 import { Trailer, Transporter } from "../../../interfaces/maintenance";
 import { createTracking } from "../../../store/seguimiento/trackerThunk";
+import DialogTitle from "../../ui/components/BoostrapDialog"
 
 interface CreateCheckProps {
   open: boolean;
@@ -149,24 +147,9 @@ const CreateCheckModal: FunctionComponent<CreateCheckProps> = ({
         fullWidth={true}
         maxWidth="sm"
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <DialogTitle onClose={() => handleClose && handleClose({}, "backdropClick")} id="form-dialog-title"> 
           Datos Generales del Tracking
         </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={() => handleClose && handleClose({}, "backdropClick")}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-            cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-          }}
-          color="primary"
-        >
-          <CloseIcon />
-        </IconButton>
         <DialogContent dividers>
           <Box>
             <Container maxWidth="xl">

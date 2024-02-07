@@ -15,10 +15,11 @@ import { FC, useEffect } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { Controller, useForm } from "react-hook-form";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import { useAppSelector } from "../../../store";
+import { useAppDispatch, useAppSelector } from "../../../store";
 import { DatePicker } from "@mui/x-date-pickers";
 import { ProductSelect } from "../../ui/components/ProductSelect";
-import { isValid } from "date-fns";
+import { format, isValid } from "date-fns";
+import { setQueryReportPallets } from "../../../store/ui/uiSlice";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -32,11 +33,12 @@ const MenuProps = {
 };
 
 export interface FormFilterShiftManage {
-  date_after: string | null;
-  date_before: string | null;
+  date_after: string;
+  date_before: string;
   expiration_date: string | null;
   distribution_center: number | undefined;
   shift: "A" | "B" | "C" | undefined;
+  avalibleQuantity: 'equal' | 'less' | 'greater' | 'all';
   product: number | undefined;
 }
 
@@ -51,24 +53,28 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
   handleFilter,
 }) => {
   //const { reportPallets } = useAppSelector((state) => state.ui);
+  const dispatch = useAppDispatch();
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
+  const { reportPallets } = useAppSelector((state) => state.ui);
   const { user } = useAppSelector((state) => state.auth);
   const { control, watch, setValue, getValues } =
     useForm<FormFilterShiftManage>({
       defaultValues: {
-        distribution_center: user?.centro_distribucion || undefined,
+        ...reportPallets,
+        distribution_center: user?.centro_distribucion || reportPallets.distribution_center || undefined,
       },
     });
 
   useEffect(() => {
     const data = getValues();
     handleFilter(data);
+    dispatch(setQueryReportPallets(data))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ watch("date_after"),watch("date_before"),watch("shift"),watch("distribution_center"),watch("product"),watch("expiration_date")]);
+  }, [ watch("date_after"),watch("date_before"),watch("shift"),watch("distribution_center"),watch("product"),watch("expiration_date"), watch("avalibleQuantity")]);
 
   const handleReset = () => {
-    setValue("date_after", null  );
-    setValue("date_before", null);
+    setValue("date_after", format(new Date(), 'yyyy-MM-dd'));
+    setValue("date_before", format(new Date(), 'yyyy-MM-dd'));
     setValue("shift", undefined);
     setValue("distribution_center", user?.centro_distribucion || undefined);
     setValue("product", undefined);
@@ -130,12 +136,12 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                     <DatePicker
                       label="Mayor que"
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                      value={field.value}
+                      value={ isValid(new Date(watch("date_after") )) ? new Date(watch("date_after")) : null}
                       inputRef={field.ref}
                       format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) &&
-                        field.onChange(date);
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
                       }}
                     />
                   )}
@@ -149,13 +155,13 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                   render={({ field }) => (
                     <DatePicker
                       label="Menor que"
-                      format="dd/MM/yyyy"
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                      value={field.value}
+                      value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
                       inputRef={field.ref}
+                      format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) &&
-                        field.onChange(date);
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
                       }}
                     />
                   )}
@@ -174,12 +180,12 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                     <DatePicker
                       label="Fecha de vencimiento"
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                      value={field.value}
+                      // value={field.value}
                       inputRef={field.ref}
                       format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) &&
-                        field.onChange(date);
+                        isValid(date) && date &&
+                        field.onChange(format(new Date(date as string), 'yyyy-MM-dd 00:00:00'));
                       }}
                     />
                   )}
@@ -256,6 +262,43 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
               </Grid>
             </Grid>
           </List>
+          <Divider />
+          <List>
+            <Grid container sx={{ p: 1 }} spacing={2}>
+            <Grid item xs={12}>
+                <Typography variant="subtitle2" fontWeight={200}>
+                  Cajas
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name="avalibleQuantity"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl size="small" fullWidth>
+                      <InputLabel id="avalibleQuantity">Cantidad disponible</InputLabel>
+                      <Select
+                        labelId="avalibleQuantity"
+                        id="avalibleQuantity"
+                        {...field}
+                        label="Cantidad disponible"
+                        MenuProps={MenuProps}
+                      >
+                        <MenuItem value="all">
+                          <>Todos</>
+                        </MenuItem>
+                        <MenuItem value="equal">Igual a 0</MenuItem>
+                        <MenuItem value="less">Menor a 0</MenuItem>
+                        <MenuItem value="greater">Mayor a 0</MenuItem>
+
+                      </Select>
+
+                    </FormControl>
+                  )}
+                />
+                </Grid>
+                </Grid>
+                </List>
         </Box>
       </Drawer>
     </>

@@ -6,11 +6,13 @@ import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import DashboardTwoToneIcon from "@mui/icons-material/DashboardTwoTone";
+import Inventory2TwoToneIcon from '@mui/icons-material/Inventory2TwoTone';
 import { logout } from "../../../store/auth";
 import { useLocation } from "react-router-dom";
 import { useLogoutMutation } from "../../../store/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { RoutePermissionsDirectory } from "../../../config/directory";
+import ContentPasteGoTwoToneIcon from '@mui/icons-material/ContentPasteGoTwoTone';
 interface SidebarProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -34,6 +36,11 @@ const items: SideBarItem[] = [
         text: "Dashboard",
         href: "/",
         id: "dashboard",
+      },
+      {
+        text: "IN-OUT",
+        href: "/tracker/view",
+        id: "vista",
       },
     ],
     id: "inicio",
@@ -73,16 +80,33 @@ const items: SideBarItem[] = [
         href: "/order/manage",
         id: "order",
       },
-      {
-        text: "IN-OUT",
-        href: "/tracker/view",
-        id: "vista",
-      },
       
 
     ],
     icon: <FactCheckOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "movimientos",
+  },
+  {
+    text: "T2",
+    subItems: [
+      {
+        text: "Cargar Preventa",
+        href: "/tracker-t2/pre-sale",
+        id: "outregister",
+      },
+      {
+        text: "Gestión",
+        href: "/tracker-t2/manage",
+        id: "outmanage",
+      },
+      {
+        text: "Revision",
+        href: "/tracker-t2/pre-sale-check",
+        id: "outcheck",
+      },
+    ],
+    icon: <ContentPasteGoTwoToneIcon sx={{ width: "30px" }} color="primary" />,
+    id: "t2",
   },
   {
     text: "REPORTE",
@@ -93,6 +117,14 @@ const items: SideBarItem[] = [
     ],
     icon: <AssessmentOutlinedIcon sx={{ width: "30px" }} color="primary" />,
     id: "reportes",
+  },
+  {
+    text: "INVENTARIO",
+    subItems: [
+      { text: "Movimientos", href: "/inventory/", id: "gestion" },
+    ],
+    icon: <Inventory2TwoToneIcon sx={{ width: "30px" }} color="primary" />,
+    id: "inventario",
   },
 ];
 
@@ -143,7 +175,6 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <>
       <Grid item xs={2} className={`sidebar__root`}>
@@ -207,7 +238,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
         className={`sidebar__root ui__sidebar_open`}
       >
         <Grid container direction="column" justifyContent="space-between">
-          <Grid>
+          <Grid item overflow="auto" sx={{ height:"calc(100vh - 7.5rem);" }}>
             {sidebarItems.map((item) => {
               if (item.visible) {
                 return (
