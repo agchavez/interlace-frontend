@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { Autocomplete, TextField } from "@mui/material";
 
 import type { FieldValues } from "react-hook-form";
-import { LocationTypeQuerySearch, LocationType } from '../../../interfaces/maintenance';
-import { useGetLocationsQuery } from "../../../store/maintenance/maintenanceApi";
+import { useGetOrderQuery } from "../../../store/order";
+import { Order } from "../../../interfaces/orders";
+import { OrderQueryParams } from '../../../interfaces/tracking';
 
 interface OrderSelectProps<
     TField extends FieldValues
@@ -14,7 +15,8 @@ interface OrderSelectProps<
   name: Path<TField>;
   placeholder?: string;
   disabled?: boolean;
-  onChange?: (value: LocationType | null) => void;
+  ignoreCompleted: boolean;
+  onChange?: (value: Order | null) => void;
   orderId?: number;
   label?: string;
 }
@@ -26,11 +28,12 @@ props: OrderSelectProps<TField>
 ) => {
 
   // Nose pueden seleccionar pedidos que no esten en estado "COMPLETADOS  "
-  const [query, setQuery] = useState<LocationTypeQuerySearch>({
+  const [query, setQuery] = useState<OrderQueryParams>({
     limit: 10,
     offset: 0,
     search: "",
-    id: props.orderId
+    id: props.orderId,
+    status_choice: props.ignoreCompleted ? ["IN_PROCESS", "PENDING"] : undefined,
   });
   
   const {
@@ -38,7 +41,7 @@ props: OrderSelectProps<TField>
     refetch,
     isFetching,
     isLoading
-  } = useGetLocationsQuery(query);
+  } = useGetOrderQuery(query);
   
   const handleInputChange = (newInputValue: string) => {
       const splitted = newInputValue.split(" - ");
@@ -74,8 +77,8 @@ props: OrderSelectProps<TField>
         const { onChange } = field as (typeof field) & { onChange: (value: number | null) => void };
         return (<>
           <Autocomplete
-            value={value ? categorias?.results?.find((option : LocationType) => value === option.id) ?? null : null}
-            getOptionLabel={(option) => "ORD - " + option.code}
+            value={value ? categorias?.results?.find((option : Order) => value === option.id) ?? null : null}
+            getOptionLabel={(option) => "ORD - " + option.id}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             disabled={props.disabled}
             onChange={(_, newValue) => {

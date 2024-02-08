@@ -6,20 +6,17 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
   Typography,
   styled,
   TextField,
 } from "@mui/material";
 import { FunctionComponent, useRef, useEffect } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { updateTracking } from "../../../store/seguimiento/trackerThunk";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
-
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
 interface ObservationModalProps {
   open: boolean;
   seguimiento: Seguimiento;
@@ -103,24 +100,9 @@ const ObservationModal: FunctionComponent<ObservationModalProps> = ({
         fullWidth={true}
         maxWidth="md"
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+        <BootstrapDialogTitle onClose={() => handleClose && handleClose({}, "backdropClick")} id="customized-dialog-title">
           Observaciones
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={() => handleClose && handleClose({}, "backdropClick")}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-            cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-          }}
-          color="primary"
-        >
-          <CloseIcon />
-        </IconButton>
+        </BootstrapDialogTitle>
         <DialogContent dividers>
           <Box>
             <Container maxWidth="xl">

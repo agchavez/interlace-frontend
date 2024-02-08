@@ -88,6 +88,17 @@ export interface LocationType {
     distributor_center:       number | null;
 }
 
+export interface CreateLocationBody {
+    name:                     string;
+    code:                     string;
+}
+
+export interface CreateRouteBody {
+    code:                     string;
+    distributor_center:                     number;
+    location:                     number;
+}
+
 //groups
 
 export interface Group {
@@ -163,9 +174,27 @@ export interface Route {
 
 export interface RouteQuerySearch extends BaseQueryParams {
     search?: string;
-    distributorCenter?: number;
+    distributor_center?: number;
     id?: number;
     location?: number;
 }
 
 export type PeriodLabel = "A" | "B" | "C"
+
+export interface LotType {
+    id:                 number;
+    created_at:         Date;
+    code:               string;
+    distributor_center: number;
+}
+
+export interface LotTypeQuerySearch extends BaseQueryParams {
+    search?: string;
+    distributorCenter?: number;
+    id?: number;
+}
+
+export interface LotBody {
+    code: string;
+    distributor_center: number;
+}

@@ -18,6 +18,8 @@ import { setManageQueryParams } from "../../../store/ui/uiSlice";
 import { useAppDispatch } from "../../../store/store";
 import ExportManageMenu from "../components/ExportManageMenu";
 import { TabsGridManage } from '../components/TabsGridManage';
+import ChipFilterCategory from "../../ui/components/ChipFilter";
+import { format } from "date-fns";
 
 
 
@@ -95,7 +97,7 @@ export const ManagePage = () => {
       filter_date: data.date_range,
       date_after: data.date_after,
       date_before: data.date_before,
-      status: data.status,
+      status: data.status as "COMPLETE" | "PENDING" | "EDITED",
       user: userId,
       id: data.id ? data.id : undefined,
       onlyMyTreckers: data.onlyMyTreckers,
@@ -106,6 +108,7 @@ export const ManagePage = () => {
   };
 
   const [openFilter, setopenFilter] = useState(false);
+  const {disctributionCenters} = useAppSelector(state => state.maintenance)
   return (
     <>
       <FilterManage
@@ -145,6 +148,97 @@ export const ManagePage = () => {
               t1Count={data?.count || 0}
             />
           </Grid>
+          <Grid item xs={12}>
+            <Grid container spacing={1}>
+              {(manageQueryParams.search && manageQueryParams.search.length > 0) && (
+                <ChipFilterCategory
+                  label="Buscar: "
+                  items={[
+                    {
+                      label: manageQueryParams.search,
+                      id: "",
+                      deleteAction: () => dispatch(setManageQueryParams({...manageQueryParams, search: undefined})),
+                    },
+                  ]}
+                />
+              )}
+              {(manageQueryParams.id) && (
+                <ChipFilterCategory
+                  label="Tracking: "
+                  items={[
+                    {
+                      label: `TRK-${manageQueryParams.id?.toString().padStart(5, '0')}`,
+                      id: "",
+                      deleteAction: () => dispatch(setManageQueryParams({...manageQueryParams, id: undefined})),
+                    },
+                  ]}
+                />
+              )}
+              {(manageQueryParams.trailer) && (
+                <ChipFilterCategory
+                  label="Trailer: "
+                  items={[
+                    {
+                      label: manageQueryParams.trailer.toString(),
+                      id: "trailer",
+                      deleteAction: () => dispatch(setManageQueryParams({...manageQueryParams, trailer: undefined})),
+                    },
+                  ]}
+                />
+              )}
+              {(manageQueryParams.distributor_center && manageQueryParams.distributor_center?.length>0) && (
+                <ChipFilterCategory
+                  label="Centro de Distribución: "
+                  items={[
+                    {
+                      label: disctributionCenters.find(dc => dc.id === (manageQueryParams.distributor_center && manageQueryParams.distributor_center[0]))?.name ||"",
+                      id: "dc",
+                      deleteAction: !user?.centro_distribucion? (() => dispatch(setManageQueryParams({...manageQueryParams, distributor_center: []}))): undefined,
+                    },
+                  ]}
+                />
+              )}
+              {
+                (manageQueryParams.date_after || manageQueryParams.date_before) &&
+                <ChipFilterCategory 
+                    label="Fecha de Registro: "
+                    items={[
+                      {
+                          label: `Mayor que: ${manageQueryParams.date_after && format(new Date(manageQueryParams.date_after), 'dd/MM/yyyy')}`,
+                          id: "date_after",
+                      },
+                      {
+                          label: `Menor que: ${manageQueryParams.date_before && format(new Date(manageQueryParams.date_before), 'dd/MM/yyyy')}`,
+                          id: "date_before",
+                      },
+                    ]}
+                />
+              }
+              {(manageQueryParams.status) && (
+                  <ChipFilterCategory
+                    label="Estado: "
+                    items={[
+                      {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          label: StatusOptions[manageQueryParams.status],
+                          id:manageQueryParams.status,
+                      }
+                    ]}
+                  />
+                )}
+                {
+                  <ChipFilterCategory
+                    label="Usuario: "
+                    items={[
+                      {
+                          label: manageQueryParams.onlyMyTreckers? "Solo míos":"Todos",
+                          id:"only_mine",
+                      }
+                    ]}
+                  />
+                }
+            </Grid>
+          </Grid>
           <TabsGridManage
             data={data?.results || []}
             count={data?.count || 0}
@@ -158,3 +252,8 @@ export const ManagePage = () => {
   );
 };
 
+const StatusOptions: Record<string, string> = {
+  EDITED: "En atención",
+  PENDING: "Pendiente",
+  COMPLETE: "Completado",
+}

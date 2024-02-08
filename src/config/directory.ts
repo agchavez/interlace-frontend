@@ -113,29 +113,72 @@ export const permisions = [
             "report.report_shift",
         ]
     },
-    // {
-    //     url: "/order/manage",
-    //     permissions: [
-    //         "any"
-    //     ]
-    // },
-    // {
-    //     url: "/order/register",
-    //     permissions: [
-    //         "any"
-    //     ]
-    // },
+    {
+        url: "/order/manage",
+        permissions: [
+            "order.view_ordermodel",
+        ]
+    },
+    {
+        url: "/order/register",
+        permissions: [
+            "order.add_ordermodel",
+        ]
+    },
     {
         url: "/report/por-expirar",
         permissions: [
             "tracker.view_trackerdetailproductmodel",
-            "report.report_risk_stock_ege",
+            "report.report_risk_stock_ege"
+        ]
+    },
+    {
+        url: "/inventory",
+        permissions: [
+            'any',
         ]
     },
     {
         url: "/auth/login",
         permissions: [
             "any"
+        ]
+    },
+    {
+        url: "/tracker-t2/pre-sale",
+        permissions: [
+            "tracker.add_outputt2model"
+        ]
+    },
+    {
+        url: "/tracker-t2/pre-sale-check",
+        permissions: [
+            "tracker.view_outputt2model",
+            "tracker.change_outputdetailt2model",
+            "tracker.add_trackeroutputt2model",
+            "tracker.change_trackeroutputt2model",
+            "tracker.view_trackeroutputt2model",
+            "tracker.delete_trackeroutputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/manage",
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/detail/:id",
+        reg: /\/tracker-t2\/detail\/\d+/,
+        permissions: [
+            "tracker.view_outputt2model",
+        ]
+    },
+    {
+        url: "/tracker-t2/simulated/:id",
+        reg: /\/tracker-t2\/simulated\/\d+/,
+        permissions: [
+            "tracker.view_outputt2model",
         ]
     },
     {
