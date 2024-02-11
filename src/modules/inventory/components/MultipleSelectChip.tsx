@@ -38,9 +38,10 @@ interface MultipleSelectChipProps {
     label: string;
     changeEventAction?: (value:string[]) => void;
     value: string[];
+    disabled?: boolean;
 }
 
-export default function MultipleSelectChip({options, label, changeEventAction, value}:MultipleSelectChipProps) {
+export default function MultipleSelectChip({disabled, options, label, changeEventAction, value}:MultipleSelectChipProps) {
   const theme = useTheme();
   const [option, setOption] = React.useState<string[]>(value);
 
@@ -69,6 +70,7 @@ export default function MultipleSelectChip({options, label, changeEventAction, v
           id="demo-multiple-chip"
           multiple
           value={option}
+          disabled={disabled}
           onChange={handleChange}
           input={<OutlinedInput id="select-multiple-chip" label={label} />}
           renderValue={(selected) => (

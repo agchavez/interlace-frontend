@@ -83,7 +83,7 @@ const InventoryManager = () => {
         { field: 'Tracking', headerName: 'Tracking', width: 100, renderCell: (params) => (
             <Link to={`/tracker/detail/${params.row.tracker}`} style={{ textDecoration: 'none' }}>
                 <Typography variant="body2" component="h2" fontWeight={400} color="secondary">
-                    TRK-{params.row.tracker.toString().padStart(5, '0')}
+                    TRK-{params.row.tracker?.toString().padStart(5, '0')}
                 </Typography>
             </Link>
         ) },
@@ -119,7 +119,7 @@ const InventoryManager = () => {
         {
             field: 'origin_id', headerName: 'Registro', width: 200, renderCell: (params) => (
                 <Typography variant="body2" component="h2" fontWeight={400}>
-                    {params.row.module === 'T1' ? `TRK-${params.value.toString().padStart(5, '0')}` : params.value}
+                    {params.row.module === 'T1' ? `TRK-${params.value?.toString().padStart(5, '0')}` : params.value}
                 </Typography>
             )
         },
@@ -296,7 +296,7 @@ const InventoryManager = () => {
                                     items={inventoryQueryParams.distributor_center.map(distributor_center =>{
                                         return {
                                             label: distributor_center.name,
-                                            id: distributor_center.id.toString(),
+                                            id: distributor_center.id?.toString(),
                                             deleteAction: () => handleClickDeleteDistributorCenterFilter(distributor_center)
                                         }
                                     })}
@@ -311,7 +311,7 @@ const InventoryManager = () => {
                                         return {
                                             label: modulefind?.text || "",
                                             id: modulefind?.value || "",
-                                            deleteAction: () => handleClickDeleteModuleFilter(modulefind?.value.toString()||"")
+                                            deleteAction: () => handleClickDeleteModuleFilter(modulefind?.value?.toString()||"")
                                         }
                                     })}
                                 />

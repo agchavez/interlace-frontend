@@ -65,18 +65,20 @@ export const FilterInventory: FC<FilterManageProps> = ({
     (state) => state.ui
   );
 
-  const { disctributionCenters } = useAppSelector((state) => state.maintenance);
+  const { user } = useAppSelector((state) => state.auth);
 
+  const { disctributionCenters } = useAppSelector((state) => state.maintenance);
   const { control, watch, setValue, getValues, register } =
     useForm<FormFilterInventory>({
       defaultValues: {
         limit: 10,
         offset: 0,
         productos: [],
-        distributor_center: [],
+        distributor_center: user?.centro_distribucion? disctributionCenters.filter(dc=>dc.id===user.centro_distribucion) : [],
         module: []
       },
     });
+
 
   const filterTriggers = [
     watch("user"),
@@ -121,7 +123,7 @@ export const FilterInventory: FC<FilterManageProps> = ({
     if (open) {
       setValue("user", filterQueryParams.user || undefined);
       setValue("movement_type", filterQueryParams.movement_type || undefined);
-      setValue("distributor_center", filterQueryParams.distributor_center);
+      setValue("distributor_center", user?.centro_distribucion? disctributionCenters.filter(dc=>dc.id===user.centro_distribucion) : filterQueryParams.distributor_center);
       setValue("module", filterQueryParams.module);
       setValue(
         "tracker_detail__product",
@@ -232,6 +234,7 @@ export const FilterInventory: FC<FilterManageProps> = ({
                     text: dc.name,
                     value: dc.id.toString(),
                   }))}
+                  disabled={user?.centro_distribucion? disctributionCenters.filter(dc=>dc.id===user.centro_distribucion).length===1 : false}
                   value={watch("distributor_center").map(cd=>cd.id.toString())}
                   label="Centro de Distribución"
                   changeEventAction={(value)=>{
