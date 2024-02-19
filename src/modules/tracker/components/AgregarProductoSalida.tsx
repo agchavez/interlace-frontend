@@ -133,6 +133,7 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({
                           name="producto"
                           onChange={handleSelectProduct}
                           placeholder="Producto"
+                          isOutput={true}
                         />
                       </Grid>
                       <Grid item xs={12} md={6} lg={4} xl={3}>

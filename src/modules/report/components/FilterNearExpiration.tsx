@@ -18,6 +18,7 @@ import { Controller, useForm } from "react-hook-form";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { useAppSelector } from "../../../store";
 import { ProductSelect } from "../../ui/components/ProductSelect";
+import { NearExpirationQueryParams, Product } from "../../../interfaces/tracking";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -33,6 +34,7 @@ const MenuProps = {
 export interface FormFilterNearExpiration {
   distribution_center: number | undefined;
   product: number | undefined;
+  productos: Product[];
   days: number | null;
 }
 
@@ -40,11 +42,13 @@ interface FilterNearExpirationProps {
   open: boolean;
   handleClose?: () => void;
   handleFilter: (data: FormFilterNearExpiration) => void;
+  query: NearExpirationQueryParams
 }
 export const FilterNearExpiration: FC<FilterNearExpirationProps> = ({
   open,
   handleClose,
   handleFilter,
+  query,
 }) => {
   //const { reportPallets } = useAppSelector((state) => state.ui);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
@@ -55,6 +59,7 @@ export const FilterNearExpiration: FC<FilterNearExpirationProps> = ({
         distribution_center: user?.centro_distribucion || undefined,
         product: undefined,
         days: 60,
+        productos: []
       },
     });
 
@@ -62,16 +67,29 @@ export const FilterNearExpiration: FC<FilterNearExpirationProps> = ({
     const data = getValues();
     handleFilter(data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watch("distribution_center"), watch("product"), watch("days")]);
+  }, [watch("distribution_center"), watch("product"), watch("days"), watch("productos")]);
 
   const handleReset = () => {
     setValue("distribution_center", user?.centro_distribucion || undefined);
     setValue("product", undefined);
+    setValue("productos", [])
     setValue("days", 60);
   };
   useEffect(() => {
+    if (open) {
+      setValue("productos", query.productos)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  const addProduct = (product: Product) => {
+    const products = watch("productos");
+    const producto = products.find(
+      (producto) => producto.sap_code === product.sap_code
+    );
+    if (producto) return;
+    setValue("productos", [...products, product]);
+  };
 
   return (
     <>
@@ -122,12 +140,13 @@ export const FilterNearExpiration: FC<FilterNearExpirationProps> = ({
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12}> 
                 <ProductSelect
                   control={control}
                   name="product"
                   ProductId={watch("product")}
                   placeholder="Producto"
+                  onChange={(p)=>p && addProduct(p)}
                 />
               </Grid>
               <Grid item xs={12}>

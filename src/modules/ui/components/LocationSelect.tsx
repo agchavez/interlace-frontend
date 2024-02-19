@@ -65,6 +65,10 @@ props: LocationSelectProps<TField>
     }
   }, [query, refetch]);
 
+  useEffect(() => {
+    setQuery({limit:10, offset:0, id: props.locationId})
+  }, [props.locationId]);
+
   return (
     <Controller
     name={props.name}

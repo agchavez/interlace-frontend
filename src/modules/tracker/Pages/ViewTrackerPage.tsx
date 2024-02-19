@@ -316,6 +316,7 @@ export function CustomizedTablesOut({ rows }: CustomizedTablesOutProps) {
         rowsToShow.push({
           output_type_name: row.output_type_name,
           required_details: false,
+          required_orders: false,
           tracking: row.tracking,
           sap_code: otrow.material,
           product_name: otrow.description,

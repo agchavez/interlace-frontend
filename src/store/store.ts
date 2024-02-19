@@ -8,8 +8,10 @@ import { userApi } from './user/userApi';
 import { userSlice } from "./user/userSlice";
 import { maintenanceApi } from './maintenance/maintenanceApi';
 import { maintenanceSlice } from './maintenance/maintenanceSlice';
-import { nearExpirationProductsApi, trackerApi, trackerOutputApi, trackerPalletsApi } from './seguimiento/trackerApi';
+import { nearExpirationProductsApi, trackerApi, trackerDetailApi, trackerOutputApi, trackerPalletsApi, t2TrackingApi } from './seguimiento/trackerApi';
 import { uiSlice } from './ui/uiSlice';
+import { orderApi, orderSlice } from "./order";
+import { inventoryApi } from "./inventory/api";
 
 export const store = configureStore({
     reducer: {
@@ -24,7 +26,12 @@ export const store = configureStore({
         [uiSlice.name]: uiSlice.reducer,
         [trackerPalletsApi.reducerPath]: trackerPalletsApi.reducer,
         [trackerOutputApi.reducerPath]: trackerOutputApi.reducer,
+        [trackerDetailApi.reducerPath]: trackerDetailApi.reducer,
         [nearExpirationProductsApi.reducerPath]: nearExpirationProductsApi.reducer,
+        [orderApi.reducerPath]: orderApi.reducer,
+        [orderSlice.name]: orderSlice.reducer,
+        [inventoryApi.reducerPath]: inventoryApi.reducer,
+        [t2TrackingApi.reducerPath]: t2TrackingApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -34,8 +41,12 @@ export const store = configureStore({
         .concat(trackerPalletsApi.middleware)
         .concat(trackerOutputApi.middleware)
         .concat(nearExpirationProductsApi.middleware)
+        .concat(trackerDetailApi.middleware)
+        .concat(orderApi.middleware)
+        .concat(inventoryApi.middleware)
+        .concat(t2TrackingApi.middleware)
     ,
-    devTools: true
+    devTools: false
 })
 
 export type RootState = ReturnType<typeof store.getState>;

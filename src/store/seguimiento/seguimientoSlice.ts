@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Product, TarilerData, TransporterData } from '../../interfaces/tracking';
 import { LocationType } from "../../interfaces/maintenance";
+import { OrderDetailHistory } from "../../interfaces/orders";
+import { OutputT2, OutputDetailT2, Status } from '../../interfaces/trackingT2';
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -56,6 +58,10 @@ interface RemoveDetalle {
     detalleIdx: number;
 }
 
+export interface OrderDetailHistoryIdx extends OrderDetailHistory {
+    trackerIndex: number;
+}
+
 export interface DetalleCarga extends Product {
     amount: number;
     history?: DetalleCargaPalet[];
@@ -65,7 +71,9 @@ export interface DetalleCarga extends Product {
 export interface DetalleCargaSalida extends Product {
     amount: number;
     idDetalle: number;
+    idProducto: number;
     expiration_date: string;
+    tracker_detail_product: number | null;
 }
 
 export interface UploadDataBody {
@@ -113,6 +121,7 @@ export interface Seguimiento {
     observation: string | null;
     archivo_name: string | null;
     is_archivo_up: boolean;
+    order: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -123,11 +132,25 @@ interface seguimientoInterface {
     seguimientos: Seguimiento[]
     seguimeintoActual?: number;
     loading: boolean;
+    t2Tracking: {
+        loading: boolean;
+        loadingDetail: boolean;
+        t2Trackings:OutputT2[],
+        t2TrackingActual:OutputT2 | null
+        ordering: Status | null;
+    }
 }
 
 const initialState: seguimientoInterface = {
     seguimientos: [],
     loading: false,
+    t2Tracking: {
+        loading: false,
+        loadingDetail: false,
+        t2Trackings: [],
+        t2TrackingActual: null,
+        ordering: null
+    }
 }
 
 export const seguimientoSlice = createSlice({
@@ -195,7 +218,7 @@ export const seguimientoSlice = createSlice({
                 detalle.history = cortado;
             }
         },
-        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number, expiration_date: string }>) => {
+        addDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product, amount: number, idDetalle: number, expiration_date: string, tracker_detail_product: number | null }>) => {
             const { segIndex, product, amount, idDetalle, expiration_date } = action.payload
             const seguimiento = state.seguimientos[segIndex];
             if (seguimiento.detallesSalida) {
@@ -203,10 +226,10 @@ export const seguimientoSlice = createSlice({
                 if (index !== -1) {
                     seguimiento.detallesSalida[index].amount = amount
                 } else {
-                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date })
+                    seguimiento.detallesSalida.push({ ...product, amount, idDetalle: idDetalle, expiration_date: expiration_date, idProducto:product.id, tracker_detail_product: action.payload.tracker_detail_product })
                 }
             } else {
-                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date }]
+                seguimiento.detallesSalida = [{ ...product, amount, idDetalle, expiration_date, idProducto:product.id, tracker_detail_product: action.payload.tracker_detail_product }]
             }
         },
         removeDetalleCargaSalida: (state, action: PayloadAction<{ segIndex: number, product: Product }>) => {
@@ -224,13 +247,67 @@ export const seguimientoSlice = createSlice({
         removeSeguimientoActual: (state) => {
             state.seguimientos.splice(state.seguimeintoActual || 0, 1);
             state.seguimeintoActual = state.seguimientos.length - 1;
-        }
+        },
+        setT2Trackings: (state, action: PayloadAction<OutputT2[]>) => {
+            state.t2Tracking.t2Trackings = action.payload
+            if (action.payload.length > 0) {
+                state.t2Tracking.t2TrackingActual = action.payload[0]
+            }
+        },
+        setT2Tracking: (state, action: PayloadAction<OutputT2>) => {
+            state.t2Tracking.t2TrackingActual = action.payload
+            state.t2Tracking.ordering = null
+        },
+        setLoadT2Tracking: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loading = action.payload
+        },
+        updateDetailT2Tracking: (state, action: PayloadAction<OutputDetailT2>) => {
+            const { t2TrackingActual } = state.t2Tracking
+            if (t2TrackingActual) {
+                const index = t2TrackingActual.output_detail_t2.findIndex((det) => det.id === action.payload.id)
+                if (index !== -1) {
+                    t2TrackingActual.output_detail_t2[index] = action.payload
+                }
+            }
 
-
-
-
-
-
+        },
+        setLoadingT2Tracking: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loading = action.payload
+        },
+        setLoadingT2TrackingDetail: (state, action: PayloadAction<boolean>) => {
+            state.t2Tracking.loadingDetail = action.payload
+        },
+        // Eliminar de la lista de seguimientos
+        removeSeguimientoT2: (state, action: PayloadAction<number>) => {
+            /// Eliminar de la lista de seguimientos de T2
+            const { t2Trackings } = state.t2Tracking
+            const cortado = t2Trackings.filter((track) => track.id !== action.payload)
+            state.t2Tracking.t2Trackings = cortado;
+            /// El seguimiento actual de T2 es el primero de la lista en caso de que exista
+            if (cortado.length > 0) {
+                state.t2Tracking.t2TrackingActual = cortado[0]
+            } else {
+                state.t2Tracking.t2TrackingActual = null
+            }
+            
+        },
+        orderingT2Selected: (state, action: PayloadAction<Status | null>) => {
+            const { t2TrackingActual } = state.t2Tracking;
+            const status = action.payload || state.t2Tracking.ordering;
+            state.t2Tracking.ordering = status;
+            if (t2TrackingActual && status) {
+          
+              // Filtrar los elementos basados en la condición
+              const ordenado = t2TrackingActual.output_detail_t2.filter(det => det.status === status);
+              const otros = t2TrackingActual.output_detail_t2.filter(det => det.status !== status);
+          
+              // Ordenar los elementos filtrados si es necesario
+              ordenado.sort((a, b) => a.status.localeCompare(b.status));
+          
+              // Actualizar el array en el estado
+              t2TrackingActual.output_detail_t2 = [...ordenado, ...otros];
+            }
+          },
     }
 })
 
@@ -248,5 +325,13 @@ export const {
     removeDetalleCargaSalida,
     setLoading,
     setSeguimientos,
-    removeSeguimientoActual
+    removeSeguimientoActual,
+    setT2Trackings,
+    setT2Tracking,
+    setLoadT2Tracking,
+    updateDetailT2Tracking,
+    setLoadingT2Tracking,
+    setLoadingT2TrackingDetail,
+    removeSeguimientoT2,
+    orderingT2Selected
 } = seguimientoSlice.actions;

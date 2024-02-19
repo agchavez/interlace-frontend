@@ -1,4 +1,6 @@
-import { BaseQueryParams, LocationType } from './maintenance';
+import { TypeChart } from "../modules/home/components/TATGraph";
+import { BaseQueryParams, DistributionCenter, LocationType } from "./maintenance";
+import { OrderStatusType } from "./orders";
 export interface Rastra {
   id: number;
   transportista: string;
@@ -39,7 +41,6 @@ export interface Product {
   days_not_accept_product: number;
 }
 
-
 export interface ProductQuerySearch extends BaseQueryParams {
   search?: string;
   id?: number;
@@ -53,14 +54,13 @@ export interface OutputType {
   created_at_time: string;
   name: string;
   required_details: boolean;
+  required_orders: boolean;
+  required_: boolean;
 }
-
 
 export interface OutputTypeQuerySearch extends BaseQueryParams {
   search?: string;
 }
-
-
 
 export interface CheckFormType {
   plateNumber: string;
@@ -120,15 +120,16 @@ export interface Tracker {
   observation: string | null;
   archivo_name: string | null;
   is_archivo_up: boolean;
+  order: number | null;
 }
 
-export type TrackerType = 'LOCAL' | 'IMPORT';
+export type TrackerType = "LOCAL" | "IMPORT";
 
 export enum FilterDate {
-  TODAY = 'Hoy',
-  WEEK = 'Esta semana',
-  MONTH = 'Este mes',
-  YEAR = 'Este año',
+  TODAY = "Hoy",
+  WEEK = "Esta semana",
+  MONTH = "Este mes",
+  YEAR = "Este año",
 }
 export interface TrackerQueryParams extends BaseQueryParams {
   search?: string;
@@ -139,11 +140,19 @@ export interface TrackerQueryParams extends BaseQueryParams {
   user?: number[];
   date_after?: string;
   date_before?: string;
-  status?: string;
+  status?: "COMPLETE" | "PENDING" | "EDITED";
   filter_date?: FilterDate;
   onlyMyTreckers?: boolean;
-  type?: "IMPORT" | "LOCAL",
+  type?: "IMPORT" | "LOCAL";
   shift?: 'A' | 'B' | 'C';
+}
+
+export interface OrderQueryParams extends BaseQueryParams {
+  location?: number;
+  distributor_center?: number;
+  status?: OrderStatusType;
+  status_choice?: OrderStatusType[];
+  id?: number;
 }
 
 export interface TrackerProductDetailQueryParams extends BaseQueryParams {
@@ -153,13 +162,16 @@ export interface TrackerProductDetailQueryParams extends BaseQueryParams {
   tracker_detail__tracker?: number;
   tracker_detail__product?: number;
   tracker_detail__tracker__distributor_center?: number;
-  tracker_detail__tracker__status?: 'COMPLETE' | 'PENDING' | 'EDITED';
+  tracker_detail__tracker__status?: "COMPLETE" | "PENDING" | "EDITED";
   tracker_detail__tracker__user?: string;
   expiration_date?: string;
   created_at__gte?: string;
   created_at__lte?: string;
-  shift?: 'A' | 'B' | 'C';
+  shift?: "A" | "B" | "C";
   ordering?: string;
+  available_quantity__gt?: number;
+  available_quantity__lt?: number;
+  available_quantity?: number;
 }
 
 export interface LastTrackerOutputQueryParams {
@@ -170,8 +182,15 @@ export interface NearExpirationQueryParams {
   limit: number;
   offset: number;
   product?: number;
+  productos: Product[];
   distributor_center?: number;
   days?: number;
+}
+
+export interface OrderQueryParams {
+  limit: number;
+  offset: number;
+  search?: string;
 }
 
 export interface TrackerDeailOutput {
@@ -181,6 +200,7 @@ export interface TrackerDeailOutput {
   quantity: number;
   tracker: number;
   product: number;
+  tracker_detail_product: number | null;
   expiration_date: string;
 }
 export interface DistributorCenterData {
@@ -219,18 +239,18 @@ export interface AddDetalleBody {
 
 export interface AddDetalleData {
   quantity: number;
-  product: Product
+  product: Product;
 }
 
 export interface AddDetallePalletData {
-  expiration_date: string | null,
-  quantity: number | null,
-  tracker_detail: number | null
+  expiration_date: string | null;
+  quantity: number | null;
+  tracker_detail: number | null;
 }
 
 export interface UpdateDetallePalletData extends Partial<AddDetallePalletData> {
-  id: number,
-  tracker_detail: number
+  id: number;
+  tracker_detail: number;
 }
 
 export interface AddDetallePalletResponse {
@@ -243,7 +263,6 @@ export interface AddDetallePalletResponse {
   product_sap_code: string;
   tracker_detail_id: number;
   tracker_id: number;
-
 }
 
 export interface TrackerDetailResponse {
@@ -258,7 +277,7 @@ export interface TrackerDetailResponse {
 
 export interface ProductData {
   id: number;
-  created_at: null;
+  created_at: string;
   name: string;
   sap_code: string;
   brand: string;
@@ -286,7 +305,7 @@ export interface ProductData {
   ton: string;
   block_t1: number;
   days_not_accept_product: number;
-
+  is_output: boolean;
 }
 
 export interface TrackerProductDetail {
@@ -310,9 +329,9 @@ export interface LastTrackerOutputResult {
   total_pallets: number;
 }
 
-
 export interface LastTrackerOutput {
   required_details: boolean;
+  required_orders: boolean;
   tracking?: number;
   sap_code?: string;
   product_name?: string;
@@ -325,13 +344,14 @@ export interface NearExpirationProductResponse {
   product_name: string;
   sap_code: string;
   distributor_center: string;
-  expiration_list: HistoryNearExpiration[]
+  expiration_list: HistoryNearExpiration[];
 }
 
 export interface HistoryNearExpiration {
   expiration_date: string;
   quantity: number;
   tracker_id: number;
+  available_quantity: number;
 }
 
 export interface AddOutProductData {
@@ -346,5 +366,98 @@ export interface AddOutProductBody {
   product: number;
   quantity: number;
   expiration_date: string | null;
+  tracker_detail_product: number | null;
 }
 
+
+export interface InventarioMoviment {
+  id:                      number;
+  distributor_center_name: string;
+  product_name:            string;
+  product_sap_code:        string;
+  tracker:                 string;
+  user_name:               string;
+  created_at:              Date;
+  module:                  string;
+  origin_id:               number;
+  is_applied:              boolean;
+  applied_date:            Date;
+  movement_type:           string;
+  reason:                  null | string;
+  initial_quantity:        number;
+  final_quantity:          number | null;
+  quantity:                number;
+  tracker_detail_product:  number;
+  user:                    number;
+}
+
+export interface InventarioMovimentQueryParams {
+  limit: number;
+  offset: number;
+  tracker?: number;
+  date_before?: string;
+  date_after?: string;
+  movement_type?: "IN"|"OUT"|"BALANCE"
+  user?: number;
+  distributor_center: DistributionCenter[];
+  tracker_detail__product?: number;
+  sap_code?: string;
+  product__name?: string;
+  module: ModuleType[];
+  productos: Product[];
+  producto?: Product;
+  origin_id?: number;
+  is_applied?: boolean;
+}
+
+export interface GraphQueryParams {
+  year: number;
+  actualYear: number;
+  distributor_center: string[];
+  typeChart: TypeChart;
+  encountered: boolean;
+}
+
+export type ModuleType = "T1"|"T2"|"ADMIN"|"ORDER";
+
+export interface InventarioMovimentResult {
+  data:       DatuInventarioMoviment[];
+  data_error: DataError[];
+}
+
+export interface DatuInventarioMoviment {
+  id:                      number;
+  distributor_center_name: string;
+  product_name:            string;
+  product_sap_code:        string;
+  tracker:                 string;
+  user_name:               string;
+  final_quantity:          null;
+  created_at:              Date;
+  module:                  string;
+  origin_id:               number;
+  is_applied:              boolean;
+  applied_date:            null;
+  movement_type:           string;
+  reason:                  string;
+  initial_quantity:        number;
+  quantity:                number;
+  tracker_detail_product:  number;
+  user:                    number;
+}
+
+export interface DataError {
+  tracker_id:        number;
+  codigo_sap:        number;
+  fecha_vencimiento: Date;
+  cantidad:          number;
+  error:             string;
+}
+
+export interface TATGraphItem {
+  month: number;
+  year: number;
+  distributor_center: number;
+  distributor_center_name: string;
+  avg_time_invested: number;
+}
