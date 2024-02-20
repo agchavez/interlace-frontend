@@ -43,7 +43,14 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { ...query, offset: 0, limit: t1Count, distributor_center: distributor_center },
+        params: { 
+            ...query, 
+            offset: 0, 
+            limit: t1Count, 
+            distributor_center: distributor_center, 
+            date_after: query.date_after ? format(new Date(query.date_after), "yyyy-MM-dd") : undefined,
+            date_before: query.date_before ? format(new Date(query.date_before), "yyyy-MM-dd") : undefined,
+        }
       }
     );
     return response.data;

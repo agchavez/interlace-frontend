@@ -81,6 +81,7 @@ export const ManagePage = () => {
   });
   
   const { data, isLoading, isFetching, refetch } = useGetTrackerQuery(query);
+
   useEffect(() => {
     refetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +107,7 @@ export const ManagePage = () => {
     setquery(queryProcess);
     dispatch(setManageQueryParams(queryProcess));
   };
-
+  
   const [openFilter, setopenFilter] = useState(false);
   const {disctributionCenters} = useAppSelector(state => state.maintenance)
   return (

@@ -25,9 +25,9 @@ export const trackerApi = createApi({
                 method: 'GET',
                 params: {
                     ...params,
-                    distributor_center: params.distributor_center?.length  === 0 ? undefined : params.distributor_center![0],
-                    date_after: params.date_after ? format(new Date(params.date_after), 'yyyy-MM-dd') : null,
-                    date_before: params.date_before ? format(new Date(params.date_before), 'yyyy-MM-dd') : null,
+                    distributor_center: !params.distributor_center? undefined : params.distributor_center[0] ? params.distributor_center[0] : undefined,
+                    date_after: params.date_after ? format(new Date(params.date_after), 'yyyy-MM-dd') : undefined,
+                    date_before: params.date_before ? format(new Date(params.date_before), 'yyyy-MM-dd') : undefined,
                 }
             }),
             keepUnusedDataFor: 120000

@@ -14,7 +14,6 @@ import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import TATGraph from '../components/TATGraph';
-
 enum FilterDate {
     TODAY = 'Hoy',
     WEEK = 'Esta semana',
