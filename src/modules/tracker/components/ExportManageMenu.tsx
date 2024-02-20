@@ -36,7 +36,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
   };
 
   const fetchData = async () => {
-    const distributor_center = query.distributor_center?.length  === 0 ? undefined : query.distributor_center![0]
+    const distributor_center = !query.distributor_center? undefined : query.distributor_center.length > 0 ? query.distributor_center[0] : undefined;
     const response = await backendApi.get<BaseApiResponse<Tracker>>(
       `/tracker/`,
       {
@@ -61,7 +61,8 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
     handleClose();
     let headers: string[] = []
     let trackerData:(string | number | null)[][] = []
-    const data = await fetchData();
+    try {
+      const data = await fetchData();
     if(query.type === "IMPORT" ){
       headers = [
         "Fecha",
@@ -132,6 +133,11 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       });
     }
     setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+    
   };
 
   return (
