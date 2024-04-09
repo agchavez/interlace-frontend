@@ -1,13 +1,17 @@
 import backendApi from '../../config/apiConfig';
 import { AppThunk } from '../store';
 import { InventarioMovimentResult } from '../../interfaces/tracking';
-import { handleApiError } from '../../utils/error';
+import { errorApiHandler, handleApiError } from '../../utils/error';
 export const createLocationAndRoute = (
     file: File,
     reason: string,
     onCompleted: (data: InventarioMovimentResult) => void,
+    onError: () => void
 ): AppThunk => {
     return async (_, getState) => {
+        try {
+            
+        
         const { auth } = getState();
         const token = auth.token;
         const formData = new FormData();
@@ -25,6 +29,12 @@ export const createLocationAndRoute = (
         }
 
         onCompleted(resp.data);
+
+    } catch (error) {
+        errorApiHandler(error, 'Error al crear el ajuste de inventario');
+        onError();
+    }
+
 
 
     }

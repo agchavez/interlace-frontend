@@ -383,6 +383,7 @@ export const addOutOrder = (
       orderOutBody.append("order", orderOutData.order.toString())
       orderOutBody.append("type", orderOutData.type)
       orderOutBody.append("document_number", orderOutData.document_number)
+      orderOutBody.append("vehicle", orderOutData.vehicle)
       orderOutData.document_name && orderOutBody.append("document_name", orderOutData.document_name)
       orderOutData.document && orderOutBody.append("document", orderOutData.document)
       const response = await backendApi.post<OutOrder, AxiosResponse<OutOrder>>(
