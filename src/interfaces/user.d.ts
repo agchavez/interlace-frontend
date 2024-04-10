@@ -7,6 +7,7 @@ export interface RegisterUserForm {
     group: string;
     cd?: string;
     employee_number?: number;
+    distributions_centers: number[];
 }
 
 
@@ -35,6 +36,7 @@ export interface CreateUserResponse {
     employee_number:     number;
     groups:              string[];
     user_permissions:    string[];
+    distributions_centers: number[];
 }
 
 export interface CreateUserBody {
@@ -49,6 +51,7 @@ export interface CreateUserBody {
     email:string;
     employee_number?: number;
     group: number;
+    distributions_centers: number[];
 }
 
 export type User = {
@@ -69,6 +72,7 @@ export type User = {
     createdAt?:          Date;
     groups?:             number[];
     userPermissions?:    string[];
+    distributions_centers: number[];
 }
 
 export interface UserQuerySearch {
@@ -103,4 +107,5 @@ export interface GetAUserResponse {
     codigo_empleado:          number;
     groups:                   number[];
     user_permissions:         string[];
+    distributions_centers:    number[];
 }

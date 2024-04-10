@@ -58,6 +58,13 @@ export const authSlice = createSlice({
             state.user = action.payload.user;
             state.loading = false;
         },
+        setDistributionCenters: (state, action: PayloadAction<{
+            distributionCenter: number;
+            name: string;
+        }>) => {
+            state.user!.centro_distribucion = action.payload.distributionCenter;
+            state.user!.centro_distribucion_name = action.payload.name;
+        },
         setStatus: (state, action: PayloadAction<AuthStatus>) => {
             state.status = action.payload;
             
@@ -83,4 +90,5 @@ export const {
     setLoadingAuth,
     closeLogoutModal,
     openTimeoutModal,
+    setDistributionCenters
 } = authSlice.actions;

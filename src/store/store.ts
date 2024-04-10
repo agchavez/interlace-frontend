@@ -46,7 +46,7 @@ export const store = configureStore({
         .concat(inventoryApi.middleware)
         .concat(t2TrackingApi.middleware)
     ,
-    devTools: false
+    devTools: true
 })
 
 export type RootState = ReturnType<typeof store.getState>;

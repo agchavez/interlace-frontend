@@ -1,4 +1,4 @@
-import { Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, CircularProgress } from '@mui/material';
+import { Button, Divider, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, CircularProgress, OutlinedInput, Box, Chip, Theme, useTheme } from '@mui/material';
 import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
 // react hook form
 import { useForm } from 'react-hook-form';
@@ -16,8 +16,30 @@ interface UserFormProps {
     setResetForm?: (value: boolean) => unknown
 }
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+function getStyles(id: number, idsCD: readonly number[], theme: Theme) {
+    return {
+      fontWeight:
+      idsCD.indexOf(id) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
+
+
 export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit, resetForm, setResetForm }) => {
     const [needDC, setNeedDC] = useState(false)
+    const theme = useTheme();
     const schema = useMemo(() => {
         const shape: yup.ObjectShape = {
             fistName: yup.string().required("El nombre es requerido"),
@@ -30,7 +52,7 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
         needDC && (shape.cd = yup.number().required("El centro de distribucion es requerido").min(1, "El centro de distribucion es requerido"))
         return yup.object().shape(shape);
     }, [needDC, isEdit])
-    const { register, handleSubmit, formState: { errors }, reset, watch, setFocus } = useForm<RegisterUserForm>({
+    const { register, handleSubmit, formState: { errors }, reset, watch, setFocus, setValue } = useForm<RegisterUserForm>({
         defaultValues: initialValues,
         resolver: yupResolver(schema as yup.ObjectSchema<RegisterUserForm>)
     });
@@ -61,6 +83,8 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialValues])
+    console.log(watch('distributions_centers'))
+    
     return (
         <>
             <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -120,7 +144,7 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                             helperText={errors.employee_number?.message}
                         />
 
-                        </Grid>
+                    </Grid>
                     <Grid item xs={12} md={6}>
                         <FormControl fullWidth margin="dense" size='small' variant="outlined" >
                             <InputLabel id='role-label' component="legend" style={{ marginBottom: 5 }}>
@@ -184,79 +208,115 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                             </FormControl>
                         }
                     </Grid>
-                    {!isEdit &&
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-
-                                label="Contraseña"
-                                variant="outlined"
-                                margin="dense"
-                                size='small'
-                                {...register("password")}
-                                value={watch('password')}
-                                error={errors.password ? true : false}
-                                helperText={errors.password?.message}
-                            />
-                        </Grid>}
-                    {!isEdit &&
-                        <Grid item xs={12} md={6}>
-                            <TextField
-                                fullWidth
-
-                                label="Confirmar contraseña"
-                                variant="outlined"
-                                margin="dense"
-                                size='small'
-                                {...register("confirmPassword")}
-                                error={errors.confirmPassword ? true : false}
-
-                            />
-                        </Grid>}
                     <Grid item xs={12}>
-                        <Divider sx={{ marginBottom: 1, marginTop: 1 }} />
-                    </Grid>
-                    <Grid item xs={12} md={3} lg={2}>
-                        <Button
-                            disabled={loading}
-                            fullWidth
-                            variant="text"
-                            color="primary"
-                            size="small"
-                            onClick={() => reset(
-                                initialValues
+                    <FormControl  fullWidth margin="dense" size='small' variant="outlined">
+                        <InputLabel id="demo-multiple-chip-label">
+                            Centros de distribución a los que tiene acceso
+                        </InputLabel>
+                        <Select
+                            labelId="demo-multiple-chip-label"
+                            id="demo-multiple-chip"
+                            multiple
+                            value={watch('distributions_centers')}
+                            onChange={(e) => {
+                                const value = e.target.value as number[]
+                                setValue('distributions_centers', value)
+                            }}
+                            input={<OutlinedInput id="select-multiple-chip" label="Centros de distribución a los que tiene acceso" />}
+                            renderValue={(selected: number[]) => (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map((value) => (
+                                        <Chip key={value} label={distributionCenters.find(dc => dc.id === value)?.name} />
+                                    ))}
+                                </Box>
                             )}
-                            startIcon={<CleaningServicesTwoToneIcon />}
+                            MenuProps={MenuProps}
                         >
-                            <Typography variant="button" fontWeight={300}>
-                                Limpiar
-                            </Typography>
-                        </Button>
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={8}>
-                    </Grid>
-                    <Grid item xs={12} md={3} lg={2}>
-                        <Button
+                            {distributionCenters.map((name) => (
+                                <MenuItem
+                                    key={name.id}
+                                    value={name.id}
+                                    style={getStyles(name.id, watch('distributions_centers'), theme)}
+                                >
+                                    {name.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Grid>
+                {!isEdit &&
+                    <Grid item xs={12} md={6}>
+                        <TextField
                             fullWidth
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            startIcon={loading ? <CircularProgress size={20} /> : null}
-                            type='submit'
-                            disabled={loading}
-                        >
-                            <Typography variant="button" fontWeight={300}>
-                                {
-                                    isEdit ? "Guardar":"Registrar"
-                                }
-                            </Typography>
-                        </Button>
-                    </Grid>
 
+                            label="Contraseña"
+                            variant="outlined"
+                            margin="dense"
+                            size='small'
+                            {...register("password")}
+                            value={watch('password')}
+                            error={errors.password ? true : false}
+                            helperText={errors.password?.message}
+                        />
+                    </Grid>}
+                {!isEdit &&
+                    <Grid item xs={12} md={6}>
+                        <TextField
+                            fullWidth
 
+                            label="Confirmar contraseña"
+                            variant="outlined"
+                            margin="dense"
+                            size='small'
+                            {...register("confirmPassword")}
+                            error={errors.confirmPassword ? true : false}
+
+                        />
+                    </Grid>}
+                <Grid item xs={12}>
+                    <Divider sx={{ marginBottom: 1, marginTop: 1 }} />
+                </Grid>
+                <Grid item xs={12} md={3} lg={2}>
+                    <Button
+                        disabled={loading}
+                        fullWidth
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        onClick={() => reset(
+                            initialValues
+                        )}
+                        startIcon={<CleaningServicesTwoToneIcon />}
+                    >
+                        <Typography variant="button" fontWeight={300}>
+                            Limpiar
+                        </Typography>
+                    </Button>
+                </Grid>
+                <Grid item xs={12} md={6} lg={8}>
+                </Grid>
+                <Grid item xs={12} md={3} lg={2}>
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        startIcon={loading ? <CircularProgress size={20} /> : null}
+                        type='submit'
+                        disabled={loading}
+                    >
+                        <Typography variant="button" fontWeight={300}>
+                            {
+                                isEdit ? "Guardar" : "Registrar"
+                            }
+                        </Typography>
+                    </Button>
                 </Grid>
 
-            </form>
+
+            </Grid>
+
+        </form >
         </>
     )
 }

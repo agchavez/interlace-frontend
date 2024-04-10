@@ -8,6 +8,7 @@ import { FormFilterInventory } from "../../modules/inventory/components/FilterIn
 import { es } from "date-fns/locale";
 import { TypeChart } from "../../modules/home/components/TATGraph";
 import { SimulatedForm } from "../../interfaces/trackingT2";
+import { authApi } from "../auth/authApi";
 
 
 enum FilterDate {
@@ -29,6 +30,7 @@ export interface uiState {
     inventoryQueryParams: InventarioMovimentQueryParams;
     graphQueryParams: GraphQueryParams;
     simulatedQueryParams: SimulatedForm;
+    openChangeDistributionCenter: boolean;
 }
 
 const storageGraphqueryParams = (()=>{
@@ -43,7 +45,8 @@ const initialState: uiState = {
     dashboardQueryParams: {
         filterDate: FilterDate.TODAY,
         start_date: format(new Date(), "yyyy-MM-dd 00:00:00"),
-        end_date: format(new Date(), "yyyy-MM-dd 23:59:59"),
+        end_date: format(new Date(), "yyyy-MM-dd 23:59:59"), 
+        distribution_centers: [],
     },
     reportPallets: {
         date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
@@ -93,7 +96,8 @@ const initialState: uiState = {
         ruta: "",
         conductor: "",
         producto: "",
-    }
+    },
+    openChangeDistributionCenter: false,
 }
 
 export const uiSlice = createSlice({
@@ -127,8 +131,18 @@ export const uiSlice = createSlice({
         },
         setSimulatedQueryParams: (state, action: PayloadAction<SimulatedForm>) => {
             state.simulatedQueryParams = action.payload
+        },
+        setOpenChangeDistributionCenter: (state, action: PayloadAction<boolean>) => {
+            state.openChangeDistributionCenter = action.payload
         }
-    }
+    },
+    extraReducers(builder) {
+        builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
+            if (action.payload.user.distributions_centers.length > 1) {
+                state.openChangeDistributionCenter = true
+            }
+        })
+    },
 })
 
 
@@ -141,5 +155,6 @@ export const {
     setManagerT2QueryParams, 
     setInventoryQueryParams,
     setGraphQueryParams,
-    setSimulatedQueryParams
+    setSimulatedQueryParams,
+    setOpenChangeDistributionCenter
 } = uiSlice.actions;

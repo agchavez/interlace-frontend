@@ -108,7 +108,6 @@ export const ListUserPage = () => {
                             <IconButton
                                 color="default"
                                 size="medium"
-                                onClick={() => console.log(params.row)}
                                 title='Editar usuario'
                             >
                                 <EditTwoToneIcon fontSize="medium" />
