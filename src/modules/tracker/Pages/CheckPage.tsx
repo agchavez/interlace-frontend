@@ -61,6 +61,9 @@ export const CheckPage = () => {
   const { seguimientos, seguimeintoActual, loading } = useAppSelector(
     (state) => state.seguimiento
   );
+  const { user } = useAppSelector(
+    (state) => state.auth
+  );
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
@@ -99,7 +102,7 @@ export const CheckPage = () => {
     // get pending trackings
     dispatch(getOpenTrackings());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.centro_distribucion]);
 
   const handleClickCompletar = () => {
     setCompletarOpen({
