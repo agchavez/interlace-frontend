@@ -19,22 +19,22 @@ interface UserFormProps {
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: 250,
+        },
     },
-  },
 };
 
 function getStyles(id: number, idsCD: readonly number[], theme: Theme) {
     return {
-      fontWeight:
-      idsCD.indexOf(id) === -1
-          ? theme.typography.fontWeightRegular
-          : theme.typography.fontWeightMedium,
+        fontWeight:
+            idsCD.indexOf(id) === -1
+                ? theme.typography.fontWeightRegular
+                : theme.typography.fontWeightMedium,
     };
-  }
+}
 
 
 export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, isEdit, resetForm, setResetForm }) => {
@@ -83,8 +83,21 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialValues])
-    console.log(watch('distributions_centers'))
-    
+
+    // Al seleccionar centro de distribución se agrega tambien al array de centros de distribución
+    useEffect(() => {
+        const cdValue = watch('cd');
+        if (cdValue !== undefined) {
+            const id = +cdValue;
+            // verificar si ya esta en el array
+            const value = watch('distributions_centers') as number[];
+            if (!value.includes(id)) {
+                setValue('distributions_centers', [...value, id]);
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [watch('cd')]);
+
     return (
         <>
             <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -209,114 +222,114 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
                         }
                     </Grid>
                     <Grid item xs={12}>
-                    <FormControl  fullWidth margin="dense" size='small' variant="outlined">
-                        <InputLabel id="demo-multiple-chip-label">
-                            Centros de distribución a los que tiene acceso
-                        </InputLabel>
-                        <Select
-                            labelId="demo-multiple-chip-label"
-                            id="demo-multiple-chip"
-                            multiple
-                            value={watch('distributions_centers')}
-                            onChange={(e) => {
-                                const value = e.target.value as number[]
-                                setValue('distributions_centers', value)
-                            }}
-                            input={<OutlinedInput id="select-multiple-chip" label="Centros de distribución a los que tiene acceso" />}
-                            renderValue={(selected: number[]) => (
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                    {selected.map((value) => (
-                                        <Chip key={value} label={distributionCenters.find(dc => dc.id === value)?.name} />
-                                    ))}
-                                </Box>
+                        <FormControl fullWidth margin="dense" size='small' variant="outlined">
+                            <InputLabel id="demo-multiple-chip-label">
+                                Centros de distribución a los que tiene acceso
+                            </InputLabel>
+                            <Select
+                                labelId="demo-multiple-chip-label"
+                                id="demo-multiple-chip"
+                                multiple
+                                value={watch('distributions_centers')}
+                                onChange={(e) => {
+                                    const value = e.target.value as number[]
+                                    setValue('distributions_centers', value)
+                                }}
+                                input={<OutlinedInput id="select-multiple-chip" label="Centros de distribución a los que tiene acceso" />}
+                                renderValue={(selected: number[]) => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {selected.map((value) => (
+                                            <Chip key={value} label={distributionCenters.find(dc => dc.id === value)?.name} />
+                                        ))}
+                                    </Box>
+                                )}
+                                MenuProps={MenuProps}
+                            >
+                                {distributionCenters.map((name) => (
+                                    <MenuItem
+                                        key={name.id}
+                                        value={name.id}
+                                        style={getStyles(name.id, watch('distributions_centers'), theme)}
+                                    >
+                                        {name.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Grid>
+                    {!isEdit &&
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+
+                                label="Contraseña"
+                                variant="outlined"
+                                margin="dense"
+                                size='small'
+                                {...register("password")}
+                                value={watch('password')}
+                                error={errors.password ? true : false}
+                                helperText={errors.password?.message}
+                            />
+                        </Grid>}
+                    {!isEdit &&
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                fullWidth
+
+                                label="Confirmar contraseña"
+                                variant="outlined"
+                                margin="dense"
+                                size='small'
+                                {...register("confirmPassword")}
+                                error={errors.confirmPassword ? true : false}
+
+                            />
+                        </Grid>}
+                    <Grid item xs={12}>
+                        <Divider sx={{ marginBottom: 1, marginTop: 1 }} />
+                    </Grid>
+                    <Grid item xs={12} md={3} lg={2}>
+                        <Button
+                            disabled={loading}
+                            fullWidth
+                            variant="text"
+                            color="primary"
+                            size="small"
+                            onClick={() => reset(
+                                initialValues
                             )}
-                            MenuProps={MenuProps}
+                            startIcon={<CleaningServicesTwoToneIcon />}
                         >
-                            {distributionCenters.map((name) => (
-                                <MenuItem
-                                    key={name.id}
-                                    value={name.id}
-                                    style={getStyles(name.id, watch('distributions_centers'), theme)}
-                                >
-                                    {name.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Grid>
-                {!isEdit &&
-                    <Grid item xs={12} md={6}>
-                        <TextField
+                            <Typography variant="button" fontWeight={300}>
+                                Limpiar
+                            </Typography>
+                        </Button>
+                    </Grid>
+                    <Grid item xs={12} md={6} lg={8}>
+                    </Grid>
+                    <Grid item xs={12} md={3} lg={2}>
+                        <Button
                             fullWidth
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            startIcon={loading ? <CircularProgress size={20} /> : null}
+                            type='submit'
+                            disabled={loading}
+                        >
+                            <Typography variant="button" fontWeight={300}>
+                                {
+                                    isEdit ? "Guardar" : "Registrar"
+                                }
+                            </Typography>
+                        </Button>
+                    </Grid>
 
-                            label="Contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            size='small'
-                            {...register("password")}
-                            value={watch('password')}
-                            error={errors.password ? true : false}
-                            helperText={errors.password?.message}
-                        />
-                    </Grid>}
-                {!isEdit &&
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            fullWidth
 
-                            label="Confirmar contraseña"
-                            variant="outlined"
-                            margin="dense"
-                            size='small'
-                            {...register("confirmPassword")}
-                            error={errors.confirmPassword ? true : false}
-
-                        />
-                    </Grid>}
-                <Grid item xs={12}>
-                    <Divider sx={{ marginBottom: 1, marginTop: 1 }} />
-                </Grid>
-                <Grid item xs={12} md={3} lg={2}>
-                    <Button
-                        disabled={loading}
-                        fullWidth
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        onClick={() => reset(
-                            initialValues
-                        )}
-                        startIcon={<CleaningServicesTwoToneIcon />}
-                    >
-                        <Typography variant="button" fontWeight={300}>
-                            Limpiar
-                        </Typography>
-                    </Button>
-                </Grid>
-                <Grid item xs={12} md={6} lg={8}>
-                </Grid>
-                <Grid item xs={12} md={3} lg={2}>
-                    <Button
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        startIcon={loading ? <CircularProgress size={20} /> : null}
-                        type='submit'
-                        disabled={loading}
-                    >
-                        <Typography variant="button" fontWeight={300}>
-                            {
-                                isEdit ? "Guardar" : "Registrar"
-                            }
-                        </Typography>
-                    </Button>
                 </Grid>
 
-
-            </Grid>
-
-        </form >
+            </form >
         </>
     )
 }
