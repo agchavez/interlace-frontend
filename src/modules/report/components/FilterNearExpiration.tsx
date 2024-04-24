@@ -162,16 +162,18 @@ export const FilterNearExpiration: FC<FilterNearExpirationProps> = ({
                         labelId="distribution_center"
                         id="distribution_center"
                         {...field}
-                        disabled={user?.centro_distribucion ? true : false}
+                        disabled={user?.distribution_centers.length === 1}
                         label="Centro de distribución"
                         sx={{
                           maxHeight: 300,
                         }}
                         MenuProps={MenuProps}
                       >
-                        {disctributionCenters.map((item) => (
-                          <MenuItem key={item.id} value={item.id}>
-                            {item.name}
+                        {user?.distribution_centers.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {disctributionCenters.find(
+                              (dc) => dc.id === item
+                            )?.name}
                           </MenuItem>
                         ))}
                       </Select>

@@ -206,7 +206,7 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                         id="distribution_center"
                         {...field}
                         value={watch('distribution_center')}
-                        disabled={user?.centro_distribucion ? true : false}
+                        disabled={user?.distributions_centers.length === 1}
                         label="Centro de distribución"
                         sx={{
                           maxHeight: 300,
@@ -215,9 +215,11 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
                         
                       >
                         
-                        {disctributionCenters.map((item) => (
-                          <MenuItem key={item.id} value={item.id}>
-                            {item.name}
+                        {user?.distributions_centers.map((item) => (
+                          <MenuItem key={item} value={item}>
+                            {disctributionCenters.find(
+                              (dc) => dc.id === item
+                            )?.name}
                           </MenuItem>
                         ))}
                       </Select>

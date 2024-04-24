@@ -215,7 +215,7 @@ export const ManagePage = () => {
                     ]}
                 />
               }
-              {(manageQueryParams.status) && (
+              {manageQueryParams.status && ['COMPLETE', 'PENDING', 'EDITED'].includes(manageQueryParams.status) ? (
                   <ChipFilterCategory
                     label="Estado: "
                     items={[
@@ -226,7 +226,18 @@ export const ManagePage = () => {
                       }
                     ]}
                   />
+                ) : (
+                  <ChipFilterCategory
+                    label="Estado: "
+                    items={[
+                      {
+                          label: "Todos",
+                          id:"",
+                      }
+                    ]}
+                  />
                 )}
+                
                 {
                   <ChipFilterCategory
                     label="Usuario: "

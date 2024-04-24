@@ -43,7 +43,7 @@ export const ChangeDistributorCenter = () => {
         ))}
          <ListItem disableGutters alignItems='center' key='no_cd'>
           {
-            user?.distributions_centers.length === 0 && (
+             user?.distributions_centers && user?.distributions_centers.length <= 1 && (
               <ListItemText primary="No tiene centros de distribución permitidos" sx={{textAlign: 'center'}} />
             )
           }
