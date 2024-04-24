@@ -14,6 +14,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { EditedTrackerCDs } from '../../../interfaces/home';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
+import { Chip } from '@mui/material';
 
 function Row(props: { row: EditedTrackerCDs }) {
     const { row } = props;
@@ -34,12 +35,21 @@ function Row(props: { row: EditedTrackerCDs }) {
                 <TableCell component="th" scope="row">
                     TRK-{row.id}
                 </TableCell>
-                <TableCell align="center">{
-                    row.input_date === null && row.output_date === null ?
-                        'En descarga' :
-                        row.input_date !== null && row.output_date === null ?
-                            'En bahia de espera ' : 'Descarga completa'
-                }</TableCell>
+                <TableCell align="center">
+                    <Chip
+                        variant="outlined"
+                        label={
+                            row.input_date !== null && row.output_date === null ?
+                                'En descarga' :
+                                row.input_date === null && row.output_date === null ?
+                                    'En bahia de espera ' : 'Descarga completa'
+                        }
+                        color={
+                            'secondary'
+                        }
+                        size="small"
+                    />
+                    </TableCell>
                 <TableCell align="right">{row.trailer__code}</TableCell>
                 <TableCell align="right">{row.trailer__code}</TableCell>
                 <TableCell align="right">
