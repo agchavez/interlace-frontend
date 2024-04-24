@@ -242,14 +242,14 @@ export const FilterShiftManage: FC<FilterShiftManageProps> = ({
                         labelId="distribution_center"
                         id="distribution_center"
                         {...field}
-                        disabled={user?.distribution_centers.length === 1}
+                        disabled={user?.distributions_centers?.length === 1}
                         label="Centro de distribución"
                         sx={{
                           maxHeight: 300,
                         }}
                         MenuProps={MenuProps}
                       >
-                        {user?.distribution_centers.map((item) => (
+                        {user?.distributions_centers.map((item) => (
                           <MenuItem key={item} value={item}>
                             {disctributionCenters.find(
                               (dc) => dc.id === item

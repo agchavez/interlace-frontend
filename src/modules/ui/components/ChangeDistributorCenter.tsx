@@ -1,4 +1,4 @@
-import { Avatar, Dialog, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
+import { Alert, Avatar, Dialog, List, ListItem, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material'
 import PinDropTwoToneIcon from '@mui/icons-material/PinDropTwoTone';
 import { useAppDispatch, useAppSelector } from '../../../store'
 import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice'
@@ -26,7 +26,7 @@ export const ChangeDistributorCenter = () => {
         Cambiar Centro de Distribución
         </BootstrapDialogTitle>
       <List sx={{ p: 0, m: 0 }}>
-        {user?.distributions_centers.map((cd) => (
+        {user?.distributions_centers && user?.distributions_centers.length > 1 && user?.distributions_centers.map((cd) => (
           <ListItem disableGutters key={cd}>
             <ListItemButton onClick={() => handleListItemClick(cd)}>
               <ListItemAvatar>
@@ -41,10 +41,12 @@ export const ChangeDistributorCenter = () => {
             </ListItemButton>
           </ListItem>
         ))}
-         <ListItem disableGutters alignItems='center' key='no_cd'>
+         <ListItem disableGutters alignItems='center' key='no_cd' sx={{ padding: 2 }}>
           {
              user?.distributions_centers && user?.distributions_centers.length <= 1 && (
-              <ListItemText primary="No tiene centros de distribución permitidos" sx={{textAlign: 'center'}} />
+              <Alert severity="error" sx={{ width: '100%' }}>
+                No tiene más centros de distribución asociados
+              </Alert>
             )
           }
         </ListItem>

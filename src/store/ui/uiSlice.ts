@@ -9,6 +9,7 @@ import { es } from "date-fns/locale";
 import { TypeChart } from "../../modules/home/components/TATGraph";
 import { SimulatedForm } from "../../interfaces/trackingT2";
 import { authApi } from "../auth/authApi";
+import { DashboardCdQuery, FilterDateDashboard } from "../../interfaces/home";
 
 
 enum FilterDate {
@@ -30,6 +31,7 @@ export interface uiState {
     inventoryQueryParams: InventarioMovimentQueryParams;
     graphQueryParams: GraphQueryParams;
     simulatedQueryParams: SimulatedForm;
+    dashboardCDsQueryParams: DashboardCdQuery;
     openChangeDistributionCenter: boolean;
 }
 
@@ -97,6 +99,9 @@ const initialState: uiState = {
         conductor: "",
         producto: "",
     },
+    dashboardCDsQueryParams: {
+        date_range: FilterDateDashboard.TODAY,
+    },
     openChangeDistributionCenter: false,
 }
 
@@ -134,6 +139,9 @@ export const uiSlice = createSlice({
         },
         setOpenChangeDistributionCenter: (state, action: PayloadAction<boolean>) => {
             state.openChangeDistributionCenter = action.payload
+        },
+        setDashboardCDsQueryParams: (state, action: PayloadAction<DashboardCdQuery>) => {
+            state.dashboardCDsQueryParams = action.payload
         }
     },
     extraReducers(builder) {
@@ -156,5 +164,6 @@ export const {
     setInventoryQueryParams,
     setGraphQueryParams,
     setSimulatedQueryParams,
-    setOpenChangeDistributionCenter
+    setOpenChangeDistributionCenter,
+    setDashboardCDsQueryParams
 } = uiSlice.actions;
