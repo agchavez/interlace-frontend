@@ -20,7 +20,14 @@ const CardContentStyled = ({ row, isFetching, isLoading }: { row: DashboardCds, 
         <CardActionArea onClick={() => setopen(!open)}>
           <CardHeader
 
-            title={row.distributor_center}
+            title={<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="h6" component="h2" fontWeight={400} color="secondary ">
+                {row.distributor_center}
+              </Typography>
+              <Typography variant="body1" component="h2" fontWeight={200} color="secondary">
+                {row.user ? row.user : "--"}
+              </Typography>
+            </Box>}
             subheader={<Grid container spacing={3}>
               <Grid item xs={12} md={4}>
                 <Typography variant="body1" component="h2" fontWeight={400} color="primary">

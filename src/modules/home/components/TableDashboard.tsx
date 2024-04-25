@@ -15,6 +15,8 @@ import { EditedTrackerCDs } from '../../../interfaces/home';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 import { Chip } from '@mui/material';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 function Row(props: { row: EditedTrackerCDs }) {
     const { row } = props;
@@ -35,6 +37,8 @@ function Row(props: { row: EditedTrackerCDs }) {
                 <TableCell component="th" scope="row">
                     TRK-{row.id}
                 </TableCell>
+
+                <TableCell align="right">{row.trailer__code}</TableCell>
                 <TableCell align="center">
                     <Chip
                         variant="outlined"
@@ -49,9 +53,15 @@ function Row(props: { row: EditedTrackerCDs }) {
                         }
                         size="small"
                     />
-                    </TableCell>
-                <TableCell align="right">{row.trailer__code}</TableCell>
-                <TableCell align="right">{row.trailer__code}</TableCell>
+                </TableCell>
+                <TableCell align="right">
+                    <Chip
+                        label={formatDistanceToNow(
+                            new Date(row?.created_at),
+                            { addSuffix: true, locale: es }
+                        )}
+                    />
+                </TableCell>
                 <TableCell align="right">
                     <IconButton size="small" color="primary" aria-label="add to shopping cart" onClick={() => navigate('/tracker/detail/' + row.id)}>
                         <ArrowForwardIcon />
@@ -70,8 +80,8 @@ function Row(props: { row: EditedTrackerCDs }) {
                                     <TableRow>
                                         <TableCell>Codigo SAP</TableCell>
                                         <TableCell>Descripción</TableCell>
-                                        <TableCell align="right">Cantidad</TableCell>
-                                        <TableCell align="right">Fechas</TableCell>
+                                        <TableCell align="right">Pallets</TableCell>
+                                        <TableCell align="right">Periodo</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -84,7 +94,7 @@ function Row(props: { row: EditedTrackerCDs }) {
                                             <TableCell align="right">
                                                 {historyRow.quantity}
                                             </TableCell>
-                                            <TableCell align="right">{historyRow.expiration_dates.length}</TableCell>
+                                            <TableCell align="right">{historyRow.period}</TableCell>
 
                                         </TableRow>
                                     ))}
@@ -108,12 +118,15 @@ export default function TableDashboard({ data }: DashboardCds) {
                 <TableHead>
                     <TableRow>
                         <TableCell />
-                        <TableCell>Tracker</TableCell>
-                        <TableCell align="center">Estado</TableCell>
+                        <TableCell>Traking code</TableCell>
                         <TableCell align="right">Rastra
                         </TableCell>
-                        <TableCell align="right">Transportista</TableCell>
+                        <TableCell align="center">Estado</TableCell>
+                        <TableCell align="right">
+                            Tiempo en revisión
+                        </TableCell>
                         <TableCell align="right">Acciones</TableCell>
+                        
                     </TableRow>
                 </TableHead>
                 <TableBody>

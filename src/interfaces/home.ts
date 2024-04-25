@@ -3,6 +3,7 @@ export interface DashboardCds {
     total_trackers:     number;
     edit_trackers:      number;
     tat:                number;
+    user:               string | null;
     edited_trackers:    EditedTrackerCDs[];
 }
 
@@ -20,6 +21,7 @@ export interface ProductCDs {
     sap_code:         string;
     name:             string;
     quantity:         number;
+    period:           string;
     expiration_dates: ExpirationDateCDs[];
 }
 

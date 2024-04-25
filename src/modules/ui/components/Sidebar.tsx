@@ -164,7 +164,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
   const sidebarItems = useMemo(() => {
     return sidebarSelected.map((item) => {
       const subitems = item.subItems.map((sub) => {
-        if (sub.permissions?.includes("cd.more") && user?.distributions_centers && user?.distributions_centers.length > 1) {
+        if (sub.permissions?.includes("cd.more") && user?.distributions_centers && user?.distributions_centers.length >= 1) {
           sub.visible = true;
         }else {
           sub.visible = sub.permissions?.includes("any")

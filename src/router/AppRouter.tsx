@@ -52,7 +52,7 @@ export function AppRouter() {
         if (!obj) return false
         const requiredPermissions = obj?.permissions
         if (requiredPermissions.includes("any")) return true;
-        if (requiredPermissions.includes("cd.more") && user?.distributions_centers && user?.distributions_centers?.length > 1) return true;
+        if (requiredPermissions.includes("cd.more") && user?.distributions_centers && user?.distributions_centers?.length >= 1) return true;
         return requiredPermissions.every(r_perm =>
             user?.list_permissions.includes(r_perm) ||
             user?.user_permissions.includes(r_perm)
