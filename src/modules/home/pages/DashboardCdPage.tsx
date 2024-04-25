@@ -31,7 +31,7 @@ const CardContentStyled = ({ row, isFetching, isLoading }: { row: DashboardCds, 
             subheader={<Grid container spacing={3}>
               <Grid item xs={12} md={4}>
                 <Typography variant="body1" component="h2" fontWeight={400} color="primary">
-                  Tracking Totales
+                  Unidades T1 atendidas
                 </Typography>
                 <Divider sx={{ backgroundColor: 'white' }} />
                 <Typography variant="body1" component="h2" fontWeight={200} color="secondary">

@@ -41,7 +41,7 @@ function Row(props: { row: EditedTrackerCDs }) {
                 <TableCell align="right">{row.trailer__code}</TableCell>
                 <TableCell align="center">
                     <Chip
-                        variant="outlined"
+                        variant="filled"
                         label={
                             row.input_date !== null && row.output_date === null ?
                                 'En descarga' :
@@ -49,7 +49,10 @@ function Row(props: { row: EditedTrackerCDs }) {
                                     'En bahia de espera ' : 'Descarga completa'
                         }
                         color={
-                            'secondary'
+                            row.input_date !== null && row.output_date === null ?
+                                'warning' :
+                                row.input_date === null && row.output_date === null ?
+                                    'error' : 'success'
                         }
                         size="small"
                     />
