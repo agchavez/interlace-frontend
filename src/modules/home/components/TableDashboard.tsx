@@ -14,9 +14,12 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { EditedTrackerCDs } from '../../../interfaces/home';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
-import { Chip } from '@mui/material';
+import { Avatar, Chip } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import NoCrashTwoToneIcon from '@mui/icons-material/NoCrashTwoTone';
+import RvHookupTwoToneIcon from '@mui/icons-material/RvHookupTwoTone';
+import LocalShippingTwoToneIcon from '@mui/icons-material/LocalShippingTwoTone';
 
 function Row(props: { row: EditedTrackerCDs }) {
     const { row } = props;
@@ -41,7 +44,7 @@ function Row(props: { row: EditedTrackerCDs }) {
                 <TableCell align="right">{row.trailer__code}</TableCell>
                 <TableCell align="center">
                     <Chip
-                        variant="filled"
+                        variant="outlined"
                         label={
                             row.input_date !== null && row.output_date === null ?
                                 'En descarga' :
@@ -53,6 +56,12 @@ function Row(props: { row: EditedTrackerCDs }) {
                                 'warning' :
                                 row.input_date === null && row.output_date === null ?
                                     'error' : 'success'
+                        }
+                        icon={
+                            row.input_date !== null && row.output_date === null ?
+                                <RvHookupTwoToneIcon /> :
+                                row.input_date === null && row.output_date === null ?
+                                    <LocalShippingTwoToneIcon /> : <NoCrashTwoToneIcon />
                         }
                         size="small"
                     />
@@ -84,7 +93,7 @@ function Row(props: { row: EditedTrackerCDs }) {
                                         <TableCell>Codigo SAP</TableCell>
                                         <TableCell>Descripción</TableCell>
                                         <TableCell align="right">Pallets</TableCell>
-                                        <TableCell align="right">Periodo</TableCell>
+                                        <TableCell align="right">Giro</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -97,7 +106,16 @@ function Row(props: { row: EditedTrackerCDs }) {
                                             <TableCell align="right">
                                                 {historyRow.quantity}
                                             </TableCell>
-                                            <TableCell align="right">{historyRow.period}</TableCell>
+                                            <TableCell align="right">
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                                                <Avatar sx={historyRow.period === 'A' ? { backgroundColor: 'success.main' } :
+                                                    historyRow.period === 'B' ? { backgroundColor: '#f8f32b' } :
+                                                        historyRow.period === 'C' ? { backgroundColor: '#ff6600' } : { backgroundColor: 'primary.main' }
+                                                } variant="square" style={{ width: 24, height: 24, borderRadius: 2}}>
+
+                                                    {historyRow.period}
+                                                </Avatar></div>
+                                            </TableCell>
 
                                         </TableRow>
                                     ))}
@@ -129,7 +147,7 @@ export default function TableDashboard({ data }: DashboardCds) {
                             Tiempo en revisión
                         </TableCell>
                         <TableCell align="right">Acciones</TableCell>
-                        
+
                     </TableRow>
                 </TableHead>
                 <TableBody>
