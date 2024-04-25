@@ -131,14 +131,15 @@ const TATGraph = () => {
   const { graphQueryParams: {year, distributor_center, typeChart}, graphQueryParams } = useAppSelector(state => state.ui)
   const [averages, setAverages] = useState<TATGraphItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const { user } = useAppSelector(state => state.auth)
   const {disctributionCenters} = useAppSelector(state => state.maintenance)
   const dispatch = useAppDispatch()
   // TODO implementar bien el loading
 
   const datasets = useMemo(()=>{
     const datosAgrupados = groupByDistributorCenter(averages);
-    return obtenerDatasets(datosAgrupados, disctributionCenters)
-  }, [averages, disctributionCenters])
+    return obtenerDatasets(datosAgrupados, disctributionCenters.filter(dc => user?.distributions_centers.includes(dc.id)))
+  }, [averages, disctributionCenters, user])
 
   const data = {
     labels,

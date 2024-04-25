@@ -66,7 +66,11 @@ export const ViewTrackerPage = ({ isModal = false }: { isModal?: boolean }) => {
   const user = useAppSelector((state) => state.auth.user);
 
   const [showedError, setShowedError] = useState(false);
-
+  useEffect(() => {
+    refetchEntradas();
+    refetchSalidas();
+  }, [user?.centro_distribucion, refetchEntradas, refetchSalidas]);
+  
   if (
     (user && user.centro_distribucion === undefined) ||
     user?.centro_distribucion === null

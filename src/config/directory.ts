@@ -187,6 +187,12 @@ export const permisions = [
             "any"
         ]
     },
+    {
+        url: "/dashboard/cd",
+        permissions: [
+            "cd.more",
+        ]
+    },
 ]
 
 const directory: RoutePermissions = {}

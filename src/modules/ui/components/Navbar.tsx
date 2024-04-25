@@ -8,6 +8,8 @@ import CloseIcon from '@mui/icons-material/Close';
 // import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { logout } from '../../../store/auth';
+import { ChangeDistributorCenter } from './ChangeDistributorCenter';
+import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice';
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
 interface NavbarProps {
@@ -32,6 +34,8 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
     }
 
     return (
+        <>
+        <ChangeDistributorCenter />
         <Grid container
             alignItems="center"
             justifyContent="space-between"
@@ -54,16 +58,6 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                 </Grid>
             }
             <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
-                {/* Logo */}
-                {/* {status == 'authenticated1' && <IconButton
-                    aria-label="menu"
-                    sx={{ mr: 0 }}
-                    onClick={() => {
-                    }}
-                >
-                    <MenuOutlinedIcon fontSize='medium' color='primary' />
-                </IconButton>} */}
-
                 <div className="nav__img" style={{ display: 'flex', alignItems: 'end' }}>
                     <img src={logo} alt="img" width={120} className="p-1" style={{ marginRight: '4px' }} />
                     <Typography variant="body1" component="h1" fontWeight={400} className="p-1" sx={{ 
@@ -105,9 +99,11 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                                 component="h1"
                                 style={{
                                     color: "black",
+                                    cursor: 'pointer'
                                 }}
                                 fontWeight={200}
                                 fontSize={13}
+                                onClick={()=>dispatch(setOpenChangeDistributionCenter(true))}
                             >
                                 {user && (user.centro_distribucion_name || '')}
                             </Typography>
@@ -189,6 +185,8 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                 </Menu>
             </Grid>
         </Grid>
+        </>
+
     );
 }
 

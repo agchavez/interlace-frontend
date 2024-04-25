@@ -19,9 +19,22 @@ enum FilterDate {
     WEEK = 'Esta semana',
     MONTH = 'Este mes',
     YEAR = 'Este año',
-  }
+}
 
-  
+
+// const ITEM_HEIGHT = 48;
+// const ITEM_PADDING_TOP = 8;
+// const MenuPropsSelect = {
+//     PaperProps: {
+//         style: {
+//             maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+//             width: 250,
+//         },
+//     },
+// };
+
+
+
 const StyledMenu = styled((props: MenuProps) => (
     <Menu
         elevation={0}
@@ -79,14 +92,18 @@ export default function HomePage() {
         user
     } = useAppSelector(state => state.auth);
     const {
-        dashboardQueryParams
+        dashboardQueryParams,
     } = useAppSelector(state => state.ui);
-    const [query, setQuery] = useState<DashboardQueryParams>(dashboardQueryParams)
+    // const { disctributionCenters } = useAppSelector(state => state.maintenance)
+
+    const [query, setQuery] = useState<DashboardQueryParams>(dashboardQueryParams);
+    // const [distributor, setDistributor] = useState<number[]>([
+    //     user?.centro_distribucion as number
+    // ]);
     const { data, isLoading, isFetching, refetch } = useGetdashboardQuery(query);
 
     useEffect(() => {
         refetch()
-
     }, [refetch])
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -117,12 +134,12 @@ export default function HomePage() {
                 end_date = format(date, "yyyy-MM-dd");
                 break;
             case FilterDate.MONTH:
-                valueDate = new Date(date.getFullYear(), date.getMonth(),1);
+                valueDate = new Date(date.getFullYear(), date.getMonth(), 1);
                 start_date = format(valueDate, "yyyy-MM-dd");
                 end_date = format(date, "yyyy-MM-dd");
                 break;
             case FilterDate.YEAR:
-                valueDate = new Date(date.getFullYear(), date.getMonth() - date.getMonth() , 1);
+                valueDate = new Date(date.getFullYear(), date.getMonth() - date.getMonth(), 1);
                 start_date = format(valueDate, "yyyy-MM-dd");
                 end_date = format(date, "yyyy-MM-dd");
                 break;
@@ -130,7 +147,8 @@ export default function HomePage() {
                 break;
         }
 
-        setQuery({ ...query, 
+        setQuery({
+            ...query,
             filterDate: filter,
             start_date,
             end_date
@@ -140,17 +158,24 @@ export default function HomePage() {
     }
 
     useEffect(() => {
-     dispatch(setDashboardQueryParams(query));
-        
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        dispatch(setDashboardQueryParams(query));
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query])
+
+    useEffect(() => {
+        refetch()
+
+    }, [user?.centro_distribucion, refetch])
 
     const navigate = useNavigate();
 
     return <Container maxWidth="xl">
 
-        <Grid container sx={{ mt: 3 , mb: 5}} spacing={2} >
-            <Grid item xs={12} justifyContent={"flex-end"} display={"flex"} >
+        <Grid container sx={{ mt: 3, mb: 5 }} spacing={2} >
+            {/* <Grid item xs={12} md={6} lg={4} xl={4}>
+            </Grid> */}
+            <Grid item xs={12} justifyContent={"flex-end"} display={"flex"}>
                 <Chip
                     label={query.filterDate}
                     variant='outlined'
@@ -185,6 +210,34 @@ export default function HomePage() {
 
                 </StyledMenu>
             </Grid>
+            {/* <Grid item xs={12} justifyContent={"flex-end"} display={"flex"}  sm={6} md={6} lg={4} xl={4}>
+               {user && <FormControl size="small" variant="outlined" fullWidth>
+                    <InputLabel id="demo-multiple-checkbox-label">Tag</InputLabel>
+                    <Select
+                        labelId="demo-multiple-checkbox-label"
+                        id="demo-multiple-checkbox"
+                        multiple
+                        value={distributor}
+                        onChange={(e) => setDistributor(e.target.value as number[])}
+                        input={<OutlinedInput label="Tag" />}
+                        renderValue={(selected) => (
+                            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {(selected as number[]).map((value) => (
+                                    disctributionCenters.find(dc => dc.id === value)?.name + ', '
+                                ))}
+                            </div>
+                        )}
+                        MenuProps={MenuPropsSelect}
+                    >
+                        {disctributionCenters.filter(dc => user?.distributions_centers.includes(dc.id)).map((cd) => (
+                            <MenuItem key={cd.id} value={cd.id}>
+                                <Checkbox checked={distributor.indexOf(cd.id) > -1} />
+                                <ListItemText primary={cd.name} />
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>}
+            </Grid> */}
 
             <Grid item xs={12} md={6} >
                 <Card elevation={0} sx={{
@@ -226,7 +279,7 @@ export default function HomePage() {
                             </Typography>
                         </div>
                         <div>
-                        <Typography variant="h2" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
+                            <Typography variant="h2" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
                                 TAT
                             </Typography>
                         </div>
@@ -339,7 +392,7 @@ export default function HomePage() {
                                         Tracking
                                     </StyledTableCell>
                                     <StyledTableCell align="left">
-                                    Traslado 5001
+                                        Traslado 5001
                                     </StyledTableCell>
                                     <StyledTableCell align="right">
 
@@ -371,7 +424,7 @@ export default function HomePage() {
                         </Table>
                     </TableContainer>
 
-                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />} onClick={()=> navigate('/tracker/manage/?status=COMPLETE')}>
+                    <Button variant="text" color="primary" size="medium" sx={{ mt: 1 }} endIcon={<ArrowForwardIcon />} onClick={() => navigate('/tracker/manage/?status=COMPLETE')}>
                         Ver más
                     </Button>
                 </Card>

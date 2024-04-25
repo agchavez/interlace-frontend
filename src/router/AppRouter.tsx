@@ -52,11 +52,12 @@ export function AppRouter() {
         if (!obj) return false
         const requiredPermissions = obj?.permissions
         if (requiredPermissions.includes("any")) return true;
+        if (requiredPermissions.includes("cd.more") && user?.distributions_centers && user?.distributions_centers?.length > 1) return true;
         return requiredPermissions.every(r_perm =>
             user?.list_permissions.includes(r_perm) ||
             user?.user_permissions.includes(r_perm)
         )
-    }, [location.pathname, user?.list_permissions, user?.user_permissions])
+    }, [location.pathname, user?.list_permissions, user?.user_permissions, user?.distributions_centers])
     const [openMobileSidebar, setOpenMobileSidebar] = useState(false)
     if (status === 'checking') return <></>
 

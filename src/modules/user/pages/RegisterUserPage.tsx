@@ -34,8 +34,8 @@ export const RegisterUserPage = () => {
                     group: +data.group,
                     last_name: data.lastName,
                     username: data.email,
-                    employee_number: data.employee_number
-                    
+                    employee_number: data.employee_number,
+                    distributions_centers: data.distributions_centers.length > 0 ? data.distributions_centers : data.cd ? [+data.cd] : []
                 }
             })
         } else {
@@ -50,7 +50,8 @@ export const RegisterUserPage = () => {
                 is_superuser: false,
                 username: data.email,
                 is_active: true,
-                employee_number: data.employee_number
+                employee_number: data.employee_number,
+                distributions_centers: data.distributions_centers.length > 0 ? data.distributions_centers : data.cd ? [+data.cd] : []
             })
         }
 
@@ -72,7 +73,8 @@ export const RegisterUserPage = () => {
             confirmPassword: '',
             group: `${editingUser?.groups?.[0] || ''}`,
             cd:`${editingUser?.centroDistribucion}`,
-            employee_number: editingUser?.employee_number || undefined
+            employee_number: editingUser?.employee_number || undefined,
+            distributions_centers: [...editingUser?.distributions_centers || []]
         } : {
             fistName: '',
             lastName: '',
@@ -80,7 +82,8 @@ export const RegisterUserPage = () => {
             password: '',
             confirmPassword: '',
             group: '',
-            employee_number: undefined
+            employee_number: undefined,
+            distributions_centers: []
         }
     }, [edit, editingUser]) 
 

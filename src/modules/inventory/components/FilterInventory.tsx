@@ -230,11 +230,8 @@ export const FilterInventory: FC<FilterManageProps> = ({
             <Grid container sx={{ p: 1 }} spacing={2}>
               <Grid item xs={12}>
                 <MultipleSelectChip
-                  options={disctributionCenters.map((dc) => ({
-                    text: dc.name,
-                    value: dc.id.toString(),
-                  }))}
-                  disabled={user?.centro_distribucion? disctributionCenters.filter(dc=>dc.id===user.centro_distribucion).length===1 : false}
+                  options={user?.distributions_centers?.map(dc=> disctributionCenters.find(dca=>dca.id===dc) as DistributionCenter).map(dc=>({text: dc.name, value: dc.id.toString()})) || []}
+                  disabled={user?.distributions_centers && user?.distributions_centers.length === 1}
                   value={watch("distributor_center").map(cd=>cd.id.toString())}
                   label="Centro de Distribución"
                   changeEventAction={(value)=>{
