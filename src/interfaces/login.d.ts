@@ -42,6 +42,7 @@ export interface User {
     created_at:          string | null;
     groups:              number[];
     user_permissions:    string[];
+    distributions_centers: number[];
 }
 
 export interface LoginBody {
@@ -68,5 +69,6 @@ export interface DashboardQueryParams {
     start_date?: string;
     end_date?:   string;
     filterDate: FilterDate;
+    distribution_centers: number[];
 }
 

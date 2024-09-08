@@ -26,7 +26,12 @@ export const getAUser = (id:number): AppThunk => {
             const resp = await backendApi.get<GetAUserResponse>(
                 import.meta.env.VITE_JS_APP_API_URL + `/api/users/${id}/`, 
                 { headers: { 'Authorization': `Bearer ${auth.token}` } })
-            dispatch(setEditingUser({...resp.data, lastName: resp.data.last_name, firstName:resp.data.first_name, centroDistribucion:resp.data.centro_distribucion}))
+            dispatch(setEditingUser({
+                ...resp.data, 
+                lastName: resp.data.last_name, 
+                firstName:resp.data.first_name, 
+                centroDistribucion:resp.data.centro_distribucion, 
+                distributions_centers:resp.data.distributions_centers})) 
         } catch (error) {
             console.log(error)
         }

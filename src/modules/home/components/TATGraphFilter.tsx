@@ -65,12 +65,12 @@ export default function TATGraphFilter() {
         }}
       >
         {
-            !user?.centro_distribucion &&
+            user?.distributions_centers &&
             <MenuItem sx={{width: "100%"}}>
                 <Grid container>
                     <Grid item xs={12}>
                         <MultipleSelectChip
-                            options={disctributionCenters.map(dc => ({text: dc.name, value: dc.id.toString()}))}
+                            options={disctributionCenters.filter(dc => user?.distributions_centers.includes(dc.id)).map(dc => ({text: dc.name, value: dc.id.toString()}))}
                             label="DC"
                             value={distributor_center||[]}
                             changeEventAction={(dc:string[])=>setDistributorCenter(dc.map(dc=>parseInt(dc)))}

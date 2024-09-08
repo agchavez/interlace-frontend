@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import { RootState } from '..'
 import { LoginResponseOk, LoginBody, DashboardResponse, DashboardQueryParams } from '../../interfaces/login';
+import { DashboardCdQuery, DashboardCds } from '../../interfaces/home';
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
@@ -63,6 +64,21 @@ export const authApi = createApi({
                 )
             }
         }),
+        getDashboardCD: builder.query<DashboardCds[], DashboardCdQuery>({
+            query: (params) => {
+                return (
+                    {
+                        url: '/dashboard/',
+                        method: 'GET',
+                        params: {
+                            date_range: params.date_range.toString()
+                        }
+                    }
+                )
+            },
+            keepUnusedDataFor: 0
+        })
+
 
     })
 })
@@ -71,5 +87,6 @@ export const {
     useLoginMutation,
     useRefreshTokenQuery,
     useLogoutMutation,
-    useGetdashboardQuery
+    useGetdashboardQuery,
+    useGetDashboardCDQuery
 } = authApi;

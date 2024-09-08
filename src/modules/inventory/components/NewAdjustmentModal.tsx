@@ -63,7 +63,7 @@ export const NewAdjustmentModal: FC<NewAdjustmentModalProps> = ({ isOpen, onClos
             return;
         }
         setloading(true);
-        dispatch(createLocationAndRoute(file.file, reason, onComplete));
+        dispatch(createLocationAndRoute(file.file, reason, onComplete, () => setloading(false)));
     }
 
     const onComplete = (data: InventarioMovimentResult) => {

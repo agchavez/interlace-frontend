@@ -42,6 +42,11 @@ const items: SideBarItem[] = [
         href: "/tracker/view",
         id: "vista",
       },
+      {
+        text: "DashboardCD",
+        href: "/dashboard/cd",
+        id: "dashboardcd",
+      },
     ],
     id: "inicio",
   },
@@ -159,7 +164,10 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
   const sidebarItems = useMemo(() => {
     return sidebarSelected.map((item) => {
       const subitems = item.subItems.map((sub) => {
-        sub.visible = sub.permissions?.includes("any")
+        if (sub.permissions?.includes("cd.more") && user?.distributions_centers && user?.distributions_centers.length >= 1) {
+          sub.visible = true;
+        }else {
+          sub.visible = sub.permissions?.includes("any")
           ? true
           : sub.permissions?.every((perm) => {
               return (
@@ -167,6 +175,8 @@ const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
                 user?.user_permissions.includes(perm)
               );
             });
+        }
+        
         return sub;
       });
       item.subItems = subitems;

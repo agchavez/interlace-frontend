@@ -1,8 +1,10 @@
 import { AxiosError } from "axios";
-import { setStatus, login, logout, setLoadingAuth } from ".";
+import { setStatus, login, logout, setLoadingAuth, setDistributionCenters } from ".";
 import { AppThunk } from "..";
 import backendApi from "../../config/apiConfig";
-import { LoginResponseOk } from "../../interfaces/login";
+import { LoginResponseOk, User } from "../../interfaces/login";
+import { errorApiHandler } from "../../utils/error";
+import { setOpenChangeDistributionCenter } from "../ui/uiSlice";
 export const checkToken = (): AppThunk => {
     return async (dispatch,) => {
         dispatch(setStatus('checking'));
@@ -53,5 +55,25 @@ export const startUpdateToken = (
             dispatch(setLoadingAuth(false));
         }
 
+    }
+}
+
+// cambiar centro de distribucion asignado al usuario
+export const changeDistributionCenter = (
+    distributionCenter: number,
+): AppThunk => {
+    return async (dispatch, getState) => {
+        try {
+            const { auth } = getState();
+            const resp = await backendApi.put<User>(
+                `/users/update-profile/`,
+                { centro_distribucion: distributionCenter },
+                { headers: { 'Authorization': `Bearer ${auth.token}` }
+            });
+            dispatch(setDistributionCenters({ distributionCenter, name: resp.data.centro_distribucion_name }));
+            dispatch(setOpenChangeDistributionCenter(false));
+        } catch (error) {
+            errorApiHandler(error, "No se pudo cambiar el centro de distribución");
+        }
     }
 }
