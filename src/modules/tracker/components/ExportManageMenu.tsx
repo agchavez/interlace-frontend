@@ -98,6 +98,8 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         "Transferencia de Salida",
         "Contabilizado",
         "Usuario",
+        "Operador 1",
+        "Operador 2",
         "TAT",
         "Observaciones",
       ];
@@ -113,6 +115,8 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
           tr.output_document_number,
           tr.accounted,
           tr.user_name,
+          tr.operator_1_name || "",
+          tr.operator_2_name || "",
           (tiempoSalida && tiempoEntrada
             // Solo tomar 2 decimales
           ? ((tiempoSalida.getTime() - tiempoEntrada.getTime()) / (1000 * 60)).toFixed(2) // Calcula la diferencia en minutos

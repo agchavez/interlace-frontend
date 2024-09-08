@@ -110,6 +110,8 @@ export interface Tracker {
   origin_location: number | null;
   destination_location: number | null;
   operator_1: number | null;
+  operator_1_name: string | null;
+  operator_2_name: string | null;
   operator_2: number | null;
   driver: number | null;
   output_type: number;

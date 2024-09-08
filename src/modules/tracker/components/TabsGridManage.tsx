@@ -161,6 +161,34 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
                 );
             },
         },
+        {
+            field: "operator_1_name",
+            headerName: "Operador 1",
+            flex: 1,
+            width: 200,
+            minWidth: 200,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.value ? params.value : "-"}
+                    </Typography>
+                );
+            },
+        },
+        {
+            field: "operator_2_name",
+            headerName: "Operador 2",
+            flex: 1,
+            width: 200,
+            minWidth: 200,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.value ? params.value : "-"}
+                    </Typography>
+                );
+            },
+        },
 
 
         // {
