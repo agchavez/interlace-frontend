@@ -37,9 +37,6 @@
     }
 }
 
-.close{
-    display: none;
-}
 
 .sidebar__root {
     background-color: $color-sidebar-primary;
@@ -73,19 +70,7 @@
         display: block;
     }
 }
-.ui__container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 240px;
-    margin-top: 3rem;
-    width: calc(100vw - 270px) !important;
-    @media screen and (max-width: $md-breackpoint) {
-        display: flex;
-        margin-left: 0;
-        width: 100vw !important;
-    }
-}
+
 
 .navbar__logo {
     @media screen and (max-width: $sm-breackpoint) {

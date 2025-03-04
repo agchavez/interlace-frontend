@@ -20,6 +20,7 @@ import { getOpenTrackings } from "../../../store/seguimiento/trackerThunk";
 import { CompletarSeguimientoModal } from "../components/CompletarSeguimientoModal";
 import FloatLoading from "../components/FloatLoading";
 import { useSearchParams } from "react-router-dom";
+import {ReclamoModal} from "../components/ClaimDialog.tsx";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,6 +55,7 @@ export const CheckPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [, setValue] = useState(0);
   const [eliminarOpen, setEliminarOpen] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false)
   const [completarOpen, setCompletarOpen] = useState({
     open: false,
     completed: true,
@@ -95,8 +97,11 @@ export const CheckPage = () => {
   };
 
   const handleClickDelete = () => {
+    if (seguimientos[seguimeintoActual || 0]?.type === "IMPORT") {
+        setClaimOpen(true);
+        return;
+    }
     setEliminarOpen(true);
-    // seguimeintoActual !== undefined && dispatch(removeSeguimiento(seguimeintoActual))
   };
   useEffect(() => {
     // get pending trackings
@@ -130,6 +135,10 @@ export const CheckPage = () => {
           handleClose={handleCloseCreateModal}
         />
       )}
+      <ReclamoModal
+        open={claimOpen}
+        onClose={() => setClaimOpen(false)}
+      />
       <EliminarSeguimientoModal
         index={seguimeintoActual || 0}
         open={eliminarOpen}
@@ -251,7 +260,9 @@ export const CheckPage = () => {
                     fontWeight={400}
                     color={"gray.700"}
                   >
-                    Eliminar
+                    {seguimientos[seguimeintoActual || 0]?.type === "IMPORT"
+                      ? "Reclamo"
+                      : "Eliminar"}
                   </Typography>
                 </Button>
               </Grid>

@@ -23,6 +23,7 @@ enum FilterDate {
 const actualYear = parseInt(format(new Date(), "yyyy", { locale: es }));
 export interface uiState {
     loading: boolean;
+    openSidebar: boolean;
     dashboardQueryParams: DashboardQueryParams;
     manageQueryParams: TrackerQueryParams;
     orderQueryParams: OrderQueryParams;
@@ -44,6 +45,7 @@ const storageGraphqueryParams = (()=>{
 
 const initialState: uiState = {
     loading: false,
+    openSidebar: false,
     dashboardQueryParams: {
         filterDate: FilterDate.TODAY,
         start_date: format(new Date(), "yyyy-MM-dd 00:00:00"),
@@ -109,6 +111,9 @@ export const uiSlice = createSlice({
     name: "ui",
     initialState, 
     reducers: {
+        toggleSidebar: (state) => {
+            state.openSidebar = !state.openSidebar;
+        },
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload
         },
@@ -155,6 +160,7 @@ export const uiSlice = createSlice({
 
 
 export const {
+    toggleSidebar,
     setLoading,
     setDashboardQueryParams,
     setManageQueryParams,

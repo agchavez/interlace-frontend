@@ -7,13 +7,13 @@ import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
 
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
-import Sidebar from '../modules/ui/components/Sidebar';
 import Navbar from '../modules/ui/components/Navbar';
 
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
 import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
+import {Side2bar} from "../modules/ui/components/Side2Bar.tsx";
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -27,6 +27,7 @@ export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
     const location = useLocation()
+    const openSidebar = useAppSelector((state) => state.ui.openSidebar);
     useEffect(() => {
         dispatch(checkToken());
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -64,12 +65,14 @@ export function AppRouter() {
     if (!permitedRoute) return <Navigate to="/"/>
 
     return <>
-        <div >
-            {status === 'authenticated' && <Sidebar open={openMobileSidebar} setOpen={setOpenMobileSidebar}/>}
+        <div>
+            {status === 'authenticated' && <Side2bar open={openMobileSidebar} setOpen={setOpenMobileSidebar} />}
             <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
             <LogOutTimer />
             <div>
-                <div className={status === 'authenticated' ? 'ui__container' : 'ui__container__auth'}>
+                <div className={status === 'authenticated' ? !openSidebar ?
+                    'ui__container': 'ui__container close' :
+                    'ui__container__auth'}>
 
                     <Routes>
                         <Route path="/auth/*" element={

@@ -37,7 +37,7 @@ import AgregarProductoSalida from "./AgregarProductoSalida";
 import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
-  chanceStatusTracking,
+  chanceStatusTracking, downloadFile,
   // downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 import { formatDistance, formatDistanceToNow } from "date-fns";
@@ -60,6 +60,7 @@ import {
 import ObservationModal from "./ObservationModal";
 import ArchivoModal from "./ArchivoModal";
 import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
+import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -142,9 +143,9 @@ export const CheckForm = ({
     );
   };
 
-  // const handleClickDescargar = () => {
-  //   dispatch(downloadFile(seguimiento.id));
-  // };
+  const handleClickDescargar = () => {
+    dispatch(downloadFile(seguimiento.id));
+  };
 
   const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
 
@@ -352,7 +353,7 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                {/* <Grid item xs={12} md={6} lg={4} xl={3}>
+                <Grid item xs={12} md={6} lg={4} xl={3}>
                   <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
 
                     <Typography
@@ -376,20 +377,20 @@ export const CheckForm = ({
                     )}
                   </Box>
                   <Divider />
-                  {seguimiento.is_archivo_up ? (
+                  {seguimiento.is_archivo_up ?
                     <Chip
                       onClick={handleClickDescargar}
                       label={seguimiento.archivo_name}
                       variant="outlined"
                       color="secondary"
-                      icon={<CloudDownloadTwoToneIcon color="secondary" />}
+                      icon={<CloudUploadTwoToneIcon color="secondary" />}
                       size="medium"
                       sx={{ mt: 1 }}
                     />
                     :
                       '--'
                   }
-                </Grid> */}
+                </Grid>
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography

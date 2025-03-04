@@ -13,6 +13,7 @@ import { useLogoutMutation } from "../../../store/auth/authApi";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { RoutePermissionsDirectory } from "../../../config/directory";
 import ContentPasteGoTwoToneIcon from '@mui/icons-material/ContentPasteGoTwoTone';
+
 interface SidebarProps {
   open: boolean;
   setOpen: (value: boolean) => void;
@@ -139,7 +140,8 @@ items.forEach((item) =>
   )
 );
 
-const Sidebar: FunctionComponent<SidebarProps> = ({ open, setOpen }) => {
+const Sidebar: FunctionComponent<SidebarProps> = ({ setOpen }) => {
+  const open = true
   const user = useAppSelector((state) => state.auth.user);
   const [logoutAPI] = useLogoutMutation();
   const dispatch = useAppDispatch();

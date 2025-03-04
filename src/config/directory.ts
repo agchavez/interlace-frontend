@@ -193,6 +193,26 @@ export const permisions = [
             "cd.more",
         ]
     },
+    {
+        url:"/claim",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url:"/claim/detail/:id",
+        reg: /\/claim\/detail\/\d+/,
+        permissions: [
+            "any"
+        ]
+    },
+
+    {
+        url:"/claim/mine",
+        permissions: [
+            "any"
+        ]
+    },
 ]
 
 const directory: RoutePermissions = {}

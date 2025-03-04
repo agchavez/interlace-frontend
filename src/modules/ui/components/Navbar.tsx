@@ -9,7 +9,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { logout } from '../../../store/auth';
 import { ChangeDistributorCenter } from './ChangeDistributorCenter';
-import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice';
+import {setOpenChangeDistributionCenter, toggleSidebar} from '../../../store/ui/uiSlice';
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 // import { toggleSidebar } from '../../../store/ui';
 // import { openLogoutModal } from '../../../store/auth';
 interface NavbarProps {
@@ -50,20 +51,33 @@ const Navbar = ({sidebarOpen=false, setSidebaOpen}:NavbarProps) => {
                 left: 0,
                 zIndex: 3
             }}>
-            {
-                status === "authenticated" && <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
+            <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'}>
+
+                {status == 'authenticated' && <IconButton
+                    aria-label="menu"
+                    sx={{ mr: 0 }}
+                    onClick={() => {
+                        dispatch(toggleSidebar());
+                    }}
+                >
+                    <MenuOutlinedIcon fontSize='medium' color='primary' />
+                </IconButton>}
+            </Grid>
+            { status === "authenticated" && <Grid item flexShrink={1} className='ui__nav_bar__menu_button'>
                     <Button onClick={()=>setSidebaOpen && setSidebaOpen(!sidebarOpen)}>
                         { sidebarOpen ? <CloseIcon />: <MenuIcon />}
                     </Button>
                 </Grid>
             }
             <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
-                <div className="nav__img" style={{ display: 'flex', alignItems: 'end' }}>
+                <div className="nav__img" style={{ display: 'flex', alignItems: 'center' }}>
                     <img src={logo} alt="img" width={120} className="p-1" style={{ marginRight: '4px' }} />
-                    <Typography variant="body1" component="h1" fontWeight={400} className="p-1" sx={{ 
+                    <Typography variant="body2" component="p" fontWeight={100} className="p-1" sx={{
                         borderLeft: '2px solid black',
-                        paddingLeft: '4px   ',
-                    }}>
+                        paddingLeft: '4px',
+                    }}
+
+                    >
                         {import.meta.env.VITE_JS_APP_NAME}
                     </Typography>
                 </div>
