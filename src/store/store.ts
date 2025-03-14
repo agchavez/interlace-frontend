@@ -1,12 +1,12 @@
 import { Action, ThunkAction, configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { authSlice } from './auth'
+import {authSlice} from './auth'
 import { seguimientoSlice } from "./seguimiento/seguimientoSlice";
-import { authApi } from "./auth/authApi";
+import {authApi, notificationApi} from "./auth/authApi";
 import { userApi } from './user/userApi';
 
 import { userSlice } from "./user/userSlice";
-import { maintenanceApi } from './maintenance/maintenanceApi';
+import {distributorCenterApi, maintenanceApi} from './maintenance/maintenanceApi';
 import { maintenanceSlice } from './maintenance/maintenanceSlice';
 import { nearExpirationProductsApi, trackerApi, trackerDetailApi, trackerOutputApi, trackerPalletsApi, t2TrackingApi } from './seguimiento/trackerApi';
 import { uiSlice } from './ui/uiSlice';
@@ -32,6 +32,8 @@ export const store = configureStore({
         [orderSlice.name]: orderSlice.reducer,
         [inventoryApi.reducerPath]: inventoryApi.reducer,
         [t2TrackingApi.reducerPath]: t2TrackingApi.reducer,
+        [notificationApi.reducerPath]: notificationApi.reducer,
+        [distributorCenterApi.reducerPath]: distributorCenterApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -45,6 +47,8 @@ export const store = configureStore({
         .concat(orderApi.middleware)
         .concat(inventoryApi.middleware)
         .concat(t2TrackingApi.middleware)
+        .concat(notificationApi.middleware)
+        .concat(distributorCenterApi.middleware)
     ,
     devTools: true
 })

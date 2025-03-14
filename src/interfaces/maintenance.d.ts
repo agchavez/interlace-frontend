@@ -160,7 +160,10 @@ export interface Period {
     initialDate: string;
     finalDate: string;
     year: number;
+    product: number;
+    product_name: string;
     distributor_center: number;
+    distributor_center_data: DistributorCenter;
 }
 export interface Route {
     id:                      number;
@@ -197,4 +200,46 @@ export interface LotTypeQuerySearch extends BaseQueryParams {
 export interface LotBody {
     code: string;
     distributor_center: number;
+}
+
+// interfaces.ts
+
+/** Interfaz del país, tal como lo devuelve tu API de /api/country/ */
+export interface CountryType {
+    id: number;
+    created_at: string;
+    name: string;
+    code: string;
+    flag: string; // p.ej "hn"
+}
+
+/** Interfaz del Centro de Distribución (DistributorCenter).
+ *  Notar que data_country es un objeto con la info del país,
+ *  y country es su ID numérico.
+ */
+export interface DistributorCenter {
+    id: number;
+    data_country: CountryType;
+    name: string;
+    direction: string;
+    country_code?: string;
+    country?: number; // ID del país
+    location_distributor_center_code: string;
+}
+
+
+export interface CountryQueryParams extends BaseQueryParams{
+
+    search: string;
+}
+
+/** Parámetros para la query de distributorCenters */
+export interface DistributorCenterQueryParams extends BaseQueryParams {
+
+    search: string;
+}
+
+// Parámetros de búsqueda / paginación para Period
+export interface PeriodQueryParams extends  BaseQueryParams{
+    search?: string;
 }

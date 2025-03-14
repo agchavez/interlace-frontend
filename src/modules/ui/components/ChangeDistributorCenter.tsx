@@ -17,8 +17,6 @@ export const ChangeDistributorCenter = () => {
     const handleListItemClick = (id: number) => {
         dispatch(changeDistributionCenter(id))
     }
-
-
   return (
     <>
     <Dialog onClose={handleClose} open={openChangeDistributionCenter} maxWidth="xs" fullWidth>

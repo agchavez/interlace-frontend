@@ -213,6 +213,24 @@ export const permisions = [
             "any"
         ]
     },
+    {
+        url:"/notifications",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url:"/maintenance/distributor-center",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/maintenance/period-center",
+        permissions: [
+            "any"
+        ]
+    }
 ]
 
 const directory: RoutePermissions = {}

@@ -20,3 +20,24 @@ $md-breackpoint: 768px;
     text-align: center;
     font-size: 0.8rem;
 }
+
+/* Para navegadores basados en WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 5px;  /* Ancho del scroll */
+}
+
+/* Estilo del "track" (fondo de la barra de desplazamiento) */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Estilo del "thumb" (barra que se mueve) */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+/* Cambio de color al pasar el mouse */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

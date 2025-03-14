@@ -7,13 +7,14 @@ import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
 
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
-import Navbar from '../modules/ui/components/Navbar';
 
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
 import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
 import {Side2bar} from "../modules/ui/components/Side2Bar.tsx";
+import NotificationManager from "../modules/ui/components/NotificationManager.tsx";
+import MaintenanceRouter from "../modules/maintenance/MaintenanceRouter.tsx";
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -67,7 +68,7 @@ export function AppRouter() {
     return <>
         <div>
             {status === 'authenticated' && <Side2bar open={openMobileSidebar} setOpen={setOpenMobileSidebar} />}
-            <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
+            <NotificationManager/>
             <LogOutTimer />
             <div>
                 <div className={status === 'authenticated' ? !openSidebar ?
@@ -126,6 +127,13 @@ export function AppRouter() {
                             <PrivateRoute access={status === 'authenticated'} path="/">
                                 <LazyLoading Children={
                                     InventoryRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/maintenance/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    MaintenanceRouter
                                 } />
                             </PrivateRoute>
                         } />

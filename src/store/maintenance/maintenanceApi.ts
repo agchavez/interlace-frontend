@@ -18,6 +18,7 @@ import {
   Route,
   RouteQuerySearch,
   CreateLocationBody,
+  DistributorCenter, DistributorCenterQueryParams, CountryType, CountryQueryParams,
 } from "../../interfaces/maintenance";
 import { Product, ProductQuerySearch } from "../../interfaces/tracking";
 import { LotType, LotTypeQuerySearch } from '../../interfaces/maintenance';
@@ -33,8 +34,9 @@ export const maintenanceApi = createApi({
       }
       return headers;
     },
+
   }),
-  // tagTypes: ["Location"],
+  tagTypes: ["Location", "Period"],
   endpoints: (builder) => ({
     getTrailer: builder.query<BaseApiResponse<Trailer>, TrailerQuerySearch>({
       query: (params) => ({
@@ -127,7 +129,7 @@ export const maintenanceApi = createApi({
           body: body,
         };
       },
-      // invalidatesTags: ["Location"],
+      invalidatesTags: ["Location"],
     }),
     getProductPeriod: builder.query<Period, ProductPeriodQueryParams>({
       query: (params) => {
@@ -178,9 +180,149 @@ export const maintenanceApi = createApi({
           },
         };
       }
-    })
+    }),
+    getPeriodList: builder.query<BaseApiResponse<Period>, PeriodQueryParams>({
+      query: (params) => ({
+        url: `/period/`,
+        method: "GET",
+        params: {
+          limit: params.limit,
+          offset: params.offset,
+          search: params.search,
+        },
+      }),
+      // Si quieres tags para invalidar:
+      providesTags: (result) =>
+          result
+              ? [
+                ...result.results.map(({ id }) => ({ type: "Period" as const, id })),
+                { type: "Period", id: "LIST" },
+              ]
+              : [{ type: "Period", id: "LIST" }],
+    }),
+
+    createPeriod: builder.mutation<Period, Partial<Period>>({
+      query: (body) => ({
+        url: `/period/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Period", id: "LIST" }],
+    }),
+
+    updatePeriod: builder.mutation<Period, { id: number; data: Partial<Period> }>({
+      query: ({ id, data }) => ({
+        url: `/period/${id}/`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Period", id }],
+    }),
+
+    deletePeriod: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/period/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "Period", id }],
+    }),
+    massImportPeriods: builder.mutation<void, FormData>({
+      query: (formData) => ({
+        url: "/period/mass-import/", // Ajusta la URL a tu endpoint real
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: [{ type: "Period", id: "LIST" }],
+    }),
   }),
 });
+
+export const distributorCenterApi = createApi({
+  reducerPath: "distributorCenterApi",
+  tagTypes: ['dc'],
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_JS_APP_API_URL + "/api",
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as RootState).auth.token;
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
+  endpoints: (builder) => ({
+    // 1) Traer la lista de DistributorCenters
+    getDistributorCenters: builder.query<
+      BaseApiResponse<DistributorCenter>,
+      DistributorCenterQueryParams
+    >({
+      query: ({ limit, offset, search }) => ({
+        url: "distribution-center/",
+        params: { limit, offset, search },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({ type: 'dc' as const, id })),
+              { type: 'dc', id: 'LIST' },
+            ]
+          : [{ type: 'dc', id: 'LIST' }],
+    }),
+
+    // 2) Crear un nuevo
+    createDistributorCenter: builder.mutation<DistributorCenter, Partial<DistributorCenter>>({
+      query: (body) => ({
+        url: "distribution-center/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: 'dc', id: 'LIST' }],
+    }),
+
+    // 3) Actualizar uno existente
+    updateDistributorCenter: builder.mutation<
+      DistributorCenter,
+      { id: number; data: Partial<DistributorCenter> }
+    >({
+      query: ({ id, data }) => ({
+        url: `distribution-center/${id}/`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: 'dc', id }],
+    }),
+
+    // 4) Eliminar
+    deleteDistributorCenter: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `distribution-center/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'dc', id }],
+    }),
+
+    // 5) Traer países (para el autocomplete)
+    getCountries: builder.query<
+      BaseApiResponse<CountryType>,
+      CountryQueryParams
+    >({
+      query: ({ limit, offset, search }) => ({
+        url: "country/",
+        params: { limit, offset, search },
+      }),
+    }),
+  }),
+});
+
+export const {
+  useGetDistributorCentersQuery,
+  useCreateDistributorCenterMutation,
+  useUpdateDistributorCenterMutation,
+  useDeleteDistributorCenterMutation,
+
+  // Para países
+  useGetCountriesQuery,
+} = distributorCenterApi;
 
 export const {
   useGetTrailerQuery,
@@ -194,5 +336,10 @@ export const {
   useGetRouteQuery,
   usePostLocationsMutation,
   useGetLotQuery,
-  usePostLotMutation
+  usePostLotMutation,
+  useGetPeriodListQuery,
+  useCreatePeriodMutation,
+  useUpdatePeriodMutation,
+  useDeletePeriodMutation,
+    useMassImportPeriodsMutation
 } = maintenanceApi;

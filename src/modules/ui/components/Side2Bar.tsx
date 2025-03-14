@@ -9,10 +9,12 @@ import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
 import ContentPasteGoTwoToneIcon from "@mui/icons-material/ContentPasteGoTwoTone";
+import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
 import { SideBarItem } from "./SideBar2Item";
-import {Avatar, Tooltip} from "@mui/material";
+import {Avatar, Tooltip, useMediaQuery} from "@mui/material";
 import {RoutePermissionsDirectory} from "../../../config/directory.ts";
 import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
+import {toggleSidebar} from "../../../store/ui/uiSlice.ts";
 
 // ============================
 // Interfaz para subitems
@@ -192,6 +194,25 @@ const items: SideBarMainItem[] = [
                 permissions: ["cd"],
             }
         ],
+    },
+    {
+        text: "Mantenimiento",
+        icon: <EngineeringTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+        id: "mantenimiento",
+        subItems: [
+            {
+                text: "Centros de Distribución",
+                href: "/maintenance/distributor-center",
+                id: "cd",
+                permissions: ["any"],
+            },
+            {
+                text: "Periodos",
+                href: "/maintenance/period-center",
+                id: "period-cente",
+                permissions: ["any"],
+            }
+        ],
     }
 ];
 
@@ -263,6 +284,16 @@ export const Side2bar: FunctionComponent<Props> = ({ open, setOpen }) => {
         dispatch(logout());
     };
 
+    const isMobile = useMediaQuery('(max-width:600px)');
+
+    const handleCloseByMobile = () => {
+        // Si es dispositivo móvil, cerrar el sidebar
+        if (isMobile) {
+            dispatch(toggleSidebar());
+        }
+    }
+
+
     return (
         <div className={openSidebar? "sidebar close": "sidebar"}>
             <ul className="nav-links">
@@ -273,7 +304,10 @@ export const Side2bar: FunctionComponent<Props> = ({ open, setOpen }) => {
                         <SideBarItem
                             key={item.id}
                             item={item}
-                            subitemClickAction={() => setOpen(false)}
+                            subitemClickAction={() => {
+                                setOpen(false)
+                                handleCloseByMobile()
+                            }}
                         />
                     );
                 })}

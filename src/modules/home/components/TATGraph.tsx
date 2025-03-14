@@ -1,8 +1,9 @@
 import {
+  Box,
   CircularProgress,
   Container,
   Grid,
-  IconButton,
+  IconButton, LinearProgress,
   Typography,
 } from "@mui/material";
 import {
@@ -182,20 +183,13 @@ const TATGraph = () => {
       <Container maxWidth="xl" className="mt-5">
         <div className="row">
           <div className="col-sm-6">
-            {loading ? (
-              <div className="d-flex justify-content-center align-items-center mt-5">
-                <div>
-                  <CircularProgress />
-                  <Typography variant="body1" component="h6" className="ml-2">
-                    Obteniendo datos...
-                  </Typography>
-                </div>
-              </div>
-            ) : (
+
               <>
                 <div className="d-flex justify-content-between align-items-between">
+                  {loading &&<LinearProgress color="primary" sx={{width: '100%'}}/>}
                   <Grid container justifyContent="space-between">
                     <Grid item>
+
                       <div>
                         <IconButton
                           onClick={() => setTypeChart(TypeChart.LINE)}
@@ -222,13 +216,12 @@ const TATGraph = () => {
                   </Grid>
                 </div>
                 {typeChart === TypeChart.BAR && (
-                  <Bar options={options} data={data} />
+                  <Bar options={options} data={data} height={80} />
                 )}
                 {typeChart === TypeChart.LINE && (
-                  <Line options={options} data={data} />
+                  <Line options={options} data={data} height={80} />
                 )}
               </>
-            )}
           </div>
         </div>
       </Container>

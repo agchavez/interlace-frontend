@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LoginResponseOk, User } from "../../interfaces/login";
+import {LoginResponse, LoginResponseOk, User} from "../../interfaces/login";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -14,6 +14,7 @@ interface authInterface {
     status: AuthStatus;
     loading: boolean;
     openLogoutModal: boolean;
+    expiresIn: number | null;
 }
 
 const initialState: authInterface = {
@@ -21,11 +22,12 @@ const initialState: authInterface = {
     expiredIn: null,
     logoutType: null,
     tokenExpires: null,
-    token: localStorage.getItem('token') || '',
+    token: '',
     isAuthenticated: false,
     status: 'checking',
     loading: false,
     openLogoutModal: false,
+    expiresIn: null,
 }
 
 export const authSlice = createSlice({
@@ -79,6 +81,32 @@ export const authSlice = createSlice({
             state.openLogoutModal = true;
             state.logoutType = 'timeout';
         },
+
+        loginUser: (state, action: PayloadAction<LoginResponse>) => {
+            if (action.payload.token) {
+                state.user = action.payload.user;
+                state.token = action.payload.token.access;
+                state.isAuthenticated = true;
+                state.status = 'authenticated';
+                state.expiresIn = action.payload.token.exp;
+                state.loading = false;
+            }
+        },
+
+        veryFyToken: (state, action: PayloadAction<LoginResponse>) => {
+            if (action.payload.token) {
+                state.token = action.payload.token.access;
+                state.isAuthenticated = true;
+                state.status = 'authenticated';
+                state.expiresIn = action.payload.token.exp;
+                state.openLogoutModal = false;
+                state.loading = false;
+            }
+        },
+        checkAuth: (state, action: PayloadAction<AuthStatus>) => {
+            state.status = action.payload;
+        },
+
     }
 })
 
@@ -90,5 +118,8 @@ export const {
     setLoadingAuth,
     closeLogoutModal,
     openTimeoutModal,
-    setDistributionCenters
+    setDistributionCenters,
+    loginUser,
+    veryFyToken,
+    checkAuth
 } = authSlice.actions;

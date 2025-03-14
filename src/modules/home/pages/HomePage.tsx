@@ -430,9 +430,13 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={12}>
+                <Card elevation={2} sx={{
+                    p: 2, borderRadius: 2
+                }} >
                 <TATGraph />
-            </Grid>
+                </Card>
+                </Grid>
         </Grid>
     </Container>
 }

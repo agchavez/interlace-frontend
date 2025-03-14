@@ -1,23 +1,24 @@
 import backendApi from '../../config/apiConfig';
 import { AppThunk } from '../store';
-import { DistributionCenter, BaseaAPIResponse, GroupsResponse, } from '../../interfaces/maintenance';
+import {DistributionCenter, BaseaAPIResponse, GroupsResponse} from '../../interfaces/maintenance';
 import { setDistributionCenters, setOutputType, setGroups, setLoadingMain } from './maintenanceSlice';
 import { OutputType, Product } from '../../interfaces/tracking';
 import { toast } from 'sonner';
 import { addDetalleCarga } from '../seguimiento/seguimientoSlice';
 import { handleApiError } from '../../utils/error';
+import {BaseApiResponse} from "../../interfaces/api";
 
 
 // listar data inicial de mantenimiento
 export const getMaintenanceData = (): AppThunk => async (dispatch, getState) => {
     try {
         const { token } = getState().auth;
-        const { data: dataDistributionCenters } = await backendApi.get<DistributionCenter[]>('/distribution-center/', {
+        const { data: dataDistributionCenters } = await backendApi.get<BaseApiResponse<DistributionCenter>>('/distribution-center/?limit=1000', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        dispatch(setDistributionCenters(dataDistributionCenters));
+        dispatch(setDistributionCenters(dataDistributionCenters.results || []));
         const { data: dataGroups } = await backendApi.get<GroupsResponse>('/groups/', {
             headers: {
                 Authorization: `Bearer ${token}`

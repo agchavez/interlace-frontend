@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../../interfaces/user";
-import { GetDistributionCenterResponse } from "../../interfaces/user";
+import {DistributorCenter} from "../../interfaces/maintenance";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -8,7 +8,7 @@ export type LogOutType = 'timeout' | 'logout';
 interface userInterface {
     editingUser: User | null;
     loading: boolean;
-    distributionCenters: GetDistributionCenterResponse[];
+    distributionCenters: DistributorCenter[];
 }
 
 const initialState: userInterface = {
@@ -21,7 +21,7 @@ export const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        setDistributionCenters: (state, action:PayloadAction<GetDistributionCenterResponse[]>) => {
+        setDistributionCenters: (state, action:PayloadAction<DistributorCenter[]>) => {
             state.distributionCenters = action.payload
         },
         setEditingUser: (state, action:PayloadAction<User>) => {
