@@ -1,0 +1,244 @@
+import {
+  Button,
+  Container,
+  Divider,
+  Grid,
+  Typography,
+  Box,
+  Tabs,
+  Tab,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
+import { useLocation } from "react-router-dom";
+import { ClaimQueryParams } from "../../../store/claim/claimApi";
+import { useAppSelector } from "../../../store";
+import { setClaimQueryParams } from "../../../store/ui/uiSlice";
+import { useAppDispatch } from "../../../store/store";
+import ChipFilterCategory from "../../ui/components/ChipFilter";
+import { ClaimsFilter } from "../components/ClaimsFilter";
+import { useGetClaimsQuery } from "../../../store/claim/claimApi";
+import { format } from "date-fns";
+import { LocalShippingOutlined } from "@mui/icons-material";
+import PublicTwoToneIcon from '@mui/icons-material/PublicTwoTone';
+import ClaimsDataGrid from "../components/ClaimsDataGrid";
+
+function a11yProps(index: number) {
+  return {
+    id: `claim-tab-${index}`,
+    'aria-controls': `claim-tabpanel-${index}`,
+  };
+}
+
+export default function MyClaimsPage() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+  const { claimQueryParams } = useAppSelector((state) => state.ui);
+  const { disctributionCenters } = useAppSelector((state) => state.maintenance);
+
+  const [tabValue, setTabValue] = useState(0);
+  const [query, setQuery] = useState<ClaimQueryParams>(() => {
+    return {
+      search: queryParams.get("search") || claimQueryParams.search,
+      tipo: (queryParams.get("tipo") as any) || claimQueryParams.tipo,
+      status: (queryParams.get("status") as any) || claimQueryParams.status,
+      distributor_center: user?.centro_distribucion
+        ? [user.centro_distribucion]
+        : claimQueryParams.distributor_center || [],
+      date_after: claimQueryParams.date_after || "",
+      date_before: claimQueryParams.date_before || "",
+      id: queryParams.get("id") ? Number(queryParams.get("id")) : claimQueryParams.id,
+      claim_type: tabValue === 0 ? "LOCAL" : "IMPORT",
+    };
+  });
+
+  const { data, isLoading, isFetching, refetch } = useGetClaimsQuery(query);
+
+  useEffect(() => {
+    refetch();
+  }, [query, refetch]);
+
+  const handleFilter = (filterData: any) => {
+    const queryProcess: ClaimQueryParams = {
+      ...query,
+      search: filterData.search || "",
+      tipo: filterData.tipo,
+      status: filterData.status,
+      distributor_center: filterData.distributor_center ? [filterData.distributor_center] : [],
+      date_after: filterData.date_after || "",
+      date_before: filterData.date_before || "",
+      id: filterData.id || undefined,
+    };
+    setQuery(queryProcess);
+    dispatch(setClaimQueryParams(queryProcess));
+  };
+
+  const [openFilter, setOpenFilter] = useState(false);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    setQuery({
+      ...query,
+      claim_type: newValue === 0 ? "LOCAL" : "IMPORT"
+    });
+  };
+
+  return (
+    <>
+      <ClaimsFilter
+        open={openFilter}
+        handleClose={() => setOpenFilter(false)}
+        handleFilter={handleFilter}
+      />
+      <Container maxWidth="xl" sx={{ marginTop: 2 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h5" component="h1" fontWeight={400}>
+              Gestión de Reclamos
+            </Typography>
+            <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="body2" component="h2" fontWeight={400}>
+              A continuación se muestra el listado de los reclamos registrados en el sistema.
+              Para ver el detalle de cada uno, haga click en el botón ver o presione doble click sobre el registro.
+            </Typography>
+          </Grid>
+          <Grid item xs={12} display="flex" justifyContent="flex-end">
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{ marginRight: 1 }}
+              endIcon={<FilterListTwoToneIcon />}
+              onClick={() => setOpenFilter(true)}
+            >
+              Filtrar
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container spacing={1}>
+              {claimQueryParams.search && claimQueryParams.search.length > 0 && (
+                <ChipFilterCategory
+                  label="Buscar: "
+                  items={[
+                    {
+                      label: claimQueryParams.search,
+                      id: "",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, search: ""})),
+                    },
+                  ]}
+                />
+              )}
+              {claimQueryParams.id && (
+                <ChipFilterCategory
+                  label="ID Reclamo: "
+                  items={[
+                    {
+                      label: `${claimQueryParams.id}`,
+                      id: "",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, id: undefined})),
+                    },
+                  ]}
+                />
+              )}
+              {claimQueryParams.tipo && (
+                <ChipFilterCategory
+                  label="Tipo: "
+                  items={[
+                    {
+                      label: claimQueryParams.tipo === "FALTANTE"
+                        ? "Faltante"
+                        : claimQueryParams.tipo === "SOBRANTE"
+                          ? "Sobrante"
+                          : "Daños por Calidad y Transporte",
+                      id: "",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, tipo: undefined})),
+                    },
+                  ]}
+                />
+              )}
+              {(claimQueryParams.distributor_center && claimQueryParams.distributor_center.length > 0) && (
+                <ChipFilterCategory
+                  label="Centro de Distribución: "
+                  items={[
+                    {
+                      label: disctributionCenters.find(dc => dc.id === claimQueryParams.distributor_center![0])?.name || "",
+                      id: "dc",
+                      deleteAction: !user?.centro_distribucion ?
+                        (() => dispatch(setClaimQueryParams({...claimQueryParams, distributor_center: []}))) :
+                        undefined,
+                    },
+                  ]}
+                />
+              )}
+              {(claimQueryParams.date_after || claimQueryParams.date_before) && (
+                <ChipFilterCategory
+                  label="Fecha de Registro: "
+                  items={[
+                    {
+                      label: `Mayor que: ${claimQueryParams.date_after && format(new Date(claimQueryParams.date_after), 'dd/MM/yyyy')}`,
+                      id: "date_after",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, date_after: ""})),
+                    },
+                    {
+                      label: `Menor que: ${claimQueryParams.date_before && format(new Date(claimQueryParams.date_before), 'dd/MM/yyyy')}`,
+                      id: "date_before",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, date_before: ""})),
+                    },
+                  ]}
+                />
+              )}
+              {claimQueryParams.status && (
+                <ChipFilterCategory
+                  label="Estado: "
+                  items={[
+                    {
+                      label: claimQueryParams.status === "PENDIENTE"
+                        ? "Pendiente"
+                        : claimQueryParams.status === "EN_REVISION"
+                          ? "En Revisión"
+                          : claimQueryParams.status === "RECHAZADO"
+                            ? "Rechazado"
+                            : "Aprobado",
+                      id: "",
+                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, status: undefined})),
+                    },
+                  ]}
+                />
+              )}
+            </Grid>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs value={tabValue} onChange={handleTabChange} aria-label="claim tabs">
+                <Tab label="Reclamos Locales" {...a11yProps(0)} icon={<LocalShippingOutlined />} iconPosition="start" />
+                <Tab label="Reclamos Importados" {...a11yProps(1)} icon={<PublicTwoToneIcon />} iconPosition="start" />
+              </Tabs>
+            </Box>
+          </Grid>
+
+          <Grid item xs={12}>
+            <ClaimsDataGrid
+              claims={data || []}
+              loading={isLoading || isFetching}
+              claimType={tabValue === 0 ? "LOCAL" : "IMPORT"}
+              pagination={{
+                page: query.offset || 0,
+                pageSize: query.limit || 15,
+                setPage: (page, pageSize) => setQuery({
+                  ...query,
+                  offset: page,
+                  limit: pageSize
+                })
+              }}
+              totalCount={data?.length || 0}
+            />
+          </Grid>
+        </Grid>
+      </Container>
+    </>
+  );
+}

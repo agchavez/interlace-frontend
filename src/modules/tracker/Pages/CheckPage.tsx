@@ -20,7 +20,7 @@ import { getOpenTrackings } from "../../../store/seguimiento/trackerThunk";
 import { CompletarSeguimientoModal } from "../components/CompletarSeguimientoModal";
 import FloatLoading from "../components/FloatLoading";
 import { useSearchParams } from "react-router-dom";
-import {ReclamoModal} from "../components/ClaimDialog.tsx";
+import {ClaimModal} from "../components/ClaimDialog.tsx";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -135,7 +135,7 @@ export const CheckPage = () => {
           handleClose={handleCloseCreateModal}
         />
       )}
-      <ReclamoModal
+      <ClaimModal
         open={claimOpen}
         onClose={() => setClaimOpen(false)}
       />

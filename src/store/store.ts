@@ -12,6 +12,7 @@ import { nearExpirationProductsApi, trackerApi, trackerDetailApi, trackerOutputA
 import { uiSlice } from './ui/uiSlice';
 import { orderApi, orderSlice } from "./order";
 import { inventoryApi } from "./inventory/api";
+import {claimApi} from "./claim/claimApi.ts";
 
 export const store = configureStore({
     reducer: {
@@ -34,6 +35,7 @@ export const store = configureStore({
         [t2TrackingApi.reducerPath]: t2TrackingApi.reducer,
         [notificationApi.reducerPath]: notificationApi.reducer,
         [distributorCenterApi.reducerPath]: distributorCenterApi.reducer,
+        [claimApi.reducerPath]: claimApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -49,6 +51,7 @@ export const store = configureStore({
         .concat(t2TrackingApi.middleware)
         .concat(notificationApi.middleware)
         .concat(distributorCenterApi.middleware)
+        .concat(claimApi.middleware)
     ,
     devTools: true
 })

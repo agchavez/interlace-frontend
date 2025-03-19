@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../store'
 import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice'
 import { changeDistributionCenter } from '../../../store/auth'
 import BootstrapDialogTitle from './BoostrapDialog'
+import React from "react";
 
 export const ChangeDistributorCenter = () => {
     const {user} = useAppSelector(state => state.auth)
@@ -28,12 +29,12 @@ export const ChangeDistributorCenter = () => {
           <ListItem disableGutters key={cd}>
             <ListItemButton onClick={() => handleListItemClick(cd)}>
               <ListItemAvatar>
-                <Avatar sx={(theme) => ({
-                
-                    color: theme.palette.secondary.light,
-                })}>
-                  <PinDropTwoToneIcon />
-                </Avatar>
+                  <Avatar
+                      variant="rounded"
+                      alt={'hn'}
+                      src={`https://flagcdn.com/h240/hn.png`}
+                      sx={{ width: 35, height: 35 }}
+                  />
               </ListItemAvatar>
               <ListItemText primary={disctributionCenters.find((d) => d.id === cd)?.name} />
             </ListItemButton>

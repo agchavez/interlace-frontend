@@ -7,31 +7,33 @@ import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
 import SettingsSuggestRoundedIcon from '@mui/icons-material/SettingsSuggestRounded';
 import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
 import { SitemarkIcon } from './CustomIcons';
+import logo from "../../../assets/logo.png";
+import React from "react";
 
 const items = [
     {
         icon: <SettingsSuggestRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Adaptable performance',
+        title: 'Rendimiento adaptable',
         description:
-            'Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.',
+            'Nuestra plataforma se ajusta sin esfuerzo a tus necesidades, mejorando la eficiencia y simplificando la gestión de traslados.',
     },
     {
         icon: <ConstructionRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Built to last',
+        title: 'Construido para durar',
         description:
-            'Experience unmatched durability that goes above and beyond with lasting investment.',
+            'Experimenta una durabilidad inigualable que va más allá, asegurando una inversión a largo plazo en la gestión de logística.',
     },
     {
         icon: <ThumbUpAltRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Great user experience',
+        title: 'Excelente experiencia de usuario',
         description:
-            'Integrate our product into your routine with an intuitive and easy-to-use interface.',
+            'Integra nuestra plataforma en tu rutina con una interfaz intuitiva y fácil de usar, optimizando la gestión de pedidos y stocks.',
     },
     {
         icon: <AutoFixHighRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Innovative functionality',
+        title: 'Funcionalidad innovadora',
         description:
-            'Stay ahead with features that set new standards, addressing your evolving needs better than the rest.',
+            'Mantente a la vanguardia con características que establecen nuevos estándares, abordando tus necesidades logísticas en constante evolución.',
     },
 ];
 
@@ -41,7 +43,15 @@ export default function Content() {
             sx={{ flexDirection: 'column', alignSelf: 'center', gap: 4, maxWidth: 450 }}
         >
             <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                <SitemarkIcon />
+                <div className="" style={{ display: 'flex', alignItems: 'center' }}>
+                    <img src={logo} alt="img" width={100} className="p-1" style={{ marginRight: '4px' }} />
+                    <Typography variant="body2" component="p" fontWeight={100} className="p-1" sx={{
+                        borderLeft: '2px solid black',
+                        paddingLeft: '4px',
+                    }}>
+                        {import.meta.env.VITE_JS_APP_NAME}
+                    </Typography>
+                </div>
             </Box>
             {items.map((item, index) => (
                 <Stack key={index} direction="row" sx={{ gap: 2 }}>
