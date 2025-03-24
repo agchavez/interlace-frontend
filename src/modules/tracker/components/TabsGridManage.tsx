@@ -80,7 +80,20 @@ export const TabsGridManage: FC<TabsGridManageProps> = ({ query, setquery, data,
                 );
             },
         },
-
+        {
+            field: "trailer",
+            headerName: "Unidad descargada",
+            flex: 1,
+            width: 180,
+            minWidth: 180,
+            renderCell: (params) => {
+                return (
+                    <Typography variant="body2">
+                        {params.row.tariler_data ? params.row.tariler_data.code : "-"}
+                    </Typography>
+                );
+            },
+        },
         {
             field: "distributor_center_data",
             headerName: "Centro de distribución",

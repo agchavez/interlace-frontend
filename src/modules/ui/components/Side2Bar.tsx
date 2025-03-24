@@ -12,8 +12,7 @@ import ContentPasteGoTwoToneIcon from "@mui/icons-material/ContentPasteGoTwoTone
 import { SideBarItem } from "./SideBar2Item";
 import {Avatar, Tooltip} from "@mui/material";
 import {RoutePermissionsDirectory} from "../../../config/directory.ts";
-import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
-
+//import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone'
 // ============================
 // Interfaz para subitems
 // ============================
@@ -173,26 +172,8 @@ const items: SideBarMainItem[] = [
                 permissions: ["inventory.manage"],
             },
         ],
-    },
-    {
-        text: "Reclamos",
-        icon: <AssignmentLateTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
-        id: "claim",
-        subItems: [
-            {
-                text: "Seguimiento",
-                href: "/claim/",
-                id: "reclamos",
-                permissions: ["any"],
-            },
-            {
-                text: "Mis Reclamos",
-                href: "/claim/mine",
-                id: "misreclamos",
-                permissions: ["cd"],
-            }
-        ],
     }
+
 ];
 
 // Aquí podrías inyectar `RoutePermissionsDirectory` o algo parecido
@@ -210,7 +191,7 @@ interface Props {
     setOpen: (val: boolean) => void;
 }
 
-export const Side2bar: FunctionComponent<Props> = ({ open, setOpen }) => {
+export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
     const location = useLocation();
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
     const dispatch = useAppDispatch();

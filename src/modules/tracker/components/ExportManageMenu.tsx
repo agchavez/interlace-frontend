@@ -92,6 +92,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
       headers = [
         "Fecha",
         "Tracking",
+          "Unidad descargada",
         "Centro de Distribución",
         "Transferencia de entrada",
         "Traslado 5001",
@@ -109,6 +110,7 @@ const ExportManageMenu: FunctionComponent<ExportManageProps> = ({
         return [
           format(new Date(tr.created_at), "dd/MM/yyyy hh:mm"),
           "TRK-" + tr.id.toString().padStart(5, "0"),
+            tr.tariler_data.code,
           tr.distributor_center_data.name,
           tr.input_document_number,
           tr.transfer_number,
