@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
@@ -15,16 +14,16 @@ import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import {  SitemarkIcon } from './CustomIcons';
+import { SitemarkIcon } from './CustomIcons';
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "../../ui/components/BoostrapDialog";
-import {login} from "../../../store/auth";
-import {Alert} from "@mui/material";
+import { login } from "../../../store/auth";
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": {
@@ -61,7 +60,8 @@ export default function SignInCard() {
     const dispatch = useDispatch();
     const [loginAPI, resultLogin] = useLoginMutation();
     const [openDialog, setOpenDialog] = useState(false);
-    const [remember, setRemember] = useState(localStorage.getItem('remember') ? true : false)
+    const [remember, setRemember] = useState(localStorage.getItem('remember') ? true : false);
+    const [showPassword, setShowPassword] = useState(false);
     const { register, handleSubmit, formState: { errors } } = useForm({
         defaultValues: {
             email: localStorage.getItem('remember') || '',
@@ -69,11 +69,16 @@ export default function SignInCard() {
         resolver: yupResolver(schema)
     });
 
-    const onSubmit = async (data) => {
+    interface FormData {
+        email: string;
+        password: string;
+    }
+
+    const onSubmit = async (data: FormData): Promise<void> => {
         const { email, password } = data;
-        if(remember){
+        if (remember) {
             localStorage.setItem('remember', email);
-        }else{
+        } else {
             localStorage.removeItem('remember');
         }
         await loginAPI({
@@ -124,12 +129,26 @@ export default function SignInCard() {
                     </FormLabel>
                     <TextField
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         {...register("password")}
                         error={!!errors.password}
                         helperText={errors.password?.message}
                         required
                         fullWidth
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={() => setShowPassword(prevState => !prevState)}
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        edge="end"
+                                    >
+                                        {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
                     />
                 </FormControl>
                 <FormControlLabel

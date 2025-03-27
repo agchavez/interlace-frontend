@@ -84,11 +84,11 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                     </div>
                 </Grid>
                 <Grid item display={'flex'} justifyContent={'right'} alignItems={'center'} sx={{ gap: 2 }}>
-                    <IconButton onClick={onDrawerOpen}>
+                    {status === 'authenticated' && <IconButton onClick={onDrawerOpen}>
                         <Badge badgeContent={notificationCount} color="secondary">
                             <NotificationsNoneTwoToneIcon />
                         </Badge>
-                    </IconButton>
+                    </IconButton>}
                     {status === 'authenticated' && <Grid item xs={12}
                                                          display={'flex'}
                                                          justifyContent={'center'}

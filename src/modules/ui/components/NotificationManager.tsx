@@ -21,25 +21,33 @@ const NotificationManager: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const { token, user } = useAppSelector(state => state.auth);
     const tokenPayload = token;
+    const isAuthenticated = !!token && !!user?.id;
 
-    const { lastMessage } = useWebSocket(`${import.meta.env.VITE_JS_APP_API_URL_WS}/ws/notification/${user?.id}/`, {
-        queryParams: { token: tokenPayload },
-        onClose: () => {
-            setNotifications([]);
-        },
-        onError: () => {
-            setNotifications([]);
-        },
-        reconnectAttempts: 30,
-        reconnectInterval: 30000,
-        shouldReconnect: (closeEvent) => {
-            if (closeEvent.code === 1000) {
-                return false;
-            }
-            return true;
-        },
-        retryOnError: true,
-    });
+    const { lastMessage } = useWebSocket(
+        isAuthenticated 
+            ? `${import.meta.env.VITE_JS_APP_API_URL_WS}/ws/notification/${user?.id}/` 
+            : null,
+        {
+            queryParams: { token: tokenPayload },
+            onClose: () => {
+                setNotifications([]);
+            },
+            onError: () => {
+                setNotifications([]);
+            },
+            reconnectAttempts: 30,
+            reconnectInterval: 30000,
+            shouldReconnect: (closeEvent) => {
+                if (closeEvent.code === 1000) {
+                    return false;
+                }
+                return true;
+            },
+            retryOnError: true,
+            // Only connect when authenticated
+            share: isAuthenticated,
+        }
+    );
 
     const playSound = () => {
         const audio = new Audio('/public/alert.wav');
