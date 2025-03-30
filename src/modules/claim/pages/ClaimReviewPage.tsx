@@ -7,20 +7,16 @@ import {
   Tabs,
   Tab,
   Button,
-  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { useSearchParams } from "react-router-dom";
 import FloatLoading from "../../tracker/components/FloatLoading";
 import ArchivoModal from "../components/ClaimDetail";
-import { format } from "date-fns-tz";
 import { ClaimCard } from "../components/ClaimCard";
-import { getClaimById } from "../../../store/claim/claimThunks";
 import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
-import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import ClaimPDFDocument from "../components/ClaimPDF";
+import {getClaimById} from "../../../store/claim/claimThunks.ts";
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
