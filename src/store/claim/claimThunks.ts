@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { errorApiHandler } from "../../utils/errorApiHandler";
 import { claimApi } from "./claimApi";
 import { setError, setLoading, setSelectedClaim } from "./claimSlice";
+import { errorApiHandler } from "../../utils/error";
 
 export const getClaimById = createAsyncThunk(
   "claim/getClaimById",
