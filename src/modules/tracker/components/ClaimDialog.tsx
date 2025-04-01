@@ -1,66 +1,38 @@
-import {FC, useEffect} from "react";
+// ClaimModal.tsx
+import React, { FC, useState, useEffect } from "react";
 import {
-    DialogContent,
+    Dialog,
     DialogActions,
     Button,
-    Grid,
+    Divider,
     Typography,
+    Box,
+    Grid,
+    DialogContent,
+    TextField,
     FormControl,
     InputLabel,
-    Select,
     MenuItem,
-    styled,
-    Dialog,
-    TextField,
-    Tooltip,
-    Box,
-    Divider,
-    IconButton
+    Select
 } from "@mui/material";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
-import OutboxTwoToneIcon from "@mui/icons-material/OutboxTwoTone";
-import DialogTitle from "../../ui/components/BoostrapDialog";
-import "react-quill/dist/quill.snow.css";
-import * as Yup from "yup";
-import { useForm, Controller } from "react-hook-form";
-import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
-import {errorApiHandler} from "../../../utils/error.ts";
-import {useCreateClaimMutation} from "../../../store/claim/claimApi.ts";
-import {toast} from "sonner";
-import {useAppSelector} from "../../../store";
+import {Controller, useForm } from "react-hook-form";
+import { styled } from "@mui/material/styles";
+import ClaimTabs from "./ClaimTabs";
+import ClaimDocumentation from "./ClaimDocumentation";
+import ClaimProducts, { ProductItem } from "./ClaimProducts";
+import { errorApiHandler } from "../../../utils/error";
+import { useCreateClaimMutation } from "../../../store/claim/claimApi";
+import { toast } from "sonner";
+import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
 
-// Props del modal
-interface ClaimModalProps {
-    open: boolean;
-    onClose: () => void;
-}
 
-// Styled Dialog
-export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialogContent-root": {
-        padding: theme.spacing(2),
-    },
-    "& .MuiDialogActions-root": {
-        padding: theme.spacing(1),
-    },
-}));
-
-// Opciones del Select de tipo de reclamo
 const claimTypes = [
     { value: "FALTANTE", label: "Faltante" },
     { value: "SOBRANTE", label: "Sobrante" },
     { value: "DAÑOS_CALIDAD_TRANSPORTE", label: "Daños por Calidad y Transporte" },
 ];
 
-// Esquema de validación Yup
-const claimSchema = Yup.object().shape({
-    tipo: Yup.string().required("El tipo de reclamo es requerido"),
-    photos_container_closed: Yup.array().min(1, "Debes subir al menos 1 fotografía de contenedor cerrado"),
-
-});
-
-// Interfaz del formulario
-interface FormData {
+export interface FormData {
     tipo: string;
     descripcion: string;
     claimNumber: string;
@@ -82,21 +54,27 @@ interface FormData {
     photos_repalletized: File[];
 }
 
-export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
-    const [createClaim, { isLoading, isSuccess, error }] = useCreateClaimMutation();
+export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialogContent-root": {
+        padding: theme.spacing(2)
+    },
+    "& .MuiDialogActions-root": {
+        padding: theme.spacing(1)
+    }
+}));
 
-    const {  seguimeintoActual, seguimientos } = useAppSelector(
-        (state) => state.seguimiento
-    );
-    const {
-        register,
-        handleSubmit,
-        control,
-        reset,
-        setValue,
-        watch,
-        formState: { errors },
-    } = useForm<FormData>({
+interface ClaimModalProps {
+    open: boolean;
+    onClose: () => void;
+}
+
+export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
+    const [tabIndex, setTabIndex] = useState(0);
+    const handleTabChange = (event: React.SyntheticEvent, newIndex: number) => {
+        setTabIndex(newIndex);
+    };
+
+    const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
             tipo: "FALTANTE",
             descripcion: "",
@@ -116,25 +94,41 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
             photos_damaged_product_dents: [],
             photos_damaged_boxes: [],
             photos_grouped_bad_product: [],
-            photos_repalletized: [],
-        },
+            photos_repalletized: []
+        }
     });
 
-    const claimType = watch("tipo");
+    const [createClaim, { isLoading, isSuccess, error }] = useCreateClaimMutation();
+    const [products, setProducts] = useState<ProductItem[]>([]);
+
+    const addProduct = (item: ProductItem) => {
+        setProducts((prev) => [...prev, item]);
+    };
+
+    const editProduct = (index: number, item: ProductItem) => {
+        setProducts((prev) => prev.map((p, i) => (i === index ? item : p)));
+    };
+
+    const deleteProduct = (index: number) => {
+        setProducts((prev) => prev.filter((_, i) => i !== index));
+    };
+
     const onSubmit = async (data: FormData) => {
-        console.log("Data del formulario:", data);
         try {
-            await claimSchema.validate(data, { abortEarly: false });
             const formData = new FormData();
             formData.append("claim_type", data.tipo);
             formData.append("descripcion", data.descripcion);
             formData.append("claim_number", data.claimNumber);
             formData.append("discard_doc", data.discardDoc);
             formData.append("description", data.observations);
-            if (seguimeintoActual !== undefined && seguimientos[seguimeintoActual] !== undefined) {
 
-                formData.append("tracker_id", seguimientos[seguimeintoActual].id.toString());
-            }
+            // Se recorre el arreglo de productos para incluirlos
+            products.forEach((item, index) => {
+                formData.append(`products[${index}][product]`, item.product);
+                formData.append(`products[${index}][quantity]`, item.quantity.toString());
+                formData.append(`products[${index}][batch]`, item.batch);
+            });
+
             if (data.claimFile) formData.append("claim_file", data.claimFile);
             if (data.creditMemoFile) formData.append("credit_memo_file", data.creditMemoFile);
             if (data.observationsFile) formData.append("observations_file", data.observationsFile);
@@ -173,40 +167,29 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                 formData.append("photos_repalletized", file);
             });
 
-            console.log("Data del formulario:", formData);
-            // Call the createClaim mutation
-            const respuestaClaim =await createClaim(formData).unwrap();
-            console.log("Respuesta del reclamo:", respuestaClaim);
+            await createClaim(formData).unwrap();
             toast.success("Registro de reclamo", {
-                description: "Reclamo registrado exitosamente",
+                description: "Reclamo registrado exitosamente"
             });
-
         } catch (err: any) {
-            if (err && err.inner) {
-                const newErrors: Record<string, string> = {};
-                err.inner.forEach((validationError: any) => {
-                    if (validationError.path && !newErrors[validationError.path]) {
-                        newErrors[validationError.path] = validationError.message;
-                    }
-                });
-                console.log("Errores de validación:", newErrors);
-            } else {
-                console.error("Error al validar:", err);
-            }
+            console.error("Error al enviar el reclamo:", err);
+            errorApiHandler(err, "Error al registrar el reclamo");
         }
     };
 
     useEffect(() => {
-        if(isSuccess && !isLoading) {
+        if (isSuccess && !isLoading) {
             onClose();
-        }else if(error){
+        }
+        if (error) {
             errorApiHandler(error, "Error al registrar el reclamo");
         }
     }, [isSuccess, isLoading, error, onClose]);
 
     return (
         <BootstrapDialog open={open} maxWidth="lg" fullWidth>
-            <DialogTitle onClose={onClose} id="customized-dialog-title">
+            {/* Conservamos el DialogTitle original */}
+            <BootstrapDialogTitle onClose={onClose} id="customized-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
                     Levantar Reclamo - Tracker Importado
                 </Typography>
@@ -215,9 +198,10 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                         Complete el formulario para registrar el reclamo
                     </Typography>
                 </Box>
-            </DialogTitle>
+            </BootstrapDialogTitle>
             <Divider sx={{ mt: 1 }} />
-            <DialogContent  sx={{ pb: 0 }}>
+            <DialogContent sx={{ pb: 0 }}>
+                {/* Sección "Datos Generales" que siempre se muestra arriba */}
                 <Grid container spacing={1}>
                     <Grid item xs={12}>
                         <Typography variant="body2" color="textSecondary">
@@ -231,11 +215,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                                 name="tipo"
                                 control={control}
                                 render={({ field }) => (
-                                    <Select
-                                        labelId="tipo-reclamo-label"
-                                        label="Tipo de Reclamo"
-                                        {...field}
-                                    >
+                                    <Select labelId="tipo-reclamo-label" label="Tipo de Reclamo" {...field}>
                                         {claimTypes.map((t) => (
                                             <MenuItem key={t.value} value={t.value}>
                                                 {t.label}
@@ -251,16 +231,9 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                             )}
                         </FormControl>
                     </Grid>
-
                     <Grid item xs={12} sm={6}>
-                        <TextField
-                            label="Número de Claim"
-                            fullWidth
-                            size="small"
-                            {...register("claimNumber")}
-                        />
+                        <TextField label="Número de Claim" fullWidth size="small" {...register("claimNumber")} />
                     </Grid>
-
                     <Grid item xs={12}>
                         <TextField
                             label="Observaciones"
@@ -271,273 +244,51 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                             {...register("observations")}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("claimFile", files[0] || null)}
-                            label="Subir archivo Claim (PDF/Excel)"
-                            // accept="application/pdf, application/vnd.ms-excel"
-                            accept={{ "application/pdf": [".pdf"], "application/vnd.ms-excel": [".xls", ".xlsx"] }}
-                            maxFiles={1}
-                        />
-                        <Grid item xs={12} sm={6} md={4}>
-                            <TextField
-                                label="Documento de Descarte"
-                                fullWidth
-                                size="small"
-                                {...register("discardDoc")}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("creditMemoFile", files[0] || null)}
-                            label="Subir Nota de Crédito (PDF)"
-                            accept={{ "application/pdf": [".pdf"] }}
-                            maxFiles={1}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("observationsFile", files[0] || null)}
-                            label="Subir archivo de Observaciones (PDF)"
-                            accept={{ "application/pdf": [".pdf"] }}                            maxFiles={1}
-                        />
-                    </Grid>
-                    <Divider sx={{ my: 2 }} />
-                    <Grid item xs={12}>
-                        <Divider>
-
-                        <Typography variant="body2" color="textSecondary">
-                            Fotografías (máximo 5 por categoría)
-                        </Typography>
-                        </Divider>
-
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            1. Contenedor cerrado{" "}
-                            <Tooltip title="Fotografía del contenedor completamente cerrado">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_container_closed", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            2. Contenedor con 1 puerta abierta{" "}
-                            <Tooltip title="Fotografía del contenedor con una de sus puertas abierta">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_container_one_open", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            3. Contenedor con 2 puertas abiertas{" "}
-                            <Tooltip title="Fotografía del contenedor con ambas puertas abiertas">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_container_two_open", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            4. Vista superior del contenido del contenedor{" "}
-                            <Tooltip title="Fotografía tomada desde arriba del contenido del contenedor">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_container_top", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            5. Fotografía durante la descarga{" "}
-                            <Tooltip title="Fotografía tomada durante la descarga del contenedor">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_during_unload", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Typography variant="body2">
-                            6. Fisuras/abolladuras de pallets{" "}
-                            <Tooltip title="Fotografías que muestren fisuras o abolladuras en los pallets">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
-                                </IconButton>
-                            </Tooltip>
-                        </Typography>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("photos_pallet_damage", files)}
-                            label="Subir fotos"
-                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                            maxFiles={5}
-                        />
-                    </Grid>
-                    {claimType === "DAÑOS_CALIDAD_TRANSPORTE" && (
-                        <>
-                            <Grid item xs={12}>
-                                <Divider>
-
-                                <Typography variant="body2" color="textSecondary">
-                                    Producto dañado
-                                </Typography>
-                                </Divider>
-
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="body2">
-                                    a) Base de la lata/botella (fecha de vencimiento y lote){" "}
-                                    <Tooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Typography>
-                                <ImagePreviewDropzone
-                                    files={[]}
-                                    onFilesChange={(files: File[]) => setValue("photos_damaged_product_base", files)}
-                                    label="Subir fotos"
-                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                    maxFiles={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="body2">
-                                    b) Abolladuras (mínimo 3 diferentes){" "}
-                                    <Tooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Typography>
-                                <ImagePreviewDropzone
-                                    files={[]}
-                                    onFilesChange={(files: File[]) => setValue("photos_damaged_product_dents", files)}
-                                    label="Subir fotos"
-                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                    maxFiles={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="body2">
-                                    c) Cajas dañadas por golpes o problemas de calidad{" "}
-                                    <Tooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Typography>
-                                <ImagePreviewDropzone
-                                    files={[]}
-                                    onFilesChange={(files: File[]) => setValue("photos_damaged_boxes", files)}
-                                    label="Subir fotos"
-                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                    maxFiles={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="body2">
-                                    d) Producto en mal estado agrupado en 1 pallet{" "}
-                                    <Tooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Typography>
-                                <ImagePreviewDropzone
-                                    files={[]}
-                                    onFilesChange={(files: File[]) => setValue("photos_grouped_bad_product", files)}
-                                    label="Subir fotos"
-                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                    maxFiles={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography variant="body2">
-                                    e) Repaletizado por identificación de producto dañado{" "}
-                                    <Tooltip title="Fotografías del repaletizado para identificar producto dañado">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
-                                        </IconButton>
-                                    </Tooltip>
-                                </Typography>
-                                <ImagePreviewDropzone
-                                    files={[]}
-                                    onFilesChange={(files: File[]) => setValue("photos_repalletized", files)}
-                                    label="Subir fotos"
-                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                    maxFiles={5}
-                                />
-                            </Grid>
-                        </>
-                    )}
                 </Grid>
+
+                {/* Luego de los datos generales, se muestran los Tabs */}
+                <ClaimTabs value={tabIndex} onChange={handleTabChange} />
+
+                {/* Tab Panel: Documentación */}
+                <div role="tabpanel" hidden={tabIndex !== 0} id="claim-tabpanel-0">
+                    <ClaimDocumentation
+                        register={register}
+                        control={control}
+                        errors={errors}
+                        setValue={setValue}
+                        watch={watch}
+                    />
+                </div>
+
+                {/* Tab Panel: Productos */}
+                <div role="tabpanel" hidden={tabIndex !== 1} id="claim-tabpanel-1">
+                    <ClaimProducts
+                        products={products}
+                        onAddProduct={addProduct}
+                        onEditProduct={editProduct}
+                        onDeleteProduct={deleteProduct}
+                    />
+                </div>
             </DialogContent>
+            <Divider />
             <DialogActions>
                 <Button
                     variant="text"
                     onClick={() => {
                         reset();
+                        setProducts([]);
                     }}
-                    startIcon={<CleaningServicesIcon />}
+                    // Puedes agregar el icono CleaningServicesIcon aquí si lo deseas
                     color="primary"
                 >
                     Limpiar
                 </Button>
-                <Button
-                    variant="outlined"
-                    onClick={handleSubmit(onSubmit)}
-                    startIcon={<OutboxTwoToneIcon />}
-                    color="secondary"
-                >
+                <Button variant="outlined" type="submit" color="secondary" onClick={handleSubmit(onSubmit)} disabled={isLoading}>
                     Enviar Reclamo
                 </Button>
             </DialogActions>
         </BootstrapDialog>
     );
 };
+
+export default ClaimModal;
