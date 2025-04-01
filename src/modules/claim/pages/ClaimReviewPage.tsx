@@ -15,7 +15,7 @@ import FloatLoading from "../../tracker/components/FloatLoading";
 import ArchivoModal from "../components/ClaimDetail";
 import { ClaimCard } from "../components/ClaimCard";
 import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
-import {getClaimById} from "../../../store/claim/claimThunks.ts";
+import {getAllClaims, getClaimById} from "../../../store/claim/claimThunks.ts";
 
 
 interface TabPanelProps {
@@ -77,6 +77,10 @@ export const ClaimReviewPage = () => {
     }
   };
 
+  useEffect(() => {
+    dispatch(getAllClaims({}))
+  }, []);
+
   return (
     <>
       {archivoOpen && selectedClaim?.tracking && (
@@ -130,7 +134,17 @@ export const ClaimReviewPage = () => {
                     index={index}
                     key={claim.id}
                   >
-                    <ClaimCard claim={claim} />
+                    <ClaimCard claim={{
+                      id: claim.id,
+                      tracking_id: claim.tracker,
+                      trailer: claim.tracking?.trailer.toString() || "",
+                      distributor_center: claim.tracking?.distributor_center.toString() || "",
+                      created_at: claim.created_at,
+                      status: claim.status,
+                      reason: claim.description,
+                      is_archivo_up: claim.claim_file !== null,
+                      archivo_name: claim.claim_file?.name,
+                    }} />
                   </CustomTabPanel>
                 ))}
               </Box>
