@@ -21,6 +21,7 @@ import { CompletarSeguimientoModal } from "../components/CompletarSeguimientoMod
 import FloatLoading from "../components/FloatLoading";
 import { useSearchParams } from "react-router-dom";
 import {ClaimModal} from "../components/ClaimDialog.tsx";
+import ClaimEditModal from "../components/ClaimEditModal.tsx";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -132,10 +133,22 @@ export const CheckPage = () => {
           handleClose={handleCloseCreateModal}
         />
       )}
-      <ClaimModal
-        open={claimOpen}
-        onClose={() => setClaimOpen(false)}
-      />
+      {claimOpen && seguimientos.length > 0 && (
+          seguimientos[seguimeintoActual || 0]?.claim ? (
+              <ClaimEditModal
+                  open={claimOpen}
+                  onClose={() => setClaimOpen(false)}
+                  claimId={seguimientos[seguimeintoActual || 0].claim!}
+              />
+          ) : (
+              <ClaimModal
+                  tracker={seguimientos[seguimeintoActual || 0].id}
+                  open={claimOpen}
+                  onClose={() => setClaimOpen(false)}
+              />
+          )
+      )}
+
       <EliminarSeguimientoModal
         index={seguimeintoActual || 0}
         open={eliminarOpen}

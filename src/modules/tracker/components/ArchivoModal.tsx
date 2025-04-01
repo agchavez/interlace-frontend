@@ -83,8 +83,8 @@ const ArchivoModal: FunctionComponent<ArchivoModalProps> = ({
 
   useEffect(() => {
     if (open) {
-      setValue("fileName", seguimiento.archivo_name);
-      set_file_name(seguimiento.archivo_name);
+      setValue("fileName", seguimiento);
+      set_file_name(seguimiento);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);

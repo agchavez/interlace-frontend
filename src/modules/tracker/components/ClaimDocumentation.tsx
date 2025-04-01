@@ -1,21 +1,13 @@
 // ClaimDocumentation.tsx
 import React from "react";
 import {
-    DialogTitle,
     DialogContent,
     Grid,
     Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    TextField,
     Tooltip,
-    Box,
     Divider,
     IconButton
 } from "@mui/material";
-import { Controller } from "react-hook-form";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
 
 
@@ -47,9 +39,6 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ register, contr
                             accept={{ "application/pdf": [".pdf"], "application/vnd.ms-excel": [".xls", ".xlsx"] }}
                             maxFiles={1}
                         />
-                        <Grid item xs={12} sm={6} md={4}>
-                            <TextField label="Documento de Descarte" fullWidth size="small" {...register("discardDoc")} />
-                        </Grid>
                     </Grid>
                     <Grid item xs={12} sm={6} md={4}>
                         <ImagePreviewDropzone
@@ -182,8 +171,6 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ register, contr
                         />
                     </Grid>
 
-                    {/* Sección condicional para DAÑOS_CALIDAD_TRANSPORTE */}
-                    {claimType === "DAÑOS_CALIDAD_TRANSPORTE" && (
                         <>
                             <Grid item xs={12}>
                                 <Divider>
@@ -278,7 +265,6 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ register, contr
                                 />
                             </Grid>
                         </>
-                    )}
                 </Grid>
             </DialogContent>
         </>

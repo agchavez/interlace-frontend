@@ -66,9 +66,10 @@ export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 interface ClaimModalProps {
     open: boolean;
     onClose: () => void;
+    tracker: number;
 }
 
-export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
+export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabChange = (event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
@@ -116,6 +117,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
     const onSubmit = async (data: FormData) => {
         try {
             const formData = new FormData();
+            formData.append("tracker_id", tracker);
             formData.append("claim_type", data.tipo);
             formData.append("descripcion", data.descripcion);
             formData.append("claim_number", data.claimNumber);
@@ -167,6 +169,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose }) => {
                 formData.append("photos_repalletized", file);
             });
 
+            console.log(formData)
             await createClaim(formData).unwrap();
             toast.success("Registro de reclamo", {
                 description: "Reclamo registrado exitosamente"
