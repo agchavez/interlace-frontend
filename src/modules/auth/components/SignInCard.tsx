@@ -14,7 +14,6 @@ import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
-import { SitemarkIcon } from './CustomIcons';
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Dialog from "@mui/material/Dialog";
@@ -24,6 +23,8 @@ import { login } from "../../../store/auth";
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": {
@@ -45,19 +46,40 @@ const schema = yup.object().shape({
 const Card = styled(MuiCard)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
-    alignSelf: 'center',
     width: '100%',
-    padding: theme.spacing(4),
+    padding: theme.spacing(3),
     gap: theme.spacing(2),
     boxShadow:
         'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
     [theme.breakpoints.up('sm')]: {
         width: '450px',
     },
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(2), // Menos padding en móviles
+    },
 }));
+
+const LoginContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: theme.spacing(2),
+    
+    // Añadir padding-top para dispositivos móviles para evitar solapamiento con navbar
+    [theme.breakpoints.down('sm')]: {
+        paddingTop: theme.spacing(2), // Espacio adicional en la parte superior para móviles
+        paddingBottom: theme.spacing(4),
+        justifyContent: 'flex-start', // Alinear al inicio para móviles
+    }
+}));
+
 
 export default function SignInCard() {
     const dispatch = useDispatch();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [loginAPI, resultLogin] = useLoginMutation();
     const [openDialog, setOpenDialog] = useState(false);
     const [remember, setRemember] = useState(localStorage.getItem('remember') ? true : false);
@@ -99,20 +121,22 @@ export default function SignInCard() {
     }
 
     return (
-        <>
-        <Card variant="outlined">
-            <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-                <SitemarkIcon />
-            </Box>
-            <Typography component="h1" variant="h4">
+        <LoginContainer>    
+            <Card variant="outlined">
+            <Typography component="h2" variant="h5" fontWeight="bold" sx={{ mb: isMobile ? 0.5 : 1 }}>
                 Iniciar Sesión
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body2" color="text.secondary" sx={{ mb: isMobile ? 0.5 : 2 }}>
                 Ingrese sus credenciales para acceder al sistema
             </Typography>
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: isMobile ? 1 : 2 
+            }}>
                 <FormControl>
-                    <FormLabel htmlFor="email">Correo</FormLabel>
+                    <FormLabel htmlFor="email" sx={{ mb: 0.5 }}>Correo</FormLabel>
                     <TextField
                         id="email"
                         type="email"
@@ -122,10 +146,11 @@ export default function SignInCard() {
                         required
                         fullWidth
                         size="small"
+                        sx={{ mb: isMobile ? 0.5 : 1 }}
                     />
                 </FormControl>
                 <FormControl>
-                    <FormLabel htmlFor="password">
+                    <FormLabel htmlFor="password" sx={{ mb: 0.5 }}>
                         Contraseña
                     </FormLabel>
                     <TextField
@@ -145,6 +170,7 @@ export default function SignInCard() {
                                         onClick={() => setShowPassword(prevState => !prevState)}
                                         onMouseDown={(e) => e.preventDefault()}
                                         edge="end"
+                                        size="small"
                                     >
                                         {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                                     </IconButton>
@@ -154,18 +180,35 @@ export default function SignInCard() {
                     />
                 </FormControl>
                 <FormControlLabel
-                    control={<Checkbox checked={remember} onChange={()=>setRemember(!remember)} value={remember} /> }
-                    label="Recordar usuario"
+                    control={
+                        <Checkbox 
+                            checked={remember} 
+                            onChange={()=>setRemember(!remember)} 
+                            value={remember}
+                            size={isMobile ? "small" : "medium"}
+                        />
+                    }
+                    label={<Typography variant={isMobile ? "caption" : "body2"}>Recordar usuario</Typography>}
+                    sx={{ mt: 0 }}
                 />
-                <Button type="submit" variant="contained" color="primary" disabled={resultLogin.isLoading}>
+                <Button 
+                    type="submit" 
+                    variant="contained" 
+                    color="primary" 
+                    disabled={resultLogin.isLoading}
+                    sx={{ py: isMobile ? 0.8 : 1.2, mt: 0.5 }}
+                >
                     {resultLogin.isLoading ? "Cargando..." : "Iniciar Sesión"}
                 </Button>
-                <Button color="secondary" onClick={() => setOpenDialog(true)}>
+                <Button 
+                    color="secondary" 
+                    onClick={() => setOpenDialog(true)}
+                    sx={{ mt: 0.5, py: isMobile ? 0.5 : 0.8 }}
+                    size={isMobile ? "small" : "medium"}
+                >
                     ¿No tienes cuenta?
                 </Button>
             </Box>
-
-
         </Card>
 
             <BootstrapDialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
@@ -182,6 +225,6 @@ export default function SignInCard() {
                     </Box>
                 </DialogContent>
             </BootstrapDialog>
-    </>
+        </LoginContainer>
     );
 }
