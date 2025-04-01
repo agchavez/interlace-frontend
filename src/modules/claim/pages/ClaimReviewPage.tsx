@@ -7,20 +7,16 @@ import {
   Tabs,
   Tab,
   Button,
-  CircularProgress,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { useSearchParams } from "react-router-dom";
 import FloatLoading from "../../tracker/components/FloatLoading";
 import ArchivoModal from "../components/ClaimDetail";
-import { format } from "date-fns-tz";
 import { ClaimCard } from "../components/ClaimCard";
-import { getClaimById } from "../../../store/claim/claimThunks";
 import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
-import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import ClaimPDFDocument from "../components/ClaimPDF";
+import {getAllClaims, getClaimById} from "../../../store/claim/claimThunks.ts";
+
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -81,6 +77,10 @@ export const ClaimReviewPage = () => {
     }
   };
 
+  useEffect(() => {
+    dispatch(getAllClaims({}))
+  }, []);
+
   return (
     <>
       {archivoOpen && selectedClaim?.tracking && (
@@ -134,7 +134,17 @@ export const ClaimReviewPage = () => {
                     index={index}
                     key={claim.id}
                   >
-                    <ClaimCard claim={claim} />
+                    <ClaimCard claim={{
+                      id: claim.id,
+                      tracking_id: claim.tracker,
+                      trailer: claim.tracking?.trailer.toString() || "",
+                      distributor_center: claim.tracking?.distributor_center.toString() || "",
+                      created_at: claim.created_at,
+                      status: claim.status,
+                      reason: claim.description,
+                      is_archivo_up: claim.claim_file !== null,
+                      archivo_name: claim.claim_file?.name,
+                    }} />
                   </CustomTabPanel>
                 ))}
               </Box>

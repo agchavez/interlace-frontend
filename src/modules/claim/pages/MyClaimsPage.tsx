@@ -11,13 +11,12 @@ import {
 import { useEffect, useState } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { useLocation } from "react-router-dom";
-import { ClaimQueryParams } from "../../../store/claim/claimApi";
+import { ClaimQueryParams, useGetMyClaimsQuery } from "../../../store/claim/claimApi";
 import { useAppSelector } from "../../../store";
 import { setClaimQueryParams } from "../../../store/ui/uiSlice";
 import { useAppDispatch } from "../../../store/store";
 import ChipFilterCategory from "../../ui/components/ChipFilter";
 import { ClaimsFilter } from "../components/ClaimsFilter";
-import { useGetClaimsQuery } from "../../../store/claim/claimApi";
 import { format } from "date-fns";
 import { LocalShippingOutlined } from "@mui/icons-material";
 import PublicTwoToneIcon from '@mui/icons-material/PublicTwoTone';
@@ -51,10 +50,12 @@ export default function MyClaimsPage() {
       date_before: claimQueryParams.date_before || "",
       id: queryParams.get("id") ? Number(queryParams.get("id")) : claimQueryParams.id,
       claim_type: tabValue === 0 ? "LOCAL" : "IMPORT",
+      offset: 0,
+      limit: 15,
     };
   });
 
-  const { data, isLoading, isFetching, refetch } = useGetClaimsQuery(query);
+  const { data, isLoading, isFetching, refetch } = useGetMyClaimsQuery(query);
 
   useEffect(() => {
     refetch();
@@ -222,7 +223,16 @@ export default function MyClaimsPage() {
 
           <Grid item xs={12}>
             <ClaimsDataGrid
-              claims={data || []}
+              claims={data?.results.map((claim)=>(
+                {
+                  id: claim.id, 
+                  created_at: claim.created_at, 
+                  distributor_center: claim.tracking?.distributor_center, 
+                  status: claim.status, 
+                  tipo: claim.claim_type,
+                  reference_number: claim.tracking?.id?.toString(),
+                  user_name: claim.tracking?.user_name,
+                })) || []}
               loading={isLoading || isFetching}
               claimType={tabValue === 0 ? "LOCAL" : "IMPORT"}
               pagination={{
@@ -234,7 +244,7 @@ export default function MyClaimsPage() {
                   limit: pageSize
                 })
               }}
-              totalCount={data?.length || 0}
+              totalCount={data?.results?.length || 0}
             />
           </Grid>
         </Grid>

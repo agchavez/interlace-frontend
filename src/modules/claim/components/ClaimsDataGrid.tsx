@@ -152,7 +152,7 @@ import { DataGrid, GridCellParams, GridColDef, esES } from "@mui/x-data-grid";
               <IconButton
                 size="small"
                 color="primary"
-                onClick={() => navigate(`/claims/detail/${params.row.id}`)}
+                onClick={() => navigate(`/claim/detail/${params.row.id}`)}
               >
                 <ArrowForwardIcon />
               </IconButton>
@@ -182,7 +182,7 @@ import { DataGrid, GridCellParams, GridColDef, esES } from "@mui/x-data-grid";
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             loading={loading}
-            onRowDoubleClick={(params) => navigate(`/claims/detail/${params.id}`)}
+            onRowDoubleClick={(params) => navigate(`/claim/detail/${params.id}`)}
           />
         );
       };

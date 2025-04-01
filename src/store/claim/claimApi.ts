@@ -2,6 +2,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "..";
 import { BaseApiResponse } from "../../interfaces/api";
+import { Tracker } from "../../interfaces/tracking";
+import { downloadDocument } from "../order";
 
 export interface Claim {
   id: number;
@@ -13,22 +15,44 @@ export interface Claim {
   claim_number?: string;
   discard_doc?: string;
   observations?: string;
-  claim_file?: string;
-  credit_memo_file?: string;
-  observations_file?: string;
-  photos_container_closed: { id: number, url: string }[];
-  photos_container_one_open: { id: number, url: string }[];
-  photos_container_two_open: { id: number, url: string }[];
-  photos_container_top: { id: number, url: string }[];
-  photos_during_unload: { id: number, url: string }[];
-  photos_pallet_damage: { id: number, url: string }[];
-  photos_damaged_product_base: { id: number, url: string }[];
-  photos_damaged_product_dents: { id: number, url: string }[];
-  photos_damaged_boxes: { id: number, url: string }[];
-  photos_grouped_bad_product: { id: number, url: string }[];
-  photos_repalletized: { id: number, url: string }[];
+  claim_file?: ClaimFile;
+  credit_memo_file?: ClaimFile;
+  observations_file?: ClaimFile;
+  photos_container_closed: DocumentFromClaim[];
+  photos_container_one_open: DocumentFromClaim[];
+  photos_container_two_open: DocumentFromClaim[];
+  photos_container_top: DocumentFromClaim[];
+  photos_during_unload: DocumentFromClaim[];
+  photos_pallet_damage: DocumentFromClaim[];
+  photos_damaged_product_base: DocumentFromClaim[];
+  photos_damaged_product_dents: DocumentFromClaim[];
+  photos_damaged_boxes: DocumentFromClaim[];
+  photos_grouped_bad_product: DocumentFromClaim[];
+  photos_repalletized: DocumentFromClaim[];
   created_at: string;
   updated_at: string;
+  tracking?: Tracker;
+}
+
+export interface ClaimFile {
+  name: string;
+  file: string | null;
+  extension: string | null;
+  type: string | null;
+  created_at: string | null;
+  access_url: string;
+  subfolder: string | null;
+}
+export interface DocumentFromClaim {
+  id: number;
+  name: string;
+  file: string | null;
+  extension: string | null;
+  type: string | null;
+  created_at: string | null;
+  access_url: string;
+  folder: string | null;
+  subfolder: string | null;
 }
 export interface ClaimQueryParams {
   search?: string;
@@ -38,6 +62,8 @@ export interface ClaimQueryParams {
   distributor_center?: number[];
   date_after?: string;
   date_before?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export const claimApi = createApi({
@@ -77,12 +103,24 @@ export const claimApi = createApi({
       providesTags: (_result, _error, id) => [{ type: "Claims", id }],
     }),
 
-    getMyClaims: builder.query<BaseApiResponse<Claim>, void>({
-      query: () => ({
+    getMyClaims: builder.query<BaseApiResponse<Claim>, ClaimQueryParams | void>({
+      query: (params) => ({
         url: "/claim/mis-claims/",
         method: "GET",
+        params: params || {},
       }),
       providesTags: [{ type: "Claims", id: "USER_CLAIMS" }],
+    }),
+    downloadDocument: builder.query<Blob, { filename: string, claim_id: number }>({
+      query: (params) => ({
+        url: `/claim/${params.claim_id}/download-file/`,
+        method: "GET",
+        params: {filename: params.filename},
+        responseHandler: async (response) => {
+          const blob = await response.blob();
+          return blob;
+        },
+      }),
     }),
 
     createClaim: builder.mutation<Claim, FormData>({
@@ -122,6 +160,7 @@ export const {
   useGetClaimsQuery,
   useGetClaimByIdQuery,
   useGetMyClaimsQuery,
+  useDownloadDocumentQuery,
   useCreateClaimMutation,
   useUpdateClaimMutation,
   useChangeClaimStatusMutation,

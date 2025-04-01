@@ -153,9 +153,16 @@ export default function HomePage() {
             start_date,
             end_date
         })
+        localStorage.setItem('filterDate', filter)
         refetch()
         handleClose()
     }
+
+    useEffect(() => {
+        const filterDate = localStorage.getItem('filterDate') as FilterDate;
+        handleFilter(filterDate || FilterDate.TODAY)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         dispatch(setDashboardQueryParams(query));

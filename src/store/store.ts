@@ -13,6 +13,7 @@ import { uiSlice } from './ui/uiSlice';
 import { orderApi, orderSlice } from "./order";
 import { inventoryApi } from "./inventory/api";
 import {claimApi} from "./claim/claimApi.ts";
+import {claimSlice} from "./claim/claimSlice.ts";
 
 export const store = configureStore({
     reducer: {
@@ -36,6 +37,7 @@ export const store = configureStore({
         [notificationApi.reducerPath]: notificationApi.reducer,
         [distributorCenterApi.reducerPath]: distributorCenterApi.reducer,
         [claimApi.reducerPath]: claimApi.reducer,
+        [claimSlice.name]: claimSlice.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
