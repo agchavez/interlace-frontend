@@ -97,10 +97,7 @@ export const CheckPage = () => {
   };
 
   const handleClickDelete = () => {
-    if (seguimientos[seguimeintoActual || 0]?.type === "IMPORT") {
-        setClaimOpen(true);
-        return;
-    }
+    
     setEliminarOpen(true);
   };
   useEffect(() => {
@@ -228,6 +225,7 @@ export const CheckPage = () => {
                       seguimiento={seguimiento}
                       indice={index}
                       disable={false}
+                      openClaim={()=> setClaimOpen(true)}
                     />
                   </CustomTabPanel>
                 );
@@ -260,9 +258,7 @@ export const CheckPage = () => {
                     fontWeight={400}
                     color={"gray.700"}
                   >
-                    {seguimientos[seguimeintoActual || 0]?.type === "IMPORT"
-                      ? "Reclamo"
-                      : "Eliminar"}
+                    {"Eliminar"}
                   </Typography>
                 </Button>
               </Grid>

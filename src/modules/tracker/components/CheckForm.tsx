@@ -61,6 +61,7 @@ import ObservationModal from "./ObservationModal";
 import ArchivoModal from "./ArchivoModal";
 import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
+import AssignmentLateTwoToneIcon from "@mui/icons-material/AssignmentLateTwoTone";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -76,10 +77,12 @@ export const CheckForm = ({
   seguimiento,
   indice,
   disable,
+    openClaim
 }: {
   seguimiento: Seguimiento;
   indice: number;
   disable: boolean;
+  openClaim: () => void;
 }) => {
   const dispatch = useAppDispatch();
   const [open, setopen] = useState(false);
@@ -187,6 +190,9 @@ export const CheckForm = ({
           alignItems="center"
           gap={1}
         >
+          <IconButton color="error" onClick={openClaim}>
+            <AssignmentLateTwoToneIcon fontSize="large" />
+          </IconButton>
           <PDFDownloadLink
             fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
             document={

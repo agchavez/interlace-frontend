@@ -121,6 +121,7 @@ export default function SignInCard() {
                         helperText={errors.email?.message}
                         required
                         fullWidth
+                        size="small"
                     />
                 </FormControl>
                 <FormControl>
@@ -134,6 +135,7 @@ export default function SignInCard() {
                         error={!!errors.password}
                         helperText={errors.password?.message}
                         required
+                        size="small"
                         fullWidth
                         InputProps={{
                             endAdornment: (
