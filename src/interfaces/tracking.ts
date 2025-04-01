@@ -1,4 +1,5 @@
 import { TypeChart } from "../modules/home/components/TATGraph";
+import { ClaimFile } from "../store/claim/claimApi";
 import { BaseQueryParams, DistributionCenter, LocationType } from "./maintenance";
 import { OrderStatusType } from "./orders";
 export interface Rastra {
@@ -85,6 +86,7 @@ export interface CheckFormType {
 // Tracker
 export interface Tracker {
   id: number;
+  claim: number | null;
   driver_import: string | null;
   tariler_data: TarilerData;
   transporter_data: TransporterData;
@@ -120,9 +122,11 @@ export interface Tracker {
   location_data: LocationType | null;
   tracker_detail_output: TrackerDeailOutput[];
   observation: string | null;
-  archivo_name: string | null;
-  is_archivo_up: boolean;
   order: number | null;
+  file_data_1: ClaimFile | null;
+  file_data_2: ClaimFile | null;
+  file_1: number | null;
+  file_2: number | null;
 }
 
 export type TrackerType = "LOCAL" | "IMPORT";

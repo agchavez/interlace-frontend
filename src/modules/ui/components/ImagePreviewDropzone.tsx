@@ -13,9 +13,10 @@ interface ImagePreviewDropzoneProps {
     label: string;
     accept: { [key: string]: readonly string[] };
     maxFiles?: number;
+    sxDrop?: SxProps<Theme>;
 }
 
-export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles }) => {
+export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles, sxDrop }) => {
     const [previews, setPreviews] = useState<string[]>(files.map(file => URL.createObjectURL(file)));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
@@ -43,9 +44,9 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
                     Arrastra y suelta los archivos aquí, o haz clic para seleccionar archivos
                 </Typography>
             </Box>
-            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 2 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 0 }}>
                 {previews.map((preview, index) => (
-                    <Box key={index} sx={{ position: "relative", width: 100, height: 100, mr: 1, mb: 1 }}>
+                    <Box key={index} sx={{ position: "relative", width: 80, height: 80, mr: 1, mb: 1, ...(sxDrop || {}), }}>
                         {accept["application/pdf"] ? (
                             <Box
                                 sx={{

@@ -6,6 +6,17 @@ import { Tracker } from "../../interfaces/tracking";
 import { downloadDocument } from "../order";
 import { Trailer, Transporter } from "../../interfaces/maintenance";
 
+
+export interface ClaimProduct {
+  id:           number;
+  product_name: string;
+  product_id:   number;
+  created_at:   Date;
+  quantity:     number;
+  claim:        number;
+  product:      number;
+}
+
 export interface Claim {
   id: number;
   tracker: number;
@@ -30,6 +41,7 @@ export interface Claim {
   photos_damaged_boxes: DocumentFromClaim[];
   photos_grouped_bad_product: DocumentFromClaim[];
   photos_repalletized: DocumentFromClaim[];
+  claim_products: ClaimProduct[];
   created_at: string;
   updated_at: string;
   tracking?: Tracker;
@@ -149,13 +161,19 @@ export const claimApi = createApi({
 
     updateClaim: builder.mutation<Claim, { id: number, formData: FormData }>({
       query: ({ id, formData }) => ({
-        url: `/claim/${id}/`,
+        url: `/claim/${id}/update-claim/`,
         method: "PATCH",
         body: formData,
       }),
       invalidatesTags: (_result, _error, { id }) => [{ type: "Claims", id }, { type: "Claims", id: "LIST" }, { type: "Claims", id: "USER_CLAIMS" }],
     }),
-
+getClaimByTracker: builder.query<Claim, number>({
+        query: (id) => ({
+            url: `/claim/tracker/${id}/`,
+            method: "GET",
+        }),
+        providesTags: (_result, _error, id) => [{ type: "Claims", id }],
+    }),
     changeClaimStatus: builder.mutation<Claim, {id: number, formData: FormData}>({
       query: ({id, formData}) => ({
         url: `/claim/${id}/change-state/`,

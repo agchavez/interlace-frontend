@@ -3,6 +3,7 @@ import { Product, TarilerData, TransporterData } from '../../interfaces/tracking
 import { LocationType } from "../../interfaces/maintenance";
 import { OrderDetailHistory } from "../../interfaces/orders";
 import { OutputT2, OutputDetailT2, Status } from '../../interfaces/trackingT2';
+import { ClaimFile } from "../claim/claimApi";
 
 export type AuthStatus = 'authenticated' | 'unauthenticated' | 'checking';
 export type LogOutType = 'timeout' | 'logout';
@@ -87,6 +88,7 @@ export interface DetalleCargaIdx extends DetalleCarga {
 
 export interface Seguimiento {
     id: number,
+    claim: number | null,
     user: number,
     rastra: TarilerData,
     transporter: TransporterData,
@@ -119,9 +121,11 @@ export interface Seguimiento {
     originLocationData: LocationType | null;
     accounted: number | null;
     observation: string | null;
-    archivo_name: string | null;
-    is_archivo_up: boolean;
     order: number | null;
+    file_data_1: ClaimFile | null;
+    file_data_2: ClaimFile | null;
+    file_1: number | null;
+    file_2: number | null;
 }
 
 export interface SeguimientoIDX extends Partial<Seguimiento> {
@@ -308,6 +312,13 @@ export const seguimientoSlice = createSlice({
               t2TrackingActual.output_detail_t2 = [...ordenado, ...otros];
             }
           },
+          updateSeguimientoById: (state, action: PayloadAction<Seguimiento>) => {
+            const { id } = action.payload
+            const index = state.seguimientos.findIndex((seguimiento) => seguimiento.id === id)
+            if (index !== -1) {
+                state.seguimientos[index] = action.payload
+            }
+        },
     }
 })
 
@@ -333,5 +344,6 @@ export const {
     setLoadingT2Tracking,
     setLoadingT2TrackingDetail,
     removeSeguimientoT2,
-    orderingT2Selected
+    orderingT2Selected,
+    updateSeguimientoById
 } = seguimientoSlice.actions;
