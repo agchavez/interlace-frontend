@@ -227,7 +227,7 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
                         name="distributor_center"
                         control={control}
                         render={({ field }) => (
-                            <FormControl size="small" fullWidth disabled={user?.centro_distribucion !== undefined}>
+                            <FormControl size="small" fullWidth disabled={user?.centro_distribucion !== null}>
                               <InputLabel id="distribution_center">
                                 Centro de distribución
                               </InputLabel>

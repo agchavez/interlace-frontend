@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { claimApi } from "./claimApi";
-import { setError, setLoading, setSelectedClaim } from "./claimSlice";
+import { setClaims, setError, setLoading, setSelectedClaim, setTotalCount } from "./claimSlice";
 import { errorApiHandler } from "../../utils/error";
 
 export const getClaimById = createAsyncThunk(
@@ -144,6 +144,7 @@ export const getAllClaims = createAsyncThunk(
       const response = await dispatch(
         claimApi.endpoints.getClaims.initiate(params)
       ).unwrap();
+      dispatch(setClaims(response.results));
 
       dispatch(setLoading(false));
       return response;

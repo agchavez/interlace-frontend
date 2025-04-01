@@ -23,6 +23,7 @@ const TrackerT2Router = lazy(() => import('../modules/tracker_t2/TrackerT2Router
 const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
+const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
 
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -134,6 +135,13 @@ export function AppRouter() {
                             <PrivateRoute access={status === 'authenticated'} path="/">
                                 <LazyLoading Children={
                                     MaintenanceRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/claim/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/">
+                                <LazyLoading Children={
+                                    ClaimRouter
                                 } />
                             </PrivateRoute>
                         } />
