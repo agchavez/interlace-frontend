@@ -1,4 +1,4 @@
-import { DataGrid, GridCellParams, GridColDef, esES } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
       import { FC, useState, useEffect } from "react";
       import { Typography, IconButton, Chip } from "@mui/material";
       import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -95,7 +95,7 @@ import { DataGrid, GridCellParams, GridColDef, esES } from "@mui/x-data-grid";
             width: 130,
             minWidth: 130,
             renderCell: (params) => {
-              let color;
+              let color: "error" | "default" | "warning" | "info" | "success";
               let label;
 
               switch(params.value) {

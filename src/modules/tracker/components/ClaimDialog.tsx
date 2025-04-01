@@ -71,7 +71,7 @@ interface ClaimModalProps {
 
 export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
     const [tabIndex, setTabIndex] = useState(0);
-    const handleTabChange = (event: React.SyntheticEvent, newIndex: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
     };
 
@@ -117,7 +117,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
     const onSubmit = async (data: FormData) => {
         try {
             const formData = new FormData();
-            formData.append("tracker_id", tracker);
+            formData.append("tracker_id", tracker.toString());
             formData.append("claim_type", data.tipo);
             formData.append("descripcion", data.descripcion);
             formData.append("claim_number", data.claimNumber);

@@ -191,7 +191,7 @@ export function DistributorCenterListPage() {
                     onPaginationModelChange={setPaginationModel}
                     pageSizeOptions={[5, 10, 20]}
                     getRowId={(row) => row.id}
-                    onCellDoubleClick={(row)=> handleOpenEdit(row)}
+                    onCellDoubleClick={(params) => handleOpenEdit(params.row as DistributorCenter)}
                 />
             </div>
         </Grid>

@@ -29,8 +29,10 @@ export const EliminarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ 
         dispatch(removeTracking(index, seguimientoId))
     }
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-            Eliminar Seguimiento
+        <DialogTitle id="customized-dialog-title">
+            <Box sx={{ m: 0, p: 2 }}>
+                Eliminar Seguimiento
+            </Box>
         </DialogTitle>
         <IconButton
             aria-label="close"

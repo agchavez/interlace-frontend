@@ -17,7 +17,7 @@ import { useCreatePeriodMutation, useUpdatePeriodMutation } from "../../../store
 const schema = yup.object().shape({
     label: yup.string().oneOf(["A", "B", "C"]).required("La etiqueta es obligatoria").nullable(),
     initialDate: yup.string().required("La fecha inicial es obligatoria"),
-    product: yup.number().nullable().required("El producto es obligatorio"),
+    product: yup.number().required("El producto es obligatorio").nullable(),
 });
 
 interface FormData {

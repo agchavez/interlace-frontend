@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import {
-    LocalShipping, WarningAmber, AddCircle, Info,
     KeyboardArrowDown, KeyboardArrowUp, Description
 } from "@mui/icons-material";
 
@@ -45,7 +44,7 @@ const StatusChip = styled(Chip)(({ status }: { status: string }) => {
     };
 });
 
-const ClaimTypeChip = styled(Chip)(({ theme, claimType }: { theme: any, claimType: string }) => {
+const ClaimTypeChip = styled(Chip)(({ claimType }: { theme: any, claimType: string }) => {
     const colorMap: Record<string, string> = {
         "FALTANTE": "#E57373",
         "SOBRANTE": "#81C784",
@@ -83,29 +82,9 @@ const getClaimTypeLabel = (type: string): string => {
 };
 
 const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
-    const [tabIndex, setTabIndex] = useState(0);
     const [expanded, setExpanded] = useState(false);
-
-    const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-        setTabIndex(newValue);
-    };
-
     const handleExpandClick = () => {
         setExpanded(!expanded);
-    };
-
-    // Determinar ícono según el tipo de reclamo
-    const getClaimTypeIcon = () => {
-        switch (claim.claim_type) {
-            case "FALTANTE":
-                return <WarningAmber />;
-            case "SOBRANTE":
-                return <AddCircle />;
-            case "DAÑOS_CALIDAD_TRANSPORTE":
-                return <LocalShipping />;
-            default:
-                return <Info />;
-        }
     };
 
     return (

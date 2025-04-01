@@ -12,10 +12,10 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { useSearchParams } from "react-router-dom";
 import FloatLoading from "../../tracker/components/FloatLoading";
-import ArchivoModal from "../components/ClaimDetail";
 import { ClaimCard } from "../components/ClaimCard";
-import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
+// import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
 import {getAllClaims, getClaimById} from "../../../store/claim/claimThunks.ts";
+import ArchivoModal from "../components/ClaimDetail.tsx";
 
 
 interface TabPanelProps {
@@ -55,11 +55,11 @@ export const ClaimReviewPage = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
 
-  const { data: driverData, isLoading: loadingDriver } = useGetDriverQuery({
-    id: selectedClaim?.tracking?.driver !== null ? selectedClaim?.tracking?.driver : undefined,
-    limit: 1,
-    offset: 0,
-  });
+  // const { data: driverData, isLoading: loadingDriver } = useGetDriverQuery({
+  //   id: selectedClaim?.tracking?.driver !== null ? selectedClaim?.tracking?.driver : undefined,
+  //   limit: 1,
+  //   offset: 0,
+  // });
 
   const handleChangeTab = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -71,11 +71,11 @@ export const ClaimReviewPage = () => {
     }
   }, [id, dispatch]);
 
-  const handleDownloadArchivo = () => {
-    if (selectedClaim?.tracking?.id) {
-      // Implement download functionality
-    }
-  };
+  // const handleDownloadArchivo = () => {
+  //   if (selectedClaim?.tracking?.id) {
+  //     // Implement download functionality
+  //   }
+  // };
 
   useEffect(() => {
     dispatch(getAllClaims({}))

@@ -44,8 +44,8 @@ export default function MyClaimsPage() {
       tipo: (queryParams.get("tipo") as any) || claimQueryParams.tipo,
       status: (queryParams.get("status") as any) || claimQueryParams.status,
       distributor_center: user?.centro_distribucion
-        ? [user.centro_distribucion]
-        : claimQueryParams.distributor_center || [],
+        ? [Number(user.centro_distribucion)]
+        : (claimQueryParams.distributor_center?.map(Number) as number[]) || [],
       date_after: claimQueryParams.date_after || "",
       date_before: claimQueryParams.date_before || "",
       id: queryParams.get("id") ? Number(queryParams.get("id")) : claimQueryParams.id,
@@ -73,7 +73,7 @@ export default function MyClaimsPage() {
       id: filterData.id || undefined,
     };
     setQuery(queryProcess);
-    dispatch(setClaimQueryParams(queryProcess));
+    dispatch(setClaimQueryParams({ ...queryProcess, search: queryProcess.search || "", id: queryProcess.id || undefined, tipo: queryProcess.tipo || "FALTANTE", status: queryProcess.status || "PENDIENTE" }));
   };
 
   const [openFilter, setOpenFilter] = useState(false);
@@ -165,7 +165,7 @@ export default function MyClaimsPage() {
                   label="Centro de Distribución: "
                   items={[
                     {
-                      label: disctributionCenters.find(dc => dc.id === claimQueryParams.distributor_center![0])?.name || "",
+                      label: disctributionCenters.find(dc => Number(dc.id) === Number(claimQueryParams.distributor_center![0]))?.name || "",
                       id: "dc",
                       deleteAction: !user?.centro_distribucion ?
                         (() => dispatch(setClaimQueryParams({...claimQueryParams, distributor_center: []}))) :

@@ -38,7 +38,7 @@ import AgregarProductoSalida from "./AgregarProductoSalida";
 import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
-  chanceStatusTracking, downloadFile,
+  chanceStatusTracking,
   // downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 
@@ -62,7 +62,6 @@ import {
   useGetOperatorByDistributionCenterQuery,
 } from "../../../store/maintenance/maintenanceApi";
 import ObservationModal from "./ObservationModal";
-import ArchivoModal from "./ArchivoModal";
 import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
 import AssignmentLateTwoToneIcon from "@mui/icons-material/AssignmentLateTwoTone";

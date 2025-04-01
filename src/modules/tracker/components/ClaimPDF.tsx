@@ -7,7 +7,6 @@ import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
 import PDFTable from "../../ui/components/pdfDocs/Table";
-import { Trailer, Transporter } from "../../../interfaces/maintenance";
 import { useEffect, useState } from "react";
 
 const styles = StyleSheet.create({
@@ -53,7 +52,7 @@ function ClaimPDF({
     return row;
   });
 
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [_, setImageBase64] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchImage() {
@@ -61,7 +60,11 @@ function ClaimPDF({
       const blob = await response.blob();
       const reader = new FileReader();
       reader.readAsDataURL(blob);
-      reader.onloadend = () => setImageBase64(reader.result);
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setImageBase64(reader.result);
+        }
+      };
     }
 
     if (imageUrl) {

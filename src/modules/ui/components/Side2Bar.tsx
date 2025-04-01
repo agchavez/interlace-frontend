@@ -231,7 +231,7 @@ interface Props {
     setOpen: (val: boolean) => void;
 }
 
-export const Side2bar: FunctionComponent<Props> = ({ open, setOpen }) => {
+export const Side2bar: FunctionComponent<Props> = ({  setOpen }) => {
     const location = useLocation();
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
     const dispatch = useAppDispatch();

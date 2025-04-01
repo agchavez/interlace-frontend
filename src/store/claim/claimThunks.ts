@@ -1,11 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { claimApi } from "./claimApi";
-import { setClaims, setError, setLoading, setSelectedClaim, setTotalCount } from "./claimSlice";
+import { setClaims, setError, setLoading, setSelectedClaim } from "./claimSlice";
 import { errorApiHandler } from "../../utils/error";
 
 export const getClaimById = createAsyncThunk(
   "claim/getClaimById",
-  async (id: number, { dispatch, getState, rejectWithValue }) => {
+  async (id: number, { dispatch, rejectWithValue }) => {
     try {
       dispatch(setLoading(true));
 
@@ -21,51 +21,6 @@ export const getClaimById = createAsyncThunk(
       dispatch(setLoading(false));
       dispatch(setError(error?.data?.message || "Error al obtener el reclamo"));
       errorApiHandler(error, "Error al cargar la información del reclamo");
-      return rejectWithValue(error);
-    }
-  }
-);
-
-export const updateClaimStatus = createAsyncThunk(
-  "claim/updateClaimStatus",
-  async (
-    {
-      id,
-      new_state,
-      changed_by_id
-    }: {
-      id: number;
-      new_state: string;
-      changed_by_id?: number
-    },
-    { dispatch, rejectWithValue }
-  ) => {
-    try {
-      dispatch(setLoading(true));
-
-      const response = await dispatch(
-        claimApi.endpoints.changeClaimStatus.initiate({
-          id,
-          new_state,
-          changed_by_id
-        })
-      ).unwrap();
-
-      // Actualiza el reclamo seleccionado con los nuevos datos
-      dispatch(setSelectedClaim(response));
-      dispatch(setLoading(false));
-
-      // Muestra mensaje de éxito
-      errorApiHandler(
-        { data: { mensage: `Estado del reclamo actualizado a: ${new_state}` } },
-        ""
-      );
-
-      return response;
-    } catch (error: any) {
-      dispatch(setLoading(false));
-      dispatch(setError(error?.data?.message || "Error al actualizar el estado del reclamo"));
-      errorApiHandler(error, "Error al cambiar el estado del reclamo");
       return rejectWithValue(error);
     }
   }

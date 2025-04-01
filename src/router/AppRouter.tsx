@@ -14,7 +14,6 @@ import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
 import {Side2bar} from "../modules/ui/components/Side2Bar.tsx";
 import NotificationManager from "../modules/ui/components/NotificationManager.tsx";
-import MaintenanceRouter from "../modules/maintenance/MaintenanceRouter.tsx";
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -24,7 +23,7 @@ const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
 const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
-
+const MaintenanceRouter = lazy(() => import('../modules/maintenance/MaintenanceRouter'));
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()

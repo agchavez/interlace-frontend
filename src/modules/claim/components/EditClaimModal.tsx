@@ -1,5 +1,5 @@
 // EditClaimModal.tsx
-import React, { FC, useState, useEffect } from "react";
+import { FC, useEffect } from "react";
 import {
   Dialog,
   DialogActions,
@@ -21,14 +21,11 @@ import { styled } from "@mui/material/styles";
 import { errorApiHandler } from "../../../utils/error";
 import {
   Claim,
-  ClaimFile,
   useChangeClaimStatusMutation,
 } from "../../../store/claim/claimApi";
 import { toast } from "sonner";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
-import { updateClaim } from "../../../store/claim/claimThunks.ts";
 import { useAppSelector } from "../../../store/store.ts";
-import ClaimDocumentation from "../../tracker/components/ClaimDocumentation.tsx";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone.tsx";
 
 const claimStatuses = [

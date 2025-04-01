@@ -17,7 +17,6 @@ import {
 import DescriptionIcon from '@mui/icons-material/Description';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import {Notificacion, notificacionesMock} from "../../../utils/notification.ts";
-import NotificationsNoneTwoToneIcon from '@mui/icons-material/NotificationsNoneTwoTone';
 
 // Función para retornar ícono según el módulo
 function getModuloIcon(modulo: string) {

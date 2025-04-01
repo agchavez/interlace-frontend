@@ -20,8 +20,7 @@ export interface ClaimDocumentationProps {
     watch: any;
 }
 
-const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ register, control, errors, setValue, watch }) => {
-    const claimType = watch("tipo");
+const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => {
 
     return (
         <>

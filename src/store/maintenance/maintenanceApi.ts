@@ -19,6 +19,7 @@ import {
   RouteQuerySearch,
   CreateLocationBody,
   DistributorCenter, DistributorCenterQueryParams, CountryType, CountryQueryParams,
+  PeriodQueryParams,
 } from "../../interfaces/maintenance";
 import { Product, ProductQuerySearch } from "../../interfaces/tracking";
 import { LotType, LotTypeQuerySearch } from '../../interfaces/maintenance';
@@ -216,7 +217,7 @@ export const maintenanceApi = createApi({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: "Period", id }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: "Period", id }],
     }),
 
     deletePeriod: builder.mutation<void, number>({
@@ -224,7 +225,7 @@ export const maintenanceApi = createApi({
         url: `/period/${id}/`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [{ type: "Period", id }],
+      invalidatesTags: (_result, _error, id) => [{ type: "Period", id }],
     }),
     massImportPeriods: builder.mutation<void, FormData>({
       query: (formData) => ({
@@ -289,7 +290,7 @@ export const distributorCenterApi = createApi({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'dc', id }],
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'dc', id }],
     }),
 
     // 4) Eliminar
@@ -298,7 +299,7 @@ export const distributorCenterApi = createApi({
         url: `distribution-center/${id}/`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [{ type: 'dc', id }],
+      invalidatesTags: (_result, _error, id) => [{ type: 'dc', id }],
     }),
 
     // 5) Traer países (para el autocomplete)

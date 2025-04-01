@@ -40,13 +40,3 @@ export enum FilterDateDashboard {
 export interface DashboardCdQuery {
     date_range : FilterDateDashboard;
 }
-
-export interface ClaimQueryParams {
-    search: string;
-    tipo: string | undefined;
-    status: string | undefined;
-    distributor_center: string[];
-    date_after: string;
-    date_before: string;
-    id: number | undefined;
-}

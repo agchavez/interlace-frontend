@@ -20,7 +20,7 @@ import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { isValid, format } from "date-fns";
 import { useAppSelector } from "../../../store";
 import { DatePicker } from "@mui/x-date-pickers";
-import { ClaimQueryParams } from "../../../interfaces/home";
+import { ClaimQueryParams } from "../../../store/claim/claimApi";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -54,9 +54,9 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
           search: claimQueryParams.search || "",
           tipo: claimQueryParams.tipo,
           status: claimQueryParams.status,
-          distributor_center: claimQueryParams.distributor_center?.length > 0
-              ? claimQueryParams.distributor_center
-              : user?.centro_distribucion ? [user.centro_distribucion] : [],
+          distributor_center: Array.isArray(claimQueryParams.distributor_center) && claimQueryParams.distributor_center.length > 0
+              ? claimQueryParams.distributor_center.map((dc) => Number(dc))
+              : user?.centro_distribucion ? [Number(user.centro_distribucion)] : [],
           date_after: claimQueryParams.date_after || "",
           date_before: claimQueryParams.date_before || "",
           id: claimQueryParams.id || undefined,
@@ -81,7 +81,7 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
     setValue("search", "");
     setValue("tipo", undefined);
     setValue("status", undefined);
-    setValue("distributor_center", user?.centro_distribucion ? [user.centro_distribucion] : []);
+    setValue("distributor_center", user?.centro_distribucion ? [Number(user.centro_distribucion)] : []);
     setValue("date_after", "");
     setValue("date_before", "");
     setValue("id", undefined);
@@ -92,9 +92,9 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
       setValue("search", claimQueryParams.search || "");
       setValue("tipo", claimQueryParams.tipo);
       setValue("status", claimQueryParams.status);
-      setValue("distributor_center", claimQueryParams.distributor_center?.length > 0
-          ? claimQueryParams.distributor_center
-          : user?.centro_distribucion ? [user.centro_distribucion] : []);
+      setValue("distributor_center", Array.isArray(claimQueryParams.distributor_center) && claimQueryParams.distributor_center.length > 0
+          ? claimQueryParams.distributor_center.map((dc) => Number(dc))
+          : user?.centro_distribucion ? [Number(user.centro_distribucion)] : []);
       setValue("date_after", claimQueryParams.date_after || "");
       setValue("date_before", claimQueryParams.date_before || "");
       setValue("id", claimQueryParams.id);
@@ -235,7 +235,7 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
                                   labelId="distribution_center"
                                   id="distribution_center"
                                   {...field}
-                                  value={watch('distributor_center')[0] || ""}
+                                  value={String(watch('distributor_center')?.[0] ?? "")}
                                   label="Centro de distribución"
                                   sx={{ maxHeight: 300 }}
                                   MenuProps={MenuProps}
@@ -274,7 +274,7 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
                           <DatePicker
                               label="Del"
                               slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                              value={isValid(new Date(watch("date_after"))) ? new Date(watch("date_after")) : null}
+                              value={isValid(new Date(watch("date_after") || "")) ? new Date(watch("date_after") || "") : null}
                               inputRef={field.ref}
                               format="dd/MM/yyyy"
                               onChange={(date) => {
@@ -294,7 +294,7 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
                               label="Al"
                               format="dd/MM/yyyy"
                               slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                              value={isValid(new Date(watch("date_before"))) ? new Date(watch("date_before")) : null}
+                              value={isValid(new Date(watch("date_before") || "")) ? new Date(watch("date_before") || "") : null}
                               inputRef={field.ref}
                               onChange={(date) => {
                                 isValid(date) && date &&

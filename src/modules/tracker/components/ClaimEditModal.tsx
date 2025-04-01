@@ -7,7 +7,6 @@ import {
     Divider,
     Typography,
     Box,
-    Grid,
     DialogContent,
     CircularProgress,
     Alert
@@ -27,7 +26,6 @@ import ClaimEditProducts, { ProductItem } from "./ClaimEditProducts";
 import {
     useGetClaimByIdQuery,
     useUpdateClaimMutation,
-    Claim,
 } from "../../../store/claim/claimApi";
 import ClaimCard from "./ClaimCard.tsx";
 import { SaveAltOutlined } from "@mui/icons-material";

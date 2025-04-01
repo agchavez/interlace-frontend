@@ -3,7 +3,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "..";
 import { BaseApiResponse } from "../../interfaces/api";
 import { Tracker } from "../../interfaces/tracking";
-import { downloadDocument } from "../order";
 import { Trailer, Transporter } from "../../interfaces/maintenance";
 
 
@@ -91,6 +90,8 @@ export interface ClaimQueryParams {
   date_before?: string;
   limit?: number;
   offset?: number;
+  id?: number;
+  claim_type?: "LOCAL" | "IMPORT";
 }
 
 export const claimApi = createApi({

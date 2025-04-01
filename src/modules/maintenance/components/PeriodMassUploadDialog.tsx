@@ -50,7 +50,7 @@ export function PeriodMassUploadDialog({ open, onClose }: Props) {
 
             toast.success("Importación masiva realizada con éxito");
             onClose();
-        } catch (error: never) {
+        } catch (error: unknown) {
             toast.error("Error al importar el archivo Excel");
         }
     }

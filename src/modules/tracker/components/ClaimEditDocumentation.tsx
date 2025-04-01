@@ -53,8 +53,6 @@ interface Props {
 }
 
 const ClaimEditDocumentation: React.FC<Props> = ({
-                                                     register,
-                                                     control,
                                                      watch,
                                                      setValue,
                                                      claimData

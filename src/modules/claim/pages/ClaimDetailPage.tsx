@@ -45,17 +45,6 @@ import PhotoCameraTwoToneIcon from '@mui/icons-material/PhotoCameraTwoTone';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import InventoryTwoToneIcon from '@mui/icons-material/InventoryTwoTone';
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
-
 const claimStatuses = [
   { value: "PENDIENTE", label: "Pendiente" },
   { value: "EN_REVISION", label: "En Revisión" },

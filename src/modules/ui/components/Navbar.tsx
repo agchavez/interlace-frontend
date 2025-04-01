@@ -31,10 +31,6 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
     const dispatch = useAppDispatch();
     const { status, user } = useAppSelector(state => state.auth);
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
     const handleClose = () => {
         setAnchorEl(null);
     };

@@ -6,7 +6,7 @@ import { BaseApiResponse } from '../../interfaces/api';
 import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 import { format } from 'date-fns';
 import { DatesT2Tracking, OutputT2, OutputT2QueryParams } from '../../interfaces/trackingT2';
-import { Seguimiento, setSeguimientoActual, updateSeguimientoById } from './seguimientoSlice';
+import {  updateSeguimientoById } from './seguimientoSlice';
 import { parseTrackerSeguimiento } from './trackerThunk';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',

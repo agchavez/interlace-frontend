@@ -1,10 +1,7 @@
 import {
-  Box,
-  CircularProgress,
   Container,
   Grid,
   IconButton, LinearProgress,
-  Typography,
 } from "@mui/material";
 import {
   Chart as ChartJS,

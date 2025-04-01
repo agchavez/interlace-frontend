@@ -49,6 +49,9 @@ export const DetailPage = () => {
                             disable={true}
                             indice={0}
                             seguimiento={parseTrackerSeguimiento(data)}
+                            openClaim={() => {
+                                console.log('Claim opened');
+                            }}
                         />
                     </Grid>
                 </Grid>

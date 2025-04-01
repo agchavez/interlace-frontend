@@ -26,12 +26,6 @@ import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
 import { useUploadFileMutation } from "../../../store/seguimiento/trackerApi";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
 
-interface DocumentData {
-  id?: number;
-  name: string;
-  extension: string | null;
-  access_url: string;
-}
 
 interface TrackerFilesModalProps {
   open: boolean;
