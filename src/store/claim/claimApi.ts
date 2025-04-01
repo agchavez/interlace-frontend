@@ -4,6 +4,7 @@ import { RootState } from "..";
 import { BaseApiResponse } from "../../interfaces/api";
 import { Tracker } from "../../interfaces/tracking";
 import { downloadDocument } from "../order";
+import { Trailer, Transporter } from "../../interfaces/maintenance";
 
 export interface Claim {
   id: number;
@@ -32,6 +33,20 @@ export interface Claim {
   created_at: string;
   updated_at: string;
   tracking?: Tracker;
+  claim_products: ClaimProduct[];
+  trailer: Trailer;
+  transporter: Transporter;
+}
+
+export interface ClaimProduct {
+  id: number;
+  product_name: string;
+  product_id: number;
+  created_at: string;
+  quantity: number;
+  claim: number;
+  product: number;
+  sap_code: string;
 }
 
 export interface ClaimFile {
@@ -141,11 +156,11 @@ export const claimApi = createApi({
       invalidatesTags: (_result, _error, { id }) => [{ type: "Claims", id }, { type: "Claims", id: "LIST" }, { type: "Claims", id: "USER_CLAIMS" }],
     }),
 
-    changeClaimStatus: builder.mutation<Claim, { id: number; new_state: string; changed_by_id?: number }>({
-      query: ({ id, new_state, changed_by_id }) => ({
+    changeClaimStatus: builder.mutation<Claim, {id: number, formData: FormData}>({
+      query: ({id, formData}) => ({
         url: `/claim/${id}/change-state/`,
         method: "POST",
-        body: { new_state, changed_by_id },
+        body: formData,
       }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Claims", id },

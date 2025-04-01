@@ -1,14 +1,11 @@
 // Detalles de un reclamo
 import {
   Box,
+  Button,
   Card,
   Divider,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -16,7 +13,6 @@ import { useParams } from "react-router-dom";
 import {
   Claim,
   ClaimFile,
-  useChangeClaimStatusMutation,
   useDownloadDocumentQuery,
   useGetClaimByIdQuery,
 } from "../../../store/claim/claimApi";
@@ -30,10 +26,9 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { Controller, useForm } from "react-hook-form";
-import { useAppSelector } from "../../../store";
-import { toast } from "sonner";
 import TableChartIcon from "@mui/icons-material/TableChart";
+import EditIcon from "@mui/icons-material/Edit";
+import EditClaimModal from "../components/EditClaimModal";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,23 +60,13 @@ const claimTypes = [
 export default function ClaimDetailPage() {
   const { id } = useParams();
   const [claim, setClaim] = useState<Claim | null>(null);
+  const [open, setOpen] = useState(false);
 
   const { data, refetch } = useGetClaimByIdQuery(Number(id));
-
-  const { user } = useAppSelector((state) => state.auth);
-
-  const { control, watch, setValue } = useForm<{
-    status: string;
-  }>({
-    defaultValues: {
-      status: claim?.status || "",
-    },
-  });
 
   useEffect(() => {
     if (data) {
       setClaim(data);
-      setValue("status", data.status);
     }
   }, [data]);
 
@@ -89,37 +74,9 @@ export default function ClaimDetailPage() {
     refetch();
   }, [id, refetch]);
 
-  const [updateStatus, { isLoading, isSuccess, error }] =
-    useChangeClaimStatusMutation();
-  
-    useEffect(() => {
-    if (isSuccess && !isLoading) {
-      toast.success("Estado actualizado con éxito");
-    }
-  }, [isSuccess, isLoading, error, refetch]);
-
-  const handleChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = event.target.value;
-    setValue("status", newStatus);
-
-    const formData = new FormData();
-    formData.append("status", newStatus);
-
-    try {
-      await updateStatus(
-        {
-          id: id ? parseInt(id) : 0,
-          new_state: newStatus,
-          changed_by_id: user?.id || 0,
-        },
-      ).unwrap();
-    } catch (error) {
-      console.error("Error al actualizar el estado:", error);
-    }
-  };
   return (
     <>
-      <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
+      <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
         <Grid item xs={12}>
           <Typography
             variant="h4"
@@ -129,7 +86,7 @@ export default function ClaimDetailPage() {
             align="center"
             bgcolor={"#1c2536"}
           >
-            CLAIM-{claim?.id?.toString().padStart(5, "0")}
+            TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
           </Typography>
         </Grid>
         <Grid
@@ -180,6 +137,25 @@ export default function ClaimDetailPage() {
               >
                 Datos Generales
               </Typography>
+              {/* Boton de editar datos */}
+              <Button
+                variant="outlined"
+                color="secondary"
+                size="medium"
+                endIcon={<EditIcon />}
+                onClick={() => []}
+              >
+                <Typography
+                  variant="body2"
+                  component="span"
+                  fontWeight={400}
+                  color={"secondary"}
+                  onClick={() => setOpen(true)}
+                >
+                  {/* icono de editar */}
+                  Editar
+                </Typography>
+              </Button>
             </Box>
             <Divider />
             <Box sx={{ padding: 2 }}>
@@ -235,35 +211,37 @@ export default function ClaimDetailPage() {
                     Estado del Reclamo
                   </Typography>
                   <Divider sx={{ my: 1 }} />
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <FormControl size="small" fullWidth>
-                        <InputLabel id="tipo-label">
-                          Estado del Reclamo
-                        </InputLabel>
-                        <Select
-                          labelId="tipo-label"
-                          id="tipo"
-                          {...field}
-                          value={watch("status") || ""}
-                          label="Estado del Reclamo"
-                          MenuProps={MenuProps}
-                          onChange={handleChange}
-                        >
-                          <MenuItem value="">
-                            <em>Estado del Reclamo</em>
-                          </MenuItem>
-                          {claimStatuses.map((t) => (
-                            <MenuItem key={t.value} value={t.value}>
-                              {t.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    {claim?.status &&
+                      claimStatuses.find(
+                        (status) => status.value === claim.status
+                      )?.label}
+                  </Typography>
+                </Grid>
+                {/* Documento de Descarte */}
+                <Grid item xs={12} sm={6} md={4}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    Documento de Descarte{" "}
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
+                    {claim?.discard_doc}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Grid
@@ -356,46 +334,51 @@ export default function ClaimDetailPage() {
           label="Fisuras/abolladuras de pallets"
           claim_id={claim?.id || 0}
         />
-        {/* {
-          claim?.claim_type === "DAÑOS_CALIDAD_TRANSPORTE" && (
-            <> */}
-        <Grid item container xs={12}>
-          <Divider>
-            <Typography variant="body2" color="textSecondary">
-              Producto dañado
-            </Typography>
-          </Divider>
-        </Grid>
-        <FilesPreview
-          files={claim?.photos_damaged_product_base || []}
-          label="Base de la lata/botella (fecha de vencimiento y lote)"
-          claim_id={claim?.id || 0}
-        />
-        <FilesPreview
-          files={claim?.photos_damaged_product_dents || []}
-          label="Abolladuras (mínimo 3 diferentes)"
-          claim_id={claim?.id || 0}
-        />
-        <FilesPreview
-          files={claim?.photos_damaged_boxes || []}
-          label="Cajas dañadas por golpes o problemas de calidad"
-          claim_id={claim?.id || 0}
-        />
-        <FilesPreview
-          files={claim?.photos_grouped_bad_product || []}
-          label="Producto en mal estado agrupado en 1 pallet"
-          claim_id={claim?.id || 0}
-        />
+        {claim?.claim_type === "DAÑOS_CALIDAD_TRANSPORTE" && (
+          <>
+            <Grid item container xs={12}>
+              <Divider>
+                <Typography variant="body2" color="textSecondary">
+                  Producto dañado
+                </Typography>
+              </Divider>
+            </Grid>
+            <FilesPreview
+              files={claim?.photos_damaged_product_base || []}
+              label="Base de la lata/botella (fecha de vencimiento y lote)"
+              claim_id={claim?.id || 0}
+            />
+            <FilesPreview
+              files={claim?.photos_damaged_product_dents || []}
+              label="Abolladuras (mínimo 3 diferentes)"
+              claim_id={claim?.id || 0}
+            />
+            <FilesPreview
+              files={claim?.photos_damaged_boxes || []}
+              label="Cajas dañadas por golpes o problemas de calidad"
+              claim_id={claim?.id || 0}
+            />
+            <FilesPreview
+              files={claim?.photos_grouped_bad_product || []}
+              label="Producto en mal estado agrupado en 1 pallet"
+              claim_id={claim?.id || 0}
+            />
 
-        <FilesPreview
-          files={claim?.photos_repalletized || []}
-          label="Repaletizado por identificación de producto dañado"
-          claim_id={claim?.id || 0}
-        />
-        {/* </>
-          )
-        } */}
+            <FilesPreview
+              files={claim?.photos_repalletized || []}
+              label="Repaletizado por identificación de producto dañado"
+              claim_id={claim?.id || 0}
+            />
+          </>
+        )}
       </Grid>
+      {open && (
+        <EditClaimModal
+          claim={claim || undefined}
+          onClose={() => setOpen(false)}
+          open={open}
+        />
+      )}
     </>
   );
 }
@@ -582,14 +565,31 @@ function FilesPreview({
                     backgroundColor: "rgba(255, 255, 255, 0.7)",
                   }}
                 >
-                  <TableChartIcon
-                    sx={{ fontSize: 30 }}
-                    color="success"
-                  />
-                  <Typography variant="caption" textTransform={"uppercase"}>{extension} {index + 1}</Typography>
+                  <TableChartIcon sx={{ fontSize: 30 }} color="success" />
+                  <Typography variant="caption" textTransform={"uppercase"}>
+                    {extension} {index + 1}
+                  </Typography>
                 </Box>
               ) : (
-                <Typography variant="caption">{extension}</Typography>
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    minHeight: 100,
+                    display: "flex",
+                    position: "initial",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    border: "1px dashed grey",
+                    borderRadius: 1,
+                    backgroundColor: "rgba(255, 255, 255, 0.7)",
+                  }}
+                >
+                  <Typography variant="caption" textTransform={"uppercase"}>
+                    {extension} {index + 1}
+                  </Typography>
+                </Box>
               )}
               <IconButton
                 size="small"

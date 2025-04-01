@@ -6,6 +6,9 @@ import { format } from "date-fns-tz";
 import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
+import PDFTable from "../../ui/components/pdfDocs/Table";
+import { Trailer, Transporter } from "../../../interfaces/maintenance";
+import { useEffect, useState } from "react";
 
 const styles = StyleSheet.create({
   page: {
@@ -19,22 +22,24 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   divider: {
-    backgroundColor: 'gray',
+    backgroundColor: "gray",
     height: 1,
-    width: '100%', // Adjust the width according to your layout
+    width: "100%", // Adjust the width according to your layout
     marginBottom: 10,
   },
   subTitle: {
     marginBottom: 5,
-  }
+  },
 });
 
 interface TrakerPDFDocumentProps {
   claim?: Claim;
+  imageUrl?: string;
 }
 
 function ClaimPDF({
-  claim: seguimiento,
+  claim,
+  imageUrl = "https://flagcdn.com/h240/sv.png",
 }: TrakerPDFDocumentProps) {
   const inputRowCellStyles = [
     { flex: 1 },
@@ -43,9 +48,30 @@ function ClaimPDF({
     { flex: 1 },
   ];
 
+  const claimTableData = claim?.claim_products.map((product) => {
+    const row = [product.sap_code, product.product_name, "", "", ""];
+    return row;
+  });
+
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchImage() {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => setImageBase64(reader.result);
+    }
+
+    if (imageUrl) {
+      fetchImage();
+    }
+  }, [imageUrl]);
+
   return (
     <Document
-      title="Datos Tracker"
+      title="Datos Claim"
       language="es"
       style={{ fontFamily: "Helvetica" }}
       author="AbinBev"
@@ -53,28 +79,69 @@ function ClaimPDF({
       keywords="Tracker, AbinBev, PDF, Seguimiento"
     >
       <Page size="LETTER" style={styles.page}>
-        <View style={{ ...styles.section }}>
-          <Image src="/logo.png" style={{ width: 200 }} />
+        <View
+          style={{ ...styles.section, display: "flex", flexDirection: "row" }}
+        >
+          <View style={{ flex: 1 }}>
+            <Image src="/logo.png" style={{ width: 200 }} />
+          </View>
+          <View style={{ flex: 1, textAlign: "right", color: "red" }}>
+            <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
+              CLAIM
+            </PDFTitle>
+            <PDFText>Evidencia de Fotografía</PDFText>
+          </View>
         </View>
         <View style={{ ...styles.divider }} />
-        <View style={{ ...styles.section, backgroundColor: "#1c2536" }}>
-          <PDFTitle style={{ color: "white", fontSize: 30 }}>
-            CLAIM-{seguimiento?.id?.toString().padStart(5, "0")}
-          </PDFTitle>
+        <View
+          style={{
+            ...styles.section,
+            backgroundColor: "red",
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <View style={{ marginLeft: 10 }}>
+            <Image
+              src="https://flagcdn.com/h240/hn.png"
+              style={{ width: 100 }}
+            />
+          </View>
+          <View
+            style={{
+              flex: 1,
+              paddingLeft: -30,
+              alignContent: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PDFTitle style={{ color: "white", fontSize: 30 }}>
+              TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
+            </PDFTitle>
+          </View>
+          <View style={{ marginLeft: 10 }}>
+            <View style={{ width: 100 }}></View>
+          </View>
         </View>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle style={{ ...styles.subTitle }}>Datos principales:</PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Datos Tracker:
+            </PDFSubTitle>
             <View style={{ flexDirection: "row", paddingRight: 10 }}>
               <View style={{ minWidth: 100 }}>
                 <PDFText>Fecha de registro:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {seguimiento?format(new Date(seguimiento?.created_at), "dd/MM/yyyy"):""}
+                  {claim?.tracking
+                    ? format(
+                        new Date(claim?.tracking?.created_at),
+                        "dd/MM/yyyy"
+                      )
+                    : ""}
                 </PDFText>
               </View>
-
             </View>
             <View style={{ flexDirection: "row", paddingRight: 10 }}>
               <View style={{ minWidth: 100 }}>
@@ -82,17 +149,16 @@ function ClaimPDF({
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {/* {seguimiento?.distributorCenterName} */}
+                  {claim?.tracking?.distributor_center_data?.name}
                 </PDFText>
               </View>
-
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 100 }}>
                 <PDFText>Número de Rastra:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento?.rastra.code}</PDFText> */}
+                <PDFText>{claim?.trailer?.code}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -101,7 +167,7 @@ function ClaimPDF({
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {/* {seguimiento?.type === "IMPORT" ? "Importación" : "Local"} */}
+                  {claim?.tracking?.type === "IMPORT" ? "Importación" : "Local"}
                 </PDFText>
               </View>
             </View>
@@ -110,7 +176,7 @@ function ClaimPDF({
                 <PDFText>Transportista:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento?.transporter.name}</PDFText> */}
+                <PDFText>{claim?.transporter?.name}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -118,7 +184,7 @@ function ClaimPDF({
                 <PDFText>Tractor:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento?.transporter.tractor}</PDFText> */}
+                <PDFText>{claim?.transporter?.tractor}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -126,228 +192,395 @@ function ClaimPDF({
                 <PDFText>Cabezal:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento?.transporter.code}</PDFText> */}
+                <PDFText>{claim?.transporter?.code}</PDFText>
               </View>
             </View>
           </View>
 
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle style={{ ...styles.subTitle }}>Datos generales:</PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Datos generales:
+            </PDFSubTitle>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Numero de placa:</PDFText>
+                <PDFText>Tipo de Reclamo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento.plateNumber}</PDFText> */}
+                <PDFText>{claim?.claim_type}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Localidad de origen:</PDFText>
+                <PDFText>Numero de Reclamo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>
-                  {/* {seguimiento.originLocationData?.name}- */}
-                  {/* {seguimiento.originLocationData?.code} */}
-                </PDFText>
+                <PDFText>{claim?.claim_number}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Conductor:</PDFText>
+                <PDFText>Estado del Reclamo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>
-                  {/* {seguimiento.type === "LOCAL"
-                    ? `${driver?.first_name}`
-                    : `${seguimiento.driverImport}`} */}
-                </PDFText>
+                <PDFText>{claim?.status}</PDFText>
               </View>
             </View>
-
-            {/* {seguimiento.type === "IMPORT" && (
-              <View style={{ flexDirection: "row" }}>
-                <View style={{ minWidth: 125 }}>
-                  <PDFText>No. Contenedor:</PDFText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <PDFText>{seguimiento.containernumber}</PDFText>
-                </View>
-              </View>
-            )} */}
-            {/* {seguimiento.type === "LOCAL" ? (
-              <View style={{ flexDirection: "row" }}>
-                <View style={{ minWidth: 125 }}>
-                  <PDFText>Transferencia de entrada:</PDFText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <PDFText>{seguimiento.documentNumber}</PDFText>
-                </View>
-              </View>
-            ) : (
-              <View style={{ flexDirection: "row" }}>
-                <View style={{ minWidth: 125 }}>
-                  <PDFText>No. Factura:</PDFText>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <PDFText>{seguimiento.invoiceNumber}</PDFText>
-                </View>
-              </View>
-            )} */}
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>N° de Traslado 5001:</PDFText>
+                <PDFText>Documento de Descarte:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                {/* <PDFText>{seguimiento.transferNumber}</PDFText> */}
+                <PDFText>{claim?.discard_doc}</PDFText>
               </View>
             </View>
           </View>
         </View>
         <View style={styles.section}>
-          <PDFSubTitle style={{ ...styles.subTitle }}>Observaciones:</PDFSubTitle>
+          <PDFSubTitle style={{ ...styles.subTitle }}>
+            Observaciones:
+          </PDFSubTitle>
           <View style={{ flex: 1 }}>
-            {/* <PDFText>{seguimiento.observation || "--"}</PDFText> */}
+            <PDFText>{claim?.observations || "--"}</PDFText>
           </View>
         </View>
         <View style={styles.section}></View>
         <View style={styles.section}>
-          <PDFSubTitle style={{ ...styles.subTitle }}>Entrada de producto:</PDFSubTitle>
-          {/* <PDFTable
-            data={entradaTableData}
-            header={["N° Sap", "Producto", "Pallets", "Fecha Expiración"]}
+          <PDFSubTitle style={{ ...styles.subTitle }}>
+            Productos Afectados:
+          </PDFSubTitle>
+          <PDFTable
+            data={claimTableData || []}
+            header={[
+              "N° Sap",
+              "Producto",
+              "Cajas Afectadas",
+              "Lote",
+              "Fecha Expiración",
+            ]}
             headerCellsStyle={inputRowCellStyles}
             rowCellsStyle={inputRowCellStyles}
-          /> */}
+          />
         </View>
-        { (
-          <>
-            <View style={{ display: "flex", flexDirection: "row" }}>
-              <View style={{ ...styles.section, flex: 1 }}>
-                <PDFSubTitle style={{ ...styles.subTitle }}>Datos del Operador:</PDFSubTitle>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 100 }}>
-                    <PDFText>Tiempo de entrada:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    {/* <PDFText>
-                      {(tiempoEntrada &&
-                        tiempoEntrada !== null &&
-                        format(tiempoEntrada, "HH:mm:ss", {
-                          locale: es,
-                          timeZone: "America/Tegucigalpa",
-                        })) ||
-                        "00:00:00"}
-                    </PDFText> */}
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 100 }}>
-                    <PDFText>Tiempo de salida:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <PDFText>
-                      {/* {(tiempoSalida &&
-                        tiempoSalida !== null &&
-                        format(tiempoSalida, "HH:mm:ss")) ||
-                        "00:00:00"} */}
-                    </PDFText>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 100 }}>
-                    <PDFText>Tiempo invertido:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <PDFText>
-                      {/* {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
-                        ? formatDistance(tiempoEntrada, tiempoSalida, {
-                          locale: es,
-                        })
-                        : "--:--:--"} */}
-                    </PDFText>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 100 }}>
-                    <PDFText>Operador 1:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <PDFText>
-                      {/* {op1?.first_name} {op1?.last_name} */}
-                    </PDFText>
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 100 }}>
-                    <PDFText>Operador 2:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <PDFText>
-                      {/* {op2?.first_name} {op2?.last_name} */}
-                    </PDFText>
-                  </View>
-                </View>
-              </View>
-
-              <View style={{ ...styles.section, flex: 1 }}>
-                <PDFSubTitle style={{ ...styles.subTitle }}>Salida de producto:</PDFSubTitle>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 120 }}>
-                    <PDFText>N° de Doc. Salida:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    {/* <PDFText>{seguimiento.documentNumberExit}</PDFText> */}
-                  </View>
-                </View>
-
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 120 }}>
-                    <PDFText>Contabilizado: </PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    {/* <PDFText>{seguimiento.accounted}</PDFText> */}
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 120 }}>
-                    <PDFText>Localidad de Envío:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    {/* <PDFText>{outputLocation?.name}</PDFText> */}
-                  </View>
-                </View>
-                <View style={{ flexDirection: "row" }}>
-                  <View style={{ minWidth: 120 }}>
-                    <PDFText>Unidad cargada con:</PDFText>
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    {/* <PDFText>{outputTypeData?.name}</PDFText> */}
-                  </View>
-                </View>
+        {/* Imagenes del claim */}
+      </Page>
+      {/* Contenedor cerrado */}
+      {(claim?.photos_container_closed.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Contenedor cerrado:</PDFText>
               </View>
             </View>
-
-            {/* {outputTypeData && (
-              <View style={styles.section}>
-                <PDFSubTitle style={{ ...styles.subTitle }}>Salida de producto:</PDFSubTitle>
-                <PDFTable
-                  data={salidaTableData}
-                  header={
-                    outputTypeData.required_details
-                      ? ["N° Sap", "Producto", "Cantidad", "Fecha Expiración"]
-                      : ["Material", "Texto Breve", "Cantidad"]
-                  }
-                  headerCellsStyle={outputRowCellStyles}
-                  rowCellsStyle={outputRowCellStyles}
-                />
+            <View style={{ flexDirection: "row", paddingVertical: 10 }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_container_closed.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
               </View>
-            )} */}
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Contenedor con 1 puerta */}
+      {(claim?.photos_container_one_open.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Contenedor con 1 puerta abierta:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_container_one_open.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
 
+      {/* Contenedor con 2 puertas */}
+      {(claim?.photos_container_two_open.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Contenedor con 2 puertas abiertas:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_container_two_open.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
 
-          </>
-        )}
-      </Page>
+      {/* Contenedor superior */}
+      {(claim?.photos_container_top.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Contenedor superior:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_container_top.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+
+      {/* Durante descarga */}
+      {(claim?.photos_during_unload.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Fotografía durante la descarga:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_during_unload.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Pallets */}
+      {(claim?.photos_pallet_damage.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Fisuras/abolladuras de pallets:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_pallet_damage.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Daños por Calidad y Transporte */}
+      {/* Base de la lata/botella (fecha de vencimiento y lote) */}
+      {(claim?.photos_damaged_product_base.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>
+                  Base de la lata/botella (fecha de vencimiento y lote):
+                </PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_damaged_product_base.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Abolladuras (mínimo 3 diferentes) */}
+      {(claim?.photos_damaged_product_dents.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Abolladuras (mínimo 3 diferentes):</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_damaged_product_dents.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Cajas dañadas por golpes o problemas de calidad */}
+      {(claim?.photos_damaged_boxes.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>
+                  Cajas dañadas por golpes o problemas de calidad:
+                </PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_damaged_boxes.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Producto en mal estado agrupado en 1 pallet */}
+      {(claim?.photos_grouped_bad_product.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Producto en mal estado agrupado en 1 pallet:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_grouped_bad_product.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Repaletizado por identificación de producto dañado */}
+      {(claim?.photos_repalletized.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Imagenes del Claim:
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>
+                  Repaletizado por identificación de producto dañado:
+                </PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_repalletized.map((photo) => {
+                  return (
+                    <Image
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
     </Document>
   );
 }
