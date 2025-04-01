@@ -45,7 +45,6 @@ export interface Claim {
   created_at: string;
   updated_at: string;
   tracking?: Tracker;
-  claim_products: ClaimProduct[];
   trailer: Trailer;
   transporter: Transporter;
 }
@@ -54,11 +53,12 @@ export interface ClaimProduct {
   id: number;
   product_name: string;
   product_id: number;
-  created_at: string;
   quantity: number;
   claim: number;
   product: number;
   sap_code: string;
+  created_at: Date;
+
 }
 
 export interface ClaimFile {

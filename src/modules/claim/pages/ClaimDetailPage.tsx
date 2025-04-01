@@ -1,11 +1,21 @@
 // Detalles de un reclamo
 import {
+  alpha,
+  Avatar,
   Box,
   Button,
   Card,
+  Chip,
   Divider,
   Grid,
   IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -29,6 +39,11 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import EditIcon from "@mui/icons-material/Edit";
 import EditClaimModal from "../components/EditClaimModal";
+// Añadir estas importaciones al inicio del archivo
+import { useTheme } from "@mui/material";
+import PhotoCameraTwoToneIcon from '@mui/icons-material/PhotoCameraTwoTone';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import InventoryTwoToneIcon from '@mui/icons-material/InventoryTwoTone';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -58,6 +73,7 @@ const claimTypes = [
 ];
 
 export default function ClaimDetailPage() {
+  const theme = useTheme(); // Add this line to access the theme object
   const { id } = useParams();
   const [claim, setClaim] = useState<Claim | null>(null);
   const [open, setOpen] = useState(false);
@@ -77,21 +93,46 @@ export default function ClaimDetailPage() {
   return (
     <>
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
-        <Grid item xs={12}>
+        
+                <Grid item xs={12} md={11}>
           <Typography
             variant="h4"
             component="h1"
             fontWeight={400}
-            color={"white"}
+            color={"#1c2536"}
             align="center"
-            bgcolor={"#1c2536"}
+            borderRadius={2}
+            sx={{
+              border: "1px solid #1c2536",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+              padding: "8px 16px"
+            }}
           >
+            {claim?.tracking?.distributor_center_data?.country_code && (
+              <Box
+                component="img"
+                src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png`}
+                srcSet={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png 2x`}
+                alt={claim?.tracking?.distributor_center_data.country_code}
+                sx={{ 
+                  width: 60, 
+                  height: 40, 
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  borderRadius: '2px',
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.1)'
+                }}
+              />
+            )}
             TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
           </Typography>
         </Grid>
         <Grid
           item
           xs={12}
+          md={1}
           container
           justifyContent="flex-end"
           justifyItems="flex-end"
@@ -189,6 +230,36 @@ export default function ClaimDetailPage() {
                     fontWeight={400}
                     color={"gray.500"}
                   >
+                    Centro de Distribución
+                  </Typography>
+                  <Divider />
+                  <Chip
+                      sx={{ cursor: "default" }}
+                      label={claim?.tracking?.distributor_center_data.name}
+                      size={"small"}
+                      avatar={
+                          // <Box
+                          //     component="img"
+                          //     src={`https://flagcdn.com/w20/${row.data_country.flag.toLowerCase()}.png`}
+                          //     srcSet={`https://flagcdn.com/w40/${row.data_country.flag.toLowerCase()}.png 2x`}
+                          //     alt=""
+                          //     sx={{ width: 20, height: 14, ml: 1 }}
+                          // />
+                          <Avatar
+                              src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png`}
+                              alt={claim?.tracking?.distributor_center_data.country_code}
+                              sizes={"small"}
+                              />
+                      }
+                  />
+                </Grid>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
                     Numero de Reclamo
                   </Typography>
                   <Divider />
@@ -208,9 +279,28 @@ export default function ClaimDetailPage() {
                     fontWeight={400}
                     color={"gray.500"}
                   >
+                    Tracking
+                  </Typography>
+                  <Divider />
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={600}
+                    color={"gray.500"}
+                  >
+                    TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} md={6} lg={4} xl={3}>
+                  <Typography
+                    variant="body1"
+                    component="h1"
+                    fontWeight={400}
+                    color={"gray.500"}
+                  >
                     Estado del Reclamo
                   </Typography>
-                  <Divider sx={{ my: 1 }} />
+                  <Divider />
                   <Typography
                     variant="body1"
                     component="h1"
@@ -275,6 +365,120 @@ export default function ClaimDetailPage() {
               </Grid>
             </Box>
             <Divider sx={{ my: 2 }} />
+            <Box sx={{ my: 3, p:2 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  mb: 2, 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  borderBottom: `2px solid ${theme.palette.primary.main}`,
+                  pb: 1
+                }}
+              >
+                <InventoryIcon sx={{ mr: 1 }} />
+                Productos asociados al reclamo
+              </Typography>
+              
+              {claim?.claim_products && claim.claim_products.length > 0 ? (
+                <TableContainer 
+                  component={Paper} 
+                  elevation={0} 
+                  sx={{ 
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 1,
+                    mb: 3
+                  }}
+                >
+                  <Table size="small" aria-label="tabla de productos reclamados">
+                    <TableHead sx={{ backgroundColor: theme.palette.background.default }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Código SAP</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Producto</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Cantidad</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Fecha</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {claim.claim_products.map((product) => (
+                        <TableRow 
+                          key={product.id}
+                          sx={{ 
+                            '&:last-child td, &:last-child th': { border: 0 },
+                            '&:hover': { backgroundColor: alpha(theme.palette.primary.light, 0.1) },
+                            transition: 'background-color 0.2s'
+                          }}
+                        >
+                          <TableCell component="th" scope="row">
+                            <Typography variant="body2" fontFamily="monospace" fontWeight={500}>
+                              {product.sap_code}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2">
+                              {product.product_name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip 
+                              label={product.quantity}
+                              size="small"
+                              sx={{ 
+                                minWidth: '60px',
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                color: theme.palette.primary.main,
+                                fontWeight: 'bold'
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(product.created_at).toLocaleDateString()}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Paper 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 3, 
+                    textAlign: 'center',
+                    backgroundColor: alpha(theme.palette.warning.light, 0.1),
+                    mb: 3
+                  }}
+                >
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'center', 
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <InventoryTwoToneIcon 
+                      sx={{ 
+                        fontSize: 48, 
+                        color: theme.palette.warning.main,
+                        mb: 1
+                      }} 
+                    />
+                    <Typography variant="subtitle1" color="text.secondary">
+                      No hay productos asociados a este reclamo
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, maxWidth: 500 }}>
+                      Este reclamo no tiene productos detallados. Puede ser un reclamo general o puede requerir actualización.
+                    </Typography>
+                  </Box>
+                </Paper>
+              )}
+            </Box>
+            
+          </Card>
+            <Divider sx={{ my: 2 }} />
             <Grid item container xs={12}>
               <FilesPreview
                 files={claim?.claim_file ? [claim?.claim_file] : []}
@@ -294,7 +498,6 @@ export default function ClaimDetailPage() {
                 claim_id={claim?.id || 0}
               />
             </Grid>
-          </Card>
         </Grid>
         <Divider sx={{ my: 2 }} />
         <Grid item container xs={12}>
@@ -392,6 +595,7 @@ function FilesPreview({
   files?: ClaimFile[];
   claim_id: number;
 }) {
+  const theme = useTheme(); // Añadir este hook
   const [selectedFile, setSelectedFile] = useState<ClaimFile | null>(null);
   const [filenameDownload, setFilenameDownload] = useState<string | null>(null);
   const [filenamePreview, setFilenamePreview] = useState<string | null>(null);
@@ -415,14 +619,21 @@ function FilesPreview({
       if (!filenameDownload) return;
       if (!fileBlob) return;
 
+      // Implementar descarga sin redirección (usando XMLHttpRequest)
       const url = window.URL.createObjectURL(fileBlob);
       const link = document.createElement("a");
+      link.style.display = 'none';
       link.href = url;
       link.setAttribute("download", filenameDownload); // Nombre del archivo a descargar
       document.body.appendChild(link);
       link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url); // Limpieza de memoria
+      
+      // Limpiar después de un breve delay para asegurar que la descarga inicie
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url); // Limpieza de memoria
+      }, 200);
+      
       setFilenameDownload(null);
     };
     handleDownload();
@@ -459,170 +670,204 @@ function FilesPreview({
     setSelectedFile({ ...file, extension: filename.split(".").pop() || "" });
   };
 
+  // Obtener el icono adecuado según la extensión del archivo
+  const getFileIcon = (extension: string | undefined) => {
+    if (!extension) return <InsertDriveFileIcon sx={{ fontSize: 30 }} color="disabled" />;
+    
+    if (extension === 'pdf') {
+      return <PictureAsPdfTwoToneIcon sx={{ fontSize: 30 }} color="error" />;
+    } else if (['jpg', 'jpeg', 'png', 'webp'].includes(extension)) {
+      return <PhotoCameraTwoToneIcon sx={{ fontSize: 30 }} color="primary" />;
+    } else if (['xlsx', 'xls', 'csv'].includes(extension)) {
+      return <TableChartIcon sx={{ fontSize: 30 }} color="success" />;
+    } else {
+      return <InsertDriveFileIcon sx={{ fontSize: 30 }} color="action" />;
+    }
+  };
+
+  // Contenedor común para todos los tipos de archivos
+  const fileContainer = {
+    height: 200,
+    display: "flex",
+    flexDirection: "column",
+    border: "1px solid",
+    borderColor: theme.palette.divider,
+    borderRadius: 1,
+    p: 1,
+    m: 1,
+    position: "relative",
+    transition: "all 0.2s",
+    "&:hover": {
+      boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+      borderColor: theme.palette.primary.light,
+    }
+  };
+
   if (!files) return null;
-  if (files.length === 0)
-    return (
-      <Grid item xs={12} sm={6} md={4}>
-        <Typography variant="body2">{label}</Typography>
-        <Box sx={{ display: "flex", flexWrap: "wrap", mt: 2, minHeight: 200 }}>
-          <Box
-            key={1}
-            sx={{
-              position: "relative",
-              width: files.length > 1 ? 100 : "100%",
-              mr: 1,
-              mb: 1,
-            }}
-          >
-            <Box
-              sx={{
-                width: "100%",
-                height: "100%",
-                minHeight: 100,
-                display: "flex",
-                position: "initial",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-                border: "1px dashed grey",
-                borderRadius: 1,
-                backgroundColor: "rgba(255, 255, 255, 0.7)",
-              }}
-            >
-              <InsertDriveFileIcon sx={{ fontSize: 30 }} color="error" />
-              <Typography variant="caption">No hay Archivos</Typography>
-            </Box>
-          </Box>
-        </Box>
-      </Grid>
-    );
 
   return (
     <Grid item xs={12} sm={6} md={4}>
-      <Typography variant="body2">{label}</Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap", mt: 2, minHeight: 200 }}>
-        {files?.map((preview, index) => {
-          const extension = preview.name.split(".").pop();
-          return (
-            <Box
-              key={index}
-              sx={{
-                position: "relative",
-                width: files.length > 1 ? 100 : "100%",
-                mr: 1,
-                mb: 1,
-              }}
-            >
-              {extension === "pdf" ? (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    minHeight: 100,
-                    display: "flex",
-                    position: "initial",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    border: "1px dashed grey",
-                    borderRadius: 1,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  }}
-                >
-                  <PictureAsPdfTwoToneIcon
-                    sx={{ fontSize: 30 }}
-                    color="error"
-                  />
-                  <Typography variant="caption">PDF {index + 1}</Typography>
-                </Box>
-              ) : extension === "jpg" ||
-                extension === "jpeg" ||
-                extension === "png" ||
-                extension === "webp" ? (
-                <img
-                  src={preview.access_url}
-                  alt={`preview ${index}`}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    cursor: "pointer",
-                  }}
-                />
-              ) : ["xlsx", "xls", "csv"].includes(extension || "") ? (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    minHeight: 100,
-                    display: "flex",
-                    position: "initial",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    border: "1px dashed grey",
-                    borderRadius: 1,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  }}
-                >
-                  <TableChartIcon sx={{ fontSize: 30 }} color="success" />
-                  <Typography variant="caption" textTransform={"uppercase"}>
-                    {extension} {index + 1}
-                  </Typography>
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    minHeight: 100,
-                    display: "flex",
-                    position: "initial",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    border: "1px dashed grey",
-                    borderRadius: 1,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  }}
-                >
-                  <Typography variant="caption" textTransform={"uppercase"}>
-                    {extension} {index + 1}
-                  </Typography>
-                </Box>
-              )}
-              <IconButton
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  backgroundColor: "rgba(255, 255, 255, 0.7)",
-                }}
-                onClick={() => handleDownloadArchivo(index)}
-              >
-                <DownloadIcon fontSize="small" />
-              </IconButton>
-              {["jpg", "jpeg", "png", "webp", "pdf"].includes(
-                extension || ""
-              ) && (
-                <IconButton
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    bottom: 0,
-                    right: 0,
-                    backgroundColor: "rgba(255, 255, 255, 0.7)",
-                  }}
-                  onClick={() => handlePreviewArchivo(index)}
-                >
-                  <ZoomInIcon fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
-          );
-        })}
+      <Box sx={{ 
+        borderBottom: `2px solid ${theme.palette.primary.main}`, 
+        mb: 1, 
+        pb: 0.5, 
+        display: 'flex', 
+        alignItems: 'center',
+        gap: 1
+      }}>
+        {getFileIcon(files?.[0]?.name.split('.').pop())}
+        <Typography variant="subtitle1" fontWeight={500}>{label}</Typography>
       </Box>
+
+      {files.length === 0 ? (
+        // Placeholder uniforme cuando no hay archivos
+        <Box 
+          sx={{
+            ...fileContainer,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: theme.palette.background.default,
+            height: 200,
+            cursor: "default"
+          }}
+        >
+          <InsertDriveFileIcon sx={{ fontSize: 50, color: theme.palette.text.disabled, mb: 2 }} />
+          <Typography variant="body2" color="text.secondary" align="center">
+            No hay documentos disponibles
+          </Typography>
+        </Box>
+      ) : (
+        <Box sx={{ display: "flex", flexWrap: "wrap", mt: 1, minHeight: 200 }}>
+          {files.map((file, index) => {
+            const extension = file.name.split(".").pop();
+            const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(extension || '');
+            const isPdf = extension === 'pdf';
+            const isSpreadsheet = ['xlsx', 'xls', 'csv'].includes(extension || '');
+            
+            return (
+              <Box
+                key={index}
+                sx={{
+                  ...fileContainer,
+                  width: files.length > 1 ? 140 : "100%",
+                }}
+              >
+                {/* Parte superior - Contenido del archivo */}
+                <Box 
+                  sx={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    borderRadius: 1,
+                    cursor: (isImage || isPdf) ? 'pointer' : 'default',
+                    position: 'relative',
+                    '&:hover .preview-overlay': {
+                      opacity: 1
+                    }
+                  }}
+                  onClick={() => {
+                    if (isImage || isPdf) handlePreviewArchivo(index);
+                  }}
+                >
+                  {isImage ? (
+                    <>
+                      <img
+                        src={file.access_url}
+                        alt={`Documento ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
+                      <Box 
+                        className="preview-overlay"
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          backgroundColor: 'rgba(0,0,0,0.5)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          opacity: 0,
+                          transition: 'opacity 0.2s'
+                        }}
+                      >
+                        <ZoomInIcon sx={{ color: 'white', fontSize: 28 }} />
+                      </Box>
+                    </>
+                  ) : (
+                    <Box sx={{ textAlign: 'center' }}>
+                      {isPdf ? (
+                        <PictureAsPdfTwoToneIcon sx={{ fontSize: 50 }} color="error" />
+                      ) : isSpreadsheet ? (
+                        <TableChartIcon sx={{ fontSize: 50 }} color="success" />
+                      ) : (
+                        <InsertDriveFileIcon sx={{ fontSize: 50 }} color="action" />
+                      )}
+                      <Typography variant="caption" display="block" textTransform="uppercase">
+                        {extension}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+                
+                {/* Parte inferior - Nombre del archivo y acciones */}
+                <Box sx={{ mt: 1, borderTop: `1px solid ${theme.palette.divider}`, pt: 1 }}>
+                  <Typography 
+                    variant="caption" 
+                    display="block" 
+                    sx={{
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {file.name.split('/').pop()}
+                  </Typography>
+                </Box>
+                
+                {/* Botones de acción */}
+                <Box sx={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  backgroundColor: 'rgba(255,255,255,0.8)',
+                  borderRadius: '4px',
+                  padding: '2px',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleDownloadArchivo(index)}
+                    sx={{ mb: isImage || isPdf ? 0.5 : 0 }}
+                  >
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                  
+                  {(isImage || isPdf) && (
+                    <IconButton
+                      size="small"
+                      onClick={() => handlePreviewArchivo(index)}
+                    >
+                      <ZoomInIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
+      )}
+      
+      {/* Modales de vista previa */}
       {selectedFile && selectedFile.extension === "pdf" && fileUrl && (
         <PDFPreviewModal file={fileUrl} onClose={() => setSelectedFile(null)} />
       )}
