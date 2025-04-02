@@ -15,7 +15,6 @@ export const TrackerRouter = () => {
       <Route path="detail/:id" element={<DetailPage />} />
       
       <Route path="pallet-detail/:id" element={<QRCheckPage />} />
-      <Route path="tracker/" element={<QRCheckPage />} />
       <Route path="view" element={<ViewTrackerPage />} />
       <Route path="*" element={<CheckPage />} />
     </Routes>
