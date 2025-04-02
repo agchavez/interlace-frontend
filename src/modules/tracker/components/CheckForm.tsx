@@ -42,7 +42,7 @@ import {
   // downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
 
-import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+// import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
 import VisibilityTwoToneIcon from '@mui/icons-material/VisibilityTwoTone';
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -52,9 +52,9 @@ import { EditNote, EditTwoTone } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
-import TrakerPDFDocument from "./TrackerPDF";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
+// import TrakerPDFDocument from "./TrackerPDF";
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 
 import {
   useGetDriverQuery,
@@ -66,7 +66,9 @@ import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
 import AssignmentLateTwoToneIcon from "@mui/icons-material/AssignmentLateTwoTone";
 import TrackerFilesModal from "./TrackerFilesModal";
-import { toast } from "sonner";
+// import { toast } from "sonner";
+import PDFDownloader from "./TrackerPDFV2";
+import { QRCodeSVG } from "qrcode.react";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -105,24 +107,24 @@ export const CheckForm = ({
       driver: seguimiento.driver !== null ? seguimiento.driver : undefined,
     },
   });
-  const { data: dataDriver, isLoading: loadingDriver } = useGetDriverQuery({
+  const { data: dataDriver } = useGetDriverQuery({
     id: seguimiento.driver !== null ? seguimiento.driver : undefined,
     limit: 1,
     offset: 0,
   });
-  const { data: dataOp1, isLoading: loadingOP1 } =
+  const { data: dataOp1 } =
     useGetOperatorByDistributionCenterQuery({
       id: seguimiento.driver !== null ? seguimiento.opm1 : undefined,
       limit: 1,
       offset: 0,
     });
-  const { data: dataOp2, isLoading: loadingOP2 } =
+  const { data: dataOp2 } =
     useGetOperatorByDistributionCenterQuery({
       limit: 1,
       offset: 0,
       id: seguimiento.driver !== null ? seguimiento.opm2 : undefined,
     });
-  const { data: dataOutputLocation, isLoading: loadingOutputData } =
+  const { data: dataOutputLocation } =
     useGetLocationsQuery({
       id: seguimiento.driver !== null ? seguimiento.outputLocation : undefined,
       limit: 1,
@@ -151,75 +153,75 @@ export const CheckForm = ({
     );
   };
 
-  
-    const handleClickDescargar = async () => {
-    // Función auxiliar para descargar archivos sin redirección
-    const downloadFileWithoutRedirect = async (url: string, fileName: string) => {
-      try {
-        
-        // Usar XMLHttpRequest que tiene mejor manejo de descargas de archivos binarios
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        
-        // Manejar la respuesta
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            // Crear objeto URL
-            const blob = new Blob([xhr.response]);
-            const blobUrl = window.URL.createObjectURL(blob);
-            
-            // Crear elemento temporal para la descarga
-            const downloadLink = document.createElement('a');
-            downloadLink.style.display = 'none';
-            downloadLink.href = blobUrl;
-            downloadLink.download = fileName;
-            
-            // Agregar, hacer clic y eliminar
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            
-            // Limpiar después de un breve delay para asegurar que la descarga inicie
-            setTimeout(() => {
-              document.body.removeChild(downloadLink);
-              window.URL.revokeObjectURL(blobUrl);
-            }, 200);
-          
-          } else {
-            throw new Error(`Error al descargar: ${xhr.status}`);
-          }
-        };
-        
-        xhr.onerror = function() {
-          throw new Error('Error de red al intentar descargar el archivo');
-        };
-        
-        // Iniciar la descarga
-        xhr.send();
-        
-      } catch (error) {
-        console.error(`Error al descargar ${fileName}:`, error);
-        toast.error(`No se pudo descargar ${fileName}`);
-      }
-    };
-    
-    // Descargar el archivo 1 si existe
-    if (seguimiento.file_data_1) {
-      const url = seguimiento.file_data_1.access_url;
-      const nombre = seguimiento.file_data_1.name || 'documento1';
-      await downloadFileWithoutRedirect(url, nombre);
-    }
-    
-    // Descargar el archivo 2 si existe
-    if (seguimiento.file_data_2) {
-      // Pequeña pausa para asegurar que el primer archivo tenga tiempo de iniciar su descarga
-      await new Promise(resolve => setTimeout(resolve, 700));
-      
-      const url = seguimiento.file_data_2.access_url;
-      const nombre = seguimiento.file_data_2.name || 'documento2';
-      await downloadFileWithoutRedirect(url, nombre);
-    }
-  };
+
+  //   const handleClickDescargar = async () => {
+  //   // Función auxiliar para descargar archivos sin redirección
+  //   const downloadFileWithoutRedirect = async (url: string, fileName: string) => {
+  //     try {
+
+  //       // Usar XMLHttpRequest que tiene mejor manejo de descargas de archivos binarios
+  //       const xhr = new XMLHttpRequest();
+  //       xhr.open('GET', url, true);
+  //       xhr.responseType = 'blob';
+
+  //       // Manejar la respuesta
+  //       xhr.onload = function() {
+  //         if (xhr.status === 200) {
+  //           // Crear objeto URL
+  //           const blob = new Blob([xhr.response]);
+  //           const blobUrl = window.URL.createObjectURL(blob);
+
+  //           // Crear elemento temporal para la descarga
+  //           const downloadLink = document.createElement('a');
+  //           downloadLink.style.display = 'none';
+  //           downloadLink.href = blobUrl;
+  //           downloadLink.download = fileName;
+
+  //           // Agregar, hacer clic y eliminar
+  //           document.body.appendChild(downloadLink);
+  //           downloadLink.click();
+
+  //           // Limpiar después de un breve delay para asegurar que la descarga inicie
+  //           setTimeout(() => {
+  //             document.body.removeChild(downloadLink);
+  //             window.URL.revokeObjectURL(blobUrl);
+  //           }, 200);
+
+  //         } else {
+  //           throw new Error(`Error al descargar: ${xhr.status}`);
+  //         }
+  //       };
+
+  //       xhr.onerror = function() {
+  //         throw new Error('Error de red al intentar descargar el archivo');
+  //       };
+
+  //       // Iniciar la descarga
+  //       xhr.send();
+
+  //     } catch (error) {
+  //       console.error(`Error al descargar ${fileName}:`, error);
+  //       toast.error(`No se pudo descargar ${fileName}`);
+  //     }
+  //   };
+
+  //   // Descargar el archivo 1 si existe
+  //   if (seguimiento.file_data_1) {
+  //     const url = seguimiento.file_data_1.access_url;
+  //     const nombre = seguimiento.file_data_1.name || 'documento1';
+  //     await downloadFileWithoutRedirect(url, nombre);
+  //   }
+
+  //   // Descargar el archivo 2 si existe
+  //   if (seguimiento.file_data_2) {
+  //     // Pequeña pausa para asegurar que el primer archivo tenga tiempo de iniciar su descarga
+  //     await new Promise(resolve => setTimeout(resolve, 700));
+
+  //     const url = seguimiento.file_data_2.access_url;
+  //     const nombre = seguimiento.file_data_2.name || 'documento2';
+  //     await downloadFileWithoutRedirect(url, nombre);
+  //   }
+  // };
 
   const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
 
@@ -252,21 +254,49 @@ export const CheckForm = ({
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
-        <Grid item xs={12}>
-          <Typography
-            variant="h4"
-            component="h1"
-            fontWeight={400}
-            color={"#1c2536"}
-            align="center"
-            borderRadius={2}
+                <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3, alignItems: "center" }}>
+          <Grid
+            item
+            xs={12}
+            md={1}
             sx={{
-              border: "1px solid #1c2536",
-
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
             }}
           >
-            TRK-{seguimiento.id?.toString().padStart(5, "0")}
-          </Typography>
+            <QRCodeSVG
+              value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/?tracker_id=${seguimiento?.id}`}
+              imageSettings={{
+                src: "/logo-qr.png",
+                height: 20,
+                width: 20,
+                excavate: true,
+              }}
+              size={80}
+              level="Q"
+            />
+          </Grid>
+          <Grid item xs={12} md={11}>
+            <Typography
+              variant="h4"
+              component="h1"
+              fontWeight={400}
+              bgcolor={"#1c2536"}
+              color={"white"}
+              align="center"
+              borderRadius={2}
+              sx={{
+                border: "1px solid #1c2536",
+                padding: "0px 8px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center"
+              }}
+            >
+              TRK-{seguimiento.id?.toString().padStart(5, "0")}
+            </Typography>
+          </Grid>
         </Grid>
         {/* <Grid
           item
@@ -731,21 +761,8 @@ export const CheckForm = ({
                       />
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        color="primary"
-                        onClick={handleClickDescargar}
-                        startIcon={<CloudDownloadTwoToneIcon />}
-                        sx={{
-                          borderRadius: '5px',
-                          boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                          textTransform: 'none'
-                        }}
-                      >
-                        Descargar
-                      </Button>
-                      <PDFDownloadLink
+
+                      {/* <PDFDownloadLink
                         fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
                         document={
                           <TrakerPDFDocument
@@ -788,7 +805,19 @@ export const CheckForm = ({
                             </IconButton>
                           );
                         }}
-                      </PDFDownloadLink>
+                      </PDFDownloadLink> */}
+                      <PDFDownloader
+                        seguimiento={seguimiento}
+                        outputTypeData={outputTypeData}
+                        driver={dataDriver?.results[0]}
+                        op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp1?.results[0]
+                          : undefined}
+                        op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp2?.results[0]
+                          : undefined}
+                        outputLocation={dataOutputLocation?.results[0]}
+                      />
                     </Box>
                   </>
                 ) : (
@@ -1149,7 +1178,7 @@ export const CheckForm = ({
                   fontWeight={400}
                   color={"gray.500"}
                 >
-                   Inicio descarga
+                  Inicio descarga
                 </Typography>
                 <Divider />
                 <Typography
@@ -1174,7 +1203,7 @@ export const CheckForm = ({
                   fontWeight={400}
                   color={"gray.500"}
                 >
-                  Finzalización descarga
+                  Finalización de descarga
                 </Typography>
                 <Divider />
                 <Typography
@@ -1324,10 +1353,10 @@ export const CheckForm = ({
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Detalle</StyledTableCell>
-                    <StyledTableCell align="right">No. SAP</StyledTableCell>
-                    <StyledTableCell align="right">Producto</StyledTableCell>
+                    <StyledTableCell align="right">Material</StyledTableCell>
+                    <StyledTableCell align="right">Texto Breve de Material</StyledTableCell>
                     <StyledTableCell align="right">
-                      Total pallets
+                      Pallets
                     </StyledTableCell>
                     {!disable && (
                       <StyledTableCell align="right">Acciones</StyledTableCell>

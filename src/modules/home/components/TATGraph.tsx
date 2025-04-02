@@ -134,10 +134,19 @@ const TATGraph = () => {
   const dispatch = useAppDispatch()
   // TODO implementar bien el loading
 
-  const datasets = useMemo(()=>{
+    const datasets = useMemo(() => {
     const datosAgrupados = groupByDistributorCenter(averages);
-    return obtenerDatasets(datosAgrupados, disctributionCenters.filter(dc => user?.distributions_centers.includes(dc.id)))
-  }, [averages, disctributionCenters, user])
+    
+    // Verificar que user y distributions_centers existan y sea un array
+    const userDistributionCenters = user?.distributions_centers || [];
+    
+    // Asegurarnos de que es un array antes de usar filter
+    const filteredCenters = Array.isArray(disctributionCenters) 
+      ? disctributionCenters.filter(dc => Array.isArray(userDistributionCenters) && userDistributionCenters.includes(dc.id))
+      : [];
+      
+    return obtenerDatasets(datosAgrupados, filteredCenters);
+  }, [averages, disctributionCenters, user]);
 
   const data = {
     labels,

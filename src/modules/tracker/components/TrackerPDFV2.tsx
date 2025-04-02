@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Document, Page, View, StyleSheet, Image } from "@react-pdf/renderer";
 import PDFText from "../../ui/components/pdfDocs/PDFText";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
@@ -14,6 +15,12 @@ import {
 } from "../../../interfaces/maintenance";
 import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
+import Box from "@mui/material/Box";
 
 const styles = StyleSheet.create({
   page: {
@@ -29,7 +36,7 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: 'gray',
     height: 1,
-    width: '100%', // Adjust the width according to your layout
+    width: '100%',
     marginBottom: 10,
   },
   subTitle: {
@@ -66,7 +73,6 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-
   }
 });
 
@@ -77,6 +83,8 @@ interface TrakerPDFDocumentProps {
   op1?: Operator;
   op2?: Operator;
   outputLocation?: LocationType;
+  imageBase64_1?: string | null;
+  imageBase64_2?: string | null;
 }
 
 function TrakerPDFDocument({
@@ -86,6 +94,8 @@ function TrakerPDFDocument({
   op1,
   op2,
   outputLocation,
+  imageBase64_1,
+  imageBase64_2,
 }: TrakerPDFDocumentProps) {
   const entradaTableData = seguimiento.detalles
     .map((det) => {
@@ -131,13 +141,14 @@ function TrakerPDFDocument({
     ? new Date(seguimiento?.timeEnd)
     : null;
 
+
   // Verificar si hay archivos de imagen
   const hasImages = seguimiento.file_data_1 || seguimiento.file_data_2;
 
   // Determinar las extensiones de los archivos para saber si son imágenes
-  const isFileImage = (extension: string | null) => {
+  const isFileImage = (extension: string | undefined | null) => {
     if (!extension) return false;
-    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension.toLowerCase());
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension.toLowerCase());
   };
 
   // Verificar si los archivos son imágenes
@@ -149,7 +160,7 @@ function TrakerPDFDocument({
     if (seguimiento.type === "IMPORT") {
       return fileNum === 1 ? "Gate Pass" : "Factura";
     } else {
-      return `Documento ${fileNum}`;
+      return `Documento`;
     }
   };
 
@@ -461,48 +472,221 @@ function TrakerPDFDocument({
 
       {hasImages && (file1IsImage || file2IsImage) && (
         <>
-          <Page size="LETTER" style={styles.page}>
-            <View style={styles.section}>
-              <PDFSubTitle style={{ ...styles.subTitle }}>
-                {seguimiento.type === "IMPORT" ? "Documentación fotográfica:" : "Documentos adjuntos:"}
-              </PDFSubTitle>
-
-              <View style={styles.imagesRow}>
-                {file1IsImage && seguimiento.file_data_1 && (
-                  <View style={styles.imageItem}>
-                    <PDFText style={styles.imageCaption}>
-                      {getDocumentName(1)}
-                    </PDFText>
-                    <Image
-                      src={seguimiento.file_data_1.access_url}
-                      style={styles.documentImage}
-                    />
-                  </View>
-                )}
-
-
+          {file1IsImage && seguimiento.file_data_1 && (
+            <Page size="LETTER" style={styles.page}>
+              <View style={{ ...styles.section, marginBottom: 10 }}>
+                <PDFTitle style={{ color: "#1c2536", fontSize: 18, marginBottom: 10 }}>
+                  {seguimiento.type === "IMPORT" ? "Documentos de Importación" : "Documentos adjuntos"}
+                </PDFTitle>
+                <View style={{ ...styles.divider, marginBottom: 20 }} />
+                
+                <View style={styles.imageItem}>
+                  <PDFText style={{ ...styles.imageCaption, fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
+                    {getDocumentName(1)}
+                  </PDFText>
+                  <Image
+                    src={imageBase64_1 || seguimiento.file_data_1.access_url}
+                    style={styles.documentImage}
+                  />
+                </View>
               </View>
-            </View>
-          </Page>
-          {file2IsImage && seguimiento.file_data_2 && (<Page size="LETTER" style={styles.page}>
-
-            <View style={styles.imageItem}>
-              <PDFText style={styles.imageCaption}>
-                {getDocumentName(2)}
-              </PDFText>
-              <Image
-                src={seguimiento.file_data_2.access_url}
-                style={styles.documentImage}
-              />
-            </View>
-
-          </Page>
+            </Page>
+          )}
+          
+          {file2IsImage && seguimiento.file_data_2 && (
+            <Page size="LETTER" style={styles.page}>
+              <View style={{ ...styles.section, marginBottom: 10 }}>
+                
+                <View style={{ ...styles.divider, marginBottom: 20 }} />
+                
+                <View style={styles.imageItem}>
+                  <PDFText style={{ ...styles.imageCaption, fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
+                    {getDocumentName(2)}
+                  </PDFText>
+                  <Image
+                    src={imageBase64_2 || seguimiento.file_data_2.access_url}
+                    style={styles.documentImage}
+                  />
+                  <PDFText style={{ ...styles.imageCaption, fontSize: 10, marginTop: 5 }}>
+                    {seguimiento.file_data_2.name || 'Documento 2'}
+                  </PDFText>
+                </View>
+              </View>
+            </Page>
           )}
         </>
       )}
-
     </Document>
   );
 }
 
-export default TrakerPDFDocument;
+// Componente para manejar la precarga de imágenes y la descarga del PDF
+const PDFDownloader = ({
+  seguimiento,
+  outputTypeData,
+  driver,
+  op1,
+  op2,
+  outputLocation,
+}: TrakerPDFDocumentProps) => {
+  const [imageBase64_1, setImageBase64_1] = useState<string | null>(null);
+  const [imageBase64_2, setImageBase64_2] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Función para convertir URL de imagen a base64
+  const convertImageToBase64 = async (url: string): Promise<string | null> => {
+    try {
+      // Usar XMLHttpRequest para mayor compatibilidad
+      return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            const blob = new Blob([xhr.response]);
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => {
+              console.error("Error al leer la imagen como base64");
+              resolve(null);
+            };
+            reader.readAsDataURL(blob);
+          } else {
+            console.error("Error al cargar imagen:", xhr.status);
+            resolve(null);
+          }
+        };
+        xhr.onerror = () => {
+          console.error("Error de red al cargar imagen");
+          resolve(null);
+        };
+        xhr.open('GET', url);
+        xhr.responseType = 'blob';
+        xhr.send();
+      });
+    } catch (error) {
+      console.error("Error al convertir imagen a base64:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const loadImages = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // Verificar si hay imágenes para cargar
+        const file1IsImage = seguimiento.file_data_1 && 
+          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
+            (seguimiento.file_data_1.extension || '').toLowerCase()
+          );
+        
+        const file2IsImage = seguimiento.file_data_2 && 
+          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
+            (seguimiento.file_data_2.extension || '').toLowerCase()
+          );
+        
+        // Cargar imágenes en paralelo
+        const promises = [];
+        
+        if (file1IsImage && seguimiento.file_data_1?.access_url) {
+          promises.push(
+            convertImageToBase64(seguimiento.file_data_1.access_url)
+              .then(base64 => setImageBase64_1(base64))
+          );
+        }
+        
+        if (file2IsImage && seguimiento.file_data_2?.access_url) {
+          promises.push(
+            convertImageToBase64(seguimiento.file_data_2.access_url)
+              .then(base64 => setImageBase64_2(base64))
+          );
+        }
+        
+        // Si no hay imágenes, simplemente finalizamos la carga
+        if (promises.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+        
+        // Esperar a que todas las imágenes se carguen (con un timeout máximo)
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Tiempo de carga excedido")), 15000)
+        );
+        
+        await Promise.race([
+          Promise.all(promises),
+          timeoutPromise
+        ]);
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error al cargar imágenes:", error);
+        setError("No se pudieron cargar las imágenes. Se generará el PDF sin ellas.");
+        setIsLoading(false);
+      }
+    };
+    
+    loadImages();
+  }, [seguimiento]);
+
+  return (
+    <Box>
+      {isLoading ? (
+        <Button
+          startIcon={<CircularProgress size={20} />}
+          variant="contained"
+          color="secondary"
+          disabled
+          sx={{
+            mt: 'auto',
+            borderRadius: '5px',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+            textTransform: 'none',
+            minWidth: '140px'
+          }}
+        >
+          Preparando PDF...
+        </Button>
+      ) : (
+        <PDFDownloadLink
+          document={
+            <TrakerPDFDocument
+              seguimiento={seguimiento}
+              outputTypeData={outputTypeData}
+              driver={driver}
+              op1={op1}
+              op2={op2}
+              outputLocation={outputLocation}
+              imageBase64_1={imageBase64_1}
+              imageBase64_2={imageBase64_2}
+            />
+          }
+          fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}.pdf`}
+          style={{ textDecoration: 'none' }}
+        >
+          {({ loading }) => (
+            <Button
+              startIcon={loading ? <CircularProgress size={20} /> : <PictureAsPdfTwoToneIcon/>}
+              variant="outlined"
+              color="secondary"
+              disabled={loading}
+              size="small"
+              
+            >
+              {loading ? "Generando PDF..." : "Descargar PDF"}
+            </Button>
+          )}
+        </PDFDownloadLink>
+      )}
+      
+      {error && (
+        <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
+          {error}
+        </Typography>
+      )}
+    </Box>
+  );
+};
+
+export default PDFDownloader;

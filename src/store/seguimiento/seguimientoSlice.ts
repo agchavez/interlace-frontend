@@ -315,6 +315,7 @@ export const seguimientoSlice = createSlice({
           updateSeguimientoById: (state, action: PayloadAction<Seguimiento>) => {
             const { id } = action.payload
             const index = state.seguimientos.findIndex((seguimiento) => seguimiento.id === id)
+            
             if (index !== -1) {
                 state.seguimientos[index] = action.payload
             }
