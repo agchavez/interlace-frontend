@@ -20,6 +20,7 @@ import {
 
 import { Claim } from "../../../store/claim/claimApi";
 import {format} from "date-fns";
+import { ClaimTypeChipWrapper } from "../../ui/components/ClaimTypeChip";
 
 const StyledCard = styled(Card)(({ theme }) => ({
     borderRadius: theme.spacing(1),
@@ -100,12 +101,10 @@ const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
                                     Reclamo Tracker TRK-{claim.tracker}
                                 </Typography>
                                 <Box display="flex" gap={1} mt={0.5}>
-                                    <ClaimTypeChip
-                                        theme={useTheme()}
-                                        claimType={claim.claim_type}
-                                        label={getClaimTypeLabel(claim.claim_type)}
-                                        size="small"
-                                    />
+                                <ClaimTypeChipWrapper
+                                            claimTypeId={claim.claim_type}
+                                            size="small"
+                                        />
                                     <StatusChip
                                         status={claim.status}
                                         label={getStatusLabel(claim.status)}

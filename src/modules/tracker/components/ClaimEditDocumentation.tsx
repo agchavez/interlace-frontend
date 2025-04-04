@@ -10,7 +10,7 @@ import { PhotosEditor } from "./PhotosEditor";
 import PlaceholderDocPreview from "../../ui/components/PlaceholderDocPreview.tsx";
 
 export interface EditFormData {
-    tipo: string;
+    tipo: number;
     descripcion: string;
     claimNumber: string;
     discardDoc: string;

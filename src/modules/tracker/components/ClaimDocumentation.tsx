@@ -6,7 +6,10 @@ import {
     Typography,
     Tooltip,
     Divider,
-    IconButton
+    IconButton,
+    styled,
+    TooltipProps,
+    tooltipClasses
 } from "@mui/material";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
 
@@ -19,6 +22,20 @@ export interface ClaimDocumentationProps {
     setValue: any;
     watch: any;
 }
+
+
+                const HtmlTooltip = styled(({ className, ...props }: TooltipProps) => (
+                    <Tooltip {...props} classes={{ popper: className }} />
+                ))(({ theme }) => ({
+                    [`& .${tooltipClasses.tooltip}`]: {
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    maxWidth: 220,
+                    fontSize: theme.typography.pxToRem(12),
+                    border: '1px solid #dadde9',
+                    },
+                }));
+
 
 const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => {
 
@@ -70,11 +87,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             1. Contenedor cerrado{" "}
-                            <Tooltip title="Fotografía del contenedor completamente cerrado">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografía del contenedor completamente cerrado" color="warning">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -87,11 +104,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             2. Contenedor con 1 puerta abierta{" "}
-                            <Tooltip title="Fotografía del contenedor con una de sus puertas abierta">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografía del contenedor con una de sus puertas abierta">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -104,11 +121,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             3. Contenedor con 2 puertas abiertas{" "}
-                            <Tooltip title="Fotografía del contenedor con ambas puertas abiertas">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografía del contenedor con ambas puertas abiertas">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -121,11 +138,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             4. Vista superior del contenido del contenedor{" "}
-                            <Tooltip title="Fotografía tomada desde arriba del contenido del contenedor">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografía tomada desde arriba del contenido del contenedor">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -138,11 +155,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             5. Fotografía durante la descarga{" "}
-                            <Tooltip title="Fotografía tomada durante la descarga del contenedor">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografía tomada durante la descarga del contenedor">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -155,11 +172,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                     <Grid item xs={12} sm={6} md={4}>
                         <Typography variant="body2">
                             6. Fisuras/abolladuras de pallets{" "}
-                            <Tooltip title="Fotografías que muestren fisuras o abolladuras en los pallets">
-                                <IconButton size="small">
-                                    <Typography variant="caption">?</Typography>
+                            <HtmlTooltip title="Fotografías que muestren fisuras o abolladuras en los pallets">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
                                 </IconButton>
-                            </Tooltip>
+                            </HtmlTooltip>
                         </Typography>
                         <ImagePreviewDropzone
                             files={[]}
@@ -181,11 +198,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                             <Grid item xs={12} sm={6} md={4}>
                                 <Typography variant="body2">
                                     a) Base de la lata/botella (fecha de vencimiento y lote){" "}
-                                    <Tooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
+                                    <HtmlTooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
                                         </IconButton>
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                 </Typography>
                                 <ImagePreviewDropzone
                                     files={[]}
@@ -198,11 +215,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                             <Grid item xs={12} sm={6} md={4}>
                                 <Typography variant="body2">
                                     b) Abolladuras (mínimo 3 diferentes){" "}
-                                    <Tooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
+                                    <HtmlTooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
                                         </IconButton>
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                 </Typography>
                                 <ImagePreviewDropzone
                                     files={[]}
@@ -215,11 +232,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                             <Grid item xs={12} sm={6} md={4}>
                                 <Typography variant="body2">
                                     c) Cajas dañadas por golpes o problemas de calidad{" "}
-                                    <Tooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
+                                    <HtmlTooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
                                         </IconButton>
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                 </Typography>
                                 <ImagePreviewDropzone
                                     files={[]}
@@ -232,11 +249,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                             <Grid item xs={12} sm={6} md={4}>
                                 <Typography variant="body2">
                                     d) Producto en mal estado agrupado en 1 pallet{" "}
-                                    <Tooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
+                                    <HtmlTooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
                                         </IconButton>
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                 </Typography>
                                 <ImagePreviewDropzone
                                     files={[]}
@@ -249,11 +266,11 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue }) => 
                             <Grid item xs={12} sm={6} md={4}>
                                 <Typography variant="body2">
                                     e) Repaletizado por identificación de producto dañado{" "}
-                                    <Tooltip title="Fotografías del repaletizado para identificar producto dañado">
-                                        <IconButton size="small">
-                                            <Typography variant="caption">?</Typography>
+                                    <HtmlTooltip title="Fotografías del repaletizado para identificar producto dañado">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
                                         </IconButton>
-                                    </Tooltip>
+                                    </HtmlTooltip>
                                 </Typography>
                                 <ImagePreviewDropzone
                                     files={[]}

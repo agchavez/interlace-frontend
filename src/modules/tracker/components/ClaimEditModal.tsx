@@ -128,7 +128,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
           const fd = new FormData();
       
           // Campos principales
-          fd.append("claim_type", data.tipo || "");
+          fd.append("claim_type", data.tipo?.toString() || "");
           fd.append("description", data.descripcion || "");
           fd.append("claim_number", data.claimNumber || "");
           fd.append("discard_doc", data.discardDoc || "");

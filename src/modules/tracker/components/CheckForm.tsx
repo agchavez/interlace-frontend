@@ -1373,7 +1373,7 @@ export const CheckForm = ({
             )}
 
             <Grid item xs={12}>
-              <Table size="small" aria-label="a dense table">
+              <Table size="small" aria-label="a dense table" sx={{ borderRadius: 2 }}>
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Detalle</StyledTableCell>

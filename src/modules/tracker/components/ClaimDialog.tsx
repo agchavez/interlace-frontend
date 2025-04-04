@@ -24,6 +24,7 @@ import { errorApiHandler } from "../../../utils/error";
 import { useCreateClaimMutation } from "../../../store/claim/claimApi";
 import { toast } from "sonner";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
+import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 
 
 const claimTypes = [
@@ -33,7 +34,7 @@ const claimTypes = [
 ];
 
 export interface FormData {
-    tipo: string;
+    tipo: number;
     descripcion: string;
     claimNumber: string;
     claimFile: File | null;
@@ -77,7 +78,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
 
     const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
-            tipo: "FALTANTE",
+            tipo: 0,
             descripcion: "",
             claimNumber: "",
             claimFile: null,
@@ -118,7 +119,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
         try {
             const formData = new FormData();
             formData.append("tracker_id", tracker.toString());
-            formData.append("claim_type", data.tipo);
+            formData.append("claim_type", data.tipo.toString());
             formData.append("descripcion", data.descripcion);
             formData.append("claim_number", data.claimNumber);
             formData.append("discard_doc", data.discardDoc);
@@ -212,27 +213,12 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth size="small" error={Boolean(errors.tipo)}>
-                            <InputLabel id="tipo-reclamo-label">Tipo de Reclamo</InputLabel>
-                            <Controller
-                                name="tipo"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select labelId="tipo-reclamo-label" label="Tipo de Reclamo" {...field}>
-                                        {claimTypes.map((t) => (
-                                            <MenuItem key={t.value} value={t.value}>
-                                                {t.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                )}
-                            />
-                            {errors.tipo && (
-                                <Typography variant="caption" color="error">
-                                    {errors.tipo.message}
-                                </Typography>
-                            )}
-                        </FormControl>
+                        <ClaimTypeSelect
+                            control={control}
+                            name="tipo"
+                            local={true}
+                            placeholder="Seleccione o ingrese un tipo de reclamo"
+                        />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField label="Número de Claim" fullWidth size="small" {...register("claimNumber")} />
