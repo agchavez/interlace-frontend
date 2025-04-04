@@ -24,6 +24,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -98,6 +100,11 @@ export const ProductoEntradaTableRow: FunctionComponent<
       +row.amount
     );
   };
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+
   return (
     <Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -113,10 +120,24 @@ export const ProductoEntradaTableRow: FunctionComponent<
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" align="right">
-          {row.sap_code}
-        </TableCell>
-        <TableCell align="right">{row.name}</TableCell>
+        {isMobile ?
+          <>
+            <TableCell component="th" align="left">
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <Typography variant="body2" fontWeight={600}>
+                  {row.sap_code}
+                </Typography>
+                <Typography variant="body2">{row.name}</Typography>
+              </Box>
+            </TableCell>
+          </>
+          : <>
+            <TableCell component="th" align="right">
+              {row.sap_code}
+            </TableCell>
+            <TableCell align="right">{row.name}</TableCell>
+          </>
+        }
         <TableCell align="right">{row.amount}</TableCell>
 
         {!disable && (
