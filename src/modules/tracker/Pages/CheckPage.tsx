@@ -148,6 +148,7 @@ export const CheckPage = () => {
                   tracker={seguimientos[seguimeintoActual || 0].id}
                   open={claimOpen}
                   onClose={() => setClaimOpen(false)}
+                  type={seguimientos[seguimeintoActual || 0].type}
               />
           )
       )}

@@ -19,8 +19,14 @@ interface ImagePreviewDropzoneProps {
 export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles, sxDrop }) => {
     const [previews, setPreviews] = useState<string[]>(files.map(file => URL.createObjectURL(file)));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
-
+    const [type, settype] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
     const onDrop = (acceptedFiles: File[]) => {
+        if (files.length + acceptedFiles.length > maxFiles!) {
+            alert(`No puedes subir más de ${maxFiles} archivos.`);
+            return;
+        }else{
+            settype(acceptedFiles[0].type.includes('pdf') ? 'pdf' : acceptedFiles[0].type.includes('sheet') ? 'excel' : 'image')
+        }
         const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
         onFilesChange(newFiles);
         setPreviews(newFiles.map(file => URL.createObjectURL(file)));
@@ -33,7 +39,7 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
     };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop, accept, maxFiles });
-
+    
     return (
         <Box>
             <Typography variant="body2">{label}</Typography>
@@ -47,7 +53,7 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
             <Box sx={{ display: "flex", flexWrap: "wrap", mt: 0 }}>
                 {previews.map((preview, index) => (
                     <Box key={index} sx={{ position: "relative", width: 80, height: 80, mr: 1, mb: 1, ...(sxDrop || {}), }}>
-                        {accept["application/pdf"] ? (
+                        {type === 'pdf' ? (
                             <Box
                                 sx={{
                                     width: "100%",
@@ -63,9 +69,55 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
                                 onClick={() => setSelectedFile(preview)}
                             >
                                 <PictureAsPdfTwoToneIcon sx={{ fontSize: 30 }} color="error" />
-                                <Typography variant="caption">PDF {index + 1}</Typography>
+                                <Typography variant="caption">PDF</Typography>
                             </Box>
-                        ) : (
+                        ) 
+                        : type === 'excel' ? (
+                            <Box
+                                sx={{
+                                    width: "100%",
+                                    height: "100%",
+                                    display: "flex",
+                                    flexDirection: "column", // Cambiado a column para apilar los elementos verticalmente
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    cursor: "not-allowed",
+                                    border: "1px dashed grey",
+                                    borderRadius: 1,
+                                    backgroundColor: "rgba(255, 255, 255, 0.7)",
+                                }}
+                            >
+                                <Box sx={{ mb: 0.5 }}> {/* Contenedor para el SVG con margen inferior */}
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        viewBox="0 0 48 40" 
+                                        width="32px" 
+                                        height="32px"
+                                    >
+                                        <defs>
+                                            <linearGradient 
+                                                id="G7C1BuhajJQaEWHVlNUzHa" 
+                                                x1="6" 
+                                                x2="27" 
+                                                y1="24" 
+                                                y2="24" 
+                                                data-name="Безымянный градиент 10" 
+                                                gradientUnits="userSpaceOnUse"
+                                            >
+                                                <stop offset="0" stopColor="#21ad64"/>
+                                                <stop offset="1" stopColor="#088242"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path fill="#31c447" d="m41,10h-16v28h16c.55,0,1-.45,1-1V11c0-.55-.45-1-1-1Z"/>
+                                        <path fill="#fff" d="m32,15h7v3h-7v-3Zm0,10h7v3h-7v-3Zm0,5h7v3h-7v-3Zm0-10h7v3h-7v-3Zm-7-5h5v3h-5v-3Zm0,10h5v3h-5v-3Zm0,5h5v3h-5v-3Zm0-10h5v3h-5v-3Z"/>
+                                        <path fill="url(#G7C1BuhajJQaEWHVlNUzHa)" d="m27,42l-21-4V10l21-4v36Z"/>
+                                        <path fill="#fff" d="m19.13,31l-2.41-4.56c-.09-.17-.19-.48-.28-.94h-.04c-.05.22-.15.54-.32.98l-2.42,4.52h-3.76l4.46-7-4.08-7h3.84l2,4.2c.16.33.3.73.42,1.18h.04c.08-.27.22-.68.44-1.22l2.23-4.16h3.51l-4.2,6.94,4.32,7.06h-3.74Z"/>
+                                    </svg>
+                                </Box>
+                                <Typography variant="caption" sx={{ mt: -0.5 }}>Excel {index + 1}</Typography>
+                            </Box>
+                        ) 
+                        : (
                             <img
                                 src={preview}
                                 alt={`preview ${index}`}
@@ -90,13 +142,20 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
                     </Box>
                 ))}
             </Box>
+
+            
             {selectedFile && (
-                accept["application/pdf"] ? (
+                type === 'pdf' ? (
                     <PDFPreviewModal
                         file={selectedFile}
                         onClose={() => setSelectedFile(null)}
                     />
-                ) : (
+                ) :
+                type === 'excel' ? (
+                    <></>
+                )
+
+                : (
                     <ImagePreviewModal
                         image={selectedFile}
                         onClose={() => setSelectedFile(null)}

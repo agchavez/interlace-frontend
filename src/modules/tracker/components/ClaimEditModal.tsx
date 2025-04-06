@@ -247,6 +247,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
                         watch={watch}
                         setValue={setValue}
                         claimData={claimData}
+                        type={claimData.tracking?.type}
                     />
                 </div>
 

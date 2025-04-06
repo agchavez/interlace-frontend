@@ -9,11 +9,7 @@ import {
     Box,
     Grid,
     DialogContent,
-    TextField,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select
+    TextField
 } from "@mui/material";
 import {Controller, useForm } from "react-hook-form";
 import { styled } from "@mui/material/styles";
@@ -26,17 +22,8 @@ import { toast } from "sonner";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
 import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 
-
-const claimTypes = [
-    { value: "FALTANTE", label: "Faltante" },
-    { value: "SOBRANTE", label: "Sobrante" },
-    { value: "DAÑOS_CALIDAD_TRANSPORTE", label: "Daños por Calidad y Transporte" },
-];
-
 export interface FormData {
     tipo: number;
-    descripcion: string;
-    claimNumber: string;
     claimFile: File | null;
     creditMemoFile: File | null;
     discardDoc: string;
@@ -68,9 +55,10 @@ interface ClaimModalProps {
     open: boolean;
     onClose: () => void;
     tracker: number;
+    type: 'LOCAL' | 'IMPORT';
 }
 
-export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
+export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }) => {
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabChange = (_event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
@@ -79,8 +67,6 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
     const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
             tipo: 0,
-            descripcion: "",
-            claimNumber: "",
             claimFile: null,
             creditMemoFile: null,
             discardDoc: "",
@@ -120,8 +106,6 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
             const formData = new FormData();
             formData.append("tracker_id", tracker.toString());
             formData.append("claim_type", data.tipo.toString());
-            formData.append("descripcion", data.descripcion);
-            formData.append("claim_number", data.claimNumber);
             formData.append("discard_doc", data.discardDoc);
             formData.append("description", data.observations);
 
@@ -220,9 +204,6 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
                             placeholder="Seleccione o ingrese un tipo de reclamo"
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField label="Número de Claim" fullWidth size="small" {...register("claimNumber")} />
-                    </Grid>
                     <Grid item xs={12}>
                         <TextField
                             label="Observaciones"
@@ -246,6 +227,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
                         errors={errors}
                         setValue={setValue}
                         watch={watch}
+                        type={type}
                     />
                 </div>
 
