@@ -9,11 +9,7 @@ import {
     Box,
     Grid,
     DialogContent,
-    TextField,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select
+    TextField
 } from "@mui/material";
 import {Controller, useForm } from "react-hook-form";
 import { styled } from "@mui/material/styles";
@@ -24,18 +20,10 @@ import { errorApiHandler } from "../../../utils/error";
 import { useCreateClaimMutation } from "../../../store/claim/claimApi";
 import { toast } from "sonner";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
-
-
-const claimTypes = [
-    { value: "FALTANTE", label: "Faltante" },
-    { value: "SOBRANTE", label: "Sobrante" },
-    { value: "DAÑOS_CALIDAD_TRANSPORTE", label: "Daños por Calidad y Transporte" },
-];
+import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 
 export interface FormData {
-    tipo: string;
-    descripcion: string;
-    claimNumber: string;
+    tipo: number;
     claimFile: File | null;
     creditMemoFile: File | null;
     discardDoc: string;
@@ -67,9 +55,10 @@ interface ClaimModalProps {
     open: boolean;
     onClose: () => void;
     tracker: number;
+    type: 'LOCAL' | 'IMPORT';
 }
 
-export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
+export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }) => {
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabChange = (_event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
@@ -77,9 +66,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
 
     const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
-            tipo: "FALTANTE",
-            descripcion: "",
-            claimNumber: "",
+            tipo: 0,
             claimFile: null,
             creditMemoFile: null,
             discardDoc: "",
@@ -118,9 +105,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
         try {
             const formData = new FormData();
             formData.append("tracker_id", tracker.toString());
-            formData.append("claim_type", data.tipo);
-            formData.append("descripcion", data.descripcion);
-            formData.append("claim_number", data.claimNumber);
+            formData.append("claim_type", data.tipo.toString());
             formData.append("discard_doc", data.discardDoc);
             formData.append("description", data.observations);
 
@@ -212,30 +197,12 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
                         </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth size="small" error={Boolean(errors.tipo)}>
-                            <InputLabel id="tipo-reclamo-label">Tipo de Reclamo</InputLabel>
-                            <Controller
-                                name="tipo"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select labelId="tipo-reclamo-label" label="Tipo de Reclamo" {...field}>
-                                        {claimTypes.map((t) => (
-                                            <MenuItem key={t.value} value={t.value}>
-                                                {t.label}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                )}
-                            />
-                            {errors.tipo && (
-                                <Typography variant="caption" color="error">
-                                    {errors.tipo.message}
-                                </Typography>
-                            )}
-                        </FormControl>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <TextField label="Número de Claim" fullWidth size="small" {...register("claimNumber")} />
+                        <ClaimTypeSelect
+                            control={control}
+                            name="tipo"
+                            local={true}
+                            placeholder="Seleccione o ingrese un tipo de reclamo"
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <TextField
@@ -260,6 +227,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker }) => {
                         errors={errors}
                         setValue={setValue}
                         watch={watch}
+                        type={type}
                     />
                 </div>
 

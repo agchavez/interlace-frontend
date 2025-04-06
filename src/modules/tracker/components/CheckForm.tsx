@@ -16,6 +16,8 @@ import {
   Typography,
   styled,
   tableCellClasses,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -153,6 +155,10 @@ export const CheckForm = ({
     );
   };
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+
 
   //   const handleClickDescargar = async () => {
   //   // Función auxiliar para descargar archivos sin redirección
@@ -254,50 +260,68 @@ export const CheckForm = ({
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
-                <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3, alignItems: "center" }}>
-          <Grid
-            item
-            xs={12}
-            md={1}
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <QRCodeSVG
-              value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
-              imageSettings={{
-                src: "/logo-qr.png",
-                height: 20,
-                width: 20,
-                excavate: true,
-              }}
-              size={80}
-              level="Q"
-            />
-          </Grid>
-          <Grid item xs={12} md={11}>
-            <Typography
-              variant="h4"
-              component="h1"
-              fontWeight={400}
-              bgcolor={"#1c2536"}
-              color={"white"}
-              align="center"
-              borderRadius={2}
-              sx={{
-                border: "1px solid #1c2536",
-                padding: "0px 8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-            >
-              TRK-{seguimiento.id?.toString().padStart(5, "0")}
-            </Typography>
-          </Grid>
-        </Grid>
+                              <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3 }}>
+                  <Grid item xs={12}>
+                    <Typography
+                      variant="h4"
+                      component="h1"
+                      fontWeight={400}
+                      bgcolor={"#1c2536"}
+                      color={"white"}
+                      align="center"
+                      borderRadius={2}
+                      sx={{
+                        border: "1px solid #1c2536",
+                        padding: "8px 16px",
+                        paddingLeft: "95px", // Aumentado para dar más espacio al texto principal
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        overflow: "visible",
+                        minHeight: "64px" // Aumentado ligeramente
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          left: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            backgroundColor: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 3px 5px rgba(0,0,0,0.2)",
+                            border: "3px solid white", // Aumentado
+                            overflow: "hidden",
+                            borderRadius: "8px",
+                            padding: "0px" // Agregado padding para espacio interno
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
+                            imageSettings={{
+                              src: "/logo-qr.png",
+                              height: 15,
+                              width: 15,
+                              excavate: true,
+                            }}
+                            size={50}
+                            level="Q"
+                          
+                          />
+                        </Box>
+                      </Box>
+                      TRK-{seguimiento.id?.toString().padStart(5, "0")}
+                    </Typography>
+                  </Grid>
+                </Grid>
         {/* <Grid
           item
           xs={12}
@@ -1349,12 +1373,14 @@ export const CheckForm = ({
             )}
 
             <Grid item xs={12}>
-              <Table size="small" aria-label="a dense table">
+              <Table size="small" aria-label="a dense table" sx={{ borderRadius: 2 }}>
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Detalle</StyledTableCell>
-                    <StyledTableCell align="right">Material</StyledTableCell>
-                    <StyledTableCell align="right">Texto Breve de Material</StyledTableCell>
+                    <StyledTableCell align={isMobile ? "left" : "right"}>
+                      Material
+                      </StyledTableCell>
+                    {!isMobile && <StyledTableCell align="right">Texto Breve de Material</StyledTableCell>}
                     <StyledTableCell align="right">
                       Pallets
                     </StyledTableCell>

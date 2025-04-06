@@ -20,7 +20,7 @@ export interface Claim {
   id: number;
   tracker: number;
   assigned_to: number | null;
-  claim_type: "FALTANTE" | "SOBRANTE" | "DAÑOS_CALIDAD_TRANSPORTE";
+  claim_type: number;
   description: string;
   status: "PENDIENTE" | "EN_REVISION" | "RECHAZADO" | "APROBADO";
   claim_number?: string;
@@ -95,6 +95,20 @@ export interface ClaimQueryParams {
   id?: number;
   claim_type?: "LOCAL" | "IMPORT";
 }
+
+export interface ClaimType {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface ClaimTypeQuerySearch {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  id?: number;
+}
+
 
 export const claimApi = createApi({
   reducerPath: "claimApi",
@@ -189,6 +203,26 @@ getClaimByTracker: builder.query<Claim, number>({
         { type: "Claims", id: "USER_CLAIMS" },
       ],
     }),
+
+    getClaimTypes: builder.query<BaseApiResponse<ClaimType>, ClaimTypeQuerySearch>({
+      query: (params) => ({
+        url: `/claim-type/`,
+        method: "GET",
+        params: {
+          ...params,
+          id: params.id ? params.id : undefined,
+        },
+      }),
+      keepUnusedDataFor: 120000,
+    }),
+    
+    registerClaimType: builder.mutation<ClaimType, { name: string, description?: string }>({
+      query: (body) => ({
+        url: `/claim-type/`,
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -200,4 +234,6 @@ export const {
   useCreateClaimMutation,
   useUpdateClaimMutation,
   useChangeClaimStatusMutation,
+  useGetClaimTypesQuery,
+  useRegisterClaimTypeMutation,
 } = claimApi;

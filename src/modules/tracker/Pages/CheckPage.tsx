@@ -22,6 +22,9 @@ import FloatLoading from "../components/FloatLoading";
 import { useSearchParams } from "react-router-dom";
 import {ClaimModal} from "../components/ClaimDialog.tsx";
 import ClaimEditModal from "../components/ClaimEditModal.tsx";
+import CheckBoxTwoToneIcon from '@mui/icons-material/CheckBoxTwoTone';
+import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
+import PausePresentationTwoToneIcon from '@mui/icons-material/PausePresentationTwoTone';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -145,6 +148,7 @@ export const CheckPage = () => {
                   tracker={seguimientos[seguimeintoActual || 0].id}
                   open={claimOpen}
                   onClose={() => setClaimOpen(false)}
+                  type={seguimientos[seguimeintoActual || 0].type}
               />
           )
       )}
@@ -264,6 +268,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickDelete}
+                  startIcon={
+                    <DeleteTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
@@ -290,6 +297,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickPending}
+                  startIcon={
+                    <PausePresentationTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
@@ -315,6 +325,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickCompletar}
+                  endIcon={
+                    <CheckBoxTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
