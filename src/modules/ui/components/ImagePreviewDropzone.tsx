@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Box, IconButton, SxProps, Theme, Typography } from "@mui/material";
-import { useDropzone } from "react-dropzone";
+import { FileRejection, useDropzone } from "react-dropzone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import { ImagePreviewModal } from "./ImagePreviewModal";
 import { PDFPreviewModal } from "./PDFPreviewModal";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
+import { toast } from "sonner";
 interface ImagePreviewDropzoneProps {
     files: File[];
     onFilesChange: (files: File[]) => void;
@@ -16,20 +17,23 @@ interface ImagePreviewDropzoneProps {
     sxDrop?: SxProps<Theme>;
 }
 
-export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles, sxDrop }) => {
+export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles = 1, sxDrop }) => {
     const [previews, setPreviews] = useState<string[]>(files.map(file => URL.createObjectURL(file)));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
     const [type, settype] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
+    
     const onDrop = (acceptedFiles: File[]) => {
-        if (files.length + acceptedFiles.length > maxFiles!) {
-            alert(`No puedes subir más de ${maxFiles} archivos.`);
+        console.log(acceptedFiles);
+        if (files.length + acceptedFiles.length > maxFiles) {
+            toast.error(`No puedes subir más de ${maxFiles} archivos.`);
             return;
-        }else{
-            settype(acceptedFiles[0].type.includes('pdf') ? 'pdf' : acceptedFiles[0].type.includes('sheet') ? 'excel' : 'image')
         }
-        const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
-        onFilesChange(newFiles);
-        setPreviews(newFiles.map(file => URL.createObjectURL(file)));
+        
+        if (acceptedFiles.length > 0) {
+            const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
+            onFilesChange(newFiles);
+        }
+        setPreviews([...previews, ...acceptedFiles.map(file => URL.createObjectURL(file))]);
     };
 
     const handleRemove = (index: number) => {
@@ -38,8 +42,60 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
         setPreviews(newFiles.map(file => URL.createObjectURL(file)));
     };
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop, accept, maxFiles });
     
+
+    const handleRejectedFiles = (rejectedFiles: FileRejection[]) => {
+        if (rejectedFiles.length === 0) return;
+        
+        // Buscar si almenos en uno de los archivos hay el error code too-many-files
+        const tooManyFilesError = rejectedFiles.some(rejection => rejection.errors.some(error => error.code === 'too-many-files'));
+        if (tooManyFilesError) {
+            toast.error(`No puedes subir más de ${maxFiles} archivos.`);
+            return;
+        } 
+        // Iterar sobre cada archivo rechazado
+        rejectedFiles.forEach(rejection => {
+            const { file, errors } = rejection;
+            
+            // Verificar primero errores comunes
+            const sizeError = errors.find(e => e.code === 'file-too-large');
+            const typeError = errors.find(e => e.code === 'file-invalid-type');
+            
+            if (sizeError) {
+                toast.error(`El archivo "${file.name}" es demasiado grande. El tamaño máximo permitido es 10MB.`);
+                return;
+            }
+            
+            if (typeError) {
+                const acceptedTypes = Object.keys(accept).map(type => {
+                    if (type === "image/*") return "imágenes";
+                    if (type === "application/pdf") return "PDF";
+                    if (type.includes("excel") || type.includes("spreadsheetml")) return "Excel";
+                    return type;
+                }).join(", ");
+                
+                toast.error(`El archivo "${file.name}" no es un tipo válido. Solo se permiten: ${acceptedTypes}`);
+                return;
+            }
+            
+            // Si no es un error específico, mostrar el primer mensaje de error
+            if (errors.length > 0) {
+                toast.error(`Error al subir "${file.name}": ${errors[0].message}`);
+            }
+
+        });
+    };
+
+    const { getRootProps, getInputProps } = useDropzone({ 
+        onDrop, 
+        accept, 
+        maxFiles,
+        onDropRejected: handleRejectedFiles,
+        maxSize: 10485760 // 10MB
+    });
+    
+
+
     return (
         <Box>
             <Typography variant="body2">{label}</Typography>
@@ -52,7 +108,7 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
             </Box>
             <Box sx={{ display: "flex", flexWrap: "wrap", mt: 0 }}>
                 {previews.map((preview, index) => (
-                    <Box key={index} sx={{ position: "relative", width: 80, height: 80, mr: 1, mb: 1, ...(sxDrop || {}), }}>
+                    <Box key={index} sx={{ position: "relative", width: 120, height: 120, mr: 1, mb: 1, ...(sxDrop || {}), }}>
                         {type === 'pdf' ? (
                             <Box
                                 sx={{
@@ -64,6 +120,7 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
                                     cursor: "pointer",
                                     border: "1px dashed grey",
                                     borderRadius: 1,
+                                    marginTop: 0.5,
                                     backgroundColor: "rgba(255, 255, 255, 0.7)",
                             }}
                                 onClick={() => setSelectedFile(preview)}

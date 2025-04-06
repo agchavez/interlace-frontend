@@ -11,7 +11,7 @@ import {
     DialogContent,
     TextField
 } from "@mui/material";
-import {Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { styled } from "@mui/material/styles";
 import ClaimTabs from "./ClaimTabs";
 import ClaimDocumentation from "./ClaimDocumentation";
@@ -21,6 +21,8 @@ import { useCreateClaimMutation } from "../../../store/claim/claimApi";
 import { toast } from "sonner";
 import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
 import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
+import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
+import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
 
 export interface FormData {
     tipo: number;
@@ -196,7 +198,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
                             Datos Generales
                         </Typography>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} lg={4}>
                         <ClaimTypeSelect
                             control={control}
                             name="tipo"
@@ -204,7 +206,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
                             placeholder="Seleccione o ingrese un tipo de reclamo"
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={12} sm={6} lg={8}>
                         <TextField
                             label="Observaciones"
                             fullWidth
@@ -244,18 +246,25 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
             <Divider />
             <DialogActions>
                 <Button
-                    variant="text"
+                    variant="outlined"
                     onClick={() => {
                         reset();
                         setProducts([]);
                     }}
+                    startIcon={<CleaningServicesTwoToneIcon />} // Puedes agregar el icono CleaningServicesIcon aquí si lo deseas
                     // Puedes agregar el icono CleaningServicesIcon aquí si lo deseas
                     color="primary"
                 >
                     Limpiar
                 </Button>
-                <Button variant="outlined" type="submit" color="secondary" onClick={handleSubmit(onSubmit)} disabled={isLoading}>
-                    Enviar Reclamo
+                <Button 
+                    variant="contained" 
+                    type="submit" 
+                    color="secondary"
+                    startIcon={<BookmarkAddTwoToneIcon />} 
+                    onClick={handleSubmit(onSubmit)} 
+                    disabled={isLoading}>
+                    Guardar Reclamo
                 </Button>
             </DialogActions>
         </BootstrapDialog>
