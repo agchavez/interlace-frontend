@@ -78,6 +78,8 @@ function ClaimPDF({
     return `https://flagcdn.com/h240/${country_code}.png`;
   }, [claim?.tracking?.distributor_center_data?.country_code]);
 
+  const islocal = claim?.type === "ALERT_QUALITY";
+
   return (
     <Document
       title="Datos Claim"
@@ -96,7 +98,9 @@ function ClaimPDF({
           </View>
           <View style={{ flex: 1, textAlign: "right", color: "red" }}>
             <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
-              CLAIM
+              {
+                islocal ? "Alerta de Calidad" : "CLAIM"
+              }
             </PDFTitle>
             <PDFText>Evidencia de Fotografía</PDFText>
           </View>
@@ -289,12 +293,14 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {
+                islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"
+              }
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor cerrado:</PDFText>
+                <PDFText>{islocal ? "Rastra con Puerta/Lona Cerrada" : "Contenedor Cerrado"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row", paddingVertical: 10 }}>
@@ -318,12 +324,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor con 1 puerta abierta:</PDFText>
+                <PDFText>{islocal ? "Rastra Con 1 Puerta/Lona Abierta" : "Contenedor Con 1 Puerta Abierta"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -348,12 +354,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor con 2 puertas abiertas:</PDFText>
+                <PDFText>{islocal ? "Rastra Con 2 Puertas Abiertas" : "Contenedor con 2 puertas abiertas"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -378,12 +384,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor superior:</PDFText>
+                <PDFText>{islocal ? "Vista Superior del Contenido de la Rastra" : "Vista Superior del contenido del contenedor"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -408,7 +414,7 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -437,7 +443,7 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -467,7 +473,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -498,7 +507,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -527,7 +539,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -558,7 +573,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -587,7 +605,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
