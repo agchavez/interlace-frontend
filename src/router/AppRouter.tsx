@@ -29,6 +29,7 @@ export function AppRouter() {
     const dispatch = useAppDispatch()
     const location = useLocation()
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     useEffect(() => {
         dispatch(checkToken());
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -63,7 +64,11 @@ export function AppRouter() {
     const [openMobileSidebar, setOpenMobileSidebar] = useState(false)
     if (status === 'checking') return <></>
 
-    if (!permitedRoute) return <Navigate to="/"/>
+    if (!permitedRoute) {
+        return <Navigate to={`/?next=${location.pathname}`}/>
+    }
+
+    const next = queryParams.get('next')
 
     return <>
         <div>
@@ -77,68 +82,68 @@ export function AppRouter() {
 
                     <Routes>
                         <Route path="/auth/*" element={
-                            <PrivateRoute access={status === 'unauthenticated'} path="/">
+                            <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     AuthRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/user/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     UserRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/tracker/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path='/' next={next || undefined}>
                                 <LazyLoading Children={
                                     TrackerRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/tracker-t2/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     TrackerT2Router
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                            <PrivateRoute access={status === 'authenticated'} path='/auth/login' next={next || undefined}>
                                 <HomeRouter />
                             </PrivateRoute>
                         } />
                         <Route path="/report/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     ReportRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/order/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     OrderRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/inventory/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     InventoryRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/maintenance/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     MaintenanceRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/claim/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     ClaimRouter
                                 } />
