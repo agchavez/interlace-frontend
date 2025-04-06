@@ -208,6 +208,13 @@ export const permisions = [
     },
 
     {
+        url:"/claim/editstatus/:id",
+        reg: /\/claim\/editstatus\/\d+/,
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url:"/claim/mine",
         permissions: [
             "any"

@@ -7,7 +7,7 @@ import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
 import PDFTable from "../../ui/components/pdfDocs/Table";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const styles = StyleSheet.create({
   page: {
@@ -47,11 +47,12 @@ function ClaimPDF({
     { flex: 1 },
   ];
 
-  const claimTableData = claim?.claim_products.map((product) => {
-    const row = [product.sap_code, product.product_name, "", "", ""];
+  const claimTableData = useMemo(() => claim?.claim_products.map((product) => {
+    const row = [product.sap_code, product.product_name, product.quantity, product.batch, new Date(product.created_at).toLocaleDateString()];
     return row;
-  });
+  }), [claim?.claim_products]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setImageBase64] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +72,11 @@ function ClaimPDF({
       fetchImage();
     }
   }, [imageUrl]);
+
+  const flagurl = useMemo(() => {
+    const country_code = claim?.tracking?.distributor_center_data?.country_code.toLowerCase();
+    return `https://flagcdn.com/h240/${country_code}.png`;
+  }, [claim?.tracking?.distributor_center_data?.country_code]);
 
   return (
     <Document
@@ -106,7 +112,7 @@ function ClaimPDF({
         >
           <View style={{ marginLeft: 10 }}>
             <Image
-              src="https://flagcdn.com/h240/hn.png"
+              src={flagurl}
               style={{ width: 100 }}
             />
           </View>
@@ -238,6 +244,18 @@ function ClaimPDF({
             </View>
           </View>
         </View>
+        {
+          claim?.status === "RECHAZADO" && (
+            <View style={styles.section}>
+              <PDFSubTitle style={{ ...styles.subTitle }}>
+                Motivo de Rechazo:
+              </PDFSubTitle>
+              <View style={{ flex: 1 }}>
+                <PDFText>{claim?.reject_reason || "--"}</PDFText>
+              </View>
+            </View>
+          )
+        }
         <View style={styles.section}>
           <PDFSubTitle style={{ ...styles.subTitle }}>
             Observaciones:
@@ -284,6 +302,7 @@ function ClaimPDF({
                 {claim?.photos_container_closed.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -312,6 +331,7 @@ function ClaimPDF({
                 {claim?.photos_container_one_open.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -341,6 +361,7 @@ function ClaimPDF({
                 {claim?.photos_container_two_open.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -370,6 +391,7 @@ function ClaimPDF({
                 {claim?.photos_container_top.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -399,6 +421,7 @@ function ClaimPDF({
                 {claim?.photos_during_unload.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -427,6 +450,7 @@ function ClaimPDF({
                 {claim?.photos_pallet_damage.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -458,6 +482,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_product_base.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -486,6 +511,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_product_dents.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -516,6 +542,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_boxes.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -544,6 +571,7 @@ function ClaimPDF({
                 {claim?.photos_grouped_bad_product.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -574,6 +602,7 @@ function ClaimPDF({
                 {claim?.photos_repalletized.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />

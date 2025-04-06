@@ -26,9 +26,10 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
           setPage: (page: number, pageSize: number) => void;
         };
         totalCount: number;
+        path: string;
       }
 
-      const ClaimsDataGrid: FC<ClaimsDataGridProps> = ({ claims, loading, claimType, pagination, totalCount }) => {
+      const ClaimsDataGrid: FC<ClaimsDataGridProps> = ({ claims, loading, claimType, pagination, totalCount, path }) => {
         const navigate = useNavigate();
         const { disctributionCenters } = useAppSelector((state) => state.maintenance);
 
@@ -152,7 +153,12 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
               <IconButton
                 size="small"
                 color="primary"
-                onClick={() => navigate(`/claim/detail/${params.row.id}`)}
+                onClick={() => {
+                  if (path === "mine") {
+                    return navigate(`/claim/detail/${params.row.id}`)
+                  }
+                  navigate(`/claim/editstatus/${params.row.id}`)
+                }}
               >
                 <ArrowForwardIcon />
               </IconButton>
@@ -182,7 +188,12 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             loading={loading}
-            onRowDoubleClick={(params) => navigate(`/claim/detail/${params.id}`)}
+            onRowDoubleClick={(params) => {
+              if (path === "mine") {
+                return navigate(`/claim/detail/${params.id}`)
+              }
+              navigate(`/claim/editstatus/${params.id}`)
+            }}
           />
         );
       };

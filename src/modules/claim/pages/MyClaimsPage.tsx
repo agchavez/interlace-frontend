@@ -8,10 +8,12 @@ import {
   Tabs,
   Tab,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
-import { useLocation } from "react-router-dom";
-import { ClaimQueryParams, useGetMyClaimsQuery } from "../../../store/claim/claimApi";
+import {
+  ClaimQueryParams,
+  useGetMyClaimsQuery,
+} from "../../../store/claim/claimApi";
 import { useAppSelector } from "../../../store";
 import { setClaimQueryParams } from "../../../store/ui/uiSlice";
 import { useAppDispatch } from "../../../store/store";
@@ -19,72 +21,88 @@ import ChipFilterCategory from "../../ui/components/ChipFilter";
 import { ClaimsFilter } from "../components/ClaimsFilter";
 import { format } from "date-fns";
 import { LocalShippingOutlined } from "@mui/icons-material";
-import PublicTwoToneIcon from '@mui/icons-material/PublicTwoTone';
+import PublicTwoToneIcon from "@mui/icons-material/PublicTwoTone";
 import ClaimsDataGrid from "../components/ClaimsDataGrid";
 
 function a11yProps(index: number) {
   return {
     id: `claim-tab-${index}`,
-    'aria-controls': `claim-tabpanel-${index}`,
+    "aria-controls": `claim-tabpanel-${index}`,
   };
 }
 
 export default function MyClaimsPage() {
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { claimQueryParams } = useAppSelector((state) => state.ui);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
-
   const [tabValue, setTabValue] = useState(0);
-  const [query, setQuery] = useState<ClaimQueryParams>(() => {
-    return {
-      search: queryParams.get("search") || claimQueryParams.search,
-      tipo: (queryParams.get("tipo") as any) || claimQueryParams.tipo,
-      status: (queryParams.get("status") as any) || claimQueryParams.status,
-      distributor_center: user?.centro_distribucion
-        ? [Number(user.centro_distribucion)]
-        : (claimQueryParams.distributor_center?.map(Number) as number[]) || [],
-      date_after: claimQueryParams.date_after || "",
-      date_before: claimQueryParams.date_before || "",
-      id: queryParams.get("id") ? Number(queryParams.get("id")) : claimQueryParams.id,
-      claim_type: tabValue === 0 ? "LOCAL" : "IMPORT",
-      offset: 0,
-      limit: 15,
-    };
-  });
-
-  const { data, isLoading, isFetching, refetch } = useGetMyClaimsQuery(query);
+  const { data, isLoading, isFetching, refetch } =
+    useGetMyClaimsQuery(claimQueryParams);
 
   useEffect(() => {
     refetch();
-  }, [query, refetch]);
+  }, [claimQueryParams, refetch]);
 
-  const handleFilter = (filterData: any) => {
+  const handleFilter = (filterData: ClaimQueryParams) => {
     const queryProcess: ClaimQueryParams = {
-      ...query,
+      ...claimQueryParams,
       search: filterData.search || "",
       tipo: filterData.tipo,
       status: filterData.status,
-      distributor_center: filterData.distributor_center ? [filterData.distributor_center] : [],
+      distributor_center: filterData.distributor_center
+        ? filterData.distributor_center
+        : [],
       date_after: filterData.date_after || "",
       date_before: filterData.date_before || "",
       id: filterData.id || undefined,
+      claim_type: tabValue === 0 ? "LOCAL" : "IMPORT",
     };
-    setQuery(queryProcess);
-    dispatch(setClaimQueryParams({ ...queryProcess, search: queryProcess.search || "", id: queryProcess.id || undefined, tipo: queryProcess.tipo || "FALTANTE", status: queryProcess.status || "PENDIENTE" }));
+    dispatch(setClaimQueryParams(queryProcess));
   };
 
   const [openFilter, setOpenFilter] = useState(false);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    setQuery({
-      ...query,
-      claim_type: newValue === 0 ? "LOCAL" : "IMPORT"
-    });
+    dispatch(
+      setClaimQueryParams({
+        ...claimQueryParams,
+        claim_type: newValue === 0 ? "LOCAL" : "IMPORT",
+      })
+    );
   };
+
+  const dateFilterItems = useMemo(() => {
+    const dateFilterItems = [];
+    if (claimQueryParams.date_after) {
+      dateFilterItems.push({
+        label: `Mayor que: ${
+          claimQueryParams.date_after &&
+          format(new Date(claimQueryParams.date_after), "dd/MM/yyyy")
+        }`,
+        id: "date_after",
+        deleteAction: () =>
+          dispatch(
+            setClaimQueryParams({ ...claimQueryParams, date_after: "" })
+          ),
+      });
+    }
+    if (claimQueryParams.date_before) {
+      dateFilterItems.push({
+        label: `Menor que: ${
+          claimQueryParams.date_before &&
+          format(new Date(claimQueryParams.date_before), "dd/MM/yyyy")
+        }`,
+        id: "date_before",
+        deleteAction: () =>
+          dispatch(
+            setClaimQueryParams({ ...claimQueryParams, date_before: "" })
+          ),
+      });
+    }
+    return dateFilterItems;
+  }, [claimQueryParams, dispatch]);
 
   return (
     <>
@@ -92,6 +110,7 @@ export default function MyClaimsPage() {
         open={openFilter}
         handleClose={() => setOpenFilter(false)}
         handleFilter={handleFilter}
+        canEditStatus={false}
       />
       <Container maxWidth="xl" sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
@@ -103,8 +122,9 @@ export default function MyClaimsPage() {
           </Grid>
           <Grid item xs={12}>
             <Typography variant="body2" component="h2" fontWeight={400}>
-              A continuación se muestra el listado de los reclamos registrados en el sistema.
-              Para ver el detalle de cada uno, haga click en el botón ver o presione doble click sobre el registro.
+              A continuación se muestra el listado de los reclamos registrados
+              en el sistema. Para ver el detalle de cada uno, haga click en el
+              botón ver o presione doble click sobre el registro.
             </Typography>
           </Grid>
           <Grid item xs={12} display="flex" justifyContent="flex-end">
@@ -120,18 +140,25 @@ export default function MyClaimsPage() {
           </Grid>
           <Grid item xs={12}>
             <Grid container spacing={1}>
-              {claimQueryParams.search && claimQueryParams.search.length > 0 && (
-                <ChipFilterCategory
-                  label="Buscar: "
-                  items={[
-                    {
-                      label: claimQueryParams.search,
-                      id: "",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, search: ""})),
-                    },
-                  ]}
-                />
-              )}
+              {claimQueryParams.search &&
+                claimQueryParams.search.length > 0 && (
+                  <ChipFilterCategory
+                    label="Buscar: "
+                    items={[
+                      {
+                        label: claimQueryParams.search,
+                        id: "",
+                        deleteAction: () =>
+                          dispatch(
+                            setClaimQueryParams({
+                              ...claimQueryParams,
+                              search: "",
+                            })
+                          ),
+                      },
+                    ]}
+                  />
+                )}
               {claimQueryParams.id && (
                 <ChipFilterCategory
                   label="ID Reclamo: "
@@ -139,7 +166,13 @@ export default function MyClaimsPage() {
                     {
                       label: `${claimQueryParams.id}`,
                       id: "",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, id: undefined})),
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            id: undefined,
+                          })
+                        ),
                     },
                   ]}
                 />
@@ -149,46 +182,55 @@ export default function MyClaimsPage() {
                   label="Tipo: "
                   items={[
                     {
-                      label: claimQueryParams.tipo === "FALTANTE"
-                        ? "Faltante"
-                        : claimQueryParams.tipo === "SOBRANTE"
+                      label:
+                        claimQueryParams.tipo === "FALTANTE"
+                          ? "Faltante"
+                          : claimQueryParams.tipo === "SOBRANTE"
                           ? "Sobrante"
                           : "Daños por Calidad y Transporte",
                       id: "",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, tipo: undefined})),
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            tipo: undefined,
+                          })
+                        ),
                     },
                   ]}
                 />
               )}
-              {(claimQueryParams.distributor_center && claimQueryParams.distributor_center.length > 0) && (
-                <ChipFilterCategory
-                  label="Centro de Distribución: "
-                  items={[
-                    {
-                      label: disctributionCenters.find(dc => Number(dc.id) === Number(claimQueryParams.distributor_center![0]))?.name || "",
-                      id: "dc",
-                      deleteAction: !user?.centro_distribucion ?
-                        (() => dispatch(setClaimQueryParams({...claimQueryParams, distributor_center: []}))) :
-                        undefined,
-                    },
-                  ]}
-                />
-              )}
-              {(claimQueryParams.date_after || claimQueryParams.date_before) && (
+              {claimQueryParams.distributor_center &&
+                claimQueryParams.distributor_center.length > 0 && (
+                  <ChipFilterCategory
+                    label="Centro de Distribución: "
+                    items={[
+                      {
+                        label:
+                          disctributionCenters.find(
+                            (dc) =>
+                              Number(dc.id) ===
+                              Number(claimQueryParams.distributor_center![0])
+                          )?.name || "",
+                        id: "dc",
+                        deleteAction: !user?.centro_distribucion
+                          ? () =>
+                              dispatch(
+                                setClaimQueryParams({
+                                  ...claimQueryParams,
+                                  distributor_center: [],
+                                })
+                              )
+                          : undefined,
+                      },
+                    ]}
+                  />
+                )}
+              {(claimQueryParams.date_after ||
+                claimQueryParams.date_before) && (
                 <ChipFilterCategory
                   label="Fecha de Registro: "
-                  items={[
-                    {
-                      label: `Mayor que: ${claimQueryParams.date_after && format(new Date(claimQueryParams.date_after), 'dd/MM/yyyy')}`,
-                      id: "date_after",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, date_after: ""})),
-                    },
-                    {
-                      label: `Menor que: ${claimQueryParams.date_before && format(new Date(claimQueryParams.date_before), 'dd/MM/yyyy')}`,
-                      id: "date_before",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, date_before: ""})),
-                    },
-                  ]}
+                  items={dateFilterItems}
                 />
               )}
               {claimQueryParams.status && (
@@ -196,15 +238,22 @@ export default function MyClaimsPage() {
                   label="Estado: "
                   items={[
                     {
-                      label: claimQueryParams.status === "PENDIENTE"
-                        ? "Pendiente"
-                        : claimQueryParams.status === "EN_REVISION"
+                      label:
+                        claimQueryParams.status === "PENDIENTE"
+                          ? "Pendiente"
+                          : claimQueryParams.status === "EN_REVISION"
                           ? "En Revisión"
                           : claimQueryParams.status === "RECHAZADO"
-                            ? "Rechazado"
-                            : "Aprobado",
+                          ? "Rechazado"
+                          : "Aprobado",
                       id: "",
-                      deleteAction: () => dispatch(setClaimQueryParams({...claimQueryParams, status: undefined})),
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            status: undefined,
+                          })
+                        ),
                     },
                   ]}
                 />
@@ -213,38 +262,55 @@ export default function MyClaimsPage() {
           </Grid>
 
           <Grid item xs={12}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-              <Tabs value={tabValue} onChange={handleTabChange} aria-label="claim tabs">
-                <Tab label="Reclamos Locales" {...a11yProps(0)} icon={<LocalShippingOutlined />} iconPosition="start" />
-                <Tab label="Reclamos Importados" {...a11yProps(1)} icon={<PublicTwoToneIcon />} iconPosition="start" />
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="claim tabs"
+              >
+                <Tab
+                  label="Reclamos Locales"
+                  {...a11yProps(0)}
+                  icon={<LocalShippingOutlined />}
+                  iconPosition="start"
+                />
+                <Tab
+                  label="Reclamos Importados"
+                  {...a11yProps(1)}
+                  icon={<PublicTwoToneIcon />}
+                  iconPosition="start"
+                />
               </Tabs>
             </Box>
           </Grid>
 
           <Grid item xs={12}>
             <ClaimsDataGrid
-              claims={data?.results.map((claim)=>(
-                {
-                  id: claim.id, 
-                  created_at: claim.created_at, 
-                  distributor_center: claim.tracking?.distributor_center, 
-                  status: claim.status, 
+              claims={
+                data?.results.map((claim) => ({
+                  id: claim.id,
+                  created_at: claim.created_at,
+                  distributor_center: claim.tracking?.distributor_center,
+                  status: claim.status,
                   tipo: claim.claim_type,
                   reference_number: claim.tracking?.id?.toString(),
                   user_name: claim.tracking?.user_name,
-                })) || []}
+                })) || []
+              }
               loading={isLoading || isFetching}
               claimType={tabValue === 0 ? "LOCAL" : "IMPORT"}
               pagination={{
-                page: query.offset || 0,
-                pageSize: query.limit || 15,
-                setPage: (page, pageSize) => setQuery({
-                  ...query,
-                  offset: page,
-                  limit: pageSize
-                })
+                page: claimQueryParams.offset || 0,
+                pageSize: claimQueryParams.limit || 15,
+                setPage: (page, pageSize) =>
+                  setClaimQueryParams({
+                    ...claimQueryParams,
+                    offset: page,
+                    limit: pageSize,
+                  }),
               }}
               totalCount={data?.results?.length || 0}
+              path="mine"
             />
           </Grid>
         </Grid>

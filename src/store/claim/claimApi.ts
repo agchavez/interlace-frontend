@@ -46,6 +46,8 @@ export interface Claim {
   tracking?: Tracker;
   trailer: Trailer;
   transporter: Transporter;
+  reject_reason: string|null;
+  type: "CLAIM" | "ALERT_QUALITY";
 }
 
 export interface ClaimProduct {
@@ -57,7 +59,7 @@ export interface ClaimProduct {
   product: number;
   sap_code: string;
   created_at: Date;
-
+  batch: string;
 }
 
 export interface ClaimFile {

@@ -1,203 +1,323 @@
 import {
+  Button,
   Container,
-  Typography,
-  Grid,
   Divider,
+  Grid,
+  Typography,
   Box,
   Tabs,
   Tab,
-  Button,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store";
-import { useSearchParams } from "react-router-dom";
-import FloatLoading from "../../tracker/components/FloatLoading";
-import { ClaimCard } from "../components/ClaimCard";
-// import { useGetDriverQuery } from "../../../store/maintenance/maintenanceApi";
-import {getAllClaims, getClaimById} from "../../../store/claim/claimThunks.ts";
-import ArchivoModal from "../components/ClaimDetail.tsx";
-
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box>{children}</Box>}
-    </div>
-  );
-}
+import { useEffect, useMemo, useState } from "react";
+import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
+import {
+  ClaimQueryParams,
+  useGetClaimsQuery,
+} from "../../../store/claim/claimApi";
+import { useAppSelector } from "../../../store";
+import { setClaimQueryParams } from "../../../store/ui/uiSlice";
+import { useAppDispatch } from "../../../store/store";
+import ChipFilterCategory from "../../ui/components/ChipFilter";
+import { ClaimsFilter } from "../components/ClaimsFilter";
+import { format } from "date-fns";
+import { LocalShippingOutlined } from "@mui/icons-material";
+import PublicTwoToneIcon from "@mui/icons-material/PublicTwoTone";
+import ClaimsDataGrid from "../components/ClaimsDataGrid";
 
 function a11yProps(index: number) {
   return {
-    id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
+    id: `claim-tab-${index}`,
+    "aria-controls": `claim-tabpanel-${index}`,
   };
 }
 
-export const ClaimReviewPage = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [archivoOpen, setArchivoOpen] = useState(false);
+export function ClaimReviewPage() {
   const dispatch = useAppDispatch();
-  const { claims, loading, selectedClaim } = useAppSelector((state) => state.claim);
-  const [searchParams] = useSearchParams();
-  const id = searchParams.get("id");
+  const { user } = useAppSelector((state) => state.auth);
+  const { claimQueryParams } = useAppSelector((state) => state.ui);
+  const { disctributionCenters } = useAppSelector((state) => state.maintenance);
+  const [tabValue, setTabValue] = useState(0);
+  const { data, isLoading, isFetching, refetch } =
+    useGetClaimsQuery(claimQueryParams);
 
-  // const { data: driverData, isLoading: loadingDriver } = useGetDriverQuery({
-  //   id: selectedClaim?.tracking?.driver !== null ? selectedClaim?.tracking?.driver : undefined,
-  //   limit: 1,
-  //   offset: 0,
-  // });
+  useEffect(() => {
+    refetch();
+  }, [claimQueryParams, refetch]);
 
-  const handleChangeTab = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+  const handleFilter = (filterData: ClaimQueryParams) => {
+    const queryProcess: ClaimQueryParams = {
+      ...claimQueryParams,
+      search: filterData.search || "",
+      tipo: filterData.tipo,
+      status: filterData.status,
+      distributor_center: filterData.distributor_center
+        ? filterData.distributor_center
+        : [],
+      date_after: filterData.date_after || "",
+      date_before: filterData.date_before || "",
+      id: filterData.id || undefined,
+      claim_type: tabValue === 0 ? "LOCAL" : "IMPORT",
+    };
+    dispatch(setClaimQueryParams(queryProcess));
   };
 
-  useEffect(() => {
-    if (id) {
-      dispatch(getClaimById(Number(id)));
+  const [openFilter, setOpenFilter] = useState(false);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    dispatch(
+      setClaimQueryParams({
+        ...claimQueryParams,
+        claim_type: newValue === 0 ? "LOCAL" : "IMPORT",
+      })
+    );
+  };
+
+  const dateFilterItems = useMemo(() => {
+    const dateFilterItems = [];
+    if (claimQueryParams.date_after) {
+      dateFilterItems.push({
+        label: `Mayor que: ${
+          claimQueryParams.date_after &&
+          format(new Date(claimQueryParams.date_after), "dd/MM/yyyy")
+        }`,
+        id: "date_after",
+        deleteAction: () =>
+          dispatch(
+            setClaimQueryParams({ ...claimQueryParams, date_after: "" })
+          ),
+      });
     }
-  }, [id, dispatch]);
-
-  // const handleDownloadArchivo = () => {
-  //   if (selectedClaim?.tracking?.id) {
-  //     // Implement download functionality
-  //   }
-  // };
-
-  useEffect(() => {
-    dispatch(getAllClaims({}))
-  }, []);
+    if (claimQueryParams.date_before) {
+      dateFilterItems.push({
+        label: `Menor que: ${
+          claimQueryParams.date_before &&
+          format(new Date(claimQueryParams.date_before), "dd/MM/yyyy")
+        }`,
+        id: "date_before",
+        deleteAction: () =>
+          dispatch(
+            setClaimQueryParams({ ...claimQueryParams, date_before: "" })
+          ),
+      });
+    }
+    return dateFilterItems;
+  }, [claimQueryParams, dispatch]);
 
   return (
     <>
-      {archivoOpen && selectedClaim?.tracking && (
-        <ArchivoModal
-          open={archivoOpen}
-          handleClose={() => setArchivoOpen(false)}
-          seguimiento={selectedClaim.tracking}
-        />
-      )}
-      <Container maxWidth="xl">
-        <Grid container spacing={1} sx={{ marginTop: 2 }}>
+      <ClaimsFilter
+        open={openFilter}
+        handleClose={() => setOpenFilter(false)}
+        handleFilter={handleFilter}
+        canEditStatus={true}
+      />
+      <Container maxWidth="xl" sx={{ marginTop: 2 }}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="h5" component="h1" fontWeight={400}>
-              Revisión de Reclamos
+              Seguimiento de Reclamos
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
-          <FloatLoading visible={loading} />
-
-          <Grid item xs={12} md={8} lg={9} xl={10}>
-            {selectedClaim && (
-              <Typography variant="h6" sx={{ mt: 1 }}>
-                Reclamo #{selectedClaim.id} - Tracking TRK-{selectedClaim.tracking?.id?.toString().padStart(5, '0')}
-              </Typography>
-            )}
+          <Grid item xs={12}>
+            <Typography variant="body2" component="h2" fontWeight={400}>
+              A continuación se muestra el listado de los reclamos registrados
+              en el sistema. Para ver el detalle de cada uno, haga click en el
+              botón ver o presione doble click sobre el registro.
+            </Typography>
+          </Grid>
+          <Grid item xs={12} display="flex" justifyContent="flex-end">
+            <Button
+              variant="outlined"
+              color="secondary"
+              sx={{ marginRight: 1 }}
+              endIcon={<FilterListTwoToneIcon />}
+              onClick={() => setOpenFilter(true)}
+            >
+              Filtrar
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container spacing={1}>
+              {claimQueryParams.search &&
+                claimQueryParams.search.length > 0 && (
+                  <ChipFilterCategory
+                    label="Buscar: "
+                    items={[
+                      {
+                        label: claimQueryParams.search,
+                        id: "",
+                        deleteAction: () => {
+                          dispatch(
+                            setClaimQueryParams({
+                              ...claimQueryParams,
+                              search: "",
+                            })
+                          );
+                        },
+                      },
+                    ]}
+                  />
+                )}
+              {claimQueryParams.id && (
+                <ChipFilterCategory
+                  label="ID Reclamo: "
+                  items={[
+                    {
+                      label: `${claimQueryParams.id}`,
+                      id: "",
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            id: undefined,
+                          })
+                        ),
+                    },
+                  ]}
+                />
+              )}
+              {claimQueryParams.tipo && (
+                <ChipFilterCategory
+                  label="Tipo: "
+                  items={[
+                    {
+                      label:
+                        claimQueryParams.tipo === "FALTANTE"
+                          ? "Faltante"
+                          : claimQueryParams.tipo === "SOBRANTE"
+                          ? "Sobrante"
+                          : "Daños por Calidad y Transporte",
+                      id: "",
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            tipo: undefined,
+                          })
+                        ),
+                    },
+                  ]}
+                />
+              )}
+              {claimQueryParams.distributor_center &&
+                claimQueryParams.distributor_center.length > 0 && (
+                  <ChipFilterCategory
+                    label="Centro de Distribución: "
+                    items={[
+                      {
+                        label:
+                          disctributionCenters.find(
+                            (dc) =>
+                              Number(dc.id) ===
+                              Number(claimQueryParams.distributor_center![0])
+                          )?.name || "",
+                        id: "dc",
+                        deleteAction: !user?.centro_distribucion
+                          ? () =>
+                              dispatch(
+                                setClaimQueryParams({
+                                  ...claimQueryParams,
+                                  distributor_center: [],
+                                })
+                              )
+                          : undefined,
+                      },
+                    ]}
+                  />
+                )}
+              {(claimQueryParams.date_after ||
+                claimQueryParams.date_before) && (
+                <ChipFilterCategory
+                  label="Fecha de Registro: "
+                  items={dateFilterItems}
+                />
+              )}
+              {claimQueryParams.status && (
+                <ChipFilterCategory
+                  label="Estado: "
+                  items={[
+                    {
+                      label:
+                        claimQueryParams.status === "PENDIENTE"
+                          ? "Pendiente"
+                          : claimQueryParams.status === "EN_REVISION"
+                          ? "En Revisión"
+                          : claimQueryParams.status === "RECHAZADO"
+                          ? "Rechazado"
+                          : "Aprobado",
+                      id: "",
+                      deleteAction: () =>
+                        dispatch(
+                          setClaimQueryParams({
+                            ...claimQueryParams,
+                            status: undefined,
+                          })
+                        ),
+                    },
+                  ]}
+                />
+              )}
+            </Grid>
           </Grid>
 
+          <Grid item xs={12}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={tabValue}
+                onChange={handleTabChange}
+                aria-label="claim tabs"
+              >
+                <Tab
+                  label="Reclamos Locales"
+                  {...a11yProps(0)}
+                  icon={<LocalShippingOutlined />}
+                  iconPosition="start"
+                />
+                <Tab
+                  label="Reclamos Importados"
+                  {...a11yProps(1)}
+                  icon={<PublicTwoToneIcon />}
+                  iconPosition="start"
+                />
+              </Tabs>
+            </Box>
+          </Grid>
 
-          {claims.length > 0 && (
-            <Grid item xs={12}>
-              <Box sx={{ width: "100%" }}>
-                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                  <Tabs
-                    value={activeTab}
-                    onChange={handleChangeTab}
-                    aria-label="claim tabs"
-                  >
-                    {claims.map((claim, index) => (
-                      <Tab
-                        key={index}
-                        label={`Reclamo #${claim.id}`}
-                        {...a11yProps(index)}
-                      />
-                    ))}
-                  </Tabs>
-                </Box>
-
-                {claims.map((claim, index) => (
-                  <CustomTabPanel
-                    value={activeTab}
-                    index={index}
-                    key={claim.id}
-                  >
-                    <ClaimCard claim={{
-                      id: claim.id,
-                      tracking_id: claim.tracker,
-                      trailer: claim.tracking?.trailer.toString() || "",
-                      distributor_center: claim.tracking?.distributor_center.toString() || "",
-                      created_at: claim.created_at,
-                      status: claim.status,
-                      reason: claim.description,
-                      is_archivo_up: claim.claim_file !== null,
-                      archivo_name: claim.claim_file?.name,
-                    }} />
-                  </CustomTabPanel>
-                ))}
-              </Box>
-            </Grid>
-          )}
-
-          {selectedClaim && (
-            <>
-              <Grid item xs={12} sx={{ mt: 3 }}>
-                <Divider />
-              </Grid>
-
-              <Grid item xs={12} md={4} lg={3} xl={2}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  size="medium"
-                  fullWidth
-                  onClick={() => setArchivoOpen(true)}
-                >
-                  <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
-                    Ver Archivos
-                  </Typography>
-                </Button>
-              </Grid>
-
-              <Grid item xs={12} md={4} lg={3} xl={8}></Grid>
-
-              <Grid item xs={12} md={4} lg={3} xl={2}>
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="medium"
-                  fullWidth
-                  onClick={() => {/* Implementation for claim approval */}}
-                >
-                  <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
-                    Aprobar Reclamo
-                  </Typography>
-                </Button>
-              </Grid>
-            </>
-          )}
-
-          {!selectedClaim && !loading && (
-            <Grid item xs={12} sx={{ mt: 4, textAlign: "center" }}>
-              <Typography variant="h6" color="textSecondary">
-                Seleccione un reclamo para revisar o ingrese un ID en la URL
-              </Typography>
-            </Grid>
-          )}
+          <Grid item xs={12}>
+            <ClaimsDataGrid
+              claims={
+                data?.results.map((claim) => ({
+                  id: claim.id,
+                  created_at: claim.created_at,
+                  distributor_center: claim.tracking?.distributor_center,
+                  status: claim.status,
+                  tipo: claim.claim_type,
+                  reference_number: claim.tracking?.id?.toString(),
+                  user_name: claim.tracking?.user_name,
+                })) || []
+              }
+              loading={isLoading || isFetching}
+              claimType={tabValue === 0 ? "LOCAL" : "IMPORT"}
+              pagination={{
+                page: claimQueryParams.offset || 0,
+                pageSize: claimQueryParams.limit || 15,
+                setPage: (page, pageSize) =>
+                  dispatch(
+                    setClaimQueryParams({
+                      ...claimQueryParams,
+                      offset: page,
+                      limit: pageSize,
+                    })
+                  ),
+              }}
+              totalCount={data?.results?.length || 0}
+              path="review"
+            />
+          </Grid>
         </Grid>
       </Container>
     </>
   );
-};
+}

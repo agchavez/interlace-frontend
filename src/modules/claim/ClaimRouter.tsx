@@ -16,8 +16,9 @@ function MaintenanceRouter() {
                 element={<MyClaimsPage />}
                 path="/mine"
                 />
-            <Route path="/detail/:id" element={<ClaimDetailPage />} />
-            <Route path="*" element={<Navigate to="/claims" />} />
+            <Route path="/editstatus/:id" element={<ClaimDetailPage canEditStatus={true} />} />
+            <Route path="/detail/:id" element={<ClaimDetailPage canEditStatus={false} />} />
+            <Route path="*" element={<Navigate to="/claim" />} />
 
         </Routes>
     );
