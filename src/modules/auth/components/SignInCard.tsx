@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../../../store/auth/authApi";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -90,7 +90,11 @@ export default function SignInCard() {
             password: '' },
         resolver: yupResolver(schema)
     });
-
+        
+    const location = useLocation()
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const navigate = useNavigate();
+    
     interface FormData {
         email: string;
         password: string;
@@ -117,8 +121,15 @@ export default function SignInCard() {
 
     if (resultLogin.isSuccess) {
         dispatch(login(resultLogin.data))
-        return <Navigate to="/" />
-    }
+        const next = queryParams.get('next')
+        if (next) {
+            setTimeout(() => {
+                navigate(next)
+            }, 100)
+        } else {
+            return <Navigate to="/" />
+        }
+    } 
 
     return (
         <LoginContainer>    

@@ -26,9 +26,10 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
           setPage: (page: number, pageSize: number) => void;
         };
         totalCount: number;
+        path: string;
       }
 
-      const ClaimsDataGrid: FC<ClaimsDataGridProps> = ({ claims, loading, claimType, pagination, totalCount }) => {
+      const ClaimsDataGrid: FC<ClaimsDataGridProps> = ({ claims, loading, claimType, pagination, totalCount, path }) => {
         const navigate = useNavigate();
         const { disctributionCenters } = useAppSelector((state) => state.maintenance);
 
@@ -76,16 +77,7 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
             width: 180,
             minWidth: 180,
             renderCell: (params) => {
-              switch(params.value) {
-                case "FALTANTE":
-                  return <Typography variant="body2">Faltante</Typography>;
-                case "SOBRANTE":
-                  return <Typography variant="body2">Sobrante</Typography>;
-                case "DAÑOS_CALIDAD_TRANSPORTE":
-                  return <Typography variant="body2">Daños por Calidad y Transporte</Typography>;
-                default:
-                  return <Typography variant="body2">-</Typography>;
-              }
+              return <Typography variant="body2">{params.value}</Typography>;
             },
           },
           {
@@ -152,7 +144,12 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
               <IconButton
                 size="small"
                 color="primary"
-                onClick={() => navigate(`/claim/detail/${params.row.id}`)}
+                onClick={() => {
+                  if (path === "mine") {
+                    return navigate(`/claim/detail/${params.row.id}`)
+                  }
+                  navigate(`/claim/editstatus/${params.row.id}`)
+                }}
               >
                 <ArrowForwardIcon />
               </IconButton>
@@ -182,7 +179,12 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             loading={loading}
-            onRowDoubleClick={(params) => navigate(`/claim/detail/${params.id}`)}
+            onRowDoubleClick={(params) => {
+              if (path === "mine") {
+                return navigate(`/claim/detail/${params.id}`)
+              }
+              navigate(`/claim/editstatus/${params.id}`)
+            }}
           />
         );
       };

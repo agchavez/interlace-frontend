@@ -46,6 +46,10 @@ export interface Claim {
   tracking?: Tracker;
   trailer: Trailer;
   transporter: Transporter;
+  reject_reason: string|null;
+  type: "CLAIM" | "ALERT_QUALITY";
+  claim_type_data: ClaimType;
+  approve_observations?: string;
 }
 
 export interface ClaimProduct {
@@ -57,7 +61,7 @@ export interface ClaimProduct {
   product: number;
   sap_code: string;
   created_at: Date;
-
+  batch: string;
 }
 
 export interface ClaimFile {
@@ -83,7 +87,7 @@ export interface DocumentFromClaim {
 export interface ClaimQueryParams {
   search?: string;
   ordering?: string;
-  tipo?: "FALTANTE" | "SOBRANTE" | "DAÑOS_CALIDAD_TRANSPORTE";
+  tipo?: number;
   status?: "PENDIENTE" | "EN_REVISION" | "RECHAZADO" | "APROBADO";
   distributor_center?: number[];
   date_after?: string;

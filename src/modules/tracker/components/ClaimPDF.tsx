@@ -7,7 +7,8 @@ import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
 import PDFTable from "../../ui/components/pdfDocs/Table";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import logo_ch from "../../../assets/logo-ch.png";
 
 const styles = StyleSheet.create({
   page: {
@@ -38,7 +39,7 @@ interface TrakerPDFDocumentProps {
 
 function ClaimPDF({
   claim,
-  imageUrl = "https://flagcdn.com/h240/sv.png",
+  imageUrl = "https://flagcdn.com/h240/hn.png",
 }: TrakerPDFDocumentProps) {
   const inputRowCellStyles = [
     { flex: 1 },
@@ -47,11 +48,12 @@ function ClaimPDF({
     { flex: 1 },
   ];
 
-  const claimTableData = claim?.claim_products.map((product) => {
-    const row = [product.sap_code, product.product_name, "", "", ""];
+  const claimTableData = useMemo(() => claim?.claim_products.map((product) => {
+    const row = [product.sap_code, product.product_name, product.quantity, product.batch, new Date(product.created_at).toLocaleDateString()];
     return row;
-  });
+  }), [claim?.claim_products]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setImageBase64] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,6 +74,13 @@ function ClaimPDF({
     }
   }, [imageUrl]);
 
+  const flagurl = useMemo(() => {
+    const country_code = claim?.tracking?.distributor_center_data?.country_code.toLowerCase();
+    return `https://flagcdn.com/h240/${country_code}.png`;
+  }, [claim?.tracking?.distributor_center_data?.country_code]);
+
+  const islocal = claim?.type === "ALERT_QUALITY";
+
   return (
     <Document
       title="Datos Claim"
@@ -88,9 +97,18 @@ function ClaimPDF({
           <View style={{ flex: 1 }}>
             <Image src="/logo.png" style={{ width: 200 }} />
           </View>
-          <View style={{ flex: 1, textAlign: "right", color: "red" }}>
+          {
+            claim?.tracking?.distributor_center_data?.country_code && (
+              <View style={{ flex: 1}}>
+                <Image src={logo_ch} style={{ width: 150, marginHorizontal: "auto" }} />
+              </View>
+            )
+          }
+          <View style={{ flex: 0.5, textAlign: "right", color: "red" }}>
             <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
-              CLAIM
+              {
+                islocal ? "Alerta de Calidad" : "CLAIM"
+              }
             </PDFTitle>
             <PDFText>Evidencia de Fotografía</PDFText>
           </View>
@@ -106,7 +124,7 @@ function ClaimPDF({
         >
           <View style={{ marginLeft: 10 }}>
             <Image
-              src="https://flagcdn.com/h240/hn.png"
+              src={flagurl}
               style={{ width: 100 }}
             />
           </View>
@@ -209,7 +227,7 @@ function ClaimPDF({
                 <PDFText>Tipo de Reclamo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.claim_type}</PDFText>
+                <PDFText>{claim?.claim_type_data?.name}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -238,6 +256,18 @@ function ClaimPDF({
             </View>
           </View>
         </View>
+        {
+          claim?.status === "RECHAZADO" && (
+            <View style={styles.section}>
+              <PDFSubTitle style={{ ...styles.subTitle }}>
+                Motivo de Rechazo:
+              </PDFSubTitle>
+              <View style={{ flex: 1 }}>
+                <PDFText>{claim?.reject_reason || "--"}</PDFText>
+              </View>
+            </View>
+          )
+        }
         <View style={styles.section}>
           <PDFSubTitle style={{ ...styles.subTitle }}>
             Observaciones:
@@ -271,12 +301,14 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {
+                islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"
+              }
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor cerrado:</PDFText>
+                <PDFText>{islocal ? "Rastra con Puerta/Lona Cerrada" : "Contenedor Cerrado"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row", paddingVertical: 10 }}>
@@ -284,6 +316,7 @@ function ClaimPDF({
                 {claim?.photos_container_closed.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -299,12 +332,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor con 1 puerta abierta:</PDFText>
+                <PDFText>{islocal ? "Rastra Con 1 Puerta/Lona Abierta" : "Contenedor Con 1 Puerta Abierta"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -312,6 +345,7 @@ function ClaimPDF({
                 {claim?.photos_container_one_open.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -328,12 +362,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor con 2 puertas abiertas:</PDFText>
+                <PDFText>{islocal ? "Rastra Con 2 Puertas Abiertas" : "Contenedor con 2 puertas abiertas"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -341,6 +375,7 @@ function ClaimPDF({
                 {claim?.photos_container_two_open.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -357,12 +392,12 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
               <View style={{ minWidth: 100 }}>
-                <PDFText>Contenedor superior:</PDFText>
+                <PDFText>{islocal ? "Vista Superior del Contenido de la Rastra" : "Vista Superior del contenido del contenedor"}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -370,6 +405,7 @@ function ClaimPDF({
                 {claim?.photos_container_top.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -386,7 +422,7 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -399,6 +435,7 @@ function ClaimPDF({
                 {claim?.photos_during_unload.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -414,7 +451,7 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -427,6 +464,7 @@ function ClaimPDF({
                 {claim?.photos_pallet_damage.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -443,7 +481,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -458,6 +499,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_product_base.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -473,7 +515,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -486,6 +531,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_product_dents.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -501,7 +547,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -516,6 +565,7 @@ function ClaimPDF({
                 {claim?.photos_damaged_boxes.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -531,7 +581,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -544,6 +597,7 @@ function ClaimPDF({
                 {claim?.photos_grouped_bad_product.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
@@ -559,7 +613,10 @@ function ClaimPDF({
         <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <PDFSubTitle style={{ ...styles.subTitle }}>
-              Imagenes del Claim:
+              {islocal?"Imágenes de la Alerta de Calidad":"Imagenes del Claim"}
+            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              Producto Dañado
             </PDFSubTitle>
             <View style={{ ...styles.divider }} />
             <View style={{ flexDirection: "row", paddingBottom: 10 }}>
@@ -574,6 +631,7 @@ function ClaimPDF({
                 {claim?.photos_repalletized.map((photo) => {
                   return (
                     <Image
+                      key={photo.id}
                       src={photo.access_url}
                       style={{ width: 400, marginHorizontal: "auto" }}
                     />
