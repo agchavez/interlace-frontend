@@ -16,11 +16,12 @@ import {
 
 import DescriptionIcon from '@mui/icons-material/Description';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import {Notificacion, notificacionesMock} from "../../../utils/notification.ts";
+import { notificacionesMock} from "../../../utils/notification.ts";
+import {Notificacion} from "../../../interfaces/auth";
 
 // Función para retornar ícono según el módulo
-function getModuloIcon(modulo: string) {
-    if (modulo === 'DOCUMENTOS') {
+function getmoduleIcon(module: string) {
+    if (module === 'DOCUMENTOS') {
         return <DescriptionIcon color="primary" />;
     }
     return <NotificationsActiveIcon color="primary" />;
@@ -35,7 +36,7 @@ const AllNotificationsPage: React.FC = () => {
     console.log("notificaciones");
     // Filtrar según el texto
     const filtered = notificaciones.filter((n) => {
-        const text = `${n.titulo} ${n.subtitulo} ${n.descripcion}`.toLowerCase();
+        const text = `${n.title} ${n.subtitle} ${n.description}`.toLowerCase();
         return text.includes(search.toLowerCase());
     });
 
@@ -45,7 +46,7 @@ const AllNotificationsPage: React.FC = () => {
     // Marcar como leído
     const markAsRead = (id: number) => {
         setNotificaciones((prev) =>
-            prev.map((item) => (item.id === id ? { ...item, leido: true } : item))
+            prev.map((item) => (item.id === id ? { ...item, read: true } : item))
         );
     };
 
@@ -89,31 +90,32 @@ const AllNotificationsPage: React.FC = () => {
                                     onClick={() => handleSelect(notif.id)}
                                     selected={notif.id === selectedId}
                                     sx={{
-                                        backgroundColor: !notif.leido ? 'rgba(25,118,210,0.1)' : 'transparent',
+                                        backgroundColor: !notif.read ? 'rgba(25,118,210,0.1)' : 'transparent',
                                         alignItems: 'flex-start'
                                     }}
                                 >
                                     <ListItemAvatar>
                                         <Avatar sx={{ bgcolor: 'transparent' }}>
-                                            {getModuloIcon(notif.modulo)}
+                                            {getmoduleIcon(notif.module)}
                                         </Avatar>
                                     </ListItemAvatar>
                                     <ListItemText
                                         primary={
                                             <Typography
+                                                color="secondary"
                                                 variant="subtitle1"
-                                                fontWeight={notif.leido ? '400' : '600'}
+                                                fontWeight={notif.read ? '400' : '600'}
                                             >
-                                                {notif.titulo}
+                                                {notif.title}
                                             </Typography>
                                         }
                                         secondary={
                                             <>
-                                                <Typography variant="body2" color="text.secondary" noWrap>
-                                                    {notif.descripcion}
+                                                <Typography variant="body2" color="secondary" noWrap>
+                                                    {notif.description}
                                                 </Typography>
-                                                <Typography variant="caption" color="text.secondary">
-                                                    {new Date(notif.creado).toLocaleString()}
+                                                <Typography variant="caption" color="secondary">
+                                                    {new Date(notif.created_at).toLocaleString()}
                                                 </Typography>
                                             </>
                                         }
@@ -130,16 +132,16 @@ const AllNotificationsPage: React.FC = () => {
                     {selectedNotif ? (
                         <>
                             <Typography variant="h6" gutterBottom fontWeight="500">
-                                {selectedNotif.titulo}
+                                {selectedNotif.title}
                             </Typography>
                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                {selectedNotif.subtitulo}
+                                {selectedNotif.subtitle}
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
 
                             {/* Descripción principal */}
                             <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedNotif.descripcion}
+                                {selectedNotif.description}
                             </Typography>
 
                             {/* Si trae HTML, podemos mostrarlo con dangerouslySetInnerHTML (ten cuidado con XSS) */}
@@ -157,7 +159,7 @@ const AllNotificationsPage: React.FC = () => {
 
                             <Box sx={{ mt: 2 }}>
                                 <Typography variant="caption" color="text.secondary">
-                                    Creado: {new Date(selectedNotif.creado).toLocaleString()}
+                                    Creado: {new Date(selectedNotif.created_at).toLocaleString()}
                                 </Typography>
                             </Box>
                         </>

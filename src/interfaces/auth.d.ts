@@ -57,7 +57,7 @@ type tipoNotificacion = 'UBICACION' | 'ALERTA' | 'RECORDATORIO' | 'TAREA' | 'MEN
 type moduloNotificacion = 'DOCUMENTO' | 'OTRO';
 export interface Notificacion {
     id:            number;
-    creado:        string;
+    created_at:        string;
     type:          tipoNotificacion;
     title:        string;
     subtitle:     string;
