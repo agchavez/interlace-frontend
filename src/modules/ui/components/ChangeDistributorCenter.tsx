@@ -25,21 +25,26 @@ export const ChangeDistributorCenter = () => {
         Cambiar Centro de Distribución
         </BootstrapDialogTitle>
       <List sx={{ p: 0, m: 0 }}>
-        {user?.distributions_centers && user?.distributions_centers.length > 1 && user?.distributions_centers.map((cd) => (
-          <ListItem disableGutters key={cd}>
-            <ListItemButton onClick={() => handleListItemClick(cd)}>
-              <ListItemAvatar>
-                  <Avatar
-                      variant="rounded"
-                      alt={'hn'}
-                      src={`https://flagcdn.com/h240/hn.png`}
-                      sx={{ width: 35, height: 35 }}
-                  />
-              </ListItemAvatar>
-              <ListItemText primary={disctributionCenters.find((d) => d.id === cd)?.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {user?.distributions_centers && user?.distributions_centers.length > 1 && user?.distributions_centers.map((cd) => {
+          const dc = disctributionCenters.find((d) => d.id === cd)
+          return(
+            <ListItem disableGutters key={cd}>
+              <ListItemButton onClick={() => handleListItemClick(cd)}>
+                <ListItemAvatar>
+                    <Avatar
+                        variant="rounded"
+                        alt={dc?.country_code || "hn"}
+                        src={dc?.country_code ? 
+                              `https://flagcdn.com/h240/${dc?.country_code.toLowerCase()}.png`:
+                              `https://flagcdn.com/h240/hn.png`}
+                        sx={{ width: 35, height: 35 }}
+                    />
+                </ListItemAvatar>
+                <ListItemText primary={disctributionCenters.find((d) => d.id === cd)?.name} />
+              </ListItemButton>
+            </ListItem>
+          )
+        })}
          <ListItem disableGutters alignItems='center' key='no_cd' sx={{ padding: 2 }}>
           {
              user?.distributions_centers && user?.distributions_centers.length <= 1 && (

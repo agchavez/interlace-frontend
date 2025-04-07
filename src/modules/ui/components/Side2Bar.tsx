@@ -234,6 +234,7 @@ interface Props {
 export const Side2bar: FunctionComponent<Props> = ({  setOpen }) => {
     const location = useLocation();
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
+    const distributorCenters = useAppSelector((state) => state.maintenance.disctributionCenters);
     const dispatch = useAppDispatch();
 
     const user = useAppSelector((state) => state.auth.user);
@@ -293,6 +294,15 @@ export const Side2bar: FunctionComponent<Props> = ({  setOpen }) => {
         }
     }
 
+    const { country_code, flagurl } = useMemo(() => {
+        const country_code =
+          distributorCenters.find((dc) => dc.id === user?.centro_distribucion)
+            ?.country_code || "hn";
+        return {
+          country_code,
+          flagurl: `https://flagcdn.com/h240/${country_code?.toLowerCase()}.png`,
+        };
+      }, [distributorCenters, user?.centro_distribucion]);
 
     return (
         <div className={openSidebar? "sidebar close": "sidebar"}>
@@ -317,8 +327,8 @@ export const Side2bar: FunctionComponent<Props> = ({  setOpen }) => {
                         <div className="">
                             <Avatar
                                 variant="rounded"
-                                alt={'hn'}
-                                src={`https://flagcdn.com/h240/hn.png`}
+                                alt={country_code}
+                                src={flagurl}
                             />
                         </div>
                         <div className="name-job">
