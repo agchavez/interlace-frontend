@@ -45,6 +45,8 @@ import AcceptClaimModal from "../components/AcceptClaimModal";
 import TakeClaimModal from "../components/TakeClaimModal";
 import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedInTwoTone';
 import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
+import ClaimEditModal from "../../tracker/components/ClaimEditModal";
+import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 
 const claimStatuses = [
   { value: "PENDIENTE", label: "Pendiente" },
@@ -55,10 +57,12 @@ const claimStatuses = [
 
 interface ClaimDetailPageProps {
   canEditStatus?: boolean;
+  canEditInfo?: boolean;
 }
 
 export default function ClaimDetailPage({
   canEditStatus = false,
+  canEditInfo = false,
 }: ClaimDetailPageProps) {
   const theme = useTheme(); // Add this line to access the theme object
   const { id } = useParams();
@@ -66,6 +70,7 @@ export default function ClaimDetailPage({
   const [openTake, setOpenTake] = useState(false);
   const [openReject, setOpenReject] = useState(false);
   const [openAccept, setOpenAccept] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const { data, refetch } = useGetClaimByIdQuery(Number(id));
 
@@ -83,6 +88,11 @@ export default function ClaimDetailPage({
 
   return (
     <>
+      <ClaimEditModal
+          open={claimOpen}
+          onClose={() => setClaimOpen(false)}
+          claimId={claim?.id || 0}
+      />
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
         <Grid item xs={12} md={11}>
           <Typography
@@ -222,6 +232,26 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
+                {
+                  canEditInfo && claim?.status === "EN_REVISION" && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="medium"
+                      onClick={() => setClaimOpen(true)}
+                      startIcon={<EditTwoToneIcon />}
+                    >
+                      <Typography
+                        variant="body2"
+                        component="span"
+                        fontWeight={400}
+                        color={"secondary"}
+                      >
+                        Editar Reclamo
+                      </Typography>
+                    </Button>
+                  )
+                }
               </Box>
             </Box>
             <Divider />
