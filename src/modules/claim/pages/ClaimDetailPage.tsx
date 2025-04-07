@@ -47,6 +47,7 @@ import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedI
 import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
 import ClaimEditModal from "../../tracker/components/ClaimEditModal";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
+import { useAppSelector } from "../../../store";
 
 const claimStatuses = [
   { value: "PENDIENTE", label: "Pendiente" },
@@ -74,6 +75,8 @@ export default function ClaimDetailPage({
 
   const { data, refetch } = useGetClaimByIdQuery(Number(id));
 
+  const { user } = useAppSelector((state) => state.auth);
+
   useEffect(() => {
     if (data) {
       setClaim(data);
@@ -86,6 +89,8 @@ export default function ClaimDetailPage({
 
   const islocal = claim?.type === "ALERT_QUALITY";
 
+  const showEditButton = canEditInfo && ["PENDIENTE", "EN_REVISION"].includes(claim?.status || "") && user?.centro_distribucion === claim?.tracking?.distributor_center;
+
   return (
     <>
       <ClaimEditModal
@@ -94,7 +99,7 @@ export default function ClaimDetailPage({
           claimId={claim?.id || 0}
       />
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
-        <Grid item xs={12} md={11}>
+        <Grid item xs={12} md={showEditButton? 10: 11}>
           <Typography
             variant="h4"
             component="h1"
@@ -129,9 +134,27 @@ export default function ClaimDetailPage({
             TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
           </Typography>
         </Grid>
+        {
+          showEditButton && (
+          <Grid 
+            item
+            xs={6}
+            md={1}
+            container
+            justifyContent="flex-end"
+            justifyItems="flex-end"
+            alignItems="center"
+            gap={1}
+          >
+            <IconButton color="primary" sx={{border: "1px solid #dadde9"}} onClick={() => setClaimOpen(true)}>
+              <EditTwoToneIcon fontSize="large" />
+            </IconButton>
+          </Grid>
+          )
+        }
         <Grid
           item
-          xs={12}
+          xs={6}
           md={1}
           container
           justifyContent="flex-end"
@@ -232,26 +255,6 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {
-                  canEditInfo && ["PENDIENTE", "EN_REVISION"].includes(claim?.status || "") && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="medium"
-                      onClick={() => setClaimOpen(true)}
-                      startIcon={<EditTwoToneIcon />}
-                    >
-                      <Typography
-                        variant="body2"
-                        component="span"
-                        fontWeight={400}
-                        color={"secondary"}
-                      >
-                        Editar Reclamo
-                      </Typography>
-                    </Button>
-                  )
-                }
               </Box>
             </Box>
             <Divider />
