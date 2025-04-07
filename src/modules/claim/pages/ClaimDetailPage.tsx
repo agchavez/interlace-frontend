@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   Chip,
+  CircularProgress,
   Divider,
   Grid,
   IconButton,
@@ -23,7 +24,6 @@ import { useParams } from "react-router-dom";
 import {
   Claim,
   ClaimFile,
-  useDownloadDocumentQuery,
   useGetClaimByIdQuery,
 } from "../../../store/claim/claimApi";
 import { PDFDownloadLink } from "@react-pdf/renderer";
@@ -607,17 +607,14 @@ export default function ClaimDetailPage({
                   ? "Solicitud de Resolución (PDF/Excel)"
                   : "Archivo Claim (PDF/Excel)"
               }
-              claim_id={claim?.id || 0}
             />
             <FilesPreview
               files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
               label="Memorandum de Credito (PDF)"
-              claim_id={claim?.id || 0}
             />
             <FilesPreview
               files={claim?.observations_file ? [claim?.observations_file] : []}
               label="Observaciones (PDF)"
-              claim_id={claim?.id || 0}
             />
           </Grid>
         </Grid>
@@ -632,32 +629,26 @@ export default function ClaimDetailPage({
         <FilesPreview
           files={claim?.photos_container_closed || []}
           label={islocal ? "Rastra con Puerta/Lona Cerrada" : "Contenedor Cerrado"}
-          claim_id={claim?.id || 0}
         />
         <FilesPreview
           files={claim?.photos_container_one_open || []}
           label={islocal ? "Rastra Con 1 Puerta/Lona Abierta" : "Contenedor Con 1 Puerta Abierta"}
-          claim_id={claim?.id || 0}
         />
         <FilesPreview
           files={claim?.photos_container_two_open || []}
           label={islocal ? "Rastra Con 2 Puertas Abiertas" : "Contenedor con 2 puertas abiertas"}
-          claim_id={claim?.id || 0}
         />
         <FilesPreview
           files={claim?.photos_container_top || []}
           label={islocal ? "Vista Superior del Contenido de la Rastra" : "Vista Superior del contenido del contenedor"}
-          claim_id={claim?.id || 0}
         />
         <FilesPreview
           files={claim?.photos_during_unload || []}
           label="Fotografía durante la descarga"
-          claim_id={claim?.id || 0}
         />
         <FilesPreview
           files={claim?.photos_pallet_damage || []}
           label="Fisuras/abolladuras de pallets"
-          claim_id={claim?.id || 0}
         />
         <>
           <Grid item container xs={12}>
@@ -670,28 +661,23 @@ export default function ClaimDetailPage({
           <FilesPreview
             files={claim?.photos_damaged_product_base || []}
             label="Base de la lata/botella (fecha de vencimiento y lote)"
-            claim_id={claim?.id || 0}
           />
           <FilesPreview
             files={claim?.photos_damaged_product_dents || []}
             label="Abolladuras (mínimo 3 diferentes)"
-            claim_id={claim?.id || 0}
           />
           <FilesPreview
             files={claim?.photos_damaged_boxes || []}
             label="Cajas dañadas por golpes o problemas de calidad"
-            claim_id={claim?.id || 0}
           />
           <FilesPreview
             files={claim?.photos_grouped_bad_product || []}
             label="Producto en mal estado agrupado en 1 pallet"
-            claim_id={claim?.id || 0}
           />
 
           <FilesPreview
             files={claim?.photos_repalletized || []}
             label="Repaletizado por identificación de producto dañado"
-            claim_id={claim?.id || 0}
           />
         </>
       </Grid>
@@ -723,74 +709,37 @@ export default function ClaimDetailPage({
 function FilesPreview({
   files,
   label,
-  claim_id,
 }: {
   label: string;
   files?: ClaimFile[];
-  claim_id: number;
 }) {
   const theme = useTheme(); // Añadir este hook
   const [selectedFile, setSelectedFile] = useState<ClaimFile | null>(null);
-  const [filenameDownload, setFilenameDownload] = useState<string | null>(null);
-  const [filenamePreview, setFilenamePreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
-
-  const { data: fileBlob, isFetching } = useDownloadDocumentQuery(
-    { filename: filenameDownload || "", claim_id: claim_id || 0 },
-    { skip: !filenameDownload } // Evita ejecutar la consulta si no hay un filename
-  );
-
-  const { data: fileBlobPreview, isFetching: isFetchingPreview } =
-    useDownloadDocumentQuery(
-      { filename: filenamePreview || "", claim_id: claim_id || 0 },
-      { skip: !filenamePreview } // Evita ejecutar la consulta si no hay un filename
-    );
-
-  useEffect(() => {
-    if (isFetching) return;
-    const handleDownload = () => {
-      if (!filenameDownload) return;
-      if (!fileBlob) return;
-
-      // Implementar descarga sin redirección (usando XMLHttpRequest)
-      const url = window.URL.createObjectURL(fileBlob);
-      const link = document.createElement("a");
-      link.style.display = "none";
-      link.href = url;
-      link.setAttribute("download", filenameDownload); // Nombre del archivo a descargar
-      document.body.appendChild(link);
-      link.click();
-
-      // Limpiar después de un breve delay para asegurar que la descarga inicie
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url); // Limpieza de memoria
-      }, 200);
-
-      setFilenameDownload(null);
-    };
-    handleDownload();
-  }, [filenameDownload, fileBlob, isFetching]);
-
-  useEffect(() => {
-    if (isFetchingPreview) return;
-
-    if (filenamePreview && fileBlobPreview) {
-      const url = URL.createObjectURL(fileBlobPreview);
-      setFileUrl(url);
+  async function handleDownloadFile(index: number) {
+    try {
+      const file = files?.[index];
+      if (!file) return;
+      setLoading(true);
+      const respuesta = await fetch(file.access_url);
+      if (!respuesta.ok) throw new Error('Error al descargar el archivo');
+  
+      const blob = await respuesta.blob();
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = file.name;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      URL.revokeObjectURL(enlace.href);
+    } catch (error) {
+      console.error('Error:', error);
     }
-  }, [filenamePreview, fileBlobPreview, isFetchingPreview]);
-
-  const handleDownloadArchivo = async (index: number) => {
-    // Implement download functionality
-    const file = files?.[index];
-    if (!file) return;
-    const url = new URL(file.access_url);
-    const path = url.pathname;
-    const filename = path.substring(path.lastIndexOf("tracker/") + 8);
-    setFilenameDownload(filename);
-  };
+    finally {
+      setLoading(false);
+    }
+  }
 
   const handlePreviewArchivo = async (index: number) => {
     const file = files?.[index];
@@ -800,7 +749,6 @@ function FilesPreview({
     const path = url.pathname;
     const filename = path.substring(path.lastIndexOf("tracker/") + 8);
 
-    setFilenamePreview(filename);
     setSelectedFile({ ...file, extension: filename.split(".").pop() || "" });
   };
 
@@ -1009,10 +957,12 @@ function FilesPreview({
                 >
                   <IconButton
                     size="small"
-                    onClick={() => handleDownloadArchivo(index)}
+                    onClick={() => handleDownloadFile(index)}
                     sx={{ mb: isImage || isPdf ? 0.5 : 0 }}
                   >
-                    <DownloadIcon fontSize="small" />
+                    {
+                      loading ? <CircularProgress size={20} /> : <DownloadIcon fontSize="small" />
+                    }
                   </IconButton>
 
                   {(isImage || isPdf) && (
@@ -1031,14 +981,13 @@ function FilesPreview({
       )}
 
       {/* Modales de vista previa */}
-      {selectedFile && selectedFile.extension === "pdf" && fileUrl && (
-        <PDFPreviewModal file={fileUrl} onClose={() => setSelectedFile(null)} />
+      {selectedFile && selectedFile.extension === "pdf" && (
+        <PDFPreviewModal file={selectedFile.access_url} onClose={() => setSelectedFile(null)} />
       )}
       {selectedFile &&
-        ["jpg", "jpeg", "png", "webp"].includes(selectedFile.extension || "") &&
-        fileUrl && (
+        ["jpg", "jpeg", "png", "webp"].includes(selectedFile.extension || "") && (
           <ImagePreviewModal
-            image={fileUrl}
+            image={selectedFile.access_url}
             onClose={() => setSelectedFile(null)}
           />
         )}

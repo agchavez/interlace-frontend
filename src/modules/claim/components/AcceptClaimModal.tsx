@@ -20,9 +20,9 @@ import {
 } from "../../../store/claim/claimApi.ts";
 import { toast } from "sonner";
 import { useAppSelector } from "../../../store/store.ts";
-import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone.tsx";
 import BootstrapDialogTitleGray from "../../ui/components/claimDialogs/ClaimDialogTitle.tsx";
 import CheckCircleTwoToneIcon from "@mui/icons-material/CheckCircleTwoTone";
+import { ArchivosAdjuntos } from "./ArchivosAdjuntosDrop.tsx";
 
 export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -39,14 +39,17 @@ interface ClaimModalProps {
   claim?: Claim;
 }
 
-export interface FormData {
+export interface FormDataFiles {
+  claimFile: File | null;
+  creditMemoFile: File | null;
+  observationsFile: File | null;
+}
+
+export interface FormDataAcceptClaim extends FormDataFiles {
   claimNumber: string;
   status: string;
   discardDoc: string;
   approveObservations: string;
-  claimFile: File | null;
-  creditMemoFile: File | null;
-  observationsFile: File | null;
 }
 
 export const AcceptClaimModal: FC<ClaimModalProps> = ({
@@ -54,7 +57,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
   onClose,
   claim,
 }) => {
-  const { register, handleSubmit, setValue } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch } = useForm<FormDataAcceptClaim>({
     defaultValues: {
       claimNumber: claim?.claim_number || "",
       status: claim?.status || "PENDIENTE",
@@ -71,7 +74,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
 
   const { user } = useAppSelector((state) => state.auth);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormDataAcceptClaim) => {
     try {
       if (!claim) return;
       if (!user) return;
@@ -198,40 +201,46 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
         </Box>
         <Grid container spacing={1}>
           {/* Archivos adjuntos */}
-          <Grid item xs={12} sm={6} md={4}>
-            <ImagePreviewDropzone
-              files={[]}
-              onFilesChange={(files: File[]) =>
-                setValue("claimFile", files[0] || null)
-              }
-              label={ islocal ? "Subir Solicitud de Resolución (PDF/Excel)" : "Subir archivo Claim (PDF/Excel)"}
+          <Grid item xs={12} md={4}>
+            <ArchivosAdjuntos 
+              label={islocal ? "Subir Solicitud de Resolución (PDF/Excel)" : "Subir archivo Claim (PDF/Excel)"} 
+              claim={claim} 
+              setValue={setValue} 
+              watch={watch} 
+              fieldName="claimFile"
               accept={{
                 "application/pdf": [".pdf"],
-                "application/vnd.ms-excel": [".xls", ".xlsx"],
+                "application/vnd.ms-excel": [".xls", ".xlsx"]
               }}
-              maxFiles={1}
+              tooltipTitle="Archivo principal del reclamo (Excel o PDF)"
+              dropZoneLabel={islocal ? "Subir Solicitud de Resolución (PDF/Excel)" : "Subir archivo Claim (PDF/Excel)"}
+              placeHolderText={islocal ? "Sin Solicitud de Resolución" : "Sin Claim File"}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <ImagePreviewDropzone
-              files={[]}
-              onFilesChange={(files: File[]) =>
-                setValue("creditMemoFile", files[0] || null)
-              }
-              label={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"}
+            <ArchivosAdjuntos 
+              label={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"} 
+              claim={claim} 
+              setValue={setValue} 
+              watch={watch} 
+              fieldName="creditMemoFile"
               accept={{ "application/pdf": [".pdf"] }}
-              maxFiles={1}
+              tooltipTitle={islocal ? "Documento de memorandum de credito" : "Documento de nota de crédito"}
+              dropZoneLabel={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"}
+              placeHolderText={islocal ? "Sin Memorandum de Credito" : "Sin Nota de Crédito"}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <ImagePreviewDropzone
-              files={[]}
-              onFilesChange={(files: File[]) =>
-                setValue("observationsFile", files[0] || null)
-              }
+            <ArchivosAdjuntos 
               label="Subir archivo de Observaciones (PDF)"
+              claim={claim} 
+              setValue={setValue} 
+              watch={watch} 
+              fieldName="observationsFile"
               accept={{ "application/pdf": [".pdf"] }}
-              maxFiles={1}
+              tooltipTitle="Documento con observaciones adicionales sobre el reclamo (PDF)"
+              dropZoneLabel="Subir Observaciones (PDF)"
+              placeHolderText="Sin Observaciones"
             />
           </Grid>
         </Grid>

@@ -9,7 +9,7 @@ import {
   DialogContent,
   TextField,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import { styled } from "@mui/material/styles";
 
 import { errorApiHandler } from "../../../utils/error.ts";
@@ -19,9 +19,10 @@ import {
 } from "../../../store/claim/claimApi.ts";
 import { toast } from "sonner";
 import { useAppSelector } from "../../../store/store.ts";
-import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone.tsx";
 import BootstrapDialogTitleGray from "../../ui/components/claimDialogs/ClaimDialogTitle.tsx";
-import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
+import CancelTwoToneIcon from "@mui/icons-material/CancelTwoTone";
+import { ArchivosAdjuntos } from "./ArchivosAdjuntosDrop.tsx";
+import { FormDataAcceptClaim } from "./AcceptClaimModal";
 
 export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -38,7 +39,7 @@ interface ClaimModalProps {
   claim?: Claim;
 }
 
-export interface FormData {
+export interface FormDataRejectClaim {
   reason: string;
   observationsFile: File | null;
 }
@@ -48,7 +49,7 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
   onClose,
   claim,
 }) => {
-  const { register, handleSubmit, setValue } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch } = useForm<FormDataRejectClaim>({
     defaultValues: {
       reason: "",
       observationsFile: null,
@@ -60,7 +61,7 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
 
   const { user } = useAppSelector((state) => state.auth);
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormDataRejectClaim) => {
     try {
       if (!claim) return;
       if (!user) return;
@@ -92,10 +93,14 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
     <BootstrapDialog open={open} maxWidth="lg" fullWidth onClose={onClose}>
       <BootstrapDialogTitleGray onClose={onClose} id="customized-dialog-title">
         <Typography variant="h6" color="#000" fontWeight={450}>
-          {islocal ? "Rechazar Alerta de Calidad - Tracker Local" : "Rechazar Reclamo - Tracker Importado"}
+          {islocal
+            ? "Rechazar Alerta de Calidad - Tracker Local"
+            : "Rechazar Reclamo - Tracker Importado"}
         </Typography>
         <Typography variant="body1" color="textSecondary">
-          {islocal ? "¿Está seguro que desea rechazar esta alerta de calidad? Indique por favor el motivo." : "¿Está seguro que desea rechazar este reclamo? Indique por favor el motivo."}
+          {islocal
+            ? "¿Está seguro que desea rechazar esta alerta de calidad? Indique por favor el motivo."
+            : "¿Está seguro que desea rechazar este reclamo? Indique por favor el motivo."}
         </Typography>
       </BootstrapDialogTitleGray>
       <DialogContent sx={{ pb: 0 }}>
@@ -113,14 +118,16 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
           </Grid>
           {/* Archivo observaciones */}
           <Grid item xs={12} sm={6} md={4}>
-            <ImagePreviewDropzone
-              files={[]}
-              onFilesChange={(files: File[]) =>
-                setValue("observationsFile", files[0] || null)
-              }
-              label={"Subir archivo de Observaciones (PDF)"}
+            <ArchivosAdjuntos
+              label="Observaciones"
+              claim={claim}
+              setValue={setValue as unknown as UseFormSetValue<FormDataAcceptClaim>}
+              watch={watch as unknown as UseFormWatch<FormDataAcceptClaim>}
+              fieldName="observationsFile"
               accept={{ "application/pdf": [".pdf"] }}
-              maxFiles={1}
+              tooltipTitle="Documento con observaciones adicionales sobre el reclamo (PDF)"
+              dropZoneLabel="Subir Observaciones (PDF)"
+              placeHolderText="Sin Observaciones"
             />
           </Grid>
         </Grid>
