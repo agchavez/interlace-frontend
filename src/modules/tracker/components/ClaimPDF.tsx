@@ -219,7 +219,7 @@ function ClaimPDF({
                 <PDFText>Tipo de Reclamo:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.claim_type}</PDFText>
+                <PDFText>{claim?.claim_type_data?.name}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>

@@ -20,7 +20,7 @@ import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { isValid, format } from "date-fns";
 import { useAppSelector } from "../../../store";
 import { DatePicker } from "@mui/x-date-pickers";
-import { ClaimQueryParams } from "../../../store/claim/claimApi";
+import { ClaimQueryParams, useGetClaimTypesQuery } from "../../../store/claim/claimApi";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -82,6 +82,12 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
     values.distributor_center,
     values.id,
   ]);
+
+  const {
+      data: claimTypes,
+      isFetching: isFetchingClaimTypes,
+      isLoading: isLoadingClaimTypes,
+  } = useGetClaimTypesQuery({});
 
   const handleReset = () => {
     setValue("search", "");
@@ -244,15 +250,16 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
                         value={watch("tipo") || ""}
                         label="Tipo de Reclamo"
                         MenuProps={MenuProps}
+                        disabled={isLoadingClaimTypes || isFetchingClaimTypes}
                       >
                         <MenuItem value="">
                           <em>Todos</em>
                         </MenuItem>
-                        <MenuItem value="FALTANTE">Faltante</MenuItem>
-                        <MenuItem value="SOBRANTE">Sobrante</MenuItem>
-                        <MenuItem value="DAÑOS_CALIDAD_TRANSPORTE">
-                          Daños por Calidad y Transporte
-                        </MenuItem>
+                        {claimTypes?.results?.map((item) => (
+                          <MenuItem key={item.id} value={item.id}>
+                            {item.name}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   )}

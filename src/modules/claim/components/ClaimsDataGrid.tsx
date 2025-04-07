@@ -77,16 +77,7 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
             width: 180,
             minWidth: 180,
             renderCell: (params) => {
-              switch(params.value) {
-                case "FALTANTE":
-                  return <Typography variant="body2">Faltante</Typography>;
-                case "SOBRANTE":
-                  return <Typography variant="body2">Sobrante</Typography>;
-                case "DAÑOS_CALIDAD_TRANSPORTE":
-                  return <Typography variant="body2">Daños por Calidad y Transporte</Typography>;
-                default:
-                  return <Typography variant="body2">-</Typography>;
-              }
+              return <Typography variant="body2">{params.value}</Typography>;
             },
           },
           {

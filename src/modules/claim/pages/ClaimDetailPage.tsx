@@ -29,9 +29,7 @@ import {
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import ClaimPDF from "../../tracker/components/ClaimPDF";
-// import download icon
 import DownloadIcon from "@mui/icons-material/Download";
-// import zoom in icon
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";
@@ -53,15 +51,6 @@ const claimStatuses = [
   { value: "EN_REVISION", label: "En Revisión" },
   { value: "RECHAZADO", label: "Rechazado" },
   { value: "APROBADO", label: "Aprobado" },
-];
-
-const claimTypes = [
-  { value: "FALTANTE", label: "Faltante" },
-  { value: "SOBRANTE", label: "Sobrante" },
-  {
-    value: "DAÑOS_CALIDAD_TRANSPORTE",
-    label: "Daños por Calidad y Transporte",
-  },
 ];
 
 interface ClaimDetailPageProps {
@@ -256,8 +245,7 @@ export default function ClaimDetailPage({
                     color={"gray.500"}
                   >
                     {
-                      claimTypes.find((t) => t.value === claim?.claim_type)
-                        ?.label
+                      claim?.claim_type_data?.name
                     }
                   </Typography>
                 </Grid>
@@ -582,7 +570,11 @@ export default function ClaimDetailPage({
           <Grid item container xs={12}>
             <FilesPreview
               files={claim?.claim_file ? [claim?.claim_file] : []}
-              label={islocal ? "Solicitud de Resolución (PDF/Excel)" : "Archivo Claim (PDF/Excel)"}
+              label={
+                islocal
+                  ? "Solicitud de Resolución (PDF/Excel)"
+                  : "Archivo Claim (PDF/Excel)"
+              }
               claim_id={claim?.id || 0}
             />
             <FilesPreview
@@ -635,53 +627,49 @@ export default function ClaimDetailPage({
           label="Fisuras/abolladuras de pallets"
           claim_id={claim?.id || 0}
         />
-        {claim?.claim_type === "DAÑOS_CALIDAD_TRANSPORTE" && (
-          <>
-            <Grid item container xs={12}>
-              <Divider>
-                <Typography variant="body2" color="textSecondary">
-                  Producto dañado
-                </Typography>
-              </Divider>
-            </Grid>
-            <FilesPreview
-              files={claim?.photos_damaged_product_base || []}
-              label="Base de la lata/botella (fecha de vencimiento y lote)"
-              claim_id={claim?.id || 0}
-            />
-            <FilesPreview
-              files={claim?.photos_damaged_product_dents || []}
-              label="Abolladuras (mínimo 3 diferentes)"
-              claim_id={claim?.id || 0}
-            />
-            <FilesPreview
-              files={claim?.photos_damaged_boxes || []}
-              label="Cajas dañadas por golpes o problemas de calidad"
-              claim_id={claim?.id || 0}
-            />
-            <FilesPreview
-              files={claim?.photos_grouped_bad_product || []}
-              label="Producto en mal estado agrupado en 1 pallet"
-              claim_id={claim?.id || 0}
-            />
-
-            <FilesPreview
-              files={claim?.photos_repalletized || []}
-              label="Repaletizado por identificación de producto dañado"
-              claim_id={claim?.id || 0}
-            />
-          </>
-        )}
-      </Grid>
-      {
-        openTake && (
-          <TakeClaimModal
-            claim={claim || undefined}
-            onClose={() => setOpenTake(false)}
-            open={openTake}
+        <>
+          <Grid item container xs={12}>
+            <Divider>
+              <Typography variant="body2" color="textSecondary">
+                Producto dañado
+              </Typography>
+            </Divider>
+          </Grid>
+          <FilesPreview
+            files={claim?.photos_damaged_product_base || []}
+            label="Base de la lata/botella (fecha de vencimiento y lote)"
+            claim_id={claim?.id || 0}
           />
-        )
-      }
+          <FilesPreview
+            files={claim?.photos_damaged_product_dents || []}
+            label="Abolladuras (mínimo 3 diferentes)"
+            claim_id={claim?.id || 0}
+          />
+          <FilesPreview
+            files={claim?.photos_damaged_boxes || []}
+            label="Cajas dañadas por golpes o problemas de calidad"
+            claim_id={claim?.id || 0}
+          />
+          <FilesPreview
+            files={claim?.photos_grouped_bad_product || []}
+            label="Producto en mal estado agrupado en 1 pallet"
+            claim_id={claim?.id || 0}
+          />
+
+          <FilesPreview
+            files={claim?.photos_repalletized || []}
+            label="Repaletizado por identificación de producto dañado"
+            claim_id={claim?.id || 0}
+          />
+        </>
+      </Grid>
+      {openTake && (
+        <TakeClaimModal
+          claim={claim || undefined}
+          onClose={() => setOpenTake(false)}
+          open={openTake}
+        />
+      )}
       {openReject && (
         <RejectClaimModal
           claim={claim || undefined}

@@ -48,6 +48,7 @@ export interface Claim {
   transporter: Transporter;
   reject_reason: string|null;
   type: "CLAIM" | "ALERT_QUALITY";
+  claim_type_data: ClaimType;
 }
 
 export interface ClaimProduct {
