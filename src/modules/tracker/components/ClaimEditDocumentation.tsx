@@ -7,7 +7,8 @@ import {
     IconButton,
     styled,
     TooltipProps,
-    tooltipClasses
+    tooltipClasses,
+    Divider
 } from "@mui/material";
 import { UseFormRegister, Control, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
@@ -426,9 +427,134 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         
                     />
                 </Grid>
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            6. {getFieldLabel(
+                                "Fisuras/abolladuras de pallets",
+                                "Fisuras/abolladuras de pallets"
+                            )}
+                            <HtmlTooltip title="Fotografías que muestren fisuras o abolladuras en los pallets">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_pallet_damage"
+                        label="Daños en pallets"
+                        existingDocs={claimData.photos_pallet_damage}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
+                
+                <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }}>
+                        <Typography variant="body2" color="textSecondary">
+                            Producto dañado
+                        </Typography>
+                    </Divider>
+                </Grid>
+                
+                {/* Base de la lata/botella */}
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            a) Base de la lata/botella (fecha de vencimiento y lote)
+                            <HtmlTooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_damaged_product_base"
+                        label="Base del producto"
+                        existingDocs={claimData.photos_damaged_product_base}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            b) Abolladuras (mínimo 3 diferentes)
+                            <HtmlTooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_damaged_product_dents"
+                        label="Abolladuras"
+                        existingDocs={claimData.photos_damaged_product_dents}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
 
-                {/* Los siguientes no necesitan cambios significativos */}
-                {/* ... */}
+                   <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            c) Cajas dañadas por golpes o problemas de calidad
+                            <HtmlTooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_damaged_boxes"
+                        label="Cajas dañadas"
+                        existingDocs={claimData.photos_damaged_boxes}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid> 
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            d) Producto en mal estado agrupado en 1 pallet
+                            <HtmlTooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_grouped_bad_product"
+                        label="Producto agrupado"
+                        existingDocs={claimData.photos_grouped_bad_product}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            e) Repaletizado por identificación de producto dañado
+                            <HtmlTooltip title="Fotografías del repaletizado para identificar producto dañado">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        categoryKey="photos_repalletized"
+                        label="Repaletizado"
+                        existingDocs={claimData.photos_repalletized}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
             </Grid>
         </Box>
     );

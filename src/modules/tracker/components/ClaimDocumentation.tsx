@@ -220,34 +220,110 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue, type 
                         />
                     </Grid>
 
-                    <>
-                        <Grid item xs={12}>
-                            <Divider>
-                                <Typography variant="body2" color="textSecondary">
-                                    Producto dañado
+                
+                                                <>
+                            <Grid item xs={12}>
+                                <Divider>
+                                    <Typography variant="body2" color="textSecondary">
+                                        Producto dañado
+                                    </Typography>
+                                </Divider>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Typography variant="body2">
+                                    a) Base de la lata/botella (fecha de vencimiento y lote){" "}
+                                    <HtmlTooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
+                                        </IconButton>
+                                    </HtmlTooltip>
                                 </Typography>
-                            </Divider>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={6}>
-                            <Typography variant="body2">
-                                a) Base de la lata/botella (fecha de vencimiento y lote){" "}
-                                <HtmlTooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
-                                    <IconButton size="small" color="primary">
-                                        <Typography variant="body1">?</Typography>
-                                    </IconButton>
-                                </HtmlTooltip>
-                            </Typography>
-                            <ImagePreviewDropzone
-                                files={[]}
-                                onFilesChange={(files: File[]) => setValue("photos_damaged_product_base", files)}
-                                label="Subir fotos"
-                                accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
-                                maxFiles={5}
-                            />
-                        </Grid>
-                        {/* El resto de elementos no cambian */}
-                        {/* ... */}
-                    </>
+                                <ImagePreviewDropzone
+                                    files={[]}
+                                    onFilesChange={(files: File[]) => setValue("photos_damaged_product_base", files)}
+                                    label="Subir fotos"
+                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                                    maxFiles={5}
+                                />
+                            </Grid>
+                            
+                            {/* Abolladuras */}
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Typography variant="body2">
+                                    b) Abolladuras (mínimo 3 diferentes){" "}
+                                    <HtmlTooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                </Typography>
+                                <ImagePreviewDropzone
+                                    files={[]}
+                                    onFilesChange={(files: File[]) => setValue("photos_damaged_product_dents", files)}
+                                    label="Subir fotos"
+                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                                    maxFiles={5}
+                                />
+                            </Grid>
+                            
+                            {/* Cajas dañadas */}
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Typography variant="body2">
+                                    c) Cajas dañadas por golpes o problemas de calidad{" "}
+                                    <HtmlTooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                </Typography>
+                                <ImagePreviewDropzone
+                                    files={[]}
+                                    onFilesChange={(files: File[]) => setValue("photos_damaged_boxes", files)}
+                                    label="Subir fotos"
+                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                                    maxFiles={5}
+                                />
+                            </Grid>
+                            
+                            {/* Producto en mal estado agrupado */}
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Typography variant="body2">
+                                    d) Producto en mal estado agrupado en 1 pallet{" "}
+                                    <HtmlTooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                </Typography>
+                                <ImagePreviewDropzone
+                                    files={[]}
+                                    onFilesChange={(files: File[]) => setValue("photos_grouped_bad_product", files)}
+                                    label="Subir fotos"
+                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                                    maxFiles={5}
+                                />
+                            </Grid>
+                            
+                            {/* Repaletizado */}
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Typography variant="body2">
+                                    e) Repaletizado por identificación de producto dañado{" "}
+                                    <HtmlTooltip title="Fotografías del repaletizado para identificar producto dañado">
+                                        <IconButton size="small" color="primary">
+                                            <Typography variant="body1">?</Typography>
+                                        </IconButton>
+                                    </HtmlTooltip>
+                                </Typography>
+                                <ImagePreviewDropzone
+                                    files={[]}
+                                    onFilesChange={(files: File[]) => setValue("photos_repalletized", files)}
+                                    label="Subir fotos"
+                                    accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                                    maxFiles={5}
+                                />
+                            </Grid>
+                        </>
+                
                 </Grid>
             </DialogContent>
         </>
