@@ -8,6 +8,7 @@ import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
 import PDFTable from "../../ui/components/pdfDocs/Table";
 import { useEffect, useMemo, useState } from "react";
+import logo_ch from "../../../assets/logo-ch.png";
 
 const styles = StyleSheet.create({
   page: {
@@ -38,7 +39,7 @@ interface TrakerPDFDocumentProps {
 
 function ClaimPDF({
   claim,
-  imageUrl = "https://flagcdn.com/h240/sv.png",
+  imageUrl = "https://flagcdn.com/h240/hn.png",
 }: TrakerPDFDocumentProps) {
   const inputRowCellStyles = [
     { flex: 1 },
@@ -96,7 +97,14 @@ function ClaimPDF({
           <View style={{ flex: 1 }}>
             <Image src="/logo.png" style={{ width: 200 }} />
           </View>
-          <View style={{ flex: 1, textAlign: "right", color: "red" }}>
+          {
+            claim?.tracking?.distributor_center_data?.country_code && (
+              <View style={{ flex: 1}}>
+                <Image src={logo_ch} style={{ width: 150, marginHorizontal: "auto" }} />
+              </View>
+            )
+          }
+          <View style={{ flex: 0.5, textAlign: "right", color: "red" }}>
             <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
               {
                 islocal ? "Alerta de Calidad" : "CLAIM"
