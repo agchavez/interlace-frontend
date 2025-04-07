@@ -233,7 +233,7 @@ export default function ClaimDetailPage({
                   </Button>
                 )}
                 {
-                  canEditInfo && claim?.status === "EN_REVISION" && (
+                  canEditInfo && ["PENDIENTE", "EN_REVISION"].includes(claim?.status || "") && (
                     <Button
                       variant="contained"
                       color="primary"
