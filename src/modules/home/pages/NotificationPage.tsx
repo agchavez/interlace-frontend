@@ -304,13 +304,13 @@ export const NotificationPage = () => {
                                       {iconsActionsNotifi[noti.module]?.[noti.type] || <NotificationsIcon />}
                                     </Avatar>
                                   }
-                                  title={<Typography variant="subtitle1" color="primary" fontWeight={500}>{noti.title}</Typography>}
+                                  title={<Typography variant="subtitle1" color="secondary" fontWeight={500}>{noti.title}</Typography>}
                                   subheader={
                                     <>
-                                    <Typography variant="subtitle1" color="primary" fontWeight={300}>{noti.subtitle}</Typography>
+                                    <Typography variant="subtitle1" color="secondary" fontWeight={300}>{noti.subtitle}</Typography>
                                     <Typography variant="subtitle2" color="text.secondary" display={'flex'} justifyContent={'space-between'} fontWeight={300}> 
                                       {formatDistanceToNow(
-                                        new Date(noti?.creado),
+                                        new Date(noti?.created_at),
                                         { addSuffix: true, locale: es, includeSeconds: false }
                                         )}
                                       {!noti.read && (

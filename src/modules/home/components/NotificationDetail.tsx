@@ -22,21 +22,26 @@ export const NotificationDetail: FC<NotificationDetailProps> = ({ select }) => {
                     <Avatar aria-label="recipe" style={{ marginRight: '10px' }}>
                         {iconsActionsNotifi[select.module]?.[select.type] || <NotificationsIcon />}
                     </Avatar>
-                    <Typography variant="h6" component="h1" fontWeight={400} color="primary" textAlign="center">
-                        {select.title}
-                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Typography variant="h6" component="h1" fontWeight={400} color="secondary" textAlign="start">
+                            {select.title}
+                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <Typography variant="body2" color="textSecondary" textAlign="center">
+                                {select.subtitle}
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" textAlign="center">
+                                {formatDistanceToNow(
+                                    new Date(select?.created_at),
+                                    { addSuffix: true, locale: es, includeSeconds: false }
+                                )}
+                            </Typography>
+                        </Box>
+                    </Box>
+
+
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <Typography variant="body2" color="textSecondary" textAlign="center">
-                        {select.subtitle}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" textAlign="center">
-                    {formatDistanceToNow(
-                        new Date(select?.creado),
-                        { addSuffix: true, locale: es, includeSeconds: false }
-                    )}
-                    </Typography>
-                </Box>
+
                 <Divider style={{ margin: '5px 0' }} />
                 <Box mt={5}>
                     <Typography variant="body1" color="textPrimary" fontWeight={400}>

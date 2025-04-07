@@ -103,10 +103,11 @@ export const notificationApi = createApi({
     endpoints: (builder) => ({
         getNotificaciones: builder.query<BaseApiResponse<Notificacion>, NotificacionQuery>({
             query: (params) => ({
-                url: '/notificacion/',
+                url: '/notification/',
                 method: 'GET',
                 params,
             }),
+            keepUnusedDataFor: 0,
             onQueryStarted: (_, { dispatch }) => {
                 dispatch(refreshToken());
             },
@@ -117,9 +118,11 @@ export const notificationApi = createApi({
         }),
         getNotificacion: builder.query<Notificacion, number>({
             query: (id) => ({
-                url: `/notificacion/${id}/`,
+                url: `/notification/${id}/`,
                 method: 'GET',
             }),
+            // quitar el cacheo de la consulta
+            keepUnusedDataFor: 0,
             onQueryStarted: (_, { dispatch }) => {
                 dispatch(refreshToken());
             },

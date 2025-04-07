@@ -33,7 +33,7 @@ export const notificationApiALL = createApi({
     endpoints: (builder) => ({
         // No leídas
         getUnreadNotifications: builder.query<NotificationsResponse, void>({
-            query: () => `/notification/?leido=false`,
+            query: () => `/notification/?read=false`,
             providesTags: ['Notifications'],
         }),
 
