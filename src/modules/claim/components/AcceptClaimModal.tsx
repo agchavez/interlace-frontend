@@ -43,7 +43,7 @@ export interface FormData {
   claimNumber: string;
   status: string;
   discardDoc: string;
-  observations: string;
+  approveObservations: string;
   claimFile: File | null;
   creditMemoFile: File | null;
   observationsFile: File | null;
@@ -59,7 +59,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
       claimNumber: claim?.claim_number || "",
       status: claim?.status || "PENDIENTE",
       discardDoc: claim?.discard_doc || "",
-      observations: claim?.observations || "",
+      approveObservations: claim?.approve_observations || "",
       claimFile: null,
       creditMemoFile: null,
       observationsFile: null,
@@ -81,7 +81,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
       formData.append("changed_by_id", user?.id.toString() || "");
       formData.append("new_claim_number", data.claimNumber);
       formData.append("new_discard_doc", data.discardDoc);
-      formData.append("new_observations", data.observations);
+      formData.append("new_approve_observations", data.approveObservations);
       if (data.claimFile) formData.append("new_claim_file", data.claimFile);
       if (data.creditMemoFile)
         formData.append("new_credit_memo_file", data.creditMemoFile);
@@ -107,7 +107,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
       setValue("claimNumber", claim?.claim_number || "");
       setValue("status", claim?.status || "PENDIENTE");
       setValue("discardDoc", claim?.discard_doc || "");
-      setValue("observations", claim?.observations || "");
+      setValue("approveObservations", claim?.approve_observations || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -172,13 +172,13 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label="Observaciones"
+              label="Observaciones de Aprobación"
               fullWidth
               size="small"
               multiline
               rows={3}
               color="secondary"
-              {...register("observations")}
+              {...register("approveObservations")}
             />
           </Grid>
         </Grid>

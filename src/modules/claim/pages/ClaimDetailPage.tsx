@@ -78,7 +78,6 @@ export default function ClaimDetailPage({
   useEffect(() => {
     refetch();
   }, [id, refetch]);
-  console.log(claim);
 
   const islocal = claim?.type === "ALERT_QUALITY";
 
@@ -399,7 +398,7 @@ export default function ClaimDetailPage({
                       fontWeight={400}
                       color={"gray.500"}
                     >
-                      Observaciones
+                      Observaciones del Reclamo
                     </Typography>
                   </Grid>
                   <Divider />
@@ -416,6 +415,39 @@ export default function ClaimDetailPage({
                     </Typography>
                   </pre>
                 </Grid>
+
+                {/* Observaciones aprobadas */}
+                {claim?.status === "APROBADO" && (
+                  <Grid item xs={12}>
+                    <Grid
+                      container
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={400}
+                        color={"gray.500"}
+                      >
+                        Observaciones de Aprobación
+                      </Typography>
+                    </Grid>
+                    <Divider />
+                    <pre>
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={600}
+                        color={"gray.500"}
+                        // que se acomode al texto
+                        style={{ whiteSpace: "pre-wrap" }}
+                      >
+                        {claim?.approve_observations || "--"}
+                      </Typography>
+                    </pre>
+                  </Grid>
+                )}
               </Grid>
             </Box>
             <Divider sx={{ my: 2 }} />

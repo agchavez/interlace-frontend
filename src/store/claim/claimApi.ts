@@ -49,6 +49,7 @@ export interface Claim {
   reject_reason: string|null;
   type: "CLAIM" | "ALERT_QUALITY";
   claim_type_data: ClaimType;
+  approve_observations?: string;
 }
 
 export interface ClaimProduct {
