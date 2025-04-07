@@ -86,7 +86,7 @@ export interface DocumentFromClaim {
 export interface ClaimQueryParams {
   search?: string;
   ordering?: string;
-  tipo?: "FALTANTE" | "SOBRANTE" | "DAÑOS_CALIDAD_TRANSPORTE";
+  tipo?: number;
   status?: "PENDIENTE" | "EN_REVISION" | "RECHAZADO" | "APROBADO";
   distributor_center?: number[];
   date_after?: string;

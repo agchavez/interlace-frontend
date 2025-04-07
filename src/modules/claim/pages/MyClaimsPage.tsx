@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import {
   ClaimQueryParams,
+  useGetClaimTypesQuery,
   useGetMyClaimsQuery,
 } from "../../../store/claim/claimApi";
 import { useAppSelector } from "../../../store";
@@ -62,6 +63,8 @@ export default function MyClaimsPage() {
   };
 
   const [openFilter, setOpenFilter] = useState(false);
+
+  const {data: claimTypes} = useGetClaimTypesQuery({});
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -182,12 +185,7 @@ export default function MyClaimsPage() {
                   label="Tipo: "
                   items={[
                     {
-                      label:
-                        claimQueryParams.tipo === "FALTANTE"
-                          ? "Faltante"
-                          : claimQueryParams.tipo === "SOBRANTE"
-                          ? "Sobrante"
-                          : "Daños por Calidad y Transporte",
+                      label: claimTypes?.results?.find((item) => item.id === claimQueryParams.tipo)?.name ||"",
                       id: "",
                       deleteAction: () =>
                         dispatch(
