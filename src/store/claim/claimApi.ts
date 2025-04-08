@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "..";
 import { BaseApiResponse } from "../../interfaces/api";
 import { Tracker } from "../../interfaces/tracking";
-import { Trailer, Transporter } from "../../interfaces/maintenance";
+import { Driver, LocationType, Trailer, Transporter } from "../../interfaces/maintenance";
 
 
 export interface ClaimProduct {
@@ -50,6 +50,8 @@ export interface Claim {
   type: "CLAIM" | "ALERT_QUALITY";
   claim_type_data: ClaimType;
   approve_observations?: string;
+  origin_location_data?: LocationType;
+  driver_data?: Driver;
 }
 
 export interface ClaimProduct {

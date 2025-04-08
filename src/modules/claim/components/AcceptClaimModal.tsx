@@ -262,7 +262,9 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
           onClick={handleSubmit(onSubmit)}
           startIcon={<CheckCircleTwoToneIcon />}
         >
-          {islocal ? "Aprobar Alerta de Calidad" : "Aprobar Reclamo"}
+          {
+            isLoading ? "Guardando cambios..." : islocal ? "Aprobar Alerta de Calidad" : "Aprobar Reclamo"
+          }
         </Button>
       </DialogActions>
     </BootstrapDialog>
