@@ -51,7 +51,7 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
 }) => {
   const { register, handleSubmit, setValue, watch } = useForm<FormDataRejectClaim>({
     defaultValues: {
-      reason: "",
+      reason: claim?.reject_reason || "",
       observationsFile: null,
     },
   });
@@ -149,7 +149,7 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
           onClick={handleSubmit(onSubmit)}
           startIcon={<CancelTwoToneIcon />}
         >
-          {islocal ? "Rechazar Alerta de Calidad" : "Rechazar Reclamo"}
+          {isLoading ? "Guardando cambios..." : islocal ? "Rechazar Alerta de Calidad" : "Rechazar Reclamo"}
         </Button>
       </DialogActions>
     </BootstrapDialog>
