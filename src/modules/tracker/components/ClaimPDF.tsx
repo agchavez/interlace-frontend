@@ -35,11 +35,13 @@ const styles = StyleSheet.create({
 interface TrakerPDFDocumentProps {
   claim?: Claim;
   imageUrl?: string;
+  qrDataUrl?: string;
 }
 
 function ClaimPDF({
   claim,
   imageUrl = "https://flagcdn.com/h240/hn.png",
+  qrDataUrl,
 }: TrakerPDFDocumentProps) {
   const inputRowCellStyles = [
     { flex: 1 },
@@ -81,14 +83,16 @@ function ClaimPDF({
 
   const islocal = claim?.type === "ALERT_QUALITY";
 
+  const seguimiento = claim?.tracking;
+
   return (
     <Document
-      title="Datos Claim"
+      title={islocal ? "Datos Alerta de Calidad" : "Datos CLAIM"}
       language="es"
       style={{ fontFamily: "Helvetica" }}
       author="AbinBev"
       creator="AbinBev Tracker"
-      keywords="Tracker, AbinBev, PDF, Seguimiento"
+      keywords="Tracker, AbinBev, PDF, Seguimiento, Claim, Alerta de Calidad"
     >
       <Page size="LETTER" style={styles.page}>
         <View
@@ -117,7 +121,7 @@ function ClaimPDF({
         <View
           style={{
             ...styles.section,
-            backgroundColor: "red",
+            backgroundColor: "#1c2536",
             display: "flex",
             flexDirection: "row",
           }}
@@ -140,29 +144,23 @@ function ClaimPDF({
               TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
             </PDFTitle>
           </View>
-          <View style={{ marginLeft: 10 }}>
-            <View style={{ width: 100 }}></View>
+          <View style={{ marginLeft: 10, marginRight: 10, borderRadius: 7 }}>
+            <Image src={qrDataUrl||''} style={{ width: 50, borderRadius: 7 }} />
           </View>
         </View>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle style={{ ...styles.subTitle }}>
-              Datos Tracker:
-            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>Datos principales:</PDFSubTitle>
             <View style={{ flexDirection: "row", paddingRight: 10 }}>
               <View style={{ minWidth: 100 }}>
                 <PDFText>Fecha de registro:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {claim?.tracking
-                    ? format(
-                        new Date(claim?.tracking?.created_at),
-                        "dd/MM/yyyy"
-                      )
-                    : ""}
+                  {seguimiento?.created_at && format(new Date(seguimiento?.created_at), "dd/MM/yyyy")}
                 </PDFText>
               </View>
+
             </View>
             <View style={{ flexDirection: "row", paddingRight: 10 }}>
               <View style={{ minWidth: 100 }}>
@@ -170,7 +168,7 @@ function ClaimPDF({
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {claim?.tracking?.distributor_center_data?.name}
+                  {seguimiento?.distributor_center_data?.name}
                 </PDFText>
               </View>
             </View>
@@ -179,7 +177,7 @@ function ClaimPDF({
                 <PDFText>Número de Rastra:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.trailer?.code}</PDFText>
+                <PDFText>{seguimiento?.tariler_data?.code}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -188,7 +186,7 @@ function ClaimPDF({
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {claim?.tracking?.type === "IMPORT" ? "Importación" : "Local"}
+                  {seguimiento?.type === "IMPORT" ? "Importación" : "Local"}
                 </PDFText>
               </View>
             </View>
@@ -197,7 +195,7 @@ function ClaimPDF({
                 <PDFText>Transportista:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.transporter?.name}</PDFText>
+                <PDFText>{seguimiento?.transporter_data?.name}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -205,7 +203,7 @@ function ClaimPDF({
                 <PDFText>Tractor:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.transporter?.tractor}</PDFText>
+                <PDFText>{seguimiento?.transporter_data.tractor}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
@@ -213,45 +211,80 @@ function ClaimPDF({
                 <PDFText>Cabezal:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.transporter?.code}</PDFText>
+                <PDFText>{seguimiento?.transporter_data?.code}</PDFText>
               </View>
             </View>
           </View>
 
           <View style={{ ...styles.section, flex: 1 }}>
-            <PDFSubTitle style={{ ...styles.subTitle }}>
-              Datos generales:
-            </PDFSubTitle>
+            <PDFSubTitle style={{ ...styles.subTitle }}>Datos generales:</PDFSubTitle>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Tipo de Reclamo:</PDFText>
+                <PDFText>Numero de placa:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.claim_type_data?.name}</PDFText>
+                <PDFText>{seguimiento?.plate_number}</PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Numero de Reclamo:</PDFText>
+                <PDFText>Localidad de origen:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.claim_number}</PDFText>
+                <PDFText>
+                  {claim?.origin_location_data?.name}-
+                  {claim?.origin_location_data?.code}
+                </PDFText>
               </View>
             </View>
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Estado del Reclamo:</PDFText>
+                <PDFText>Conductor:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.status}</PDFText>
+                <PDFText>
+                  {claim?.tracking?.type === "LOCAL"
+                    ? `${claim?.driver_data?.first_name}`
+                    : `${seguimiento?.driver_import}`}
+                </PDFText>
               </View>
             </View>
+
+            {seguimiento?.type === "IMPORT" && (
+              <View style={{ flexDirection: "row" }}>
+                <View style={{ minWidth: 125 }}>
+                  <PDFText>No. Contenedor:</PDFText>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <PDFText>{seguimiento?.container_number}</PDFText>
+                </View>
+              </View>
+            )}
+            {seguimiento?.type === "LOCAL" ? (
+              <View style={{ flexDirection: "row" }}>
+                <View style={{ minWidth: 125 }}>
+                  <PDFText>Transferencia de entrada:</PDFText>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <PDFText>{seguimiento.input_document_number}</PDFText>
+                </View>
+              </View>
+            ) : (
+              <View style={{ flexDirection: "row" }}>
+                <View style={{ minWidth: 125 }}>
+                  <PDFText>No. Factura:</PDFText>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <PDFText>{seguimiento?.invoice_number}</PDFText>
+                </View>
+              </View>
+            )}
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>Documento de Descarte:</PDFText>
+                <PDFText>N° de Traslado 5001:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
-                <PDFText>{claim?.discard_doc}</PDFText>
+                <PDFText>{seguimiento?.transfer_number}</PDFText>
               </View>
             </View>
           </View>

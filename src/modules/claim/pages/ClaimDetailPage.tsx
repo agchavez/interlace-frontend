@@ -48,6 +48,7 @@ import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
 import ClaimEditModal from "../../tracker/components/ClaimEditModal";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import { useAppSelector } from "../../../store";
+import QRToBase64 from "../components/QRToBase64";
 
 const claimStatuses = [
   { value: "PENDIENTE", label: "Pendiente" },
@@ -72,6 +73,7 @@ export default function ClaimDetailPage({
   const [openReject, setOpenReject] = useState(false);
   const [openAccept, setOpenAccept] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const { data, refetch } = useGetClaimByIdQuery(Number(id));
 
@@ -93,6 +95,7 @@ export default function ClaimDetailPage({
 
   return (
     <>
+      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
       <ClaimEditModal
           open={claimOpen}
           onClose={() => setClaimOpen(false)}
@@ -166,7 +169,7 @@ export default function ClaimDetailPage({
             fileName={
               claim ? `CLAIM-${claim.id?.toString().padStart(5, "0")}` : ""
             }
-            document={<ClaimPDF claim={claim ? claim : undefined} />}
+            document={<ClaimPDF claim={claim ? claim : undefined} qrDataUrl={qrDataUrl||''} />}
           >
             {({ loading: pdfLoading }) => {
               const loading = pdfLoading;
