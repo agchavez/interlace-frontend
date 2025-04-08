@@ -243,7 +243,7 @@ function ClaimPDF({
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>
-                  {claim?.tracking?.type === "LOCAL"
+                  {seguimiento?.type === "LOCAL"
                     ? `${claim?.driver_data?.first_name}`
                     : `${seguimiento?.driver_import}`}
                 </PDFText>
