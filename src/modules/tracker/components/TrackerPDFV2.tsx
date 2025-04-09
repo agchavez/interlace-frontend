@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Document, Page, View, StyleSheet, Image } from "@react-pdf/renderer";
 import PDFText from "../../ui/components/pdfDocs/PDFText";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
@@ -15,7 +15,6 @@ import {
 } from "../../../interfaces/maintenance";
 import PDFTitle from "../../ui/components/pdfDocs/PDFTitle";
 import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
-import { PDFDownloadLink } from "@react-pdf/renderer";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
@@ -23,6 +22,7 @@ import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import Box from "@mui/material/Box";
 import logo_ch from "../../../assets/logo-ch.png";
 import QRToBase64 from "../../claim/components/QRToBase64";
+import Backdrop from '@mui/material/Backdrop';
 
 const styles = StyleSheet.create({
   page: {
@@ -566,7 +566,7 @@ function TrakerPDFDocument({
   );
 }
 
-// Componente para manejar la precarga de imágenes y la descarga del PDF
+// Componente para manejar la descarga del PDF bajo demanda
 const PDFDownloader = ({
   seguimiento,
   outputTypeData,
@@ -575,10 +575,11 @@ const PDFDownloader = ({
   op2,
   outputLocation,
 }: TrakerPDFDocumentProps) => {
-  const [imageBase64_1, setImageBase64_1] = useState<string | null>(null);
-  const [imageBase64_2, setImageBase64_2] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [progressMessage, setProgressMessage] = useState<string>("Preparando...");
+  const [generatedPDF, setGeneratedPDF] = useState<Blob | null>(null);
 
   // Función para convertir URL de imagen a base64
   const convertImageToBase64 = async (url: string): Promise<string | null> => {
@@ -615,47 +616,59 @@ const PDFDownloader = ({
     }
   };
 
-  useEffect(() => {
-    const loadImages = async () => {
-      setIsLoading(true);
-      setError(null);
+  // Función para descargar el PDF
+  const downloadPDF = (blob: Blob) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `TRK-${seguimiento.id?.toString().padStart(5, "0")}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
-      try {
-        // Verificar si hay imágenes para cargar
-        const file1IsImage = seguimiento.file_data_1 &&
-          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
-            (seguimiento.file_data_1.extension || '').toLowerCase()
-          );
+  // Función para preparar los datos y generar el PDF
+  const handleGeneratePDF = async () => {
+    if (isProcessing || !qrDataUrl) return;
+    
+    setIsProcessing(true);
+    setProgressMessage("Obteniendo información...");
+    setError(null);
 
-        const file2IsImage = seguimiento.file_data_2 &&
-          ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
-            (seguimiento.file_data_2.extension || '').toLowerCase()
-          );
+    try {
+      // 1. Preparar las imágenes para el PDF
+      setProgressMessage("Cargando archivos...");
+      const file1IsImage = seguimiento.file_data_1 &&
+        ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
+          (seguimiento.file_data_1.extension || '').toLowerCase()
+        );
 
-        // Cargar imágenes en paralelo
-        const promises = [];
+      const file2IsImage = seguimiento.file_data_2 &&
+        ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
+          (seguimiento.file_data_2.extension || '').toLowerCase()
+        );
 
-        if (file1IsImage && seguimiento.file_data_1?.access_url) {
-          promises.push(
-            convertImageToBase64(seguimiento.file_data_1.access_url)
-              .then(base64 => setImageBase64_1(base64))
-          );
-        }
+      const promises: Promise<any>[] = [];
+      let imageBase64_1: string | null = null;
+      let imageBase64_2: string | null = null;
 
-        if (file2IsImage && seguimiento.file_data_2?.access_url) {
-          promises.push(
-            convertImageToBase64(seguimiento.file_data_2.access_url)
-              .then(base64 => setImageBase64_2(base64))
-          );
-        }
+      if (file1IsImage && seguimiento.file_data_1?.access_url) {
+        promises.push(
+          convertImageToBase64(seguimiento.file_data_1.access_url)
+            .then(base64 => { imageBase64_1 = base64; })
+        );
+      }
 
-        // Si no hay imágenes, simplemente finalizamos la carga
-        if (promises.length === 0) {
-          setIsLoading(false);
-          return;
-        }
+      if (file2IsImage && seguimiento.file_data_2?.access_url) {
+        promises.push(
+          convertImageToBase64(seguimiento.file_data_2.access_url)
+            .then(base64 => { imageBase64_2 = base64; })
+        );
+      }
 
-        // Esperar a que todas las imágenes se carguen (con un timeout máximo)
+      // Esperar a que todas las promesas se resuelvan con timeout
+      if (promises.length > 0) {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Tiempo de carga excedido")), 15000)
         );
@@ -664,72 +677,182 @@ const PDFDownloader = ({
           Promise.all(promises),
           timeoutPromise
         ]);
-
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error al cargar imágenes:", error);
-        setError("No se pudieron cargar las imágenes. Se generará el PDF sin ellas.");
-        setIsLoading(false);
       }
-    };
 
-    loadImages();
-  }, [seguimiento]);
-
-
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+      // 2. Generar PDF y mostrar progreso
+      setProgressMessage("Generando PDF...");
+      
+      // Usar react-pdf/renderer para generar el PDF
+      const { pdf } = await import('@react-pdf/renderer');
+      const blob = await pdf(
+        <TrakerPDFDocument
+          seguimiento={seguimiento}
+          outputTypeData={outputTypeData}
+          driver={driver}
+          op1={op1}
+          op2={op2}
+          outputLocation={outputLocation}
+          imageBase64_1={imageBase64_1}
+          imageBase64_2={imageBase64_2}
+          qrDataUrl={qrDataUrl}
+        />
+      ).toBlob();
+      
+      // 3. Descargar el PDF generado
+      setProgressMessage("Descargando PDF...");
+      
+      // Pequeña pausa para mostrar el mensaje de descarga
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Descargar el archivo
+      downloadPDF(blob);
+      
+      // Finalizar con éxito
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Error al generar PDF:", error);
+      setError("No se pudo generar el PDF. Por favor intente de nuevo.");
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <Box>
-      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
-      {isLoading ? (
-        <Button
-          startIcon={<CircularProgress size={20} />}
-          variant="contained"
-          color="secondary"
-          disabled
-          sx={{
-            mt: 'auto',
-            borderRadius: '5px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
-            textTransform: 'none',
-            minWidth: '140px'
-          }}
-        >
-          Preparando PDF...
-        </Button>
-      ) : (
-        <PDFDownloadLink
-          document={
-            <TrakerPDFDocument
-              seguimiento={seguimiento}
-              outputTypeData={outputTypeData}
-              driver={driver}
-              op1={op1}
-              op2={op2}
-              outputLocation={outputLocation}
-              imageBase64_1={imageBase64_1}
-              imageBase64_2={imageBase64_2}
-              qrDataUrl={qrDataUrl || undefined}
-            />
-          }
-          fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}.pdf`}
-          style={{ textDecoration: 'none' }}
-        >
-          {({ loading }) => (
-            <Button
-              startIcon={loading ? <CircularProgress size={20} /> : <PictureAsPdfTwoToneIcon />}
-              variant="outlined"
-              color="secondary"
-              disabled={loading}
-              size="small"
+      {/* Componente QRToBase64 que siempre está presente pero invisible */}
+      <Box sx={{ display: 'none' }}>
+        <QRToBase64 
+          value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento.id}`} 
+          logoSrc="/logo-qr.png" 
+          onReady={(dataUrl) => setQrDataUrl(dataUrl)} 
+        />
+      </Box>
 
-            >
-              {loading ? "Generando PDF..." : "Descargar PDF"}
-            </Button>
-          )}
-        </PDFDownloadLink>
-      )}
+      {/* Botón visible para el usuario que inicia todo el proceso */}
+      <Button
+        startIcon={<PictureAsPdfTwoToneIcon />}
+        variant="contained"
+        color="secondary"
+        onClick={handleGeneratePDF}
+        disabled={isProcessing || !qrDataUrl}
+        size="small"
+        sx={{
+          borderRadius: '5px',
+          textTransform: 'none',
+          minWidth: '140px'
+        }}
+      >
+        Descargar PDF
+      </Button>
+
+      {/* Backdrop para mostrar el progreso con diseño mejorado y colores más suaves */}
+      <Backdrop
+        sx={{ 
+          color: '#fff', 
+          zIndex: theme => theme.zIndex.drawer + 1,
+          backdropFilter: 'blur(3px)',
+          borderRadius: 2,
+          backgroundColor: 'rgba(28, 37, 54, 0.15)' // color-sidebar-primary con opacidad
+        }}
+        open={isProcessing}
+      >
+        <Box sx={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 1.5,
+          maxWidth: 260,
+          textAlign: 'center',
+          p: 2.5,
+          borderRadius: 2,
+          background: 'linear-gradient(145deg, rgba(231, 207, 15, 0.15) 0%, rgba(17, 15, 13, 0.75) 100%)',
+          boxShadow: '0 8px 16px rgba(17, 15, 13, 0.3)',
+          border: '1px solid rgba(231, 207, 15, 0.2)'
+        }}>
+          <Box sx={{ 
+            position: 'relative', 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            mb: 1
+          }}>
+            <CircularProgress 
+              size={46} 
+              thickness={3} 
+              sx={{ 
+                color: '#e7cf0f', // color-primary
+                opacity: 0.9
+              }} 
+            />
+            <Box sx={{ 
+              position: 'absolute', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <PictureAsPdfTwoToneIcon sx={{ fontSize: 20, color: '#fff' }} />
+            </Box>
+          </Box>
+          
+          <Typography 
+            variant="subtitle1" 
+            sx={{ 
+              fontWeight: 500,
+              letterSpacing: 0.3,
+              fontSize: '1rem',
+              color: '#e7cf0f' // color-primary
+            }}
+          >
+            {progressMessage}
+          </Typography>
+          
+          <Box sx={{ 
+            width: '75%', 
+            mt: 0.5,
+            position: 'relative',
+            height: 2,
+            backgroundColor: 'rgba(148, 156, 166, 0.3)', // text-sidebar-primary con opacidad
+            borderRadius: 1,
+            overflow: 'hidden'
+          }}>
+            <Box 
+              sx={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: '100%',
+                background: 'linear-gradient(90deg, rgba(231, 207, 15, 0.3) 0%, rgba(231, 207, 15, 0.9) 50%, rgba(231, 207, 15, 0.3) 100%)',
+                animation: 'progressAnimation 1.5s infinite ease-in-out',
+                width: '30%',
+                borderRadius: 1,
+                '@keyframes progressAnimation': {
+                  '0%': {
+                    left: '-30%',
+                  },
+                  '100%': {
+                    left: '100%',
+                  }
+                }
+              }} 
+            />
+          </Box>
+          
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              opacity: 0.9, 
+              mt: 0.5,
+              fontSize: '0.675rem',
+              color: '#949ca6' // text-sidebar-primary
+            }}
+          >
+            No cierre esta ventana
+          </Typography>
+        </Box>
+      </Backdrop>
 
       {error && (
         <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
