@@ -1,6 +1,6 @@
 // ExistingDocPreview.tsx
 import React, { useState } from "react";
-import { Box, Typography, IconButton, Button } from "@mui/material";
+import { Box, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";

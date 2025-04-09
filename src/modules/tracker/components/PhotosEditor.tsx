@@ -24,7 +24,6 @@ interface PhotosEditorProps {
 
 export const PhotosEditor: React.FC<PhotosEditorProps> = ({
   categoryKey,
-  label,
   existingDocs,
   watch,
   setValue,

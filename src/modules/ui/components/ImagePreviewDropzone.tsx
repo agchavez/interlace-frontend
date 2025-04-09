@@ -20,7 +20,7 @@ interface ImagePreviewDropzoneProps {
 export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ files, onFilesChange, label, accept, maxFiles = 1, sxDrop }) => {
     const [previews, setPreviews] = useState<string[]>(files.map(file => URL.createObjectURL(file)));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
-    const [type, settype] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
+    const [type] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
     
     const onDrop = (acceptedFiles: File[]) => {
         if (files.length + acceptedFiles.length > maxFiles) {

@@ -1,29 +1,20 @@
-// ClaimCard.tsx
-import React, { useState } from "react";
 import {
     Card,
     CardContent,
     Typography,
     Box,
     Chip,
-    Divider,
     Grid,
     Paper,
-    IconButton,
-    Collapse,
     Avatar,
     alpha,
-    Stack,
-    ButtonBase
+    Stack
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
-    KeyboardArrowDown,
-    KeyboardArrowUp,
     Description,
     AccessTime,
     Person,
-    Notes,
     CheckCircleOutlined,
     ErrorOutlined,
     HourglassEmptyOutlined
@@ -49,7 +40,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const StatusChip = styled(Chip, {
     shouldForwardProp: (prop) => prop !== 'statusColor',
-})(({ theme, statusColor }: { theme?: any, statusColor: string }) => ({
+})(({ statusColor }: { theme?: any, statusColor: string }) => ({
     backgroundColor: alpha(statusColor, 0.12),
     color: statusColor,
     fontWeight: 600,
@@ -101,10 +92,7 @@ const getStatusInfo = (status: string): { label: string, color: string, icon: JS
 };
 
 const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
-    const [expanded, setExpanded] = useState(false);
-    const handleExpandClick = () => {
-        setExpanded(!expanded);
-    };
+   
 
     const statusInfo = getStatusInfo(claim.status);
     const isApproved = claim.status === "APROBADO";
