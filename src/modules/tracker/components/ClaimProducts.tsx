@@ -13,18 +13,22 @@ import {
     TableRow,
     TextField,
     Typography,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    FormHelperText,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
-import { Product } from "../../../interfaces/tracking";
-import { ProductSelect } from "../../ui/components/ProductSelect";
-import { getArticlesByBarcode } from "../../../store/maintenance/maintenanceThunk";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "sonner";
+import { DetalleCarga } from "../../../store/seguimiento/seguimientoSlice";
 
 export interface ProductItem {
-    product: string;
+    product: number;
+    name: string;
     quantity: number;
     batch: string;
 }
@@ -34,22 +38,23 @@ interface ClaimProductsProps {
     onAddProduct: (item: ProductItem) => void;
     onEditProduct: (index: number, item: ProductItem) => void;
     onDeleteProduct: (index: number) => void;
+    detalles: DetalleCarga[];
 }
 
 interface FormValues {
-    producto: Product | null;
+    producto: number | null;
     cantidad: number | null;
     lote: string;
 }
 
 const ClaimProducts: React.FC<ClaimProductsProps> = ({
-                                                         products,
-                                                         onAddProduct,
-                                                         onEditProduct,
-                                                         onDeleteProduct,
-                                                     }) => {
-    const dispatch = useAppDispatch();
-    const seguimeintoActual = useAppSelector((state) => state.seguimiento.seguimeintoActual);
+    products,
+    onAddProduct,
+    onEditProduct,
+    onDeleteProduct,
+    detalles,
+}) => {
+    
     const loading = useAppSelector((state) => state.maintenance.loading);
 
     const {
@@ -59,6 +64,7 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
         setFocus,
         setValue,
         control,
+        watch,
         formState: { errors },
     } = useForm<FormValues>({
         defaultValues: {
@@ -68,8 +74,8 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
         },
     });
 
-    const [code, setCode] = useState<string>("");
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const selectedProductId = watch("producto");
+    const [selectedProduct, setSelectedProduct] = useState<DetalleCarga | null>(null);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -80,18 +86,26 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
         }, 100);
     }, [setFocus]);
 
-    // Manejo de selección de producto
-    const handleSelectProduct = (value: Product | null) => {
-        setSelectedProduct(value);
-        setFocus("cantidad");
-        setCode("");
-    };
+    // Actualizar el producto seleccionado cuando cambie el valor del formulario
+    useEffect(() => {
+        if (selectedProductId && detalles) {
+            const product = detalles.find(p => p.id === selectedProductId) || null;
+            setSelectedProduct(product);
+            if (product) {
+                setFocus("cantidad");
+            }
+        } else {
+            setSelectedProduct(null);
+        }
+    }, [selectedProductId, detalles, setFocus]);
 
     // Enviar formulario de producto (para agregar o editar)
     const onSubmitForm = (data: FormValues) => {
         if (!selectedProduct) return;
+
         const newItem: ProductItem = {
-            product: selectedProduct.name, // se asume que el objeto Product tiene la propiedad "name"
+            product: selectedProduct.productId,
+            name: selectedProduct.name,
             quantity: data.cantidad || 0,
             batch: data.lote,
         };
@@ -101,6 +115,18 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
             toast.success("Producto editado");
             setEditingIndex(null);
         } else {
+            // Verifica si el producto ya existe en la lista
+            const existingProduct = products.find((item) => item.product === newItem.product);
+            if (existingProduct) {
+                toast.error("El producto ya está agregado");
+                reset({
+                    producto: null,
+                    cantidad: null,
+                    lote: "",
+                });
+                return;
+            }
+            // Si no existe, lo agrega
             onAddProduct(newItem);
             toast.success("Producto agregado");
         }
@@ -108,31 +134,11 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
         setSelectedProduct(null);
     };
 
-    // Captura de código escaneado para obtener información del producto
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Enter") {
-                if (code.length > 0) {
-                    dispatch(getArticlesByBarcode(code, seguimeintoActual || 0));
-                    setCode("");
-                }
-            } else {
-                setCode((prev) => prev + e.key);
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-            setCode("");
-        };
-    }, [code, dispatch, seguimeintoActual]);
-
     // Función para editar un producto: carga los datos en el formulario
     const handleEdit = (index: number) => {
         const item = products[index];
         setEditingIndex(index);
-        // Se asume que podemos reconstruir un objeto Product a partir del nombre
-        setSelectedProduct({ name: item.product } as Product);
+        setValue("producto", item.product);
         setValue("cantidad", item.quantity);
         setValue("lote", item.batch);
         setFocus("cantidad");
@@ -144,18 +150,18 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
         toast.success("Producto eliminado");
     };
 
+    // Verificar si hay productos disponibles
+    const hasProducts = detalles && detalles.length > 0;
+
     return (
         <Box>
-            <Typography variant="body1" gutterBottom>
-                Productos asociados al reclamo
-            </Typography>
 
             {/* Tabla de productos */}
             {products.length > 0 ? (
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Producto</TableCell>
+                            <TableCell>Texto Breve de Material</TableCell>
                             <TableCell>Cantidad</TableCell>
                             <TableCell>Lote</TableCell>
                             <TableCell align="center">Acciones</TableCell>
@@ -164,7 +170,7 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
                     <TableBody>
                         {products.map((item, idx) => (
                             <TableRow key={idx}>
-                                <TableCell>{item.product}</TableCell>
+                                <TableCell>{item.name}</TableCell>
                                 <TableCell>{item.quantity}</TableCell>
                                 <TableCell>{item.batch}</TableCell>
                                 <TableCell align="center">
@@ -184,16 +190,48 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
             )}
 
             {/* Formulario para agregar/editar producto */}
-            <Box component="form" onSubmit={handleSubmit(onSubmitForm)} ref={formRef} sx={{ mt: 2 }}>
+            <Box
+                component="form"
+                onSubmit={handleSubmit(onSubmitForm)}
+                ref={formRef}
+                sx={{ mt: 2 }}
+            >
+                {!hasProducts && (
+                    <Typography color="error" sx={{ mb: 2 }}>
+                        No hay productos disponibles para asociar.
+                    </Typography>
+                )}
+
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={5}>
-                        <ProductSelect
-                            control={control} // Ajusta este prop según la implementación de ProductSelect
+                        <Controller
                             name="producto"
-                            disabled={loading}
-                            onChange={handleSelectProduct}
-                            placeholder="Producto"
-                            isOutput={false}
+                            control={control}
+                            rules={{ required: "Debe seleccionar un producto" }}
+                            render={({ field, fieldState }) => (
+                                <FormControl
+                                    fullWidth
+                                    size="small"
+                                    error={!!fieldState.error}
+                                    disabled={loading || !hasProducts}
+                                >
+                                    <InputLabel>Producto</InputLabel>
+                                    <Select
+                                        {...field}
+                                        label="Producto"
+                                        value={field.value || ""}
+                                    >
+                                        {detalles?.map((product) => (
+                                            <MenuItem key={product.id} value={product.id}>
+                                                {product.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {fieldState.error && (
+                                        <FormHelperText>{fieldState.error.message}</FormHelperText>
+                                    )}
+                                </FormControl>
+                            )}
                         />
                     </Grid>
                     <Grid item xs={12} md={3}>
@@ -204,7 +242,10 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
                             size="small"
                             type="number"
                             disabled={loading || !selectedProduct}
-                            {...register("cantidad", { required: "Cantidad es requerida", valueAsNumber: true })}
+                            {...register("cantidad", {
+                                required: "Cantidad es requerida",
+                                valueAsNumber: true,
+                            })}
                             error={Boolean(errors.cantidad)}
                             helperText={errors.cantidad?.message}
                         />
@@ -215,13 +256,19 @@ const ClaimProducts: React.FC<ClaimProductsProps> = ({
                             label="Lote"
                             variant="outlined"
                             size="small"
+                            disabled={loading || !selectedProduct}
                             {...register("lote", { required: "Lote es requerido" })}
                             error={Boolean(errors.lote)}
                             helperText={errors.lote?.message}
                         />
                     </Grid>
                 </Grid>
-                <Button type="submit" variant="outlined" sx={{ mt: 2 }} disabled={loading}>
+                <Button
+                    type="submit"
+                    variant="outlined"
+                    sx={{ mt: 2 }}
+                    disabled={loading || !selectedProduct}
+                >
                     {editingIndex !== null ? "Actualizar Producto" : "Agregar Producto"}{" "}
                     {loading && <CircularProgress size={20} />}
                 </Button>

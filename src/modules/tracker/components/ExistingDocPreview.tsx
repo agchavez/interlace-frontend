@@ -6,6 +6,10 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";
 import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+
+import LaunchIcon from '@mui/icons-material/Launch';
+
 
 interface ExistingDocPreviewProps {
   name: string;
@@ -28,7 +32,7 @@ export const ExistingDocPreview: React.FC<ExistingDocPreviewProps> = ({
 }) => {
   const [showImage, setShowImage] = useState<string | null>(null);
   const [showPDF, setShowPDF] = useState<string | null>(null);
-
+  const [isDeleted, setisDeleted] = useState(false)
   const lowerExt = extension?.toLowerCase() || "";
   const isImage = ["jpg","jpeg","png","gif","webp"].includes(lowerExt);
   const isPDF = lowerExt === "pdf";
@@ -39,6 +43,7 @@ export const ExistingDocPreview: React.FC<ExistingDocPreviewProps> = ({
   };
 
   return (
+    <Box display="flex" flexDirection="column" alignItems="center">
     <Box
       sx={{
         position: "relative",
@@ -105,7 +110,11 @@ export const ExistingDocPreview: React.FC<ExistingDocPreviewProps> = ({
             position: "absolute",
             top: 4,
             left: 4,
-            backgroundColor: "rgba(255,255,255,0.7)"
+            backgroundColor: "rgba(255,255,255,0.7)",
+            "&:hover": {
+              backgroundColor: "rgba(255,255,255,0.9)",
+              color: "secondary.main"
+            }
           }}
           onClick={() => {
             if (isImage) setShowImage(url);
@@ -124,41 +133,59 @@ export const ExistingDocPreview: React.FC<ExistingDocPreviewProps> = ({
             position: "absolute",
             top: 4,
             right: 4,
-            backgroundColor: "rgba(255,255,255,0.7)"
+            backgroundColor: "rgba(255,255,255,0.7)",
+            // hover background color
+            "&:hover": {
+              backgroundColor: "rgba(255,255,255,0.9)",
+              color: "red"
+            }
           }}
-          onClick={onRemove}
+          onClick={() => {
+            onRemove();
+            setisDeleted(!isDeleted);
+          }
+          }
         >
-          <DeleteIcon fontSize="small" />
+          { !isDeleted ?<DeleteIcon fontSize="small" /> : <RotateLeftIcon fontSize="small" />}
         </IconButton>
       )}
 
       {/* Botón Descargar (abajo der) */}
       {showDownload && (
-        <Button
+        <IconButton
           size="small"
-          variant="outlined"
           sx={{
             position: "absolute",
             bottom: 4,
             right: 4,
-            backgroundColor: "rgba(255,255,255,0.7)"
+            backgroundColor: "rgba(255,255,255,0.7)",
+            "&:hover": {
+              backgroundColor: "rgba(255,255,255,0.9)",
+              color: "secondary.main"
+            }
           }}
           onClick={handleDownload}
         >
-          Ver
-        </Button>
+          <LaunchIcon fontSize="small" />
+        </IconButton>
       )}
 
       {/* Modales de preview */}
       {showImage && (
         <ImagePreviewModal
-          image={showImage}
-          onClose={() => setShowImage(null)}
+        image={showImage}
+        onClose={() => setShowImage(null)}
         />
       )}
       {showPDF && (
         <PDFPreviewModal file={showPDF} onClose={() => setShowPDF(null)} />
       )}
+      
     </Box>
+    <Typography variant="caption" sx={{ textAlign: "center", mt: 1 }} color="error">
+    {isDeleted && "Se eliminará" }
+  </Typography>
+        </Box>
+    
   );
 };

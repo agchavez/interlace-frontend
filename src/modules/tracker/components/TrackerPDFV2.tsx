@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Document, Page, View, StyleSheet, Image } from "@react-pdf/renderer";
 import PDFText from "../../ui/components/pdfDocs/PDFText";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
@@ -21,6 +21,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import Box from "@mui/material/Box";
+import logo_ch from "../../../assets/logo-ch.png";
+import QRToBase64 from "../../claim/components/QRToBase64";
 
 const styles = StyleSheet.create({
   page: {
@@ -28,7 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: "0.5cm",
   },
-  section: { paddingVertical: 11 },
+  section: { paddingVertical: 5 },
   title: {
     textAlign: "center",
     fontSize: 20,
@@ -82,6 +84,7 @@ interface TrakerPDFDocumentProps {
   driver?: Driver;
   op1?: Operator;
   op2?: Operator;
+  qrDataUrl?: string;
   outputLocation?: LocationType;
   imageBase64_1?: string | null;
   imageBase64_2?: string | null;
@@ -96,6 +99,7 @@ function TrakerPDFDocument({
   outputLocation,
   imageBase64_1,
   imageBase64_2,
+  qrDataUrl,
 }: TrakerPDFDocumentProps) {
   const entradaTableData = seguimiento.detalles
     .map((det) => {
@@ -142,6 +146,13 @@ function TrakerPDFDocument({
     : null;
 
 
+  const flagurl = useMemo(() => {
+      const country_code = seguimiento?.country_code.toLowerCase();
+      return `https://flagcdn.com/h240/${country_code}.png`;
+    }, [seguimiento?.country_code]);
+
+
+
   // Verificar si hay archivos de imagen
   const hasImages = seguimiento.file_data_1 || seguimiento.file_data_2;
 
@@ -174,14 +185,49 @@ function TrakerPDFDocument({
       keywords="Tracker, AbinBev, PDF, Seguimiento"
     >
       <Page size="LETTER" style={styles.page}>
-        <View style={{ ...styles.section }}>
-          <Image src="/logo.png" style={{ width: 200 }} />
+        <View
+          style={{ ...styles.section, display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ flex: 1, alignItems: "flex-start" }}>
+            <Image src="/logo.png" style={{ width: 180 }} />
+          </View>
+          
+          {seguimiento?.country_code === "HN" && (
+            <View style={{ flex: 1, alignItems: "flex-end" }}>
+              <Image src={logo_ch} style={{ width: 130 }} />
+            </View>
+          )}
         </View>
         <View style={{ ...styles.divider }} />
-        <View style={{ ...styles.section, backgroundColor: "#1c2536" }}>
-          <PDFTitle style={{ color: "white", fontSize: 30 }}>
-            TRK-{seguimiento.id?.toString().padStart(5, "0")}
-          </PDFTitle>
+        
+        <View
+          style={{
+            ...styles.section,
+            backgroundColor: "#1c2536",
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          <View style={{ marginLeft: 10 }}>
+            <Image
+              src={flagurl}
+              style={{ width: 100 }}
+            />
+          </View>
+          <View
+            style={{
+              flex: 1,
+              paddingLeft: -30,
+              alignContent: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PDFTitle style={{ color: "white", fontSize: 30 }}>
+              TRK-{seguimiento.id?.toString().padStart(5, "0")}
+            </PDFTitle>
+          </View>
+          <View style={{ marginLeft: 10, marginRight: 10, borderRadius: 7 }}>
+            <Image src={qrDataUrl||''} style={{ width: 50, borderRadius: 7 }} />
+          </View>
         </View>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={{ ...styles.section, flex: 1 }}>
@@ -479,7 +525,7 @@ function TrakerPDFDocument({
                   {seguimiento.type === "IMPORT" ? "Documentos de Importación" : "Documentos adjuntos"}
                 </PDFTitle>
                 <View style={{ ...styles.divider, marginBottom: 20 }} />
-                
+
                 <View style={styles.imageItem}>
                   <PDFText style={{ ...styles.imageCaption, fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
                     {getDocumentName(1)}
@@ -492,13 +538,13 @@ function TrakerPDFDocument({
               </View>
             </Page>
           )}
-          
+
           {file2IsImage && seguimiento.file_data_2 && (
             <Page size="LETTER" style={styles.page}>
               <View style={{ ...styles.section, marginBottom: 10 }}>
-                
+
                 <View style={{ ...styles.divider, marginBottom: 20 }} />
-                
+
                 <View style={styles.imageItem}>
                   <PDFText style={{ ...styles.imageCaption, fontSize: 12, fontWeight: 'bold', marginBottom: 10 }}>
                     {getDocumentName(2)}
@@ -540,7 +586,7 @@ const PDFDownloader = ({
       // Usar XMLHttpRequest para mayor compatibilidad
       return new Promise((resolve) => {
         const xhr = new XMLHttpRequest();
-        xhr.onload = function() {
+        xhr.onload = function () {
           if (xhr.status === 200) {
             const blob = new Blob([xhr.response]);
             const reader = new FileReader();
@@ -573,52 +619,52 @@ const PDFDownloader = ({
     const loadImages = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // Verificar si hay imágenes para cargar
-        const file1IsImage = seguimiento.file_data_1 && 
+        const file1IsImage = seguimiento.file_data_1 &&
           ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
             (seguimiento.file_data_1.extension || '').toLowerCase()
           );
-        
-        const file2IsImage = seguimiento.file_data_2 && 
+
+        const file2IsImage = seguimiento.file_data_2 &&
           ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(
             (seguimiento.file_data_2.extension || '').toLowerCase()
           );
-        
+
         // Cargar imágenes en paralelo
         const promises = [];
-        
+
         if (file1IsImage && seguimiento.file_data_1?.access_url) {
           promises.push(
             convertImageToBase64(seguimiento.file_data_1.access_url)
               .then(base64 => setImageBase64_1(base64))
           );
         }
-        
+
         if (file2IsImage && seguimiento.file_data_2?.access_url) {
           promises.push(
             convertImageToBase64(seguimiento.file_data_2.access_url)
               .then(base64 => setImageBase64_2(base64))
           );
         }
-        
+
         // Si no hay imágenes, simplemente finalizamos la carga
         if (promises.length === 0) {
           setIsLoading(false);
           return;
         }
-        
+
         // Esperar a que todas las imágenes se carguen (con un timeout máximo)
-        const timeoutPromise = new Promise((_, reject) => 
+        const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error("Tiempo de carga excedido")), 15000)
         );
-        
+
         await Promise.race([
           Promise.all(promises),
           timeoutPromise
         ]);
-        
+
         setIsLoading(false);
       } catch (error) {
         console.error("Error al cargar imágenes:", error);
@@ -626,12 +672,16 @@ const PDFDownloader = ({
         setIsLoading(false);
       }
     };
-    
+
     loadImages();
   }, [seguimiento]);
 
+
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+
   return (
     <Box>
+      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
       {isLoading ? (
         <Button
           startIcon={<CircularProgress size={20} />}
@@ -660,6 +710,7 @@ const PDFDownloader = ({
               outputLocation={outputLocation}
               imageBase64_1={imageBase64_1}
               imageBase64_2={imageBase64_2}
+              qrDataUrl={qrDataUrl || undefined}
             />
           }
           fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}.pdf`}
@@ -667,19 +718,19 @@ const PDFDownloader = ({
         >
           {({ loading }) => (
             <Button
-              startIcon={loading ? <CircularProgress size={20} /> : <PictureAsPdfTwoToneIcon/>}
+              startIcon={loading ? <CircularProgress size={20} /> : <PictureAsPdfTwoToneIcon />}
               variant="outlined"
               color="secondary"
               disabled={loading}
               size="small"
-              
+
             >
               {loading ? "Generando PDF..." : "Descargar PDF"}
             </Button>
           )}
         </PDFDownloadLink>
       )}
-      
+
       {error && (
         <Typography variant="caption" color="error" sx={{ display: 'block', mt: 1 }}>
           {error}

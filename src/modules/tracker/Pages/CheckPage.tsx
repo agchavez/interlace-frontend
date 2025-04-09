@@ -142,6 +142,7 @@ export const CheckPage = () => {
                   open={claimOpen}
                   onClose={() => setClaimOpen(false)}
                   claimId={seguimientos[seguimeintoActual || 0].claim!}
+                  seguimiento={seguimientos[seguimeintoActual || 0]}
               />
           ) : (
               <ClaimModal
@@ -149,6 +150,7 @@ export const CheckPage = () => {
                   open={claimOpen}
                   onClose={() => setClaimOpen(false)}
                   type={seguimientos[seguimeintoActual || 0].type}
+                  seguimiento={seguimientos[seguimeintoActual || 0]}
               />
           )
       )}

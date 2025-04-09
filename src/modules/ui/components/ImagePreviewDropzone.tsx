@@ -23,7 +23,6 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
     const [type, settype] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
     
     const onDrop = (acceptedFiles: File[]) => {
-        console.log(acceptedFiles);
         if (files.length + acceptedFiles.length > maxFiles) {
             toast.error(`No puedes subir más de ${maxFiles} archivos.`);
             return;

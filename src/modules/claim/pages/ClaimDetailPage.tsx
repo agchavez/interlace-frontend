@@ -49,6 +49,7 @@ import ClaimEditModal from "../../tracker/components/ClaimEditModal";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import { useAppSelector } from "../../../store";
 import QRToBase64 from "../components/QRToBase64";
+import { parseTrackerSeguimiento } from "../../../store/seguimiento/trackerThunk";
 
 const claimStatuses = [
   { value: "PENDIENTE", label: "Pendiente" },
@@ -96,11 +97,12 @@ export default function ClaimDetailPage({
   return (
     <>
       <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
-      <ClaimEditModal
+     {claim && <ClaimEditModal
           open={claimOpen}
           onClose={() => setClaimOpen(false)}
           claimId={claim?.id || 0}
-      />
+          seguimiento={parseTrackerSeguimiento(claim.tracking)}
+      />}
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
         <Grid item xs={12} md={showEditButton? 10: 11}>
           <Typography

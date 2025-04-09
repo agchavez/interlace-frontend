@@ -780,6 +780,7 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
   const seguimiento: Seguimiento = {
     id: tracker.id,
     claim: tracker.claim,
+    country_code: tracker.distributor_center_data.country_code,
     user: tracker.user,
     rastra: tracker.tariler_data,
     distributorCenter: tracker.distributor_center,

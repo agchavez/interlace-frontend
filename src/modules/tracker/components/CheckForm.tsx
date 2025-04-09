@@ -246,6 +246,7 @@ export const CheckForm = ({
         open={openArchivoModal}
         tracker={seguimiento}
         onClose={() => setOpenArchivoModal(false)}
+        disable={disable}
       />
       {openOrderModal && (
         <SelectOrderTrackerModal
@@ -710,7 +711,7 @@ export const CheckForm = ({
             {/* Botón de acción flotante */}
             <IconButton
               onClick={() => setOpenArchivoModal(true)}
-              disabled={disable}
+              
               sx={{
                 position: 'absolute',
                 top: -15,
@@ -725,7 +726,7 @@ export const CheckForm = ({
                 height: 40
               }}
             >
-              <CloudUploadTwoToneIcon color={disable ? "disabled" : "primary"} />
+              <CloudUploadTwoToneIcon color={"primary"} />
             </IconButton>
 
             {/* Contenido de la tarjeta */}
@@ -785,51 +786,6 @@ export const CheckForm = ({
                       />
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
-
-                      {/* <PDFDownloadLink
-                        fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
-                        document={
-                          <TrakerPDFDocument
-                            seguimiento={seguimiento}
-                            outputTypeData={outputTypeData}
-                            driver={dataDriver?.results[0]}
-                            op1={
-                              seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
-                                ? dataOp1?.results[0]
-                                : undefined
-                            }
-                            op2={
-                              seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
-                                ? dataOp2?.results[0]
-                                : undefined
-                            }
-                            outputLocation={dataOutputLocation?.results[0]}
-                          />
-                        }
-                      >
-                        {({ loading: pdfLoading }) => {
-                          const loading =
-                            pdfLoading ||
-                            loadingDriver ||
-                            loadingOP1 ||
-                            loadingOP2 ||
-                            loadingOutputData;
-                          return (
-                            <IconButton
-                              color="secondary"
-                              disabled={loading}
-                              sx={{
-                                backgroundColor: (theme) => theme.palette.grey[100],
-                                '&:hover': {
-                                  backgroundColor: (theme) => theme.palette.grey[200]
-                                }
-                              }}
-                            >
-                              <PictureAsPdfTwoToneIcon />
-                            </IconButton>
-                          );
-                        }}
-                      </PDFDownloadLink> */}
                       <PDFDownloader
                         seguimiento={seguimiento}
                         outputTypeData={outputTypeData}
@@ -852,7 +808,7 @@ export const CheckForm = ({
                     <Typography variant="body2" color="text.secondary" align="center" sx={{ fontWeight: 500 }}>
                       No hay documentos cargados
                     </Typography>
-                    <Button
+                    {!disable && <Button
                       variant="outlined"
                       size="small"
                       color="primary"
@@ -866,7 +822,21 @@ export const CheckForm = ({
                       }}
                     >
                       Cargar documento
-                    </Button>
+                    </Button>}
+                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 0 }}>
+                      <PDFDownloader
+                        seguimiento={seguimiento}
+                        outputTypeData={outputTypeData}
+                        driver={dataDriver?.results[0]}
+                        op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp1?.results[0]
+                          : undefined}
+                        op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp2?.results[0]
+                          : undefined}
+                        outputLocation={dataOutputLocation?.results[0]}
+                      />
+                    </Box>
                   </>
                 )}
               </Box>

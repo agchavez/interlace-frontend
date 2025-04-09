@@ -9,7 +9,8 @@ import {
     Box,
     Grid,
     DialogContent,
-    TextField
+    TextField,
+    CircularProgress
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { styled } from "@mui/material/styles";
@@ -23,11 +24,14 @@ import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
 import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
 import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
+import { Seguimiento, setClaimByTrackerId } from "../../../store/seguimiento/seguimientoSlice.ts";
+import { useAppDispatch } from "../../../store/store.ts";
 
 export interface FormData {
     tipo: number;
     claimFile: File | null;
     creditMemoFile: File | null;
+    production_batch_file: File | null;
     discardDoc: string;
     observations: string;
     observationsFile: File | null;
@@ -58,13 +62,16 @@ interface ClaimModalProps {
     onClose: () => void;
     tracker: number;
     type: 'LOCAL' | 'IMPORT';
+    seguimiento: Seguimiento;
 }
 
-export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }) => {
+export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, seguimiento }) => {
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabChange = (_event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
     };
+
+    const dispatch = useAppDispatch();
 
     const { register, handleSubmit, control, setValue, watch, reset, formState: { errors } } = useForm<FormData>({
         defaultValues: {
@@ -112,16 +119,16 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
             formData.append("description", data.observations);
 
             // Se recorre el arreglo de productos para incluirlos
-            products.forEach((item, index) => {
-                formData.append(`products[${index}][product]`, item.product);
-                formData.append(`products[${index}][quantity]`, item.quantity.toString());
-                formData.append(`products[${index}][batch]`, item.batch);
-            });
+            formData.append("products", JSON.stringify(products.map((product) => ({
+                product: product.product,
+                quantity: product.quantity,
+                batch: product.batch
+            }))));
 
             if (data.claimFile) formData.append("claim_file", data.claimFile);
             if (data.creditMemoFile) formData.append("credit_memo_file", data.creditMemoFile);
             if (data.observationsFile) formData.append("observations_file", data.observationsFile);
-
+            if (data.production_batch_file) formData.append("production_batch_file", data.production_batch_file);
             data.photos_container_closed.forEach((file) => {
                 formData.append("photos_container_closed", file);
             });
@@ -155,9 +162,8 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
             data.photos_repalletized.forEach((file) => {
                 formData.append("photos_repalletized", file);
             });
-
-            console.log(formData)
-            await createClaim(formData).unwrap();
+            const calim = await createClaim(formData).unwrap();
+            dispatch(setClaimByTrackerId({ id: tracker, claim: calim.id }));
             toast.success("Registro de reclamo", {
                 description: "Reclamo registrado exitosamente"
             });
@@ -240,6 +246,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
                         onAddProduct={addProduct}
                         onEditProduct={editProduct}
                         onDeleteProduct={deleteProduct}
+                        detalles={seguimiento.detalles}
                     />
                 </div>
             </DialogContent>
@@ -251,6 +258,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
                         reset();
                         setProducts([]);
                     }}
+                    disabled={isLoading}
                     startIcon={<CleaningServicesTwoToneIcon />} // Puedes agregar el icono CleaningServicesIcon aquí si lo deseas
                     // Puedes agregar el icono CleaningServicesIcon aquí si lo deseas
                     color="primary"
@@ -261,7 +269,9 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type }
                     variant="contained" 
                     type="submit" 
                     color="secondary"
-                    startIcon={<BookmarkAddTwoToneIcon />} 
+                    startIcon={
+                    isLoading ? <CircularProgress size={20} /> :
+                    <BookmarkAddTwoToneIcon />} 
                     onClick={handleSubmit(onSubmit)} 
                     disabled={isLoading}>
                     Guardar Reclamo

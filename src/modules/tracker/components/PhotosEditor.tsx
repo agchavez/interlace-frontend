@@ -19,6 +19,7 @@ interface PhotosEditorProps {
   watch: UseFormWatch<EditFormData>;
   setValue: UseFormSetValue<EditFormData>;
   gridProps?: any;
+  disableDropzone?: boolean; // Prop para deshabilitar el dropzone
 }
 
 export const PhotosEditor: React.FC<PhotosEditorProps> = ({
@@ -27,7 +28,8 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
   existingDocs,
   watch,
   setValue,
-  gridProps
+  gridProps,
+  disableDropzone
 }) => {
   const addField = `${categoryKey}_add` as keyof EditFormData;
   const removeField = `${categoryKey}_remove` as keyof EditFormData;
@@ -37,14 +39,17 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
     const currentRemove = (watch(removeField) as number[]) || [];
     if (!currentRemove.includes(docId)) {
       setValue(removeField, [...currentRemove, docId]);
+    }else{
+      // eliminar el id del array
+      const newRemove = currentRemove.filter((id) => id !== docId);
+      setValue(removeField, newRemove);
     }
   };
 
   return (
-    <Grid item {...(gridProps || { xs: 12, md: 6 })}>
+    <Grid item {...(gridProps || { xs: 12 })}>
       <Box
         sx={{
-          minHeight: 300,
           border: "1px solid #ddd",
           borderRadius: 1,
           p: 2,
@@ -54,14 +59,10 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
         }}
       >
         <Box>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-            {label}
-          </Typography>
-
           {/* Documentos existentes */}
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 0 }}>
             {existingDocs.length === 0 ? (
-              <PlaceholderDocPreview boxWidth={130} boxHeight={150} />
+              <PlaceholderDocPreview boxWidth={150} boxHeight={180} />
             ) : (
               existingDocs.map((doc) => (
                 <ExistingDocPreview
@@ -69,9 +70,9 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
                   name={doc.name}
                   url={doc.access_url}
                   extension={doc.extension}
-                  onRemove={() => handleRemoveExistingDoc(doc.id)}
-                  boxWidth={130}
-                  boxHeight={150}
+                  onRemove={!disableDropzone ? () => handleRemoveExistingDoc(doc.id) : undefined}
+                  boxWidth={150}
+                  boxHeight={180}
                   showDownload={true} // Muestra botón "Ver"
                 />
               ))
@@ -80,8 +81,8 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
         </Box>
 
         {/* Dropzone abajo */}
-        <Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
+        {!disableDropzone && <Box>
+          <Typography variant="body2" sx={{ mb: 1, mt: 2 }}>
             Agregar archivos
           </Typography>
           <ImagePreviewDropzone
@@ -92,7 +93,7 @@ export const PhotosEditor: React.FC<PhotosEditorProps> = ({
             maxFiles={5}
             sxDrop={{ height: 100 }}
           />
-        </Box>
+        </Box>}
       </Box>
     </Grid>
   );

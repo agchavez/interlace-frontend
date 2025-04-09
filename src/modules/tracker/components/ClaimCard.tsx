@@ -11,75 +11,93 @@ import {
     Paper,
     IconButton,
     Collapse,
-    Tooltip
+    Avatar,
+    alpha,
+    Stack,
+    ButtonBase
 } from "@mui/material";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import {
-    KeyboardArrowDown, KeyboardArrowUp, Description
+    KeyboardArrowDown,
+    KeyboardArrowUp,
+    Description,
+    AccessTime,
+    Person,
+    Notes,
+    CheckCircleOutlined,
+    ErrorOutlined,
+    HourglassEmptyOutlined
 } from "@mui/icons-material";
 
 import { Claim } from "../../../store/claim/claimApi";
-import {format} from "date-fns";
+import { format } from "date-fns";
 import { ClaimTypeChipWrapper } from "../../ui/components/ClaimTypeChip";
 
 const StyledCard = styled(Card)(({ theme }) => ({
-    borderRadius: theme.spacing(1),
-    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+    borderRadius: theme.shape.borderRadius * 2,
+    boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
     marginBottom: theme.spacing(2),
-    overflow: "visible"
+    overflow: "visible",
+    border: `2px dashed ${alpha(theme.palette.divider, 0.3)}`,
+    transition: 'all 0.2s ease',
+    backgroundImage: 'linear-gradient(to right bottom, #ffffff, #fbfbfc)',
+    '&:hover': {
+        boxShadow: '0 10px 28px rgba(0,0,0,0.08)',
+        transform: 'translateY(-2px)'
+    }
 }));
 
-const StatusChip = styled(Chip)(({ status }: { status: string }) => {
-    const colorMap: Record<string, string> = {
-        "PENDIENTE": "#FFA726",
-        "EN_REVISION": "#2196F3",
-        "RECHAZADO": "#F44336",
-        "APROBADO": "#66BB6A"
-    };
+const StatusChip = styled(Chip, {
+    shouldForwardProp: (prop) => prop !== 'statusColor',
+})(({ theme, statusColor }: { theme?: any, statusColor: string }) => ({
+    backgroundColor: alpha(statusColor, 0.12),
+    color: statusColor,
+    fontWeight: 600,
+    height: 28,
+    border: `1px solid ${alpha(statusColor, 0.2)}`,
+    '& .MuiChip-label': {
+        padding: '0 10px',
+    }
+}));
 
-    return {
-        backgroundColor: colorMap[status] || "#9E9E9E",
-        color: "white",
-        fontWeight: 600,
-        height: 28
-    };
-});
-
-const ClaimTypeChip = styled(Chip)(({ claimType }: { theme: any, claimType: string }) => {
-    const colorMap: Record<string, string> = {
-        "FALTANTE": "#E57373",
-        "SOBRANTE": "#81C784",
-        "DAÑOS_CALIDAD_TRANSPORTE": "#64B5F6"
-    };
-
-    return {
-        backgroundColor: colorMap[claimType] || "#9E9E9E",
-        color: "white",
-        height: 28
-    };
-});
+const StatusAvatar = styled(Avatar, {
+    shouldForwardProp: (prop) => prop !== 'statusColor',
+})(({ statusColor }: { statusColor: string }) => ({
+    backgroundColor: alpha(statusColor, 0.12),
+    color: statusColor,
+    width: 56,
+    height: 56
+}));
 
 interface ClaimCardProps {
     claim: Claim;
 }
 
-const getStatusLabel = (status: string): string => {
-    const statusMap: Record<string, string> = {
-        "PENDIENTE": "Pendiente",
-        "EN_REVISION": "En Revisión",
-        "RECHAZADO": "Rechazado",
-        "APROBADO": "Aprobado"
+const getStatusInfo = (status: string): { label: string, color: string, icon: JSX.Element } => {
+    const statusMap: Record<string, { label: string, color: string, icon: JSX.Element }> = {
+        "PENDIENTE": { 
+            label: "Pendiente", 
+            color: "#F9A825", 
+            icon: <HourglassEmptyOutlined sx={{ fontSize: 30 }} /> 
+        },
+        "EN_REVISION": { 
+            label: "En Revisión", 
+            color: "#1E88E5", 
+            icon: <HourglassEmptyOutlined sx={{ fontSize: 30 }} /> 
+        },
+        "RECHAZADO": { 
+            label: "Rechazado", 
+            color: "#E53935", 
+            icon: <ErrorOutlined sx={{ fontSize: 30 }} /> 
+        },
+        "APROBADO": { 
+            label: "Aprobado", 
+            color: "#43A047", 
+            icon: <CheckCircleOutlined sx={{ fontSize: 30 }} /> 
+        }
     };
-    return statusMap[status] || status;
-};
-
-const getClaimTypeLabel = (type: string): string => {
-    const typeMap: Record<string, string> = {
-        "FALTANTE": "Faltante",
-        "SOBRANTE": "Sobrante",
-        "DAÑOS_CALIDAD_TRANSPORTE": "Daños por Calidad/Transporte"
-    };
-    return typeMap[type] || type;
+    
+    return statusMap[status] || { label: status, color: "#9E9E9E", icon: <HourglassEmptyOutlined sx={{ fontSize: 30 }} /> };
 };
 
 const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
@@ -88,119 +106,243 @@ const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
         setExpanded(!expanded);
     };
 
+    const statusInfo = getStatusInfo(claim.status);
+    const isApproved = claim.status === "APROBADO";
+
     return (
         <StyledCard>
-            {/* Cabecera con información principal */}
-            <CardContent sx={{ pb: 1 }}>
-                <Grid container spacing={2} alignItems="flex-start">
-                    <Grid item xs={12} md={7}>
-                        <Box display="flex" alignItems="center" mb={1}>
-                            
-                            <Box>
-                                <Typography variant="h6" component="div">
-                                    Reclamo Tracker TRK-{claim.tracker}
-                                </Typography>
-                                <Box display="flex" gap={1} mt={0.5}>
-                                <ClaimTypeChipWrapper
-                                            claimTypeId={claim.claim_type}
-                                            size="small"
-                                        />
-                                    <StatusChip
-                                        status={claim.status}
-                                        label={getStatusLabel(claim.status)}
-                                        size="small"
-                                    />
-                                        <Chip
-                                            icon={<Description fontSize="small" />}
-                                            label={`TRK-${claim.tracker}`}
-                                            size="small"
-                                            variant="outlined"
-                                        />
-                                    
-                                </Box>
-                            </Box>
-                        </Box>
-
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            <strong>Descripción:</strong> {claim.description || "Sin descripción"}
-                        </Typography>
-
-                        <Box mt={1}>
-                            <Typography variant="body2" color="text.secondary">
-                                <strong>Creado:</strong> {format(new Date(claim.created_at), "dd/MM/yyyy HH:mm")}
-                            </Typography>
-                        </Box>
-                        <Box mt={1}>
-                            <Typography variant="body2" color="text.secondary">
-                                <strong>Asignado:</strong> {claim.assigned_to || "Sin asignar"}
-                            </Typography>
-                        </Box>
+            <CardContent sx={{ py: 3, px: 3 }}>
+                {/* Top Section with Status */}
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item>
+                        <StatusAvatar statusColor={statusInfo.color}>
+                            {statusInfo.icon}
+                        </StatusAvatar>
                     </Grid>
 
-                    {/* Sección de información de estado */}
-                    <Grid item xs={12} md={5}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2,
-                                backgroundColor: claim.status === 'RECHAZADO'
-                                    ? 'rgba(244, 67, 54, 0.08)'
-                                    : claim.status === 'APROBADO'
-                                        ? 'rgba(102, 187, 106, 0.08)'
-                                        : 'rgba(33, 150, 243, 0.08)',
-                                borderRadius: 1
-                            }}
-                        >
-                            <Typography variant="subtitle2" gutterBottom>
-                                Estado del Reclamo
+                    <Grid item xs>
+                        {/* Main Info */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                            <Typography variant="h6" component="h2" sx={{ 
+                                fontWeight: 600, 
+                                color: '#37474F',
+                                letterSpacing: '-0.02em',
+                            }}>
+                                Reclamo ID {claim.id}
+                                <Box 
+                                    component="span" 
+                                    sx={{ 
+                                        ml: 1, 
+                                        fontSize: '0.9rem',
+                                        opacity: 0.7,
+                                        fontWeight: 400,
+                                    }}
+                                >
+                                    (TRK-{claim.tracker})
+                                </Box>
                             </Typography>
+                            
+                            <StatusChip 
+                                statusColor={statusInfo.color}
+                                label={statusInfo.label}
+                                size="small"
+                            />
+                        </Box>
 
-                            <Typography variant="body2" paragraph sx={{ mb: 1 }}>
-                                {claim.status === 'PENDIENTE' && "El reclamo está pendiente de revisión"}
-                                {claim.status === 'EN_REVISION' && "El reclamo está siendo revisado actualmente"}
-                                {claim.status === 'RECHAZADO' && "El reclamo ha sido rechazado"}
-                                {claim.status === 'APROBADO' && "El reclamo ha sido aprobado"}
+                        {/* Tag Group */}
+                        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                            <ClaimTypeChipWrapper
+                                claimTypeId={claim.claim_type}
+                                size="small"
+                            />
+                            {claim.claim_number && (
+                                <Chip
+                                    label={`Reclamo: ${claim.claim_number}`}
+                                    size="small"
+                                    variant="outlined"
+                                    sx={{ borderColor: alpha('#000', 0.1) }}
+                                />
+                            )}
+                        </Stack>
+
+                        {/* Creation Date */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
+                            <Typography variant="caption" color="text.secondary">
+                                Creado el {format(new Date(claim.created_at), "dd/MM/yyyy")} a las {format(new Date(claim.created_at), "HH:mm")}
                             </Typography>
-
-                            {claim.assigned_to && (
-                                <Typography variant="body2" color="text.secondary">
-                                    <strong>Asignado a:</strong> ID: {claim.assigned_to}
-                                </Typography>
-                            )}
-
-                            {claim.observations && (
-                                <Tooltip title="Ver observaciones completas">
-                                    <IconButton
-                                        onClick={handleExpandClick}
-                                        aria-expanded={expanded}
-                                        aria-label="mostrar observaciones"
-                                        size="small"
-                                        sx={{ ml: 'auto', display: 'block' }}
-                                    >
-                                        {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                                    </IconButton>
-                                </Tooltip>
-                            )}
-                        </Paper>
+                        </Box>
                     </Grid>
                 </Grid>
 
-                {/* Observaciones expandibles */}
+                {/* Description Section - Shows conditionally */}
                 {claim.observations && (
-                    <Collapse in={expanded} timeout="auto" unmountOnExit>
-                        <Box mt={2} mb={1} p={2} bgcolor="rgba(0,0,0,0.02)" borderRadius={1}>
-                            <Typography variant="subtitle2" gutterBottom>
-                                Observaciones del Revisor
+                    <Box sx={{ mt: 3, mb: 2 }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom sx={{ fontWeight: 500 }}>
+                            Observaciones
+                        </Typography>
+                        <Paper 
+                            variant="outlined" 
+                            sx={{ 
+                                p: 2.5,
+                                borderColor: alpha('#000', 0.08),
+                                borderRadius: 2,
+                                boxShadow: `inset 0 0 20px ${alpha('#f0f0f0', 0.8)}`,
+                                bgcolor: alpha('#f9f9f9', 0.4)
+                            }}
+                        >
+                            <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                    color: '#424242',
+                                    lineHeight: 1.7,
+                                    letterSpacing: '0.01em',
+                                }}
+                            >
+                                "{claim.observations}"
                             </Typography>
-                            <Typography variant="body2">
-                                {claim.observations}
-                            </Typography>
-                        </Box>
-                    </Collapse>
+                        </Paper>
+                    </Box>
                 )}
-            </CardContent>
 
-            <Divider />
+                {/* Status Info Cards Section */}
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                    {/* Asignado a... */}
+                    {claim.assigned_to_name && (
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Box sx={{ 
+                                p: 2, 
+                                height: '100%',
+                                borderLeft: `3px solid ${alpha('#607D8B', 0.6)}`,
+                                bgcolor: alpha('#607D8B', 0.04),
+                                borderRadius: '0 8px 8px 0',
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <Person fontSize="small" color="action" />
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Responsable
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {claim.assigned_to_name}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    )}
+
+                    {/* Info de Aprobación: Número de Claim */}
+                    {isApproved && claim.claim_number && (
+                        <Grid item xs={12} sm={6} md={6} lg={4}>
+                            <Box sx={(theme) => ({  
+                                p: 2,
+                                height: '100%', 
+                                borderLeft: `3px solid ${alpha('#1c2536', 0.6)}`,
+                                bgcolor: alpha(theme.palette.secondary.main, 0.04),
+                                borderRadius: '0 8px 8px 0'
+                            })}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <CheckCircleOutlined sx={{ color: 'secondary.main' }} />
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Número de Claim
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight={500} color="secondary.dark">
+                                            {claim.claim_number}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    )}
+
+                    {/* Info de Aprobación: Documento de Descarte */}
+                    {isApproved && claim.discard_doc && (
+                        <Grid item xs={12} sm={6} md={6} lg={4}>
+                            <Box sx={(theme) => ({ 
+                                p: 2,
+                                height: '100%', 
+                                borderLeft: `3px solid ${alpha('#1c2536', 0.6)}`,
+                                bgcolor: alpha(theme.palette.secondary.main, 0.04),
+                                borderRadius: '0 8px 8px 0'
+                            })}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <Description sx={{ color: 'secondary.main' }} />
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Doc. Descarte
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight={500} color="secondary.dark">
+                                            {claim.discard_doc}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    )}
+
+                    {/* Motivo de rechazo */}
+                    {claim.reject_reason && (
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Box sx={{ 
+                                p: 2,
+                                height: '100%', 
+                                borderLeft: `3px solid ${alpha('#F44336', 0.6)}`,
+                                bgcolor: alpha('#F44336', 0.04),
+                                borderRadius: '0 8px 8px 0'
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                    <ErrorOutlined sx={{ color: alpha('#F44336', 0.7) }} />
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Motivo de rechazo
+                                        </Typography>
+                                        <Typography variant="body2" fontWeight={500} color="error.dark">
+                                            {claim.reject_reason}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    )}
+
+                    {/* Observaciones de aprobación */}
+                    {claim.approve_observations && (
+                        <Grid item xs={12} md={6} lg={4}>
+                            <Box sx={{ 
+                                p: 2, 
+                                borderLeft: `3px solid ${alpha('#4CAF50', 0.6)}`,
+                                bgcolor: alpha('#4CAF50', 0.04),
+                                borderRadius: '0 8px 8px 0'
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                                    <CheckCircleOutlined sx={{ 
+                                        color: alpha('#4CAF50', 0.7),
+                                        mt: 0.5 
+                                    }} />
+                                    <Box>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Observaciones de aprobación
+                                        </Typography>
+                                        <Typography 
+                                            variant="body2" 
+                                            sx={{ 
+                                                color: '#1B5E20', 
+                                                whiteSpace: 'pre-line',
+                                                mt: 0.5
+                                            }}
+                                        >
+                                            {claim.approve_observations}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Grid>
+                    )}
+                </Grid>
+
+            </CardContent>
         </StyledCard>
     );
 };

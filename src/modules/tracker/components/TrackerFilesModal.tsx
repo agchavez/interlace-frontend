@@ -15,6 +15,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import DownloadIcon from "@mui/icons-material/Download";
 import CheckCircleTwoToneIcon from '@mui/icons-material/CheckCircleTwoTone';
 import ImageTwoToneIcon from '@mui/icons-material/ImageTwoTone';
 import ReceiptTwoToneIcon from '@mui/icons-material/ReceiptTwoTone';
@@ -25,18 +26,20 @@ import { toast } from "sonner";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
 import { useUploadFileMutation } from "../../../store/seguimiento/trackerApi";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
+import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
 
 
 interface TrackerFilesModalProps {
   open: boolean;
   onClose: () => void;
   tracker: Seguimiento;
+  disable: boolean;
 }
-
 const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
   open,
   onClose,
-  tracker
+  tracker,
+  disable,
 }) => {
   const theme = useTheme();
   const [uploadFile, { isLoading: isUpdating }] = useUploadFileMutation();
@@ -49,8 +52,14 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
   const [newFile2, setNewFile2] = useState<File | null>(null);
   const [deleteFile2, setDeleteFile2] = useState(false);
   
-  // Estado para preview de imágenes
+  // Estado para preview de imágenes y PDF
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewPDF, setPreviewPDF] = useState<string | null>(null);
+
+  // Determina si el archivo es un PDF
+  const isPDF = (fileName: string) => {
+    return fileName.toLowerCase().endsWith('.pdf');
+  };
 
   useEffect(() => {
     if (open) {
@@ -60,6 +69,7 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
       setNewFile2(null);
       setDeleteFile2(false);
       setPreviewImage(null);
+      setPreviewPDF(null);
     }
   }, [open]);
 
@@ -84,16 +94,86 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
         <AssignmentTurnedInTwoToneIcon color="primary" /> : 
         <ReceiptTwoToneIcon color="primary" />;
     } else {
-      return <ImageTwoToneIcon color="primary" />;
+      const fileData = docNum === 1 ? tracker.file_data_1 : tracker.file_data_2;
+      if (!fileData) return <ImageTwoToneIcon color="primary" />;
+      
+      const fileName = fileData.name.toLowerCase();
+      
+      if (fileName.endsWith('.pdf')) {
+        return <ReceiptTwoToneIcon color="primary" />;
+      } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+        return <AssignmentTurnedInTwoToneIcon color="primary" />;
+      } else {
+        return <ImageTwoToneIcon color="primary" />;
+      }
     }
   };
 
-  // Componente para previsualizar una imagen existente
-  const ImagePreview: React.FC<{
+  // Manejar descarga de archivos sin redireccionar
+  const handleDownloadFile = (url: string, fileName: string) => {
+    try {
+      fetch(url)
+        .then(response => response.blob())
+        .then(blob => {
+          const blobUrl = window.URL.createObjectURL(blob);
+          const element = document.createElement('a');
+          element.href = blobUrl;
+          element.download = fileName.split('/').pop() || 'archivo';
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          
+          window.URL.revokeObjectURL(blobUrl);
+          document.body.removeChild(element);
+          toast.success(`Descargando ${fileName.split('/').pop()}`);
+        })
+        .catch(error => {
+          console.error("Error al descargar con fetch:", error);
+          fallbackDownload(url, fileName);
+        });
+    } catch (error) {
+      console.error("Error al descargar archivo:", error);
+      fallbackDownload(url, fileName);
+    }
+  };
+
+  // Método alternativo de descarga como fallback
+  const fallbackDownload = (url: string, fileName: string) => {
+    try {
+      const element = document.createElement('a');
+      element.href = url;
+      element.download = fileName.split('/').pop() || 'archivo';
+      element.target = '_blank';
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      toast.success(`Descargando ${fileName.split('/').pop()}`);
+    } catch (error) {
+      console.error("Error en fallback de descarga:", error);
+      toast.error("No se pudo descargar el archivo");
+    }
+  };
+
+  // Función para previsualizar un archivo
+  const handlePreviewFile = (url: string, fileName: string) => {
+    if (isPDF(fileName)) {
+      setPreviewPDF(url);
+    } else {
+      setPreviewImage(url);
+    }
+  };
+
+  // Componente para previsualizar un archivo (imagen u otro tipo)
+  const FilePreview: React.FC<{
     url: string;
     name: string;
     onRemove?: () => void;
   }> = ({ url, name, onRemove }) => {
+    const fileName = name.split('/').pop() || '';
+    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName);
+    const isPDFFile = isPDF(fileName);
+    
     return (
       <Box
         sx={{
@@ -112,49 +192,101 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
           boxShadow: `0 4px 12px ${theme.palette.primary.light}20`,
         }}
       >
-        <Box
-          sx={{
-            width: '100%',
-            height: '70%',
-            position: 'relative',
-            cursor: 'pointer',
-            mb: 1,
-            '&:hover .zoom-icon': {
-              opacity: 1,
-            }
-          }}
-          onClick={() => setPreviewImage(url)}
-        >
-          <img
-            src={url}
-            alt={name}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              borderRadius: 4
-            }}
-          />
+        {isImage ? (
           <Box
-            className="zoom-icon"
             sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0,0,0,0.5)',
+              width: '100%',
+              height: '70%',
+              position: 'relative',
+              cursor: 'pointer',
+              mb: 1,
+              '&:hover .zoom-icon': {
+                opacity: 1,
+              }
+            }}
+            onClick={() => handlePreviewFile(url, fileName)}
+          >
+            <img
+              src={url}
+              alt={fileName}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 4
+              }}
+            />
+            <Box
+              className="zoom-icon"
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0,
+                transition: 'opacity 0.2s',
+                borderRadius: 4
+              }}
+            >
+              <ZoomInIcon sx={{ color: 'white', fontSize: 28 }} />
+            </Box>
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              width: '100%',
+              height: '70%',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              opacity: 0,
-              transition: 'opacity 0.2s',
-              borderRadius: 4
+              mb: 1,
+              backgroundColor: theme.palette.grey[100],
+              borderRadius: 1,
+              cursor: 'pointer',
             }}
+            onClick={() => handlePreviewFile(url, fileName)}
           >
-            <ZoomInIcon sx={{ color: 'white', fontSize: 28 }} />
+            {isPDFFile ? (
+              <ReceiptTwoToneIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+            ) : fileName.endsWith('.doc') || fileName.endsWith('.docx') ? (
+              <AssignmentTurnedInTwoToneIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+            ) : (
+              <ImageTwoToneIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+            )}
+            <Typography variant="caption" sx={{ mt: 1, color: theme.palette.text.secondary }}>
+              {fileName.split('.').pop()?.toUpperCase()}
+            </Typography>
+            
+            <Box
+              className="zoom-icon"
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                opacity: 0,
+                transition: 'opacity 0.2s',
+                borderRadius: 1,
+                '&:hover': {
+                  opacity: 1,
+                }
+              }}
+            >
+              <ZoomInIcon sx={{ color: 'white', fontSize: 28 }} />
+            </Box>
           </Box>
-        </Box>
+        )}
         
         <Typography
           variant="caption"
@@ -168,10 +300,10 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
             width: '100%'
           }}
         >
-          {name.split('/').pop()}
+          {fileName}
         </Typography>
         
-        {onRemove && (
+        {!disable && onRemove && (
           <IconButton
             size="small"
             sx={{
@@ -186,6 +318,24 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
             onClick={onRemove}
           >
             <DeleteIcon fontSize="small" color="error" />
+          </IconButton>
+        )}
+        
+        {disable && (
+          <IconButton
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              backgroundColor: theme.palette.background.paper,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.light+'20',
+              }
+            }}
+            onClick={() => handleDownloadFile(url, name)}
+          >
+            <DownloadIcon fontSize="small" color="primary" />
           </IconButton>
         )}
       </Box>
@@ -236,10 +386,10 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
             borderBottomRightRadius: 6
           }}
         >
-          Nueva
+          Nuevo
         </Box>
         
-        {previewUrl && (
+        {previewUrl && !isPDF(file.name) ? (
           <Box
             sx={{
               width: '100%',
@@ -260,6 +410,31 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                 borderRadius: 4
               }}
             />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              width: '100%',
+              height: '70%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 1,
+              backgroundColor: theme.palette.grey[100],
+              borderRadius: 1,
+            }}
+          >
+            {isPDF(file.name) ? (
+              <ReceiptTwoToneIcon sx={{ fontSize: 40, color: theme.palette.success.main }} />
+            ) : file.name.endsWith('.doc') || file.name.endsWith('.docx') ? (
+              <AssignmentTurnedInTwoToneIcon sx={{ fontSize: 40, color: theme.palette.success.main }} />
+            ) : (
+              <ImageTwoToneIcon sx={{ fontSize: 40, color: theme.palette.success.main }} />
+            )}
+            <Typography variant="caption" sx={{ mt: 1, color: theme.palette.text.secondary }}>
+              {file.name.split('.').pop()?.toUpperCase()}
+            </Typography>
           </Box>
         )}
         
@@ -327,7 +502,7 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
         >
           {isImported ? 
             (docNum === 1 ? "Sin Gate Pass" : "Sin Factura") : 
-            "Sin imagen"}
+            "Sin documento"}
         </Typography>
       </Box>
     );
@@ -389,23 +564,25 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
 
   // Manejadores de inputs (selección de archivo)
   const handleSelectFile1 = (file: File | null) => {
-    if (!file) return;
+    if (disable || !file) return;
     setNewFile1(file);
     setDeleteFile1(false);
   };
   
   const handleRemoveFile1 = () => {
+    if (disable) return;
     setDeleteFile1(true);
     setNewFile1(null);
   };
 
   const handleSelectFile2 = (file: File | null) => {
-    if (!file) return;
+    if (disable || !file) return;
     setNewFile2(file);
     setDeleteFile2(false);
   };
   
   const handleRemoveFile2 = () => {
+    if (disable) return;
     setDeleteFile2(true);
     setNewFile2(null);
   };
@@ -432,7 +609,7 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
       }
 
       await uploadFile({ trackerId: tracker.id, formData: fd }).unwrap();
-      toast.success("Fotografías actualizadas correctamente");
+      toast.success(isImported ? "Fotografías actualizadas correctamente" : "Documentos actualizados correctamente");
       onClose();
     } catch (err) {
       console.error(err);
@@ -468,9 +645,15 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
         
         <DialogContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 500 }}>
-            {isImported 
-              ? "Gestione las fotografías de Gate Pass y Factura para este tracker de importación."
-              : "Utilice esta sección para subir, ver o eliminar documentos asociados a este tracker."}
+            {disable ? (
+              isImported 
+                ? "Visualización de fotografías de Gate Pass y Factura para este tracker de importación." 
+                : "Visualización de documentos asociados a este tracker."
+            ) : (
+              isImported 
+                ? "Gestione las fotografías de Gate Pass y Factura para este tracker de importación."
+                : "Utilice esta sección para subir, ver o eliminar documentos asociados a este tracker."
+            )}
           </Typography>
           
           <Grid container spacing={3}>
@@ -510,19 +693,18 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                   </Typography>
                   
                   <Box sx={{ display: "flex", justifyContent: 'center', mb: 2, minHeight: 150 }}>
-                    {/* Si hay una nueva selección */}
-                    {newFile1 ? (
+                    {!disable && newFile1 ? (
                       <NewImagePreview file={newFile1} onRemove={() => setNewFile1(null)} />
-                    ) : deleteFile1 && tracker.file_data_1 ? (
+                    ) : !disable && deleteFile1 && tracker.file_data_1 ? (
                       <DeletedImagePlaceholder 
                         name={tracker.file_data_1.name} 
                         onCancel={() => setDeleteFile1(false)} 
                       />
                     ) : tracker.file_data_1 ? (
-                      <ImagePreview 
+                      <FilePreview 
                         url={tracker.file_data_1.access_url} 
                         name={tracker.file_data_1.name}
-                        onRemove={handleRemoveFile1}
+                        onRemove={!disable ? handleRemoveFile1 : undefined}
                       />
                     ) : (
                       <EmptyImagePlaceholder docNum={1} />
@@ -530,22 +712,28 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                   </Box>
                 </Box>
                 
-                {/* Dropzone para agregar */}
-                {!deleteFile1 && !newFile1 && (
+                {!disable && !deleteFile1 && !newFile1 && (
                   <Box sx={{ mt: 2 }}>
                     <ImagePreviewDropzone
                       files={[]}
                       onFilesChange={(files) => handleSelectFile1(files[0] || null)}
-                      label="Seleccionar una fotografía"
-                      accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }}
+                      label="Seleccionar un documento"
+                      accept={isImported ? 
+                        { 'image/*': ['.jpg', '.jpeg', '.png'] } : 
+                        {
+                          'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+                          'application/pdf': ['.pdf'],
+                          'application/msword': ['.doc'],
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                        }
+                      }
                       maxFiles={1}
                       sxDrop={{ height: 80 }}
                     />
                   </Box>
                 )}
                 
-                {/* Mensaje de estado */}
-                {(newFile1 || deleteFile1) && (
+                {!disable && (newFile1 || deleteFile1) && (
                   <Box 
                     sx={{ 
                       display: 'flex', 
@@ -562,23 +750,41 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                       <>
                         <DeleteIcon fontSize="small" color="error" />
                         <Typography variant="body2" color="error.main">
-                          La fotografía será eliminada al guardar
+                          El archivo será eliminado al guardar
                         </Typography>
                       </>
                     ) : (
                       <>
                         <CheckCircleTwoToneIcon fontSize="small" color="success" />
                         <Typography variant="body2" color="success.main">
-                          Nueva fotografía lista para subir
+                          Nuevo documento listo para subir
                         </Typography>
                       </>
                     )}
                   </Box>
                 )}
+                
+                {disable && tracker.file_data_1 && (
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      mt: 'auto', 
+                      pt: 2, 
+                      borderTop: '1px solid',
+                      borderColor: theme.palette.divider
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Haga clic para previsualizar o use el botón de descarga.
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             </Grid>
             
-            {/* Documento 2 */}
+            {/* Documento 2 - Solo para importación */}
             {isImported && <Grid item xs={12} md={6}>
               <Box
                 sx={{
@@ -614,19 +820,18 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                   </Typography>
                   
                   <Box sx={{ display: "flex", justifyContent: 'center', mb: 2, minHeight: 150 }}>
-                    {/* Si hay una nueva selección */}
-                    {newFile2 ? (
+                    {!disable && newFile2 ? (
                       <NewImagePreview file={newFile2} onRemove={() => setNewFile2(null)} />
-                    ) : deleteFile2 && tracker.file_data_2 ? (
+                    ) : !disable && deleteFile2 && tracker.file_data_2 ? (
                       <DeletedImagePlaceholder 
                         name={tracker.file_data_2.name} 
                         onCancel={() => setDeleteFile2(false)} 
                       />
                     ) : tracker.file_data_2 ? (
-                      <ImagePreview 
+                      <FilePreview 
                         url={tracker.file_data_2.access_url} 
                         name={tracker.file_data_2.name}
-                        onRemove={handleRemoveFile2}
+                        onRemove={!disable ? handleRemoveFile2 : undefined}
                       />
                     ) : (
                       <EmptyImagePlaceholder docNum={2} />
@@ -634,22 +839,28 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                   </Box>
                 </Box>
                 
-                {/* Dropzone para agregar */}
-                {!deleteFile2 && !newFile2 && (
+                {!disable && !deleteFile2 && !newFile2 && (
                   <Box sx={{ mt: 2 }}>
                     <ImagePreviewDropzone
                       files={[]}
                       onFilesChange={(files) => handleSelectFile2(files[0] || null)}
-                      label="Seleccionar una fotografía"
-                      accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }}
+                      label="Seleccionar un documento"
+                      accept={isImported ? 
+                        { 'image/*': ['.jpg', '.jpeg', '.png'] } : 
+                        {
+                          'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
+                          'application/pdf': ['.pdf'],
+                          'application/msword': ['.doc'],
+                          'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                        }
+                      }
                       maxFiles={1}
                       sxDrop={{ height: 80 }}
                     />
                   </Box>
                 )}
                 
-                {/* Mensaje de estado */}
-                {(newFile2 || deleteFile2) && (
+                {!disable && (newFile2 || deleteFile2) && (
                   <Box 
                     sx={{ 
                       display: 'flex', 
@@ -666,25 +877,42 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                       <>
                         <DeleteIcon fontSize="small" color="error" />
                         <Typography variant="body2" color="error.main">
-                          La fotografía será eliminada al guardar
+                          El archivo será eliminado al guardar
                         </Typography>
                       </>
                     ) : (
                       <>
                         <CheckCircleTwoToneIcon fontSize="small" color="success" />
                         <Typography variant="body2" color="success.main">
-                          Nueva fotografía lista para subir
+                          Nuevo documento listo para subir
                         </Typography>
                       </>
                     )}
+                  </Box>
+                )}
+                
+                {disable && tracker.file_data_2 && (
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      mt: 'auto', 
+                      pt: 2, 
+                      borderTop: '1px solid',
+                      borderColor: theme.palette.divider
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Haga clic para previsualizar o use el botón de descarga.
+                    </Typography>
                   </Box>
                 )}
               </Box>
             </Grid>}
           </Grid>
           
-          {/* Resumen de cambios */}
-          {(newFile1 || deleteFile1 || newFile2 || deleteFile2) && (
+          {!disable && (newFile1 || deleteFile1 || newFile2 || deleteFile2) && (
             <Box 
               sx={{ 
                 mt: 3, 
@@ -701,22 +929,22 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
               <Box component="ul" sx={{ pl: 2 }}>
                 {newFile1 && (
                   <Typography component="li" variant="body2">
-                    Se agregará una nueva fotografía para {getDocumentLabel(1)}: <b>{newFile1.name}</b>
+                    Se agregará un nuevo documento para {getDocumentLabel(1)}: <b>{newFile1.name}</b>
                   </Typography>
                 )}
                 {deleteFile1 && tracker.file_data_1 && (
                   <Typography component="li" variant="body2" color="error.main">
-                    Se eliminará la fotografía de {getDocumentLabel(1)}: <b>{tracker.file_data_1.name}</b>
+                    Se eliminará el documento de {getDocumentLabel(1)}: <b>{tracker.file_data_1.name}</b>
                   </Typography>
                 )}
                 {newFile2 && (
                   <Typography component="li" variant="body2">
-                    Se agregará una nueva fotografía para {getDocumentLabel(2)}: <b>{newFile2.name}</b>
+                    Se agregará un nuevo documento para {getDocumentLabel(2)}: <b>{newFile2.name}</b>
                   </Typography>
                 )}
                 {deleteFile2 && tracker.file_data_2 && (
                   <Typography component="li" variant="body2" color="error.main">
-                    Se eliminará la fotografía de {getDocumentLabel(2)}: <b>{tracker.file_data_2.name}</b>
+                    Se eliminará el documento de {getDocumentLabel(2)}: <b>{tracker.file_data_2.name}</b>
                   </Typography>
                 )}
               </Box>
@@ -727,29 +955,30 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
         <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: theme.palette.divider }}>
           <Button 
             onClick={onClose} 
-            color="inherit" 
-            
+            color="inherit"
           >
-            Cancelar
+            {disable ? "Cerrar" : "Cancelar"}
           </Button>
-          <Button 
-            variant="contained" 
-            onClick={handleSave} 
-            disabled={isUpdating || (
+          
+          {!disable && (
+            <Button 
+              variant="contained" 
+              onClick={handleSave} 
+              disabled={isUpdating || (
                 !newFile1 && 
                 !deleteFile1 && 
                 !newFile2 && 
                 !deleteFile2
               )}
-            
-            startIcon={isUpdating ? <CircularProgress size={20} /> : null}
+              startIcon={isUpdating ? <CircularProgress size={20} /> : null}
             >
-            {isUpdating ? "Actualizando..." : "Guardar Cambios"}
+              {isUpdating ? "Actualizando..." : "Guardar Cambios"}
             </Button>
+          )}
         </DialogActions>
       </Dialog>
       
-      {/* Modal de vista previa de imagen */}
+      {/* Modal de vista previa de imágenes */}
       {previewImage && (
         <Dialog 
           open={!!previewImage} 
@@ -761,15 +990,33 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
             justifyContent: 'space-between', 
             alignItems: 'center' 
           }}>
-            <Typography variant="h6">Vista previa</Typography>
-            <IconButton onClick={() => setPreviewImage(null)}>
-              <CloseIcon />
-            </IconButton>
+            <Typography variant="h6">Vista previa de imagen</Typography>
+            <Box>
+              <IconButton 
+                onClick={() => {
+                  let fileName = "";
+                  if (tracker.file_data_1 && tracker.file_data_1.access_url === previewImage) {
+                    fileName = tracker.file_data_1.name;
+                  } else if (tracker.file_data_2 && tracker.file_data_2.access_url === previewImage) {
+                    fileName = tracker.file_data_2.name;
+                  }
+                  if (fileName) {
+                    handleDownloadFile(previewImage, fileName);
+                  }
+                }}
+                sx={{ mr: 1 }}
+              >
+                <DownloadIcon />
+              </IconButton>
+              <IconButton onClick={() => setPreviewImage(null)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
           </DialogTitle>
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
             <img 
               src={previewImage} 
-              alt="Preview" 
+              alt="Vista previa" 
               style={{ 
                 width: '100%', 
                 maxHeight: '80vh', 
@@ -778,6 +1025,14 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
             />
           </DialogContent>
         </Dialog>
+      )}
+      
+      {/* Modal de vista previa de PDF usando PDFPreviewModal */}
+      {previewPDF && (
+        <PDFPreviewModal
+          file={previewPDF}
+          onClose={() => setPreviewPDF(null)}
+        />
       )}
     </>
   );

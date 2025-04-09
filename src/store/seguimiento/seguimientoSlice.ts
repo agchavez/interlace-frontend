@@ -92,6 +92,7 @@ export interface Seguimiento {
     user: number,
     rastra: TarilerData,
     transporter: TransporterData,
+    country_code: string;
     userName?: string;
     distributorCenter: number;
     distributorCenterName: string;
@@ -320,6 +321,14 @@ export const seguimientoSlice = createSlice({
                 state.seguimientos[index] = action.payload
             }
         },
+        setClaimByTrackerId: (state, action: PayloadAction<{ id: number, claim: number | null }>) => {
+            const { id, claim } = action.payload
+            const index = state.seguimientos.findIndex((seguimiento) => seguimiento.id === id)
+            
+            if (index !== -1) {
+                state.seguimientos[index].claim = claim
+            }
+        }
     }
 })
 
@@ -346,5 +355,6 @@ export const {
     setLoadingT2TrackingDetail,
     removeSeguimientoT2,
     orderingT2Selected,
-    updateSeguimientoById
+    updateSeguimientoById,
+    setClaimByTrackerId
 } = seguimientoSlice.actions;

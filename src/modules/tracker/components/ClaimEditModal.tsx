@@ -29,6 +29,7 @@ import {
 } from "../../../store/claim/claimApi";
 import ClaimCard from "./ClaimCard.tsx";
 import { SaveAltOutlined } from "@mui/icons-material";
+import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice.ts";
 
 export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": {
@@ -43,9 +44,10 @@ interface ClaimEditModalProps {
     open: boolean;
     onClose: () => void;
     claimId: number; // Reclamo a editar
+    seguimiento: Seguimiento
 }
 
-const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => {
+const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, seguimiento }) => {
     // 1) Cargar reclamo
     const { data: claimData, isLoading } = useGetClaimByIdQuery(claimId, {
         skip: !open
@@ -114,7 +116,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
                 product: cp.product,
                 productName: cp.product_name,
                 quantity: cp.quantity,
-                batch: "" // Ajusta a tu BD
+                batch: cp.batch,
             })) || [];
             setProducts(loaded);
         }
@@ -138,7 +140,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
           if (data.claimFile) fd.append("claim_file", data.claimFile);
           if (data.creditMemoFile) fd.append("credit_memo_file", data.creditMemoFile);
           if (data.observationsFile) fd.append("observations_file", data.observationsFile);
-      
+          if (data.production_batch_file) fd.append("production_batch_file", data.production_batch_file);
           // Listado de categorías
           const categories = [
             "photos_container_closed",
@@ -255,13 +257,15 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
                 <div role="tabpanel" hidden={tabIndex !== 1}>
                     <ClaimEditProducts
                         products={products}
+                        disable={claimData.status === "APROBADO" || claimData.status === "RECHAZADO"}
                         setProducts={setProducts}
+                        detalles={seguimiento.detalles || []}
                     />
                 </div>
             </DialogContent>
 
             <Divider />
-            <DialogActions>
+           { !(claimData.status === "APROBADO" || claimData.status === "RECHAZADO") && <DialogActions>
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%" p={0}>
 
                 <Box>
@@ -282,7 +286,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId }) => 
                 </Button>
                         </Box>
                     </Box>
-            </DialogActions>
+            </DialogActions>}
         </BootstrapDialog>
     );
 };

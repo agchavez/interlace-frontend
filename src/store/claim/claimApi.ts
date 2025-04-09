@@ -20,6 +20,7 @@ export interface Claim {
   id: number;
   tracker: number;
   assigned_to: number | null;
+  assigned_to_name: string | null;
   claim_type: number;
   description: string;
   status: "PENDIENTE" | "EN_REVISION" | "RECHAZADO" | "APROBADO";
@@ -29,6 +30,7 @@ export interface Claim {
   claim_file?: ClaimFile;
   credit_memo_file?: ClaimFile;
   observations_file?: ClaimFile;
+  production_batch_file?: ClaimFile;
   photos_container_closed: DocumentFromClaim[];
   photos_container_one_open: DocumentFromClaim[];
   photos_container_two_open: DocumentFromClaim[];
@@ -43,7 +45,7 @@ export interface Claim {
   claim_products: ClaimProduct[];
   created_at: string;
   updated_at: string;
-  tracking?: Tracker;
+  tracking: Tracker;
   trailer: Trailer;
   transporter: Transporter;
   reject_reason: string|null;

@@ -41,7 +41,7 @@ export interface EditFormData {
     claimFile: File | null;
     creditMemoFile: File | null;
     observationsFile: File | null;
-
+    production_batch_file: File | null;
     photos_container_closed_add: File[];
     photos_container_closed_remove: number[];
     photos_container_one_open_add: File[];
@@ -88,6 +88,8 @@ const ClaimEditDocumentation: React.FC<Props> = ({
         return isLocal ? localText : importText;
     };
 
+    const disableDropzone = claimData.status === "RECHAZADO" || claimData.status === "APROBADO";
+
     return (
         <Box sx={{ mt: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -97,7 +99,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
             {/* Archivos principales en 3 columnas */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 {/* 1) Claim File */}
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
                             minHeight: 220,
@@ -124,9 +126,9 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                     name={claimData.claim_file.name}
                                     url={claimData.claim_file.access_url}
                                     extension={claimData.claim_file.extension}
-                                    onRemove={() => setValue("claimFile", null)}
                                     boxWidth={140}
                                     boxHeight={150}
+                                    
                                 />
                             ) : (
                                 <PlaceholderDocPreview
@@ -138,7 +140,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Box>
 
                         {/* Dropzone abajo */}
-                        <Box sx={{ mt: 1 }}>
+                        {/* {!disableDropzone && <Box sx={{ mt: 1 }}>
                             <ImagePreviewDropzone
                                 files={watch("claimFile") ? [watch("claimFile")!] : []}
                                 onFilesChange={(files) => setValue("claimFile", files[0] || null)}
@@ -148,14 +150,15 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                     "application/vnd.ms-excel": [".xls", ".xlsx"]
                                 }}
                                 maxFiles={1}
+                                
                                 sxDrop={{ height: 80 }}
                             />
-                        </Box>
+                        </Box>} */}
                     </Box>
                 </Grid>
 
                 {/* 2) Credit Memo */}
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
                             minHeight: 220,
@@ -181,7 +184,6 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                     name={claimData.credit_memo_file.name}
                                     url={claimData.credit_memo_file.access_url}
                                     extension={claimData.credit_memo_file.extension}
-                                    onRemove={() => setValue("creditMemoFile", null)}
                                     boxWidth={140}
                                     boxHeight={150}
                                 />
@@ -194,7 +196,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                             )}
                         </Box>
 
-                        <Box sx={{ mt: 1 }}>
+                        {/* {!disableDropzone && <Box sx={{ mt: 1 }}>
                             <ImagePreviewDropzone
                                 files={watch("creditMemoFile") ? [watch("creditMemoFile")!] : []}
                                 onFilesChange={(files) => setValue("creditMemoFile", files[0] || null)}
@@ -205,12 +207,12 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                 maxFiles={1}
                                 sxDrop={{ height: 80 }}
                             />
-                        </Box>
+                        </Box>} */}
                     </Box>
                 </Grid>
 
                 {/* 3) Observations File */}
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
                             minHeight: 220,
@@ -236,7 +238,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                     name={claimData.observations_file.name}
                                     url={claimData.observations_file.access_url}
                                     extension={claimData.observations_file.extension}
-                                    onRemove={() => setValue("observationsFile", null)}
+                                    onRemove={!disableDropzone? () => setValue("observationsFile", null) : undefined}
                                     boxWidth={140}
                                     boxHeight={150}
                                 />
@@ -249,7 +251,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                             )}
                         </Box>
 
-                        <Box sx={{ mt: 1 }}>
+                        {!disableDropzone && <Box sx={{ mt: 1 }}>
                             <ImagePreviewDropzone
                                 files={
                                     watch("observationsFile")
@@ -266,10 +268,70 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                                 maxFiles={1}
                                 sxDrop={{ height: 80 }}
                             />
-                        </Box>
+                        </Box>}
                     </Box>
                 </Grid>
-            </Grid>
+           
+            <Grid item xs={12} md={6}>
+                    <Box
+                        sx={{
+                            minHeight: 220,
+                            border: "1px solid #ddd",
+                            borderRadius: 1,
+                            p: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-between"
+                        }}
+                    >
+                        <Box>
+                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                                Lote de Producción
+                                <HtmlTooltip title="Documento con observaciones adicionales sobre el reclamo (PDF)">
+                                    <IconButton size="small" color="primary">
+                                        <Typography variant="body1">?</Typography>
+                                    </IconButton>
+                                </HtmlTooltip>
+                            </Typography>
+                            {claimData.production_batch_file ? (
+                                <ExistingDocPreview
+                                    name={claimData.production_batch_file.name}
+                                    url={claimData.production_batch_file.access_url}
+                                    extension={claimData.production_batch_file.extension}
+                                    onRemove={() => setValue("production_batch_file", null)}
+                                    boxWidth={140}
+                                    boxHeight={150}
+                                />
+                            ) : (
+                                <PlaceholderDocPreview
+                                    boxWidth={140}
+                                    boxHeight={150}
+                                    text="Sin Observaciones"
+                                />
+                            )}
+                        </Box>
+
+                        {!disableDropzone && <Box sx={{ mt: 1 }}>
+                            <ImagePreviewDropzone
+                                files={
+                                    watch("production_batch_file")
+                                        ? [watch("production_batch_file")!]
+                                        : []
+                                }
+                                onFilesChange={(files) =>
+                                    setValue("production_batch_file", files[0] || null)
+                                }
+                                label="Subir Lote de Producción (PDF)"
+                                accept={{
+                                    "application/pdf": [".pdf"]
+                                }}
+                                maxFiles={1}
+                                sxDrop={{ height: 80 }}
+                            />
+                        </Box>}
+                    </Box>
+                </Grid>
+                </Grid>
 
             {/* Sección de Fotos */}
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -285,7 +347,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Contenedor cerrado / Rastra cerrada */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             1. {getFieldLabel(
                                 "Contenedor cerrado", 
                                 "Rastra / Lona cerrada"
@@ -301,6 +363,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_container_closed"
                         label={getFieldLabel("Contenedor cerrado", "Rastra/Lona cerrada")}
                         existingDocs={claimData.photos_container_closed}
@@ -313,7 +376,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Contenedor con 1 puerta abierta / Rastra con Puerta abierta */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             2. {getFieldLabel(
                                 "Contenedor con 1 puerta abierta",
                                 "Rastra con Puerta / Lona abierta"
@@ -329,6 +392,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_container_one_open"
                         label={getFieldLabel(
                             "Contenedor con 1 puerta abierta", 
@@ -344,7 +408,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Contenedor con 2 puertas abiertas / Rastra completamente abierta */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             3. {getFieldLabel(
                                 "Contenedor con 2 puertas abiertas",
                                 "Rastra con todas las puertas / Lona completamente abierta"
@@ -360,6 +424,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_container_two_open"
                         label={getFieldLabel(
                             "Contenedor con 2 puertas abiertas", 
@@ -375,7 +440,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Vista superior del contenedor / rastra */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             4. {getFieldLabel(
                                 "Vista superior del contenido del contenedor",
                                 "Vista superior del contenido de la rastra / lona"
@@ -391,6 +456,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_container_top"
                         label={getFieldLabel(
                             "Vista superior del contenedor", 
@@ -406,7 +472,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Fotos durante la descarga - Esto no cambia mucho */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             5. Fotografía durante la descarga
                             <HtmlTooltip title={getFieldLabel(
                                 "Fotografía tomada durante la descarga del contenedor",
@@ -419,6 +485,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_during_unload"
                         label="Durante la descarga"
                         existingDocs={claimData.photos_during_unload}
@@ -429,7 +496,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             6. {getFieldLabel(
                                 "Fisuras/abolladuras de pallets",
                                 "Fisuras/abolladuras de pallets"
@@ -442,6 +509,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_pallet_damage"
                         label="Daños en pallets"
                         existingDocs={claimData.photos_pallet_damage}
@@ -461,7 +529,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 {/* Base de la lata/botella */}
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             a) Base de la lata/botella (fecha de vencimiento y lote)
                             <HtmlTooltip title="Fotografía de la base donde se vea la fecha de vencimiento y lote">
                                 <IconButton size="small" color="primary">
@@ -471,6 +539,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_damaged_product_base"
                         label="Base del producto"
                         existingDocs={claimData.photos_damaged_product_base}
@@ -480,7 +549,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             b) Abolladuras (mínimo 3 diferentes)
                             <HtmlTooltip title="Fotografías de abolladuras, se requieren al menos 3 imágenes">
                                 <IconButton size="small" color="primary">
@@ -490,6 +559,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_damaged_product_dents"
                         label="Abolladuras"
                         existingDocs={claimData.photos_damaged_product_dents}
@@ -500,7 +570,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
 
                    <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             c) Cajas dañadas por golpes o problemas de calidad
                             <HtmlTooltip title="Fotografía de cajas dañadas por golpes o problemas de calidad">
                                 <IconButton size="small" color="primary">
@@ -510,6 +580,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_damaged_boxes"
                         label="Cajas dañadas"
                         existingDocs={claimData.photos_damaged_boxes}
@@ -519,7 +590,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 </Grid> 
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             d) Producto en mal estado agrupado en 1 pallet
                             <HtmlTooltip title="Fotografía del producto en mal estado agrupado en un pallet aparte">
                                 <IconButton size="small" color="primary">
@@ -529,6 +600,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_grouped_bad_product"
                         label="Producto agrupado"
                         existingDocs={claimData.photos_grouped_bad_product}
@@ -538,7 +610,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                 </Grid>
                 <Grid item xs={12} md={6}>
                     <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                             e) Repaletizado por identificación de producto dañado
                             <HtmlTooltip title="Fotografías del repaletizado para identificar producto dañado">
                                 <IconButton size="small" color="primary">
@@ -548,6 +620,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Typography>
                     </Box>
                     <PhotosEditor
+                        disableDropzone={disableDropzone}
                         categoryKey="photos_repalletized"
                         label="Repaletizado"
                         existingDocs={claimData.photos_repalletized}
