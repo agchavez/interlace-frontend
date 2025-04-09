@@ -648,7 +648,7 @@ export default function ClaimDetailPage({
             />
             <FilesPreview
               files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
-              label="Memorandum de Credito (PDF)"
+              label="Memorandum (PDF)"
             />
             <FilesPreview
               files={claim?.observations_file ? [claim?.observations_file] : []}

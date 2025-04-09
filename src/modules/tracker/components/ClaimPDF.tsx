@@ -108,8 +108,8 @@ function ClaimPDF({
               </View>
             )
           }
-          <View style={{ flex: 0.5, textAlign: "right", color: "red" }}>
-            <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
+          <View style={{ flex: islocal? 1: 0.5, textAlign: "right", color: "red" }}>
+            <PDFTitle style={{ fontSize: islocal? 20: 30, textAlign: "right" }}>
               {
                 islocal ? "Alerta de Calidad" : "CLAIM"
               }

@@ -219,15 +219,15 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <ArchivosAdjuntos 
-              label={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"} 
+              label={islocal ? "Subir Memorandum(PDF)" : "Subir Nota de Crédito (PDF)"} 
               claim={claim} 
               setValue={setValue} 
               watch={watch} 
               fieldName="creditMemoFile"
               accept={{ "application/pdf": [".pdf"] }}
-              tooltipTitle={islocal ? "Documento de memorandum de credito" : "Documento de nota de crédito"}
-              dropZoneLabel={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"}
-              placeHolderText={islocal ? "Sin Memorandum de Credito" : "Sin Nota de Crédito"}
+              tooltipTitle={islocal ? "Documento de Memorandum" : "Documento de nota de crédito"}
+              dropZoneLabel={islocal ? "Subir Memorandum (PDF)" : "Subir Nota de Crédito (PDF)"}
+              placeHolderText={islocal ? "Sin Memorandum" : "Sin Nota de Crédito"}
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
