@@ -256,7 +256,7 @@ export default function ClaimDetailPage({
                       component="span"
                       fontWeight={400}
                     >
-                      Aprobar
+                      Finalizar
                     </Typography>
                   </Button>
                 )}
@@ -323,7 +323,9 @@ export default function ClaimDetailPage({
                     fontWeight={400}
                     color={"gray.500"}
                   >
-                    Numero de Reclamo
+                    {
+                      islocal ? "Numero de Memorandum" : "Número de Reclamo"
+                    }
                   </Typography>
                   <Divider />
                   <Typography
@@ -356,26 +358,29 @@ export default function ClaimDetailPage({
                 </Grid>
 
                 {/* Documento de Descarte */}
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    Documento de Descarte{" "}
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    {claim?.discard_doc}
-                  </Typography>
-                </Grid>
-
+                {
+                  !islocal && (
+                    <Grid item xs={6} md={6} lg={4} xl={3}>
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={400}
+                        color={"gray.500"}
+                      >
+                        Documento de Descarte{" "}
+                      </Typography>
+                      <Divider />
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={400}
+                        color={"gray.500"}
+                      >
+                        {claim?.discard_doc}
+                      </Typography>
+                    </Grid>
+                  )
+                }
                 {/* Estado del Reclamo */}
                 <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
@@ -384,7 +389,7 @@ export default function ClaimDetailPage({
                     fontWeight={400}
                     color={"gray.500"}
                   >
-                    Estado del Reclamo
+                    Estado
                   </Typography>
                   <Divider />
                   <Typography
@@ -654,6 +659,10 @@ export default function ClaimDetailPage({
               files={claim?.observations_file ? [claim?.observations_file] : []}
               label="Observaciones (PDF)"
             />
+            <FilesPreview
+              files={claim?.production_batch_file ? [claim?.production_batch_file] : []}
+              label="Lote de Producción"
+            />
           </Grid>
         </Grid>
         <Divider sx={{ my: 2 }} />
@@ -827,7 +836,7 @@ function FilesPreview({
   if (!files) return null;
 
   return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid item xs={12} md={3}>
       <Box
         sx={{
           borderBottom: `2px solid ${theme.palette.primary.main}`,
