@@ -114,7 +114,7 @@ function ClaimPDF({
                 islocal ? "Alerta de Calidad" : "CLAIM"
               }
             </PDFTitle>
-            <PDFText>Evidencia de Fotografía</PDFText>
+            <PDFText>Evidencia Fotográfica</PDFText>
           </View>
         </View>
         <View style={{ ...styles.divider }} />
