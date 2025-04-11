@@ -682,18 +682,17 @@ export default function ClaimDetailPage({
                   ? "Solicitud de Resolución (PDF/Excel)"
                   : "Archivo Claim (PDF/Excel)"
               }
+              colWidth={4}
             />
             <FilesPreview
               files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
               label="Memorandum (PDF)"
+              colWidth={4}
             />
             <FilesPreview
               files={claim?.observations_file ? [claim?.observations_file] : []}
               label="Observaciones (PDF)"
-            />
-            <FilesPreview
-              files={claim?.production_batch_file ? [claim?.production_batch_file] : []}
-              label="Lote de Producción"
+              colWidth={4}
             />
           </Grid>
         </Grid>
@@ -729,6 +728,10 @@ export default function ClaimDetailPage({
           files={claim?.photos_pallet_damage || []}
           label="Fisuras/abolladuras de pallets"
         />
+        <FilesPreview
+          files={claim?.photos_production_batch || []}
+          label="Lote de Producción"
+        />
         <>
           <Grid item container xs={12}>
             <Divider>
@@ -753,7 +756,6 @@ export default function ClaimDetailPage({
             files={claim?.photos_grouped_bad_product || []}
             label="Producto en mal estado agrupado en 1 pallet"
           />
-
           <FilesPreview
             files={claim?.photos_repalletized || []}
             label="Repaletizado por identificación de producto dañado"
@@ -788,9 +790,11 @@ export default function ClaimDetailPage({
 function FilesPreview({
   files,
   label,
+  colWidth = 3,
 }: {
   label: string;
   files?: ClaimFile[];
+  colWidth?: number;
 }) {
   const theme = useTheme(); // Añadir este hook
   const [selectedFile, setSelectedFile] = useState<ClaimFile | null>(null);
@@ -868,7 +872,7 @@ function FilesPreview({
   if (!files) return null;
 
   return (
-    <Grid item xs={12} md={3}>
+    <Grid item xs={12} md={colWidth}>
       <Box
         sx={{
           borderBottom: `2px solid ${theme.palette.primary.main}`,

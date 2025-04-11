@@ -312,7 +312,7 @@ export function ClaimReviewPage() {
                   created_at: claim.created_at,
                   distributor_center: claim.tracking?.distributor_center,
                   status: claim.status,
-                  tipo: claim.claim_type_data.name,
+                  tipo: claim.claim_type_data?.name,
                   reference_number: claim.tracking?.id?.toString(),
                   user_name: claim.tracking?.user_name,
                 })) || []

@@ -30,7 +30,6 @@ export interface Claim {
   claim_file?: ClaimFile;
   credit_memo_file?: ClaimFile;
   observations_file?: ClaimFile;
-  production_batch_file?: ClaimFile;
   photos_container_closed: DocumentFromClaim[];
   photos_container_one_open: DocumentFromClaim[];
   photos_container_two_open: DocumentFromClaim[];
@@ -42,6 +41,7 @@ export interface Claim {
   photos_damaged_boxes: DocumentFromClaim[];
   photos_grouped_bad_product: DocumentFromClaim[];
   photos_repalletized: DocumentFromClaim[];
+  photos_production_batch: DocumentFromClaim[];
   claim_products: ClaimProduct[];
   created_at: string;
   updated_at: string;

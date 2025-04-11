@@ -43,7 +43,6 @@ export interface FormDataFiles {
   claimFile: File | null;
   creditMemoFile: File | null;
   observationsFile: File | null;
-  productionBatchFile: File | null;
 }
 
 export interface FormDataAcceptClaim extends FormDataFiles {
@@ -67,7 +66,6 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
       claimFile: null,
       creditMemoFile: null,
       observationsFile: null,
-      productionBatchFile: null,
     },
   });
 
@@ -207,7 +205,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
         </Box>
         <Grid container spacing={1}>
           {/* Archivos adjuntos */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <ArchivosAdjuntos 
               label={islocal ? "Subir Solicitud de Resolución (PDF/Excel)" : "Subir archivo Claim (PDF/Excel)"} 
               claim={claim} 
@@ -223,7 +221,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
               placeHolderText={islocal ? "Sin Solicitud de Resolución" : "Sin Claim File"}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <ArchivosAdjuntos 
               label={islocal ? "Subir Memorandum(PDF)" : "Subir Nota de Crédito (PDF)"} 
               claim={claim} 
@@ -236,7 +234,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
               placeHolderText={islocal ? "Sin Memorandum" : "Sin Nota de Crédito"}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <ArchivosAdjuntos 
               label="Subir archivo de Observaciones (PDF)"
               claim={claim} 
@@ -247,19 +245,6 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
               tooltipTitle="Documento con observaciones adicionales sobre el reclamo (PDF)"
               dropZoneLabel="Subir Observaciones (PDF)"
               placeHolderText="Sin Observaciones"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <ArchivosAdjuntos 
-              label="Lote de Producción"
-              claim={claim} 
-              setValue={setValue} 
-              watch={watch} 
-              fieldName="observationsFile"
-              accept={{ "application/pdf": [".pdf"] }}
-              tooltipTitle="Lote de Producción"
-              dropZoneLabel="Subir Lote de Producción (PDF)"
-              placeHolderText="Sin Lote de Producción"
             />
           </Grid>
         </Grid>

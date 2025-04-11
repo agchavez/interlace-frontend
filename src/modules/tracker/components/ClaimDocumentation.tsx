@@ -229,6 +229,23 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue, type 
                             maxFiles={5}
                         />
                     </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Typography variant="body2">
+                            7. Lote de Producción
+                            <HtmlTooltip title="Lote de Producción">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                        <ImagePreviewDropzone
+                            files={[]}
+                            onFilesChange={(files: File[]) => setValue("photos_production_batch", files)}
+                            label="Subir fotos"
+                            accept={{ "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] }}
+                            maxFiles={5}
+                        />
+                    </Grid>
 
                 
                                                 <>

@@ -508,6 +508,35 @@ function ClaimPDF({
           </View>
         </Page>
       )}
+      {/* Production batch */}
+      {(claim?.photos_production_batch.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              {"Imágenes de lote de producción"}
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Lote de Producción:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_production_batch.map((photo) => {
+                  return (
+                    <Image
+                      key={photo.id}
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
       {/* Daños por Calidad y Transporte */}
       {/* Base de la lata/botella (fecha de vencimiento y lote) */}
       {(claim?.photos_damaged_product_base.length || 0) > 0 && (

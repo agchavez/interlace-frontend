@@ -95,6 +95,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
                 photos_damaged_boxes_remove: [],
                 photos_grouped_bad_product_remove: [],
                 photos_repalletized_remove: [],
+                photos_production_batch_remove: [],
 
                 // add arrays
                 photos_container_closed_add: [],
@@ -107,7 +108,8 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
                 photos_damaged_product_dents_add: [],
                 photos_damaged_boxes_add: [],
                 photos_grouped_bad_product_add: [],
-                photos_repalletized_add: []
+                photos_repalletized_add: [],
+                photos_production_batch_add: []
             });
 
             // Llenar products
@@ -149,6 +151,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
             "photos_container_top",
             "photos_during_unload",
             "photos_pallet_damage",
+            "photos_production_batch",
             "photos_damaged_product_base",
             "photos_damaged_product_dents",
             "photos_damaged_boxes",
