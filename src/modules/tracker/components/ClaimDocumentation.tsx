@@ -65,16 +65,7 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue, type 
                             maxFiles={1}
                         />
                     </Grid>
-                    {/* production_batch_file */}
-                    <Grid item xs={12} sm={6} md={6}>
-                        <ImagePreviewDropzone
-                            files={[]}
-                            onFilesChange={(files: File[]) => setValue("productionBatchFile", files[0] || null)}
-                            label="Subir archivo de Lotes de Producción (PDF)"
-                            accept={{ "application/pdf": [".pdf"] }}
-                            maxFiles={1}
-                        />
-                    </Grid>
+                    {/* observationsFile */}
                     <Grid item xs={12} sm={6} md={6}>
                         <ImagePreviewDropzone
                             files={[]}
