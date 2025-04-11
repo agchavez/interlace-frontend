@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { LocalShippingOutlined } from "@mui/icons-material";
 import PublicTwoToneIcon from "@mui/icons-material/PublicTwoTone";
 import ClaimsDataGrid from "../components/ClaimsDataGrid";
+import { Navigate } from "react-router-dom";
 
 function a11yProps(index: number) {
   return {
@@ -106,6 +107,20 @@ export function ClaimReviewPage() {
     }
     return dateFilterItems;
   }, [claimQueryParams, dispatch]);
+
+  const {canViewPage, enableImport, enableLocal} = useMemo(() => {
+    const resp = {canViewPage: false, enableImport: false, enableLocal: false};
+    if (!user) return resp;
+    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
+    if (!canViewClaimsPermission) return resp;
+    const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
+    const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
+    if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
+    return {canViewPage: true, enableImport: canChangeStatusClaimImport, enableLocal: canChangeStatusClaimLocal};
+  }, [user]);
+
+  if (!user) return null;
+  if (!canViewPage) return (<Navigate to="/" />);
 
   return (
     <>
@@ -267,18 +282,24 @@ export function ClaimReviewPage() {
                 onChange={handleTabChange}
                 aria-label="claim tabs"
               >
-                <Tab
-                  label="Reclamos Locales"
-                  {...a11yProps(0)}
-                  icon={<LocalShippingOutlined />}
-                  iconPosition="start"
-                />
-                <Tab
-                  label="Reclamos Importados"
-                  {...a11yProps(1)}
-                  icon={<PublicTwoToneIcon />}
-                  iconPosition="start"
-                />
+                {
+                  enableLocal && 
+                    <Tab
+                      label="Reclamos Locales"
+                      {...a11yProps(0)}
+                      icon={<LocalShippingOutlined />}
+                      iconPosition="start"
+                    />
+                }
+                {
+                  enableImport &&
+                    <Tab
+                      label="Reclamos Importados"
+                      {...a11yProps(1)}
+                      icon={<PublicTwoToneIcon />}
+                      iconPosition="start"
+                    />
+                }
               </Tabs>
             </Box>
           </Grid>

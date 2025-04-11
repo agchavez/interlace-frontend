@@ -19,8 +19,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
 import {
   Claim,
   ClaimFile,
@@ -94,6 +94,38 @@ export default function ClaimDetailPage({
 
   const showEditButton = canEditInfo && ["PENDIENTE", "EN_REVISION"].includes(claim?.status || "") && user?.centro_distribucion === claim?.tracking?.distributor_center;
 
+  const {canViewPage, canChangeStatus, canChangeInfo} = useMemo(() => {
+    const resp = {canViewPage: false, canChangeStatus: false, canChangeInfo: false};
+    if (!user) return resp;
+    if (!claim) return resp;
+    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
+    if (!canViewClaimsPermission) return resp;
+    // change status
+    let canChangeStatus = false;
+    if (canEditStatus) {
+      const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
+      const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
+      if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
+      if (islocal && !canChangeStatusClaimLocal) return resp;
+      if (!islocal && !canChangeStatusClaimImport) return resp;
+      if (islocal) {
+        canChangeStatus= canChangeStatusClaimLocal
+      } else {
+        canChangeStatus= canChangeStatusClaimImport;
+      }
+    }
+    // change info
+    let canChangeInfo = false;
+    if (canEditInfo) {
+      const canChangeInfoClaim = user.list_permissions.includes("imported.change_claimmodel");
+      canChangeInfo= canChangeInfoClaim;
+    }
+    return {canViewPage: true, canChangeStatus, canChangeInfo};
+  }, [canEditInfo, canEditStatus, claim, islocal, user]);
+
+  if (!user||!claim) return null;
+  if (!canViewPage) return (<Navigate to="/" />);
+
   return (
     <>
       <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
@@ -140,7 +172,7 @@ export default function ClaimDetailPage({
           </Typography>
         </Grid>
         {
-          showEditButton && (
+          showEditButton && canChangeInfo && (
           <Grid 
             item
             xs={6}
@@ -208,7 +240,7 @@ export default function ClaimDetailPage({
               </Typography>
               {/* Boton de editar datos */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                {canEditStatus && claim?.status === "PENDIENTE" && (
+                {canChangeStatus && claim?.status === "PENDIENTE" && (
                   <Button
                     variant="contained"
                     color="primary"
@@ -226,7 +258,7 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {canEditStatus && claim?.status === "EN_REVISION" && (
+                {canChangeStatus && claim?.status === "EN_REVISION" && (
                   <Button
                     variant="contained"
                     color="error"
@@ -243,7 +275,7 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {canEditStatus && claim?.status === "EN_REVISION" && (
+                {canChangeStatus && claim?.status === "EN_REVISION" && (
                   <Button
                     variant="contained"
                     color="success"
