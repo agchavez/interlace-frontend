@@ -38,7 +38,26 @@ export function ClaimReviewPage() {
   const { user } = useAppSelector((state) => state.auth);
   const { claimQueryParams } = useAppSelector((state) => state.ui);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
-  const [tabValue, setTabValue] = useState(0);
+
+  const {canViewPage, enableImport, enableLocal} = useMemo(() => {
+    const resp = {canViewPage: false, enableImport: false, enableLocal: false};
+    if (!user) return resp;
+    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
+    if (!canViewClaimsPermission) return resp;
+    const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
+    const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
+    if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
+    return {canViewPage: true, enableImport: canChangeStatusClaimImport, enableLocal: canChangeStatusClaimLocal};
+  }, [user]);
+
+  const [tabValue, setTabValue] = useState(()=>{
+    if (enableImport && !enableLocal) {
+      return 1;
+    } else if (enableLocal && !enableImport) {
+      return 0;
+    }
+    return 0;
+  });
   const { data, isLoading, isFetching, refetch } =
     useGetClaimsQuery(claimQueryParams);
 
@@ -107,17 +126,6 @@ export function ClaimReviewPage() {
     }
     return dateFilterItems;
   }, [claimQueryParams, dispatch]);
-
-  const {canViewPage, enableImport, enableLocal} = useMemo(() => {
-    const resp = {canViewPage: false, enableImport: false, enableLocal: false};
-    if (!user) return resp;
-    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
-    if (!canViewClaimsPermission) return resp;
-    const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
-    const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
-    if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
-    return {canViewPage: true, enableImport: canChangeStatusClaimImport, enableLocal: canChangeStatusClaimLocal};
-  }, [user]);
 
   if (!user) return null;
   if (!canViewPage) return (<Navigate to="/" />);
@@ -282,24 +290,20 @@ export function ClaimReviewPage() {
                 onChange={handleTabChange}
                 aria-label="claim tabs"
               >
-                {
-                  enableLocal && 
-                    <Tab
-                      label="Reclamos Locales"
-                      {...a11yProps(0)}
-                      icon={<LocalShippingOutlined />}
-                      iconPosition="start"
-                    />
-                }
-                {
-                  enableImport &&
-                    <Tab
-                      label="Reclamos Importados"
-                      {...a11yProps(1)}
-                      icon={<PublicTwoToneIcon />}
-                      iconPosition="start"
-                    />
-                }
+                <Tab
+                  label="Reclamos Locales"
+                  {...a11yProps(0)}
+                  icon={<LocalShippingOutlined />}
+                  iconPosition="start"
+                  disabled={!enableLocal}
+                />
+                <Tab
+                  label="Reclamos Importados"
+                  {...a11yProps(1)}
+                  icon={<PublicTwoToneIcon />}
+                  iconPosition="start"
+                  disabled={!enableImport}
+                />
               </Tabs>
             </Box>
           </Grid>
