@@ -579,7 +579,6 @@ const PDFDownloader = ({
   const [error, setError] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [progressMessage, setProgressMessage] = useState<string>("Preparando...");
-  const [generatedPDF, setGeneratedPDF] = useState<Blob | null>(null);
 
   // Función para convertir URL de imagen a base64
   const convertImageToBase64 = async (url: string): Promise<string | null> => {
