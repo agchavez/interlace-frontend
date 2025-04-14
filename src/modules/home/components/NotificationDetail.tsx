@@ -94,17 +94,36 @@ export const NotificationDetail: FC<NotificationDetailProps> = ({ select }) => {
                     </Table>
                     </TableContainer>
                 </Box>
-                {select?.identifier && <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%', height: '100%', padding: '10px' }}>
-                                        <Button
-                        variant="outlined"
-                        color="primary"
-                        size="large"
-                        onClick={() => navigate(`/documentos/${select.identifier}?alerta=${select.type === 'ALERTA' ? 'true' : 'false'}`)}
-                        endIcon={<ArrowForwardIosIcon />}
-                    >
-                        {select.type === 'ALERTA' ? 'Ver alerta' : 'Ver documento'}
-                    </Button>
-                </Box>}
+                {
+                    select?.url ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%', height: '100%', padding: '10px' }}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="large"
+                                onClick={() => select.url && navigate(select.url)}
+                                endIcon={<ArrowForwardIosIcon />}
+                            >
+                                Ver
+                            </Button>
+                        </Box>
+                    ) :
+                    (
+                        <>
+                        {select?.identifier && <Box sx={{ display: 'flex', justifyContent: 'end', alignItems: 'center', width: '100%', height: '100%', padding: '10px' }}>
+                                                <Button
+                                variant="outlined"
+                                color="primary"
+                                size="large"
+                                onClick={() => navigate(`/documentos/${select.identifier}?alerta=${select.type === 'ALERTA' ? 'true' : 'false'}`)}
+                                endIcon={<ArrowForwardIosIcon />}
+                            >
+                                {select.type === 'ALERTA' ? 'Ver alerta' : 'Ver documento'}
+                            </Button>
+                        </Box>}
+                        </>
+                    )
+                }
             </CardContent>
         </>
     )

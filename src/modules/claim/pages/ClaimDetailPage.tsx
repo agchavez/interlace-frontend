@@ -19,8 +19,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Navigate, useParams } from "react-router-dom";
 import {
   Claim,
   ClaimFile,
@@ -94,6 +94,38 @@ export default function ClaimDetailPage({
 
   const showEditButton = canEditInfo && ["PENDIENTE", "EN_REVISION"].includes(claim?.status || "") && user?.centro_distribucion === claim?.tracking?.distributor_center;
 
+  const {canViewPage, canChangeStatus, canChangeInfo} = useMemo(() => {
+    const resp = {canViewPage: false, canChangeStatus: false, canChangeInfo: false};
+    if (!user) return resp;
+    if (!claim) return resp;
+    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
+    if (!canViewClaimsPermission) return resp;
+    // change status
+    let canChangeStatus = false;
+    if (canEditStatus) {
+      const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
+      const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
+      if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
+      if (islocal && !canChangeStatusClaimLocal) return resp;
+      if (!islocal && !canChangeStatusClaimImport) return resp;
+      if (islocal) {
+        canChangeStatus= canChangeStatusClaimLocal
+      } else {
+        canChangeStatus= canChangeStatusClaimImport;
+      }
+    }
+    // change info
+    let canChangeInfo = false;
+    if (canEditInfo) {
+      const canChangeInfoClaim = user.list_permissions.includes("imported.change_claimmodel");
+      canChangeInfo= canChangeInfoClaim;
+    }
+    return {canViewPage: true, canChangeStatus, canChangeInfo};
+  }, [canEditInfo, canEditStatus, claim, islocal, user]);
+
+  if (!user||!claim) return null;
+  if (!canViewPage) return (<Navigate to="/" />);
+
   return (
     <>
       <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
@@ -140,7 +172,7 @@ export default function ClaimDetailPage({
           </Typography>
         </Grid>
         {
-          showEditButton && (
+          showEditButton && canChangeInfo && (
           <Grid 
             item
             xs={6}
@@ -208,7 +240,7 @@ export default function ClaimDetailPage({
               </Typography>
               {/* Boton de editar datos */}
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                {canEditStatus && claim?.status === "PENDIENTE" && (
+                {canChangeStatus && claim?.status === "PENDIENTE" && (
                   <Button
                     variant="contained"
                     color="primary"
@@ -226,7 +258,7 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {canEditStatus && claim?.status === "EN_REVISION" && (
+                {canChangeStatus && claim?.status === "EN_REVISION" && (
                   <Button
                     variant="contained"
                     color="error"
@@ -243,7 +275,7 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {canEditStatus && claim?.status === "EN_REVISION" && (
+                {canChangeStatus && claim?.status === "EN_REVISION" && (
                   <Button
                     variant="contained"
                     color="success"
@@ -256,7 +288,7 @@ export default function ClaimDetailPage({
                       component="span"
                       fontWeight={400}
                     >
-                      Aprobar
+                      Finalizar
                     </Typography>
                   </Button>
                 )}
@@ -323,7 +355,9 @@ export default function ClaimDetailPage({
                     fontWeight={400}
                     color={"gray.500"}
                   >
-                    Numero de Reclamo
+                    {
+                      islocal ? "Numero de Memorandum" : "Número de Reclamo"
+                    }
                   </Typography>
                   <Divider />
                   <Typography
@@ -356,26 +390,29 @@ export default function ClaimDetailPage({
                 </Grid>
 
                 {/* Documento de Descarte */}
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    Documento de Descarte{" "}
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    {claim?.discard_doc}
-                  </Typography>
-                </Grid>
-
+                {
+                  !islocal && (
+                    <Grid item xs={6} md={6} lg={4} xl={3}>
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={400}
+                        color={"gray.500"}
+                      >
+                        Documento de Descarte{" "}
+                      </Typography>
+                      <Divider />
+                      <Typography
+                        variant="body1"
+                        component="h1"
+                        fontWeight={400}
+                        color={"gray.500"}
+                      >
+                        {claim?.discard_doc}
+                      </Typography>
+                    </Grid>
+                  )
+                }
                 {/* Estado del Reclamo */}
                 <Grid item xs={6} md={6} lg={4} xl={3}>
                   <Typography
@@ -384,7 +421,7 @@ export default function ClaimDetailPage({
                     fontWeight={400}
                     color={"gray.500"}
                   >
-                    Estado del Reclamo
+                    Estado
                   </Typography>
                   <Divider />
                   <Typography
@@ -645,14 +682,17 @@ export default function ClaimDetailPage({
                   ? "Solicitud de Resolución (PDF/Excel)"
                   : "Archivo Claim (PDF/Excel)"
               }
+              colWidth={4}
             />
             <FilesPreview
               files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
-              label="Memorandum de Credito (PDF)"
+              label="Memorandum (PDF)"
+              colWidth={4}
             />
             <FilesPreview
               files={claim?.observations_file ? [claim?.observations_file] : []}
               label="Observaciones (PDF)"
+              colWidth={4}
             />
           </Grid>
         </Grid>
@@ -688,6 +728,10 @@ export default function ClaimDetailPage({
           files={claim?.photos_pallet_damage || []}
           label="Fisuras/abolladuras de pallets"
         />
+        <FilesPreview
+          files={claim?.photos_production_batch || []}
+          label="Lote de Producción"
+        />
         <>
           <Grid item container xs={12}>
             <Divider>
@@ -712,7 +756,6 @@ export default function ClaimDetailPage({
             files={claim?.photos_grouped_bad_product || []}
             label="Producto en mal estado agrupado en 1 pallet"
           />
-
           <FilesPreview
             files={claim?.photos_repalletized || []}
             label="Repaletizado por identificación de producto dañado"
@@ -747,9 +790,11 @@ export default function ClaimDetailPage({
 function FilesPreview({
   files,
   label,
+  colWidth = 3,
 }: {
   label: string;
   files?: ClaimFile[];
+  colWidth?: number;
 }) {
   const theme = useTheme(); // Añadir este hook
   const [selectedFile, setSelectedFile] = useState<ClaimFile | null>(null);
@@ -827,7 +872,7 @@ function FilesPreview({
   if (!files) return null;
 
   return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid item xs={12} md={colWidth}>
       <Box
         sx={{
           borderBottom: `2px solid ${theme.palette.primary.main}`,

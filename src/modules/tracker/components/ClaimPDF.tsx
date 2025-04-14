@@ -108,13 +108,13 @@ function ClaimPDF({
               </View>
             )
           }
-          <View style={{ flex: 0.5, textAlign: "right", color: "red" }}>
-            <PDFTitle style={{ fontSize: 30, textAlign: "right" }}>
+          <View style={{ flex: islocal? 1: 0.5, textAlign: "right", color: "red" }}>
+            <PDFTitle style={{ fontSize: islocal? 20: 30, textAlign: "right" }}>
               {
                 islocal ? "Alerta de Calidad" : "CLAIM"
               }
             </PDFTitle>
-            <PDFText>Evidencia de Fotografía</PDFText>
+            <PDFText>Evidencia Fotográfica</PDFText>
           </View>
         </View>
         <View style={{ ...styles.divider }} />
@@ -495,6 +495,35 @@ function ClaimPDF({
             <View style={{ flexDirection: "row" }}>
               <View style={{ flex: 1 }}>
                 {claim?.photos_pallet_damage.map((photo) => {
+                  return (
+                    <Image
+                      key={photo.id}
+                      src={photo.access_url}
+                      style={{ width: 400, marginHorizontal: "auto" }}
+                    />
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
+      {/* Production batch */}
+      {(claim?.photos_production_batch.length || 0) > 0 && (
+        <Page size="LETTER" style={styles.page}>
+          <View style={styles.section}>
+            <PDFSubTitle style={{ ...styles.subTitle }}>
+              {"Imágenes de lote de producción"}
+            </PDFSubTitle>
+            <View style={{ ...styles.divider }} />
+            <View style={{ flexDirection: "row", paddingBottom: 10 }}>
+              <View style={{ minWidth: 100 }}>
+                <PDFText>Lote de Producción:</PDFText>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1 }}>
+                {claim?.photos_production_batch.map((photo) => {
                   return (
                     <Image
                       key={photo.id}

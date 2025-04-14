@@ -24,6 +24,7 @@ import { format } from "date-fns";
 import { LocalShippingOutlined } from "@mui/icons-material";
 import PublicTwoToneIcon from "@mui/icons-material/PublicTwoTone";
 import ClaimsDataGrid from "../components/ClaimsDataGrid";
+import { Navigate } from "react-router-dom";
 
 function a11yProps(index: number) {
   return {
@@ -37,7 +38,26 @@ export function ClaimReviewPage() {
   const { user } = useAppSelector((state) => state.auth);
   const { claimQueryParams } = useAppSelector((state) => state.ui);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
-  const [tabValue, setTabValue] = useState(0);
+
+  const {canViewPage, enableImport, enableLocal} = useMemo(() => {
+    const resp = {canViewPage: false, enableImport: false, enableLocal: false};
+    if (!user) return resp;
+    const canViewClaimsPermission = user?.list_permissions.includes("imported.view_claimmodel");
+    if (!canViewClaimsPermission) return resp;
+    const canChangeStatusClaimImport = user.list_permissions.includes("imported.change_status_claimmodel");
+    const canChangeStatusClaimLocal = user.list_permissions.includes("imported.change_status_claimmodelLocal");
+    if (!(canChangeStatusClaimImport || canChangeStatusClaimLocal)) return resp;
+    return {canViewPage: true, enableImport: canChangeStatusClaimImport, enableLocal: canChangeStatusClaimLocal};
+  }, [user]);
+
+  const [tabValue, setTabValue] = useState(()=>{
+    if (enableImport && !enableLocal) {
+      return 1;
+    } else if (enableLocal && !enableImport) {
+      return 0;
+    }
+    return 0;
+  });
   const { data, isLoading, isFetching, refetch } =
     useGetClaimsQuery(claimQueryParams);
 
@@ -106,6 +126,9 @@ export function ClaimReviewPage() {
     }
     return dateFilterItems;
   }, [claimQueryParams, dispatch]);
+
+  if (!user) return null;
+  if (!canViewPage) return (<Navigate to="/" />);
 
   return (
     <>
@@ -272,12 +295,14 @@ export function ClaimReviewPage() {
                   {...a11yProps(0)}
                   icon={<LocalShippingOutlined />}
                   iconPosition="start"
+                  disabled={!enableLocal}
                 />
                 <Tab
                   label="Reclamos Importados"
                   {...a11yProps(1)}
                   icon={<PublicTwoToneIcon />}
                   iconPosition="start"
+                  disabled={!enableImport}
                 />
               </Tabs>
             </Box>
@@ -291,7 +316,7 @@ export function ClaimReviewPage() {
                   created_at: claim.created_at,
                   distributor_center: claim.tracking?.distributor_center,
                   status: claim.status,
-                  tipo: claim.claim_type_data.name,
+                  tipo: claim.claim_type_data?.name,
                   reference_number: claim.tracking?.id?.toString(),
                   user_name: claim.tracking?.user_name,
                 })) || []

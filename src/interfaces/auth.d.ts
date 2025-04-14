@@ -53,7 +53,7 @@ export interface AccesoDetail {
 }
 
 
-type tipoNotificacion = 'UBICACION' | 'ALERTA' | 'RECORDATORIO' | 'TAREA' | 'MENSAJE' | 'OTRO';
+type tipoNotificacion = 'UBICACION' | 'ALERTA' | 'RECORDATORIO' | 'TAREA' | 'MENSAJE' | 'OTRO' | 'CLAIM';
 type moduloNotificacion = 'DOCUMENTO' | 'OTRO';
 export interface Notificacion {
     id:            number;

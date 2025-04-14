@@ -54,6 +54,8 @@ export interface EditFormData {
     photos_during_unload_remove: number[];
     photos_pallet_damage_add: File[];
     photos_pallet_damage_remove: number[];
+    photos_production_batch_add: File[];
+    photos_production_batch_remove: number[];
     photos_damaged_product_base_add: File[];
     photos_damaged_product_base_remove: number[];
     photos_damaged_product_dents_add: File[];
@@ -271,67 +273,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         </Box>}
                     </Box>
                 </Grid>
-           
-            <Grid item xs={12} md={6}>
-                    <Box
-                        sx={{
-                            minHeight: 220,
-                            border: "1px solid #ddd",
-                            borderRadius: 1,
-                            p: 2,
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "space-between"
-                        }}
-                    >
-                        <Box>
-                            <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                Lote de Producción
-                                <HtmlTooltip title="Documento con observaciones adicionales sobre el reclamo (PDF)">
-                                    <IconButton size="small" color="primary">
-                                        <Typography variant="body1">?</Typography>
-                                    </IconButton>
-                                </HtmlTooltip>
-                            </Typography>
-                            {claimData.production_batch_file ? (
-                                <ExistingDocPreview
-                                    name={claimData.production_batch_file.name}
-                                    url={claimData.production_batch_file.access_url}
-                                    extension={claimData.production_batch_file.extension}
-                                    onRemove={() => setValue("production_batch_file", null)}
-                                    boxWidth={140}
-                                    boxHeight={150}
-                                />
-                            ) : (
-                                <PlaceholderDocPreview
-                                    boxWidth={140}
-                                    boxHeight={150}
-                                    text="Sin Observaciones"
-                                />
-                            )}
-                        </Box>
-
-                        {!disableDropzone && <Box sx={{ mt: 1 }}>
-                            <ImagePreviewDropzone
-                                files={
-                                    watch("production_batch_file")
-                                        ? [watch("production_batch_file")!]
-                                        : []
-                                }
-                                onFilesChange={(files) =>
-                                    setValue("production_batch_file", files[0] || null)
-                                }
-                                label="Subir Lote de Producción (PDF)"
-                                accept={{
-                                    "application/pdf": [".pdf"]
-                                }}
-                                maxFiles={1}
-                                sxDrop={{ height: 80 }}
-                            />
-                        </Box>}
-                    </Box>
-                </Grid>
-                </Grid>
+            </Grid>
 
             {/* Sección de Fotos */}
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -513,6 +455,26 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                         categoryKey="photos_pallet_damage"
                         label="Daños en pallets"
                         existingDocs={claimData.photos_pallet_damage}
+                        watch={watch}
+                        setValue={setValue}
+                    />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            7. Fotografías Lote de Producción
+                            <HtmlTooltip title="Fotografías Lote de Producción">
+                                <IconButton size="small" color="primary">
+                                    <Typography variant="body1">?</Typography>
+                                </IconButton>
+                            </HtmlTooltip>
+                        </Typography>
+                    </Box>
+                    <PhotosEditor
+                        disableDropzone={disableDropzone}
+                        categoryKey="photos_production_batch"
+                        label="Daños en pallets"
+                        existingDocs={claimData.photos_production_batch}
                         watch={watch}
                         setValue={setValue}
                     />

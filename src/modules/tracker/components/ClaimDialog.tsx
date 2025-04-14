@@ -41,6 +41,7 @@ export interface FormData {
     photos_container_top: File[];
     photos_during_unload: File[];
     photos_pallet_damage: File[];
+    photos_production_batch: File[];
     photos_damaged_product_base: File[];
     photos_damaged_product_dents: File[];
     photos_damaged_boxes: File[];
@@ -91,7 +92,8 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
             photos_damaged_product_dents: [],
             photos_damaged_boxes: [],
             photos_grouped_bad_product: [],
-            photos_repalletized: []
+            photos_repalletized: [],
+            photos_production_batch: []
         }
     });
 
@@ -161,6 +163,9 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
             });
             data.photos_repalletized.forEach((file) => {
                 formData.append("photos_repalletized", file);
+            });
+            data.photos_production_batch.forEach((file) => {
+                formData.append("photos_production_batch", file);
             });
             const calim = await createClaim(formData).unwrap();
             dispatch(setClaimByTrackerId({ id: tracker, claim: calim.id }));

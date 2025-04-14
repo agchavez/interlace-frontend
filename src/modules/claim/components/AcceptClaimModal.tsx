@@ -121,17 +121,17 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
     <BootstrapDialog open={open} maxWidth="lg" fullWidth onClose={onClose}>
       <BootstrapDialogTitleGray onClose={onClose} id="customized-dialog-title">
         <Typography variant="h6" color="black" fontWeight={450}>
-          {islocal ? "Aprobar Alerta de Calidad - Tracker Local" : "Aprobar Reclamo - Tracker Importado"}
+          {islocal ? "Finalizar Alerta de Calidad - Tracker Local" : "Aprobar Reclamo - Tracker Importado"}
         </Typography>
         <Typography variant="body1">
-          {islocal ? "¿Está seguro que desea aceptar esta alerta de calidad?" : "¿Está seguro que desea aceptar este reclamo?"}
+          {islocal ? "¿Está seguro que desea finalizar esta alerta de calidad?" : "¿Está seguro que desea aceptar este reclamo?"}
         </Typography>
       </BootstrapDialogTitleGray>
       <DialogContent sx={{ pb: 0 }}>
         <Grid container spacing={1} marginTop={1}>
           <Grid item xs={12}>
             <Typography variant="body2">
-              {islocal ? "Al aceptar esta alerta de calidad no podra editarla nuevamente." : "Al aceptar este reclamo no podra editarlo nuevamente."} 
+              {islocal ? "Al finalizar esta alerta de calidad no podra editarla nuevamente." : "Al aceptar este reclamo no podra editarlo nuevamente."} 
             </Typography>
           </Grid>
         </Grid>
@@ -155,7 +155,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
 
           <Grid item xs={12} sm={6}>
             <TextField
-              label="Número de Claim"
+              label={ islocal? "Número de Memorandum": "Número de Claim"}
               fullWidth
               size="small"
               color="secondary"
@@ -164,18 +164,22 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
           </Grid>
 
           {/* Documento de Descarte */}
-          <Grid item xs={12} sm={6}>
-            <TextField
-              label="Documento de Descarte"
-              fullWidth
-              size="small"
-              color="secondary"
-              {...register("discardDoc")}
-            />
-          </Grid>
+          {
+            !islocal && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Documento de Descarte"
+                  fullWidth
+                  size="small"
+                  color="secondary"
+                  {...register("discardDoc")}
+                />
+              </Grid>
+            )
+          }
           <Grid item xs={12}>
             <TextField
-              label="Observaciones de Aprobación"
+              label="Observaciones de Finalización"
               fullWidth
               size="small"
               multiline
@@ -217,20 +221,20 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
               placeHolderText={islocal ? "Sin Solicitud de Resolución" : "Sin Claim File"}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} md={4}>
             <ArchivosAdjuntos 
-              label={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"} 
+              label={islocal ? "Subir Memorandum(PDF)" : "Subir Nota de Crédito (PDF)"} 
               claim={claim} 
               setValue={setValue} 
               watch={watch} 
               fieldName="creditMemoFile"
               accept={{ "application/pdf": [".pdf"] }}
-              tooltipTitle={islocal ? "Documento de memorandum de credito" : "Documento de nota de crédito"}
-              dropZoneLabel={islocal ? "Subir Memorandum de Credito (PDF)" : "Subir Nota de Crédito (PDF)"}
-              placeHolderText={islocal ? "Sin Memorandum de Credito" : "Sin Nota de Crédito"}
+              tooltipTitle={islocal ? "Documento de Memorandum" : "Documento de nota de crédito"}
+              dropZoneLabel={islocal ? "Subir Memorandum (PDF)" : "Subir Nota de Crédito (PDF)"}
+              placeHolderText={islocal ? "Sin Memorandum" : "Sin Nota de Crédito"}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={4}>
+          <Grid item xs={12} md={4}>
             <ArchivosAdjuntos 
               label="Subir archivo de Observaciones (PDF)"
               claim={claim} 
@@ -263,7 +267,7 @@ export const AcceptClaimModal: FC<ClaimModalProps> = ({
           startIcon={<CheckCircleTwoToneIcon />}
         >
           {
-            isLoading ? "Guardando cambios..." : islocal ? "Aprobar Alerta de Calidad" : "Aprobar Reclamo"
+            isLoading ? "Guardando cambios..." : islocal ? "Finalizar Alerta de Calidad" : "Aprobar Reclamo"
           }
         </Button>
       </DialogActions>

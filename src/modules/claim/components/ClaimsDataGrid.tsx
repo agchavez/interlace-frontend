@@ -5,6 +5,10 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
       import { format } from "date-fns";
       import { useNavigate } from "react-router-dom";
       import { useAppSelector } from "../../../store";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelTwoToneIcon from '@mui/icons-material/CancelTwoTone';
+import TimelapseIcon from '@mui/icons-material/Timelapse';
+import AssignmentTurnedInTwoToneIcon from '@mui/icons-material/AssignmentTurnedInTwoTone';
 
       const tableBase = {
         localeText: esES.components.MuiDataGrid.defaultProps.localeText,
@@ -87,32 +91,37 @@ import { DataGrid, GridColDef, esES } from "@mui/x-data-grid";
             width: 130,
             minWidth: 130,
             renderCell: (params) => {
-              let color: "error" | "default" | "warning" | "info" | "success";
+              let color: "error" | "default" | "warning" | "info" | "success" | "primary";
               let label;
+              let icon;
 
               switch(params.value) {
                 case "PENDIENTE":
                   color = "warning";
                   label = "Pendiente";
+                  icon = <TimelapseIcon />;
                   break;
                 case "EN_REVISION":
-                  color = "info";
+                  color = "primary";
                   label = "En Revisión";
+                  icon = <AssignmentTurnedInTwoToneIcon />;
                   break;
                 case "RECHAZADO":
                   color = "error";
                   label = "Rechazado";
+                  icon = <CancelTwoToneIcon />;
                   break;
                 case "APROBADO":
                   color = "success";
                   label = "Aprobado";
+                  icon = <CheckCircleIcon />;
                   break;
                 default:
                   color = "default";
                   label = "Desconocido";
               }
 
-              return <Chip label={label} variant="outlined" color={color} size="small" />;
+              return <Chip label={label} variant="outlined" color={color} icon={icon} />;
             },
           },
           {
