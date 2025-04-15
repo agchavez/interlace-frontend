@@ -1,4 +1,5 @@
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -15,12 +16,14 @@ import {
   Typography,
   styled,
   tableCellClasses,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { useState } from "react";
 
 // iCONS
 import AddTwoToneIcon from "@mui/icons-material/AddTwoTone";
-
+import FileCopyTwoToneIcon from '@mui/icons-material/FileCopyTwoTone';
 import { useAppDispatch } from "../../../store";
 import {
   Seguimiento,
@@ -37,9 +40,12 @@ import AgregarProductoSalida from "./AgregarProductoSalida";
 import { OutPutDetail } from "./OutPutDetail";
 import {
   updateTracking,
-  chanceStatusTracking, downloadFile,
+  chanceStatusTracking,
   // downloadFile,
 } from "../../../store/seguimiento/trackerThunk";
+
+// import CloudDownloadTwoToneIcon from '@mui/icons-material/CloudDownloadTwoTone';
+import VisibilityTwoToneIcon from '@mui/icons-material/VisibilityTwoTone';
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { format } from "date-fns-tz";
@@ -48,9 +54,9 @@ import { EditNote, EditTwoTone } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { ShowCodeDriver } from "./ShowCodeDriver";
 import { ShowRoute } from "./ShowRoute";
-import TrakerPDFDocument from "./TrackerPDF";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
+// import TrakerPDFDocument from "./TrackerPDF";
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 
 import {
   useGetDriverQuery,
@@ -58,9 +64,13 @@ import {
   useGetOperatorByDistributionCenterQuery,
 } from "../../../store/maintenance/maintenanceApi";
 import ObservationModal from "./ObservationModal";
-import ArchivoModal from "./ArchivoModal";
 import { SelectOrderTrackerModal } from "./SelectOrderTrackerModal";
 import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
+import AssignmentLateTwoToneIcon from "@mui/icons-material/AssignmentLateTwoTone";
+import TrackerFilesModal from "./TrackerFilesModal";
+// import { toast } from "sonner";
+import PDFDownloader from "./TrackerPDFV2";
+import { QRCodeSVG } from "qrcode.react";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -76,10 +86,12 @@ export const CheckForm = ({
   seguimiento,
   indice,
   disable,
+  openClaim
 }: {
   seguimiento: Seguimiento;
   indice: number;
   disable: boolean;
+  openClaim: () => void;
 }) => {
   const dispatch = useAppDispatch();
   const [open, setopen] = useState(false);
@@ -97,24 +109,24 @@ export const CheckForm = ({
       driver: seguimiento.driver !== null ? seguimiento.driver : undefined,
     },
   });
-  const { data: dataDriver, isLoading: loadingDriver } = useGetDriverQuery({
+  const { data: dataDriver } = useGetDriverQuery({
     id: seguimiento.driver !== null ? seguimiento.driver : undefined,
     limit: 1,
     offset: 0,
   });
-  const { data: dataOp1, isLoading: loadingOP1 } =
+  const { data: dataOp1 } =
     useGetOperatorByDistributionCenterQuery({
       id: seguimiento.driver !== null ? seguimiento.opm1 : undefined,
       limit: 1,
       offset: 0,
     });
-  const { data: dataOp2, isLoading: loadingOP2 } =
+  const { data: dataOp2 } =
     useGetOperatorByDistributionCenterQuery({
       limit: 1,
       offset: 0,
       id: seguimiento.driver !== null ? seguimiento.opm2 : undefined,
     });
-  const { data: dataOutputLocation, isLoading: loadingOutputData } =
+  const { data: dataOutputLocation } =
     useGetLocationsQuery({
       id: seguimiento.driver !== null ? seguimiento.outputLocation : undefined,
       limit: 1,
@@ -143,9 +155,79 @@ export const CheckForm = ({
     );
   };
 
-  const handleClickDescargar = () => {
-    dispatch(downloadFile(seguimiento.id));
-  };
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+
+
+  //   const handleClickDescargar = async () => {
+  //   // Función auxiliar para descargar archivos sin redirección
+  //   const downloadFileWithoutRedirect = async (url: string, fileName: string) => {
+  //     try {
+
+  //       // Usar XMLHttpRequest que tiene mejor manejo de descargas de archivos binarios
+  //       const xhr = new XMLHttpRequest();
+  //       xhr.open('GET', url, true);
+  //       xhr.responseType = 'blob';
+
+  //       // Manejar la respuesta
+  //       xhr.onload = function() {
+  //         if (xhr.status === 200) {
+  //           // Crear objeto URL
+  //           const blob = new Blob([xhr.response]);
+  //           const blobUrl = window.URL.createObjectURL(blob);
+
+  //           // Crear elemento temporal para la descarga
+  //           const downloadLink = document.createElement('a');
+  //           downloadLink.style.display = 'none';
+  //           downloadLink.href = blobUrl;
+  //           downloadLink.download = fileName;
+
+  //           // Agregar, hacer clic y eliminar
+  //           document.body.appendChild(downloadLink);
+  //           downloadLink.click();
+
+  //           // Limpiar después de un breve delay para asegurar que la descarga inicie
+  //           setTimeout(() => {
+  //             document.body.removeChild(downloadLink);
+  //             window.URL.revokeObjectURL(blobUrl);
+  //           }, 200);
+
+  //         } else {
+  //           throw new Error(`Error al descargar: ${xhr.status}`);
+  //         }
+  //       };
+
+  //       xhr.onerror = function() {
+  //         throw new Error('Error de red al intentar descargar el archivo');
+  //       };
+
+  //       // Iniciar la descarga
+  //       xhr.send();
+
+  //     } catch (error) {
+  //       console.error(`Error al descargar ${fileName}:`, error);
+  //       toast.error(`No se pudo descargar ${fileName}`);
+  //     }
+  //   };
+
+  //   // Descargar el archivo 1 si existe
+  //   if (seguimiento.file_data_1) {
+  //     const url = seguimiento.file_data_1.access_url;
+  //     const nombre = seguimiento.file_data_1.name || 'documento1';
+  //     await downloadFileWithoutRedirect(url, nombre);
+  //   }
+
+  //   // Descargar el archivo 2 si existe
+  //   if (seguimiento.file_data_2) {
+  //     // Pequeña pausa para asegurar que el primer archivo tenga tiempo de iniciar su descarga
+  //     await new Promise(resolve => setTimeout(resolve, 700));
+
+  //     const url = seguimiento.file_data_2.access_url;
+  //     const nombre = seguimiento.file_data_2.name || 'documento2';
+  //     await downloadFileWithoutRedirect(url, nombre);
+  //   }
+  // };
 
   const [openOrderModal, setopenOrderModal] = useState<boolean>(false);
 
@@ -160,10 +242,11 @@ export const CheckForm = ({
         seguimiento={seguimiento}
         handleClose={() => setOpenObservationModal(false)}
       />
-      <ArchivoModal
+      <TrackerFilesModal
         open={openArchivoModal}
-        seguimiento={seguimiento}
-        handleClose={() => setOpenArchivoModal(false)}
+        tracker={seguimiento}
+        onClose={() => setOpenArchivoModal(false)}
+        disable={disable}
       />
       {openOrderModal && (
         <SelectOrderTrackerModal
@@ -171,14 +254,76 @@ export const CheckForm = ({
           handleClose={() => setopenOrderModal(false)}
           seguimiento={seguimiento}
           indice={indice}
-          setLocalidadValue={(value: number)=>setValue("outputLocation", value)}
+          setLocalidadValue={(value: number) => setValue("outputLocation", value)}
         />
       )}
       {open && (
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
-        <Grid
+                              <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3 }}>
+                  <Grid item xs={12}>
+                    <Typography
+                      variant="h4"
+                      component="h1"
+                      fontWeight={400}
+                      bgcolor={"#1c2536"}
+                      color={"white"}
+                      align="center"
+                      borderRadius={2}
+                      sx={{
+                        border: "1px solid #1c2536",
+                        padding: "8px 16px",
+                        paddingLeft: "95px", // Aumentado para dar más espacio al texto principal
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        position: "relative",
+                        overflow: "visible",
+                        minHeight: "64px" // Aumentado ligeramente
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          left: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            backgroundColor: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 3px 5px rgba(0,0,0,0.2)",
+                            border: "3px solid white", // Aumentado
+                            overflow: "hidden",
+                            borderRadius: "8px",
+                            padding: "0px" // Agregado padding para espacio interno
+                          }}
+                        >
+                          <QRCodeSVG
+                            value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
+                            imageSettings={{
+                              src: "/logo-qr.png",
+                              height: 15,
+                              width: 15,
+                              excavate: true,
+                            }}
+                            size={50}
+                            level="Q"
+                          
+                          />
+                        </Box>
+                      </Box>
+                      TRK-{seguimiento.id?.toString().padStart(5, "0")}
+                    </Typography>
+                  </Grid>
+                </Grid>
+        {/* <Grid
           item
           xs={12}
           container
@@ -187,6 +332,9 @@ export const CheckForm = ({
           alignItems="center"
           gap={1}
         >
+          <IconButton color="error" onClick={openClaim}>
+            <AssignmentLateTwoToneIcon fontSize="large" />
+          </IconButton>
           <PDFDownloadLink
             fileName={`TRK-${seguimiento.id?.toString().padStart(5, "0")}`}
             document={
@@ -222,8 +370,8 @@ export const CheckForm = ({
               );
             }}
           </PDFDownloadLink>
-        </Grid>
-        <Grid item xs={12}>
+        </Grid> */}
+        <Grid item xs={12} md={8} sx={{ marginTop: 1 }}>
           <Card
             sx={{
               borderRadius: 2,
@@ -239,9 +387,11 @@ export const CheckForm = ({
             >
               <Typography
                 variant="h6"
-                component="h1"
-                fontWeight={400}
-                color={"gray.500"}
+                component="h2"
+                fontWeight={500}
+                color="gray.500"
+                align="center"
+                gutterBottom
               >
                 Datos principales
               </Typography>
@@ -353,8 +503,8 @@ export const CheckForm = ({
                     {seguimiento?.transporter.code}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6} lg={4} xl={3}>
-                  <Box sx={{ display: "flex", alignItems: "center" , justifyContent:'space-between', mt:0}}>
+                {/* <Grid item xs={12} md={6} lg={4} xl={3}>
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: 'space-between', mt: 0 }}>
 
                     <Typography
                       variant="body1"
@@ -388,9 +538,9 @@ export const CheckForm = ({
                       sx={{ mt: 1 }}
                     />
                     :
-                      '--'
+                    '--'
                   }
-                </Grid>
+                </Grid> */}
                 {disable && (
                   <Grid item xs={12} md={6} lg={4} xl={3}>
                     <Typography
@@ -462,15 +612,15 @@ export const CheckForm = ({
                           seguimiento?.status === "COMPLETE"
                             ? "Completado"
                             : seguimiento?.status === "PENDING"
-                            ? "Pendiente"
-                            : "En atención"
+                              ? "Pendiente"
+                              : "En atención"
                         }
                         color={
                           seguimiento?.status === "COMPLETE"
                             ? "success"
                             : seguimiento?.status === "PENDING"
-                            ? "warning"
-                            : "info"
+                              ? "warning"
+                              : "info"
                         }
                         size="medium"
                         variant="outlined"
@@ -540,17 +690,319 @@ export const CheckForm = ({
             </Box>
           </Card>
         </Grid>
-        <Grid item xs={12}>
-          <Typography
-            variant="h4"
-            component="h1"
-            fontWeight={400}
-            color={"white"}
-            align="center"
-            bgcolor={"#1c2536"}
+        {/* Tarjeta de Documentos */}
+        <Grid item xs={12} md={2} sx={{ marginTop: 1 }}>
+          <Card
+            sx={{
+              borderRadius: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              overflow: 'visible',
+              boxShadow: '0 6px 12px rgba(0,0,0,0.1)',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 12px 20px rgba(0,0,0,0.15)'
+              }
+            }}
           >
-            TRK-{seguimiento.id?.toString().padStart(5, "0")}
-          </Typography>
+            {/* Botón de acción flotante */}
+            <IconButton
+              onClick={() => setOpenArchivoModal(true)}
+              
+              sx={{
+                position: 'absolute',
+                top: -15,
+                right: -15,
+                backgroundColor: 'white',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+                '&:hover': {
+                  backgroundColor: (theme) => theme.palette.grey[100]
+                },
+                zIndex: 2,
+                width: 40,
+                height: 40
+              }}
+            >
+              <CloudUploadTwoToneIcon color={"primary"} />
+            </IconButton>
+
+            {/* Contenido de la tarjeta */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 2,
+                flexDirection: "column",
+                flex: 1,
+                pt: 3
+              }}
+            >
+              <Typography
+                variant="h6"
+                component="h2"
+                fontWeight={500}
+                color="gray.500"
+                align="center"
+                gutterBottom
+              >
+                Documentos
+              </Typography>
+              <Divider sx={{ width: '100%', mb: 2 }} />
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 1,
+                  gap: 2
+                }}
+              >
+                {seguimiento.file_1 || seguimiento.file_2 ? (
+                  <>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        mb: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <FileCopyTwoToneIcon color="secondary" sx={{ fontSize: 68 }} />
+                      <Badge
+                        badgeContent={seguimiento.file_1 && seguimiento.file_2 ? 2 : seguimiento.file_1 ? 1 : seguimiento.file_2 ? 1 : 0}
+                        color="primary"
+                        sx={{
+                          position: 'absolute',
+                          top: -10,
+                          right: -10
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
+                      <PDFDownloader
+                        seguimiento={seguimiento}
+                        outputTypeData={outputTypeData}
+                        driver={dataDriver?.results[0]}
+                        op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp1?.results[0]
+                          : undefined}
+                        op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp2?.results[0]
+                          : undefined}
+                        outputLocation={dataOutputLocation?.results[0]}
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box sx={{ position: 'relative', textAlign: 'center', mb: 2 }}>
+                      <FileCopyTwoToneIcon color="disabled" sx={{ fontSize: 70, opacity: 0.4 }} />
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" align="center" sx={{ fontWeight: 500 }}>
+                      No hay documentos cargados
+                    </Typography>
+                    {!disable && <Button
+                      variant="outlined"
+                      size="small"
+                      color="primary"
+                      onClick={() => setOpenArchivoModal(true)}
+                      startIcon={<CloudUploadTwoToneIcon />}
+                      disabled={disable}
+                      sx={{
+                        mt: 'auto',
+                        borderRadius: '20px',
+                        textTransform: 'none'
+                      }}
+                    >
+                      Cargar documento
+                    </Button>}
+                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 0 }}>
+                      <PDFDownloader
+                        seguimiento={seguimiento}
+                        outputTypeData={outputTypeData}
+                        driver={dataDriver?.results[0]}
+                        op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp1?.results[0]
+                          : undefined}
+                        op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                          ? dataOp2?.results[0]
+                          : undefined}
+                        outputLocation={dataOutputLocation?.results[0]}
+                      />
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </Box>
+          </Card>
+        </Grid>
+
+        {/* Tarjeta de Alertas/Reclamos */}
+        <Grid item xs={12} md={2} sx={{ marginTop: 1 }}>
+          <Card
+            sx={{
+              borderRadius: 2,
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              overflow: 'visible',
+              boxShadow: '0 6px 12px rgba(0,0,0,0.1)',
+              transition: 'transform 0.2s',
+              '&:hover': {
+                transform: 'translateY(-5px)',
+                boxShadow: '0 12px 20px rgba(0,0,0,0.15)'
+              }
+            }}
+          >
+            {/* Botón de acción flotante */}
+            <IconButton
+              onClick={openClaim}
+              sx={{
+                position: 'absolute',
+                top: -15,
+                right: -15,
+                backgroundColor: seguimiento.claim ? '#fef0f0' : 'white',
+                color: seguimiento.claim ? 'error.main' : 'inherit',
+                boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+                '&:hover': {
+                  backgroundColor: seguimiento.claim ? '#fee6e6' : (theme) => theme.palette.grey[100]
+                },
+                zIndex: 2,
+                width: 40,
+                height: 40
+              }}
+            >
+              <AssignmentLateTwoToneIcon color={seguimiento.claim ? "error" : "action"} />
+            </IconButton>
+
+            {/* Contenido de la tarjeta */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 2,
+                flexDirection: "column",
+                flex: 1,
+                pt: 3,
+                backgroundColor: seguimiento.claim ? 'rgba(244, 67, 54, 0.03)' : 'transparent'
+              }}
+            >
+              <Typography
+                variant="h6"
+                component="h2"
+                fontWeight={500}
+                color={seguimiento.claim ? "error.main" : "gray.500"}
+                align="center"
+                gutterBottom
+              >
+                {seguimiento?.type === "IMPORT" ? "Reclamos" : "Alertas de Calidad"}
+              </Typography>
+              <Divider sx={{
+                width: '100%',
+                mb: 2,
+                borderColor: seguimiento.claim ? 'rgba(244, 67, 54, 0.2)' : 'inherit'
+              }} />
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flex: 1,
+                  gap: 2
+                }}
+              >
+                {seguimiento.claim ? (
+                  <>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        mb: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <AssignmentLateTwoToneIcon color="error" sx={{ fontSize: 68 }} />
+                      <Badge
+                        badgeContent="!"
+                        color="error"
+                        sx={{
+                          position: 'absolute',
+                          top: -5,
+                          right: -10
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="body2" color="error" align="center" sx={{ fontWeight: 600 }}>
+                      {seguimiento?.type === "IMPORT" ? "Claim registrado" : "Alerta de Calidad registrada"}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      color="error"
+                      onClick={openClaim}
+                      startIcon={<VisibilityTwoToneIcon />}
+                      sx={{
+                        mt: 'auto',
+                        borderRadius: '5px',
+                        boxShadow: '0 4px 8px rgba(244, 67, 54, 0.25)',
+                        textTransform: 'none'
+                      }}
+                    >
+                      Ver detalles
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Box sx={{ position: 'relative', textAlign: 'center', mb: 2 }}>
+                      <AssignmentLateTwoToneIcon color="disabled" sx={{ fontSize: 70, opacity: 0.4 }} />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          position: 'absolute',
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                          color: 'text.disabled',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        0
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" align="center" sx={{ fontWeight: 500 }}>
+                      No hay {seguimiento?.type === "IMPORT" ? "reclamos" : "alertas de calidad"}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="warning"
+                      onClick={openClaim}
+                      startIcon={<AddTwoToneIcon />}
+                      sx={{
+                        mt: 'auto',
+                        borderRadius: '5px',
+                        textTransform: 'none'
+                      }}
+                    >
+                      Registrar
+                    </Button>
+                  </>
+                )}
+              </Box>
+            </Box>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
@@ -685,7 +1137,7 @@ export const CheckForm = ({
               <TextField
                 fullWidth
                 id="outlined-basic"
-                label="N° de Traslado 5001"
+                label="ZTRIC - N° de Ingreso 5001"
                 variant="outlined"
                 size="small"
                 disabled={disable}
@@ -709,7 +1161,7 @@ export const CheckForm = ({
                 fontWeight={400}
                 color={"gray.500"}
               >
-                Datos operador
+                Productividad
               </Typography>
             </Divider>
             <Grid container spacing={2} sx={{ marginTop: 2 }}>
@@ -720,7 +1172,7 @@ export const CheckForm = ({
                   fontWeight={400}
                   color={"gray.500"}
                 >
-                  Tiempo de entrada
+                  Inicio descarga
                 </Typography>
                 <Divider />
                 <Typography
@@ -745,7 +1197,7 @@ export const CheckForm = ({
                   fontWeight={400}
                   color={"gray.500"}
                 >
-                  Tiempo de salida
+                  Finalización de descarga
                 </Typography>
                 <Divider />
                 <Typography
@@ -767,7 +1219,7 @@ export const CheckForm = ({
                   fontWeight={400}
                   color={"gray.500"}
                 >
-                  Tiempo invertido
+                  TAT
                 </Typography>
                 <Divider />
                 <Typography
@@ -778,8 +1230,8 @@ export const CheckForm = ({
                 >
                   {tiempoSalida && tiempoEntrada && tiempoEntrada !== null
                     ? formatDistance(tiempoEntrada, tiempoSalida, {
-                        locale: es,
-                      })
+                      locale: es,
+                    })
                     : "--:--:--"}
                 </Typography>
               </Grid>
@@ -796,7 +1248,7 @@ export const CheckForm = ({
                     // updateSeguimientoDatosOperador({ tiempoEntrada: new Date() })
                   }}
                 >
-                  Registrar entrada
+                  Iniciar descarga
                 </Button>
               </Grid>
               <Grid item xs={6} md={6} sx={{ marginTop: "4px" }}>
@@ -816,7 +1268,7 @@ export const CheckForm = ({
                     // updateSeguimientoDatosOperador({ tiempoSalida: new Date() })
                   }}
                 >
-                  Registrar salida
+                  Finalizar descarga
                 </Button>
               </Grid>
               <Grid item xs={12}>
@@ -891,14 +1343,16 @@ export const CheckForm = ({
             )}
 
             <Grid item xs={12}>
-              <Table size="small" aria-label="a dense table">
+              <Table size="small" aria-label="a dense table" sx={{ borderRadius: 2 }}>
                 <TableHead>
                   <TableRow>
                     <StyledTableCell>Detalle</StyledTableCell>
-                    <StyledTableCell align="right">No. SAP</StyledTableCell>
-                    <StyledTableCell align="right">Producto</StyledTableCell>
+                    <StyledTableCell align={isMobile ? "left" : "right"}>
+                      Material
+                      </StyledTableCell>
+                    {!isMobile && <StyledTableCell align="right">Texto Breve de Material</StyledTableCell>}
                     <StyledTableCell align="right">
-                      Total pallets
+                      Pallets
                     </StyledTableCell>
                     {!disable && (
                       <StyledTableCell align="right">Acciones</StyledTableCell>
@@ -940,7 +1394,7 @@ export const CheckForm = ({
                 <TextField
                   fullWidth
                   id="outlined-basic"
-                  label="N° de Doc. Salida"
+                  label="Transferencia de salida"
                   variant="outlined"
                   size="small"
                   type="number"

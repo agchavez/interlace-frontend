@@ -9,10 +9,13 @@ import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
 import ContentPasteGoTwoToneIcon from "@mui/icons-material/ContentPasteGoTwoTone";
+import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
 import { SideBarItem } from "./SideBar2Item";
-import {Avatar, Tooltip} from "@mui/material";
+import {Avatar, Tooltip, useMediaQuery} from "@mui/material";
 import {RoutePermissionsDirectory} from "../../../config/directory.ts";
-//import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone'
+import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
+import {toggleSidebar} from "../../../store/ui/uiSlice.ts";
+
 // ============================
 // Interfaz para subitems
 // ============================
@@ -172,6 +175,44 @@ const items: SideBarMainItem[] = [
                 permissions: ["inventory.manage"],
             },
         ],
+    },
+    {
+        text: "Reclamos",
+        icon: <AssignmentLateTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+        id: "claim",
+        subItems: [
+            {
+                text: "Seguimiento",
+                href: "/claim/",
+                id: "reclamos",
+                permissions: ["any"],
+            },
+            {
+                text: "Mis Reclamos",
+                href: "/claim/mine",
+                id: "misreclamos",
+                permissions: ["cd"],
+            }
+        ],
+    },
+    {
+        text: "Mantenimiento",
+        icon: <EngineeringTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+        id: "mantenimiento",
+        subItems: [
+            {
+                text: "Centros de Distribución",
+                href: "/maintenance/distributor-center",
+                id: "cd",
+                permissions: ["any"],
+            },
+            {
+                text: "Periodos",
+                href: "/maintenance/period-center",
+                id: "period-cente",
+                permissions: ["any"],
+            }
+        ],
     }
 
 ];
@@ -194,6 +235,7 @@ interface Props {
 export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
     const location = useLocation();
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
+    const distributorCenters = useAppSelector((state) => state.maintenance.disctributionCenters);
     const dispatch = useAppDispatch();
 
     const user = useAppSelector((state) => state.auth.user);
@@ -244,6 +286,25 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
         dispatch(logout());
     };
 
+    const isMobile = useMediaQuery('(max-width:600px)');
+
+    const handleCloseByMobile = () => {
+        // Si es dispositivo móvil, cerrar el sidebar
+        if (isMobile) {
+            dispatch(toggleSidebar());
+        }
+    }
+
+    const { country_code, flagurl } = useMemo(() => {
+        const country_code =
+          distributorCenters.find((dc) => dc.id === user?.centro_distribucion)
+            ?.country_code || "hn";
+        return {
+          country_code,
+          flagurl: `https://flagcdn.com/h240/${country_code?.toLowerCase()}.png`,
+        };
+      }, [distributorCenters, user?.centro_distribucion]);
+
     return (
         <div className={openSidebar? "sidebar close": "sidebar"}>
             <ul className="nav-links">
@@ -254,7 +315,10 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
                         <SideBarItem
                             key={item.id}
                             item={item}
-                            subitemClickAction={() => setOpen(false)}
+                            subitemClickAction={() => {
+                                setOpen(false)
+                                handleCloseByMobile()
+                            }}
                         />
                     );
                 })}
@@ -264,8 +328,8 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
                         <div className="">
                             <Avatar
                                 variant="rounded"
-                                alt={'hn'}
-                                src={`https://flagcdn.com/h240/hn.png`}
+                                alt={country_code}
+                                src={flagurl}
                             />
                         </div>
                         <div className="name-job">

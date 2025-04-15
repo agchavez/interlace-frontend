@@ -9,7 +9,8 @@ import { es } from "date-fns/locale";
 import { TypeChart } from "../../modules/home/components/TATGraph";
 import { SimulatedForm } from "../../interfaces/trackingT2";
 import { authApi } from "../auth/authApi";
-import { DashboardCdQuery, FilterDateDashboard } from "../../interfaces/home";
+import {DashboardCdQuery, FilterDateDashboard} from "../../interfaces/home";
+import { ClaimQueryParams } from "../claim/claimApi";
 
 
 enum FilterDate {
@@ -34,6 +35,7 @@ export interface uiState {
     simulatedQueryParams: SimulatedForm;
     dashboardCDsQueryParams: DashboardCdQuery;
     openChangeDistributionCenter: boolean;
+    claimQueryParams: ClaimQueryParams
 }
 
 const storageGraphqueryParams = (()=>{
@@ -51,6 +53,15 @@ const initialState: uiState = {
         start_date: format(new Date(), "yyyy-MM-dd 00:00:00"),
         end_date: format(new Date(), "yyyy-MM-dd 23:59:59"), 
         distribution_centers: [],
+    },
+    claimQueryParams: {
+        search: "",
+        tipo: undefined,
+        status: undefined,
+        distributor_center: [],
+        date_after: "",
+        date_before: "",
+        id: undefined,
     },
     reportPallets: {
         date_after: format(new Date(), "yyyy-MM-dd 00:00:00"),
@@ -147,7 +158,10 @@ export const uiSlice = createSlice({
         },
         setDashboardCDsQueryParams: (state, action: PayloadAction<DashboardCdQuery>) => {
             state.dashboardCDsQueryParams = action.payload
-        }
+        },
+        setClaimQueryParams: (state, action: PayloadAction<ClaimQueryParams>) => {
+            state.claimQueryParams = action.payload;
+        },
     },
     extraReducers(builder) {
         builder.addMatcher(authApi.endpoints.login.matchFulfilled, (state, action) => {
@@ -171,5 +185,6 @@ export const {
     setGraphQueryParams,
     setSimulatedQueryParams,
     setOpenChangeDistributionCenter,
-    setDashboardCDsQueryParams
+    setDashboardCDsQueryParams,
+    setClaimQueryParams
 } = uiSlice.actions;

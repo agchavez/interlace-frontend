@@ -9,10 +9,19 @@ export interface Usuario {
 }
 
 export interface LoginResponse {
-    success: boolean;
-    usuario: Usuario;
-    token: string;
+    ok:   boolean;
+    user:  User | null;
+    evento: boolean;
+    token:    Token | null;
 }
+
+export interface Token {
+    access:  string;
+    refresh: string;
+    exp:     number;
+    exp_date_time: string;
+}
+
 
 export interface LoginResponseOk {
     user:  User;
@@ -26,7 +35,7 @@ export interface Token {
 }
 
 export interface User {
-    id:                  string;
+    id:                  number;
     list_groups:         string[];
     list_permissions:    string[];
     centro_distribucion: number | null;

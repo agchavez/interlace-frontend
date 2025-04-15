@@ -45,6 +45,9 @@ const QRCheckPage: FunctionComponent<QRCheckPageProps> = () => {
             disable={true}
             indice={0}
             seguimiento={parseTrackerSeguimiento(data)}
+            openClaim={() => {
+              console.log("openClaim function triggered");
+            }}
           />
         </Grid>
       </Grid>

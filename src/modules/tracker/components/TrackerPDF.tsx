@@ -34,6 +34,39 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     marginBottom: 5,
+  },
+  imageContainer: {
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  documentImage: {
+    width: '100%',
+    height: 600,
+    objectFit: 'contain',
+    marginHorizontal: 'auto',
+    marginBottom: 8,
+    border: '1pt solid #ddd',
+  },
+  imageCaption: {
+    fontSize: 10,
+    textAlign: 'center',
+    marginBottom: 5,
+    color: '#666',
+  },
+  imagesRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
+  imageItem: {
+    width: '100%',
+    marginBottom: 10,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+
   }
 });
 
@@ -97,6 +130,29 @@ function TrakerPDFDocument({
   const tiempoSalida = seguimiento?.timeEnd
     ? new Date(seguimiento?.timeEnd)
     : null;
+
+  // Verificar si hay archivos de imagen
+  const hasImages = seguimiento.file_data_1 || seguimiento.file_data_2;
+
+  // Determinar las extensiones de los archivos para saber si son imágenes
+  const isFileImage = (extension: string | null) => {
+    if (!extension) return false;
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension.toLowerCase());
+  };
+
+  // Verificar si los archivos son imágenes
+  const file1IsImage = seguimiento.file_data_1 && isFileImage(seguimiento.file_data_1.extension);
+  const file2IsImage = seguimiento.file_data_2 && isFileImage(seguimiento.file_data_2.extension);
+
+  // Determinar nombres de los documentos según el tipo de seguimiento
+  const getDocumentName = (fileNum: number) => {
+    if (seguimiento.type === "IMPORT") {
+      return fileNum === 1 ? "Gate Pass" : "Factura";
+    } else {
+      return `Documento ${fileNum}`;
+    }
+  };
+
   return (
     <Document
       title="Datos Tracker"
@@ -250,7 +306,7 @@ function TrakerPDFDocument({
             )}
             <View style={{ flexDirection: "row" }}>
               <View style={{ minWidth: 125 }}>
-                <PDFText>N° de Traslado 5001:</PDFText>
+                <PDFText>ZTRIC - N° de Ingreso 5001:</PDFText>
               </View>
               <View style={{ flex: 1 }}>
                 <PDFText>{seguimiento.transferNumber}</PDFText>
@@ -348,7 +404,7 @@ function TrakerPDFDocument({
                 <PDFSubTitle style={{ ...styles.subTitle }}>Salida de producto:</PDFSubTitle>
                 <View style={{ flexDirection: "row" }}>
                   <View style={{ minWidth: 120 }}>
-                    <PDFText>N° de Doc. Salida:</PDFText>
+                    <PDFText>Transferencia de salida:</PDFText>
                   </View>
                   <View style={{ flex: 1 }}>
                     <PDFText>{seguimiento.documentNumberExit}</PDFText>
@@ -397,11 +453,54 @@ function TrakerPDFDocument({
                 />
               </View>
             )}
-
-
           </>
         )}
+
+
       </Page>
+
+      {hasImages && (file1IsImage || file2IsImage) && (
+        <>
+          <Page size="LETTER" style={styles.page}>
+            <View style={styles.section}>
+              <PDFSubTitle style={{ ...styles.subTitle }}>
+                {seguimiento.type === "IMPORT" ? "Documentación fotográfica:" : "Documentos adjuntos:"}
+              </PDFSubTitle>
+
+              <View style={styles.imagesRow}>
+                {file1IsImage && seguimiento.file_data_1 && (
+                  <View style={styles.imageItem}>
+                    <PDFText style={styles.imageCaption}>
+                      {getDocumentName(1)}
+                    </PDFText>
+                    <Image
+                      src={seguimiento.file_data_1.access_url}
+                      style={styles.documentImage}
+                    />
+                  </View>
+                )}
+
+
+              </View>
+            </View>
+          </Page>
+          {file2IsImage && seguimiento.file_data_2 && (<Page size="LETTER" style={styles.page}>
+
+            <View style={styles.imageItem}>
+              <PDFText style={styles.imageCaption}>
+                {getDocumentName(2)}
+              </PDFText>
+              <Image
+                src={seguimiento.file_data_2.access_url}
+                style={styles.documentImage}
+              />
+            </View>
+
+          </Page>
+          )}
+        </>
+      )}
+
     </Document>
   );
 }

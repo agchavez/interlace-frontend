@@ -2,6 +2,10 @@ import { createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import { RootState } from '..'
 import { LoginResponseOk, LoginBody, DashboardResponse, DashboardQueryParams } from '../../interfaces/login';
 import { DashboardCdQuery, DashboardCds } from '../../interfaces/home';
+import {BaseApiResponse} from "../../interfaces/api";
+import {Notificacion, NotificacionQuery} from "../../interfaces/auth";
+import {refreshToken} from "./thunks.ts";
+
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: fetchBaseQuery({
@@ -82,6 +86,60 @@ export const authApi = createApi({
 
     })
 })
+
+export const notificationApi = createApi({
+    reducerPath: 'notificacionApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
+        prepareHeaders: (headers, { getState }) => {
+            const token = (getState() as RootState).auth.token;
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
+    }),
+    tagTypes: ['Notificacion'],
+    endpoints: (builder) => ({
+        getNotificaciones: builder.query<BaseApiResponse<Notificacion>, NotificacionQuery>({
+            query: (params) => ({
+                url: '/notification/',
+                method: 'GET',
+                params,
+            }),
+            keepUnusedDataFor: 0,
+            onQueryStarted: (_, { dispatch }) => {
+                dispatch(refreshToken());
+            },
+            providesTags: (result) =>
+                result
+                    ? [...result.results.map(({ id }) => ({ type: 'Notificacion' as const, id })), 'Notificacion']
+                    : ['Notificacion'],
+        }),
+        getNotificacion: builder.query<Notificacion, number>({
+            query: (id) => ({
+                url: `/notification/${id}/`,
+                method: 'GET',
+            }),
+            // quitar el cacheo de la consulta
+            keepUnusedDataFor: 0,
+            onQueryStarted: (_, { dispatch }) => {
+                dispatch(refreshToken());
+            },
+            providesTags: (result) => [{ type: 'Notificacion', id: result?.id }],
+        }),
+    })
+});
+
+
+
+
+
+
+export const {
+    useGetNotificacionesQuery,
+    useGetNotificacionQuery,
+} = notificationApi;
 
 export const {
     useLoginMutation,

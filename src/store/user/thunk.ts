@@ -1,18 +1,21 @@
 import { AppThunk, RootState } from "..";
 import backendApi from "../../config/apiConfig";
-import { GetAUserResponse, GetDistributionCenterResponse } from "../../interfaces/user";
+import { GetAUserResponse } from "../../interfaces/user";
 import { setDistributionCenters, setEditingUser, setLoadingUser } from "./userSlice";
 import { errorApiHandler } from '../../utils/error';
 import { toast } from "sonner";
+import {BaseApiResponse} from "../../interfaces/api";
+import {DistributorCenter} from "../../interfaces/maintenance";
 
 export const getDistributionCenters = (): AppThunk => {
     return async (dispatch, getState) => {
         try {
             const { auth } = getState() as RootState;
-            const resp = await backendApi.get<GetDistributionCenterResponse[]>(
-                import.meta.env.VITE_JS_APP_API_URL + `/api/distribution-center/`, 
+            const resp = await backendApi.get<BaseApiResponse<DistributorCenter>>(
+                import.meta.env.VITE_JS_APP_API_URL + `/api/distribution-center/?limit=10000`,
                 { headers: { 'Authorization': `Bearer ${auth.token}` } })
-            dispatch(setDistributionCenters(resp.data))
+
+            dispatch(setDistributionCenters(resp.data.results))
         } catch (error) {
             console.log(error)
         }

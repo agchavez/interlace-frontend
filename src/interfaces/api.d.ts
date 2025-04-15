@@ -4,6 +4,11 @@ export interface BaseApiResponse<T> {
 
 }
 
+export interface BaseApiParams {
+    limit?: number;
+    offset?: number;
+}
+
 export interface ErrorApiResponse {
     mensage?: string;
     error_code?: string;

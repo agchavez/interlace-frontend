@@ -57,6 +57,8 @@ export const UserForm: FC<UserFormProps> = ({ onSubmit, loading, initialValues, 
         resolver: yupResolver(schema as yup.ObjectSchema<RegisterUserForm>)
     });
 
+    console.log({initialValues, values: watch()})
+
     if (resetForm) {
         reset(initialValues);
         setResetForm && setResetForm(false)
