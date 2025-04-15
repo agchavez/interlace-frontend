@@ -258,7 +258,7 @@ export default function ClaimDetailPage({
                     </Typography>
                   </Button>
                 )}
-                {canChangeStatus && claim?.status === "EN_REVISION" && (
+                {canChangeStatus && claim?.status === "EN_REVISION" && (!islocal) && (
                   <Button
                     variant="contained"
                     color="error"
