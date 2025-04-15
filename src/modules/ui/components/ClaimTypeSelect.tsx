@@ -19,6 +19,7 @@ interface ClaimTypeSelectProps<
   local?: boolean; // Para indicar si se usa localmente o no
   onChange?: (value: ClaimType | null) => void;
   claimTypeId?: number;
+  required?: boolean;
 }
 
 export const ClaimTypeSelect = <
@@ -159,6 +160,7 @@ props: ClaimTypeSelectProps<TField>
                   placeholder={props.placeholder}
                   error={!!error}
                   helperText={error ? error.message : null}
+                  required={props.required}
                 />
               ) }
           />

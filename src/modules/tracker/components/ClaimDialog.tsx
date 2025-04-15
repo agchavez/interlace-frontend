@@ -115,6 +115,12 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
     const onSubmit = async (data: FormData) => {
         try {
             const formData = new FormData();
+            if (data.tipo === 0) {
+                toast.error("Error al registrar el reclamo", {
+                    description: "Debe seleccionar un Tipo de Reclamo"
+                });
+                return;
+            }
             formData.append("tracker_id", tracker.toString());
             formData.append("claim_type", data.tipo.toString());
             formData.append("discard_doc", data.discardDoc);
@@ -215,6 +221,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
                             name="tipo"
                             local={true}
                             placeholder="Seleccione o ingrese un tipo de reclamo"
+                            required={true}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} lg={8}>
