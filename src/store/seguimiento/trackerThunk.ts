@@ -779,6 +779,8 @@ export const saveOrderHistories =
 export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
   const seguimiento: Seguimiento = {
     id: tracker.id,
+    claim: tracker.claim,
+    country_code: tracker.distributor_center_data.country_code,
     user: tracker.user,
     rastra: tracker.tariler_data,
     distributorCenter: tracker.distributor_center,
@@ -815,8 +817,10 @@ export const parseTrackerSeguimiento = (tracker: Tracker): Seguimiento => {
       parseOutputDetailSalida(out)
     ),
     observation: tracker.observation,
-    archivo_name: tracker.archivo_name,
-    is_archivo_up: tracker.is_archivo_up,
+    file_1: tracker.file_1,
+    file_2: tracker.file_2,
+    file_data_1: tracker.file_data_1,
+    file_data_2: tracker.file_data_2,
     order: tracker.order,
   };
   tracker.destination_location !== null &&

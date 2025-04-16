@@ -6,6 +6,8 @@ import { BaseApiResponse } from '../../interfaces/api';
 import { Tracker, TrackerQueryParams, TrackerProductDetail, TrackerProductDetailQueryParams, LastTrackerOutputQueryParams, NearExpirationProductResponse, NearExpirationQueryParams, LastTrackerOutputResult } from '../../interfaces/tracking';
 import { format } from 'date-fns';
 import { DatesT2Tracking, OutputT2, OutputT2QueryParams } from '../../interfaces/trackingT2';
+import {  updateSeguimientoById } from './seguimientoSlice';
+import { parseTrackerSeguimiento } from './trackerThunk';
 export const trackerApi = createApi({
     reducerPath: 'trackerApi',
     baseQuery: fetchBaseQuery({
@@ -32,6 +34,28 @@ export const trackerApi = createApi({
             }),
             keepUnusedDataFor: 120000
         }),
+        uploadFile: builder.mutation<Tracker, { trackerId: number; formData: FormData }>({
+            query: ({ trackerId, formData }) => ({
+              url: `tracker/${trackerId}/upload-file/`,  // Ajusta a /tracker/:id/upload-file
+              method: "PATCH",
+              body: formData,
+            }),
+            onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+                try {
+                  // Esperar a que la mutación se complete y obtener el tracker del backend
+                  const { data: trackerResponse } = await queryFulfilled;
+                  
+                  // Transformar el tracker en un objeto de tipo Seguimiento usando la función parseTrackerSeguimiento
+                  const updatedSeguimiento = parseTrackerSeguimiento(trackerResponse);
+                  
+                  // Actualizar el seguimiento en el slice
+                  dispatch(updateSeguimientoById(updatedSeguimiento));
+                  
+                } catch (error) {
+                  console.error("Error al actualizar el seguimiento después de cargar archivos:", error);
+                }
+              },
+            }),
         getTrackerById: builder.query<Tracker, string>({
             query: (id) => ({
                 url: `/tracker/${id}/`,
@@ -203,7 +227,8 @@ export const {
 
 export const {
     useGetTrackerQuery,
-    useGetTrackerByIdQuery
+    useGetTrackerByIdQuery,
+    useUploadFileMutation
 } = trackerApi
 
 export const {

@@ -208,11 +208,36 @@ export const permisions = [
     },
 
     {
+        url:"/claim/editstatus/:id",
+        reg: /\/claim\/editstatus\/\d+/,
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url:"/claim/mine",
         permissions: [
             "any"
         ]
     },
+    {
+        url:"/notifications",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url:"/maintenance/distributor-center",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/maintenance/period-center",
+        permissions: [
+            "any"
+        ]
+    }
 ]
 
 const directory: RoutePermissions = {}

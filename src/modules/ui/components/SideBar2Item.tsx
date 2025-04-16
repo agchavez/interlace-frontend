@@ -19,6 +19,7 @@ export const SideBarItem: FC<SidebarItemProps> = ({
         setOpen(!open);
     };
 
+
     return (
         <li className={open ? "showMenu" : ""}>
             {/* "Bloque" principal */}

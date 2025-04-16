@@ -7,13 +7,13 @@ import { checkToken } from "../store/auth/thunks";
 import HomeRouter from "../modules/home/HomeRouter";
 
 import { LazyLoading } from '../modules/ui/components/LazyLoading';
-import Navbar from '../modules/ui/components/Navbar';
 
 import { getDistributionCenters } from '../store/user';
 import { getMaintenanceData } from '../store/maintenance/maintenanceThunk';
 import { permisions } from '../config/directory';
 import { LogOutTimer } from '../modules/auth/components/LogoutTimer';
 import {Side2bar} from "../modules/ui/components/Side2Bar.tsx";
+import NotificationManager from "../modules/ui/components/NotificationManager.tsx";
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -22,12 +22,14 @@ const TrackerT2Router = lazy(() => import('../modules/tracker_t2/TrackerT2Router
 const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
 const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
-
+const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
+const MaintenanceRouter = lazy(() => import('../modules/maintenance/MaintenanceRouter'));
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
     const location = useLocation()
     const openSidebar = useAppSelector((state) => state.ui.openSidebar);
+    const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     useEffect(() => {
         dispatch(checkToken());
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,12 +64,16 @@ export function AppRouter() {
     const [openMobileSidebar, setOpenMobileSidebar] = useState(false)
     if (status === 'checking') return <></>
 
-    if (!permitedRoute) return <Navigate to="/"/>
+    if (!permitedRoute) {
+        return <Navigate to={`/?next=${location.pathname}`}/>
+    }
+
+    const next = queryParams.get('next')
 
     return <>
         <div>
             {status === 'authenticated' && <Side2bar open={openMobileSidebar} setOpen={setOpenMobileSidebar} />}
-            <Navbar sidebarOpen={openMobileSidebar} setSidebaOpen={setOpenMobileSidebar}/>
+            <NotificationManager/>
             <LogOutTimer />
             <div>
                 <div className={status === 'authenticated' ? !openSidebar ?
@@ -76,56 +82,70 @@ export function AppRouter() {
 
                     <Routes>
                         <Route path="/auth/*" element={
-                            <PrivateRoute access={status === 'unauthenticated'} path="/">
+                            <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     AuthRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/user/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     UserRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/tracker/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path='/' next={next || undefined}>
                                 <LazyLoading Children={
                                     TrackerRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/tracker-t2/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     TrackerT2Router
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/auth/login">
+                            <PrivateRoute access={status === 'authenticated'} path='/auth/login' next={next || undefined}>
                                 <HomeRouter />
                             </PrivateRoute>
                         } />
                         <Route path="/report/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     ReportRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/order/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     OrderRouter
                                 } />
                             </PrivateRoute>
                         } />
                         <Route path="/inventory/*" element={
-                            <PrivateRoute access={status === 'authenticated'} path="/">
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                                 <LazyLoading Children={
                                     InventoryRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/maintenance/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                                <LazyLoading Children={
+                                    MaintenanceRouter
+                                } />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/claim/*" element={
+                            <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                                <LazyLoading Children={
+                                    ClaimRouter
                                 } />
                             </PrivateRoute>
                         } />

@@ -49,15 +49,17 @@
   z-index: 2;
   transition: all 0.4s ease;
 }
+
+
 .base__container.close{
   //el width: 100vw menos 170px es para que el contenedor de la pagina se vea completo
   width: calc(100vw - 72px);
   left: 46px;
   top: 70px;
   transition: all 0.4s ease;
-}
 
-// PA
+
+}
 
 .nav__sidebar-module{
   text-align: start;
@@ -143,11 +145,7 @@
   margin-top: 3rem;
   width: calc(100vw - 257px);
   transition: all 0.4s ease;
-  @media screen and (max-width: $md-breackpoint) {
-    display: flex;
-    margin-left: 0;
-    width: 100vw !important;
-  }
+
 }
 
 // Cuando este cerrado el sidebar el contenedor de la pagina se ajusta a 100vw
@@ -156,6 +154,21 @@
     margin-left: 55px;
   // transition: all 0.4s ease;
   transition: all 0.4s ease;
+}
+
+@media screen and (max-width: 600px) {
+  .ui__container{
+    width: 96vw;
+    left: 0;
+    top: 70px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ui__container.close {
+    width: 96vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .sidebar {
@@ -320,6 +333,13 @@
       }
     }
   }
+
+}
+@media screen and (max-width: 600px) {
+  .sidebar.close{
+    display: none;
+  }
+
 }
 .sidebar.close {
   width: 55px;
@@ -430,19 +450,7 @@
   color: $colorPrimary !important;
   opacity: 1.6 !important;
 }
-@media (max-width: 600px) {
-  .home-section {
-    left: 78px;
-    width: calc(100% - 78px);
-  }
-  .base__container{
-    //el width: 100vw menos 170px es para que el contenedor de la pagina se vea completo
-    width: calc(100vw - 78px);
-    left: 78px;
-    top: 70px;
-    z-index: 2;
-  }
-}
+
 
 .ui__footer {
   position: fixed;

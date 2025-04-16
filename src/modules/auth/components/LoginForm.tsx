@@ -87,7 +87,7 @@ export function LoginForm() {
                             style={{ marginTop: 0 }}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                                        <Grid item xs={12}>
                         <FormControl variant="outlined" fullWidth error={errors.password?.message ? true : false}>
                             <InputLabel htmlFor="outlined-adornment-password">
                                 Contraseña
@@ -101,17 +101,15 @@ export function LoginForm() {
                                     <InputAdornment position="end">
                                         <IconButton
                                             aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            onMouseDown={() => setShowPassword(!showPassword)}
+                                            onClick={() => setShowPassword(prevState => !prevState)}
+                                            onMouseDown={(e) => e.preventDefault()}
                                             edge="end"
                                         >
-                                            {
-                                                showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />
-                                            }
+                                            {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                                         </IconButton>
                                     </InputAdornment>
                                 }
-                                label="Password"
+                                label="Contraseña"
                             />
                             <Typography component="body" variant="body2" textAlign="start" color="red">
                                 {errors.password?.message}

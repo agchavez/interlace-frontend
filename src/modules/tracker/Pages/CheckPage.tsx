@@ -20,7 +20,11 @@ import { getOpenTrackings } from "../../../store/seguimiento/trackerThunk";
 import { CompletarSeguimientoModal } from "../components/CompletarSeguimientoModal";
 import FloatLoading from "../components/FloatLoading";
 import { useSearchParams } from "react-router-dom";
-import {ReclamoModal} from "../components/ClaimDialog.tsx";
+import {ClaimModal} from "../components/ClaimDialog.tsx";
+import ClaimEditModal from "../components/ClaimEditModal.tsx";
+import CheckBoxTwoToneIcon from '@mui/icons-material/CheckBoxTwoTone';
+import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
+import PausePresentationTwoToneIcon from '@mui/icons-material/PausePresentationTwoTone';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -97,10 +101,7 @@ export const CheckPage = () => {
   };
 
   const handleClickDelete = () => {
-    if (seguimientos[seguimeintoActual || 0]?.type === "IMPORT") {
-        setClaimOpen(true);
-        return;
-    }
+    
     setEliminarOpen(true);
   };
   useEffect(() => {
@@ -135,10 +136,25 @@ export const CheckPage = () => {
           handleClose={handleCloseCreateModal}
         />
       )}
-      <ReclamoModal
-        open={claimOpen}
-        onClose={() => setClaimOpen(false)}
-      />
+      {claimOpen && seguimientos.length > 0 && (
+          seguimientos[seguimeintoActual || 0]?.claim ? (
+              <ClaimEditModal
+                  open={claimOpen}
+                  onClose={() => setClaimOpen(false)}
+                  claimId={seguimientos[seguimeintoActual || 0].claim!}
+                  seguimiento={seguimientos[seguimeintoActual || 0]}
+              />
+          ) : (
+              <ClaimModal
+                  tracker={seguimientos[seguimeintoActual || 0].id}
+                  open={claimOpen}
+                  onClose={() => setClaimOpen(false)}
+                  type={seguimientos[seguimeintoActual || 0].type}
+                  seguimiento={seguimientos[seguimeintoActual || 0]}
+              />
+          )
+      )}
+
       <EliminarSeguimientoModal
         index={seguimeintoActual || 0}
         open={eliminarOpen}
@@ -228,6 +244,7 @@ export const CheckPage = () => {
                       seguimiento={seguimiento}
                       indice={index}
                       disable={false}
+                      openClaim={()=> setClaimOpen(true)}
                     />
                   </CustomTabPanel>
                 );
@@ -253,6 +270,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickDelete}
+                  startIcon={
+                    <DeleteTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
@@ -260,9 +280,7 @@ export const CheckPage = () => {
                     fontWeight={400}
                     color={"gray.700"}
                   >
-                    {seguimientos[seguimeintoActual || 0]?.type === "IMPORT"
-                      ? "Reclamo"
-                      : "Eliminar"}
+                    {"Eliminar"}
                   </Typography>
                 </Button>
               </Grid>
@@ -281,6 +299,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickPending}
+                  startIcon={
+                    <PausePresentationTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
@@ -306,6 +327,9 @@ export const CheckPage = () => {
                   size="medium"
                   fullWidth
                   onClick={handleClickCompletar}
+                  endIcon={
+                    <CheckBoxTwoToneIcon color="inherit" fontSize="small" />
+                  }
                 >
                   <Typography
                     variant="body2"
