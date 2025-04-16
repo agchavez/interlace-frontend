@@ -327,8 +327,8 @@ function ClaimPDF({
             rowCellsStyle={inputRowCellStyles}
           />
         </View>
-        {/* Imagenes del claim */}
       </Page>
+      {/* Imagenes del claim */}
       {/* Contenedor cerrado */}
       {(claim?.photos_container_closed.length || 0) > 0 && (
         <Page size="LETTER" style={styles.page}>
@@ -344,18 +344,16 @@ function ClaimPDF({
                 <PDFText>{islocal ? "Rastra con Puerta/Lona Cerrada" : "Contenedor Cerrado"}</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row", paddingVertical: 10 }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_container_closed.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_container_closed.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -373,18 +371,15 @@ function ClaimPDF({
                 <PDFText>{islocal ? "Rastra Con 1 Puerta/Lona Abierta" : "Contenedor Con 1 Puerta Abierta"}</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_container_one_open.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_container_one_open.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -403,18 +398,15 @@ function ClaimPDF({
                 <PDFText>{islocal ? "Rastra Con 2 Puertas Abiertas" : "Contenedor con 2 puertas abiertas"}</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_container_two_open.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_container_two_open.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -433,18 +425,15 @@ function ClaimPDF({
                 <PDFText>{islocal ? "Vista Superior del Contenido de la Rastra" : "Vista Superior del contenido del contenedor"}</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_container_top.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_container_top.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -463,18 +452,15 @@ function ClaimPDF({
                 <PDFText>Fotografía durante la descarga:</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_during_unload.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_during_unload.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -492,18 +478,15 @@ function ClaimPDF({
                 <PDFText>Fisuras/abolladuras de pallets:</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_pallet_damage.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_pallet_damage.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -521,18 +504,15 @@ function ClaimPDF({
                 <PDFText>Lote de Producción:</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_production_batch.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_production_batch.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -556,18 +536,15 @@ function ClaimPDF({
                 </PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_damaged_product_base.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_damaged_product_base.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -588,18 +565,15 @@ function ClaimPDF({
                 <PDFText>Abolladuras (mínimo 3 diferentes):</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_damaged_product_dents.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_damaged_product_dents.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -622,18 +596,15 @@ function ClaimPDF({
                 </PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_damaged_boxes.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_damaged_boxes.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -654,18 +625,15 @@ function ClaimPDF({
                 <PDFText>Producto en mal estado agrupado en 1 pallet:</PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_grouped_bad_product.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_grouped_bad_product.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
@@ -688,18 +656,15 @@ function ClaimPDF({
                 </PDFText>
               </View>
             </View>
-            <View style={{ flexDirection: "row" }}>
-              <View style={{ flex: 1 }}>
-                {claim?.photos_repalletized.map((photo) => {
-                  return (
-                    <Image
-                      key={photo.id}
-                      src={photo.access_url}
-                      style={{ width: 400, marginHorizontal: "auto" }}
-                    />
-                  );
-                })}
-              </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+              {claim?.photos_repalletized.map((photo) => (
+                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                  <Image
+                    src={photo.access_url}
+                    style={{ width: "100%" }}
+                  />
+                </View>
+              ))}
             </View>
           </View>
         </Page>
