@@ -111,6 +111,12 @@ const items: SideBarMainItem[] = [
                 id: "order",
                 permissions: ["order.manage"],
             },
+            {
+                text: "Exportar Excel",
+                href: "/tracker/export",
+                id: "tracker-export",
+                permissions: ["report.shift"],
+            },
         ],
     },
     {

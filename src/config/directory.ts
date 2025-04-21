@@ -107,6 +107,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/tracker/export",
+        permissions: [
+            "report.report_shift",
+        ]
+    },
+    {
         url: "/report/shift",
         permissions: [
             "tracker.view_trackerdetailproductmodel",
