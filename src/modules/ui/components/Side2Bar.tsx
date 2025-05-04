@@ -338,11 +338,31 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
                                 src={flagurl}
                             />
                         </div>
-                        <div className="name-job">
-                            <div className="profile_name">
+                        <div className="name-job" style={{ maxWidth: 160, overflow: "hidden" }}>
+                            <div
+                                className="profile_name"
+                                style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    fontWeight: 500,
+                                    maxWidth: "100%",
+                                }}
+                                title={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
+                            >
                                 {user?.first_name} {user?.last_name}
                             </div>
-                            <div className="job">
+                            <div
+                                className="job"
+                                style={{
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    fontSize: 13,
+                                    maxWidth: "100%",
+                                }}
+                                title={user?.centro_distribucion_name || "--"}
+                            >
                                 {user?.centro_distribucion_name || "--"}
                             </div>
                         </div>
