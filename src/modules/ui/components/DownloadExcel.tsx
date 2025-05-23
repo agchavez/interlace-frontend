@@ -3,6 +3,7 @@ import { useGetDistributorCentersQuery } from "../../../store/maintenance/mainte
 import { CircularProgress } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/DownloadtwoTone";
 import { Button } from "@mui/material";
+import { Cloud, CloudDownloadTwoTone } from "@mui/icons-material";
 
 const ExcelDownloader = () => {
   const { data, isLoading, isFetching } = useGetDistributorCentersQuery({
@@ -85,14 +86,14 @@ const ExcelDownloader = () => {
   return (
     <Button
       type="submit"
-      variant="outlined"
-      color="secondary"
+      variant="text"
+      color="primary"
       disabled={isLoading || isFetching}
       onClick={handleDownload}
-      startIcon={isLoading ? <CircularProgress size={24} /> : <DownloadIcon />}
+      endIcon={isLoading ? <CircularProgress size={24} /> : <CloudDownloadTwoTone />}
       fullWidth={false}
     >
-      Descargar Plantilla de Excel
+      Descargar Plantilla
     </Button>
   );
 };
