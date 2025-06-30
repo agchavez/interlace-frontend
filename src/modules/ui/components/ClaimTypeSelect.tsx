@@ -155,7 +155,7 @@ props: ClaimTypeSelectProps<TField>
               (params) => (
                 <TextField
                   {...params}
-                  label="Tipo de Reclamo"
+                  label={props.local ? "Motivo de Alerta" : "Tipo de Reclamo"}
                   variant="outlined"
                   placeholder={props.placeholder}
                   error={!!error}
