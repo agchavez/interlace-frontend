@@ -198,11 +198,11 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
             {/* Conservamos el DialogTitle original */}
             <BootstrapDialogTitle onClose={onClose} id="customized-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
-                    Levantar Reclamo - Tracker Importado
+                    {type === 'IMPORT' ? "Levantar Reclamo - Tracker Importado" : "Levantar Alerta de Calidad - Tracker Local"}
                 </Typography>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Typography variant="body2" color="white">
-                        Complete el formulario para registrar el reclamo
+                        Complete el formulario para registrar { type === 'IMPORT' ? "el reclamo" : "la alerta de calidad" }
                     </Typography>
                 </Box>
             </BootstrapDialogTitle>
@@ -219,7 +219,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
                         <ClaimTypeSelect
                             control={control}
                             name="tipo"
-                            local={true}
+                            local={type === 'LOCAL'}
                             placeholder="Seleccione o ingrese un tipo de reclamo"
                             required={true}
                         />

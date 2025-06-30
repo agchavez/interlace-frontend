@@ -51,7 +51,7 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue, type 
                         <ImagePreviewDropzone
                             files={[]}
                             onFilesChange={(files: File[]) => setValue("claimFile", files[0] || null)}
-                            label="Subir archivo Claim (PDF/Excel)"
+                            label={getFieldLabel("Subir archivo Claim (PDF/Excel)", "Subir Solicitud de Resolución (PDF/Excel)")} 
                             accept={{ "application/pdf": [".pdf"], "application/vnd.ms-excel": [".xls", ".xlsx"] }}
                             maxFiles={1}
                         />
@@ -60,7 +60,7 @@ const ClaimDocumentation: React.FC<ClaimDocumentationProps> = ({ setValue, type 
                         <ImagePreviewDropzone
                             files={[]}
                             onFilesChange={(files: File[]) => setValue("creditMemoFile", files[0] || null)}
-                            label="Subir Nota de Crédito (PDF)"
+                            label={getFieldLabel("Subir Nota de Crédito (PDF)", "Subir Memorandum (PDF)")}
                             accept={{ "application/pdf": [".pdf"] }}
                             maxFiles={1}
                         />

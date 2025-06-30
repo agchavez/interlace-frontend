@@ -115,7 +115,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                     >
                         <Box>
                             <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                Archivo "Claim File"
+                                {type === 'IMPORT' ? "Archivo \"Claim File\"" : "Archivo \"Solicitud de Resolución\""}
                                 <HtmlTooltip title="Archivo principal del reclamo (Excel o PDF)">
                                     <IconButton size="small" color="primary">
                                         <Typography variant="body1">?</Typography>
@@ -174,7 +174,7 @@ const ClaimEditDocumentation: React.FC<Props> = ({
                     >
                         <Box>
                             <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                                Nota de Crédito
+                                {type === 'IMPORT' ? "Nota de Crédito" : "Memorandum"}
                                 <HtmlTooltip title="Documento de nota de crédito (PDF)">
                                     <IconButton size="small" color="primary">
                                         <Typography variant="body1">?</Typography>

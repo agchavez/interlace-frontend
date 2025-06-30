@@ -40,6 +40,7 @@ interface ClaimEditProductsProps {
     disable: boolean;
     setProducts: React.Dispatch<React.SetStateAction<ProductItem[]>>;
     detalles?: DetalleCarga[]; // Detalles recibidos por props
+    isLocal: boolean;
 }
 
 interface FormValues {
@@ -52,7 +53,8 @@ const ClaimEditProducts: React.FC<ClaimEditProductsProps> = ({
     products,
     setProducts,
     disable,
-    detalles = [] // Valor por defecto: array vacío
+    detalles = [], // Valor por defecto: array vacío
+    isLocal,
 }) => {
     const loading = useAppSelector((state) => state.maintenance.loading);
 
@@ -176,7 +178,7 @@ const ClaimEditProducts: React.FC<ClaimEditProductsProps> = ({
     return (
         <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-                Productos del Reclamo
+                {isLocal ? "Productos de la Alerta de Calidad" : "Productos del Reclamo"}
             </Typography>
 
             {!hasProducts && (

@@ -231,7 +231,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
         <BootstrapDialog open={open} maxWidth="lg" fullWidth>
             <BootstrapDialogTitle onClose={onClose} id="claim-edit-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
-                    Editar Reclamo
+                    {seguimiento.type === "IMPORT" ? "Editar Reclamo" : "Editar Alerta de Calidad"}
                 </Typography>
                  <Typography variant="body2" component="div">
                     TRK-{claimData.tracker}
@@ -263,6 +263,7 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
                         disable={claimData.status === "APROBADO" || claimData.status === "RECHAZADO"}
                         setProducts={setProducts}
                         detalles={seguimiento.detalles || []}
+                        isLocal={seguimiento.type === "LOCAL"}
                     />
                 </div>
             </DialogContent>
