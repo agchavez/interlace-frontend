@@ -18,6 +18,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { toast } from "sonner";
 
 import { useMassImportPeriodsMutation } from "../../../store/maintenance/maintenanceApi";
+import ExcelDownloader from "../../ui/components/DownloadExcel";
 
 interface Props {
     open: boolean;
@@ -70,6 +71,10 @@ export function PeriodMassUploadDialog({ open, onClose }: Props) {
                             Selecciona un archivo .xlsx que contenga varios Períodos para importar.
                         </Typography>
                         <Divider />
+                    </Grid>
+
+                    <Grid item xs={12} display="flex" justifyContent="flex-end">
+                        <ExcelDownloader />
                     </Grid>
 
                     <Grid item xs={12}>

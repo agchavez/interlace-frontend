@@ -229,7 +229,7 @@ export const maintenanceApi = createApi({
     }),
     massImportPeriods: builder.mutation<void, FormData>({
       query: (formData) => ({
-        url: "/period/mass-import/", // Ajusta la URL a tu endpoint real
+        url: "/period/load-excel/", // Ajusta la URL a tu endpoint real
         method: "POST",
         body: formData,
       }),
