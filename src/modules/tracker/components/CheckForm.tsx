@@ -953,7 +953,7 @@ export const CheckForm = ({
                       {seguimiento?.type === "IMPORT" ? "Claim registrado" : "Alerta de Calidad registrada"}
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       size="small"
                       color="error"
                       onClick={openClaim}

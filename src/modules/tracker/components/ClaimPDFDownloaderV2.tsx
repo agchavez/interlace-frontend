@@ -388,11 +388,11 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
       {/* Backdrop para mostrar el progreso con diseño mejorado y colores más suaves */}
       <Backdrop
         sx={{
-          color: "#fff",
+          color: "#00f",
           zIndex: (theme) => theme.zIndex.drawer + 1,
           backdropFilter: "blur(3px)",
           borderRadius: 2,
-          backgroundColor: "rgba(28, 37, 54, 0.15)", // color-sidebar-primary con opacidad
+          backgroundColor: "rgba(54, 32, 28, 0.15)", // color-sidebar-primary con opacidad
         }}
         open={isProcessing}
       >
@@ -408,9 +408,9 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
             p: 2.5,
             borderRadius: 2,
             background:
-              "linear-gradient(145deg, rgba(231, 207, 15, 0.15) 0%, rgba(17, 15, 13, 0.75) 100%)",
-            boxShadow: "0 8px 16px rgba(17, 15, 13, 0.3)",
-            border: "1px solid rgba(231, 207, 15, 0.2)",
+              "linear-gradient(145deg, rgba(231, 69, 15, 0.15) 0%, rgba(17, 14, 13, 0.75) 100%)",
+            boxShadow: "0 8px 16px rgba(17, 14, 13, 0.3)",
+            border: "1px solid rgba(231, 40, 15, 0.2)",
           }}
         >
           <Box
@@ -426,7 +426,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
               size={46}
               thickness={3}
               sx={{
-                color: "#e7cf0f", // color-primary
+                color: "#e72f0fff", // color-primary
                 opacity: 0.9,
               }}
             />
@@ -438,7 +438,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
                 justifyContent: "center",
               }}
             >
-              <PictureAsPdfTwoToneIcon sx={{ fontSize: 20, color: "#fff" }} />
+              <PictureAsPdfTwoToneIcon sx={{ fontSize: 20, color: "#000" }} />
             </Box>
           </Box>
 
@@ -448,7 +448,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
               fontWeight: 500,
               letterSpacing: 0.3,
               fontSize: "1rem",
-              color: "#e7cf0f", // color-primary
+              color: "#000000ff", // color-primary
             }}
           >
             {progressMessage}
@@ -472,7 +472,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
                 left: 0,
                 height: "100%",
                 background:
-                  "linear-gradient(90deg, rgba(231, 207, 15, 0.3) 0%, rgba(231, 207, 15, 0.9) 50%, rgba(231, 207, 15, 0.3) 100%)",
+                  "linear-gradient(90deg, rgba(242, 108, 55, 0.5) 0%, rgba(231, 55, 15, 0.9) 50%, rgba(236, 100, 32, 0.62) 100%)",
                 animation: "progressAnimation 1.5s infinite ease-in-out",
                 width: "30%",
                 borderRadius: 1,
@@ -494,7 +494,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
               opacity: 0.9,
               mt: 0.5,
               fontSize: "0.675rem",
-              color: "#949ca6", // text-sidebar-primary
+              color: "#000000ff", // text-sidebar-primary
             }}
           >
             No cierre esta ventana
