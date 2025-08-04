@@ -52,7 +52,7 @@ export const ClaimTypeChipWrapper: React.FC<ClaimTypeChipWrapperProps> = ({ clai
     } else {
         // For newer numeric IDs, you could define a color mapping or use a default color
         // For now, using a blue color for all numeric IDs
-        color = "#64B5F6";
+        color = "#1c2536";
     }
 
     if (isLoading) {

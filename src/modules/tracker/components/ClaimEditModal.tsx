@@ -11,7 +11,8 @@ import {
     CircularProgress,
     Alert,
     useTheme,
-    useMediaQuery
+    useMediaQuery,
+    Tooltip
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { toast } from "sonner";
@@ -30,7 +31,7 @@ import {
     useUpdateClaimMutation,
 } from "../../../store/claim/claimApi";
 import ClaimCard from "./ClaimCard.tsx";
-import { SaveAltOutlined } from "@mui/icons-material";
+import { ReportProblemTwoTone, SaveAltOutlined } from "@mui/icons-material";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice.ts";
 
 export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -243,6 +244,11 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
             maxWidth={isMobile ? false : "lg"}
             fullWidth={!isMobile}
             fullScreen={isMobile}
+            PaperProps={{
+                sx: {
+                    overflow: 'hidden'
+                }
+            }}
         >
             <BootstrapDialogTitle onClose={onClose} id="claim-edit-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
@@ -286,25 +292,28 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
             <Divider />
            { !(claimData.status === "APROBADO" || claimData.status === "RECHAZADO") && <DialogActions>
                 <Box display="flex" justifyContent="space-between" alignItems="center" width="100%" p={0}>
-
-                <Box>
-                    <Alert severity="warning" sx={{ mb: 0 }}>
-                        Para mantener los cambios, debes guardar el reclamo antes de cerrar la ventana.
-                    </Alert>
-                </Box>
-                <Box>
-
-                <Button
-                    variant="outlined"
-                    color="secondary"
-                    onClick={handleSubmit(onSubmit)}
-                    disabled={isUpdating}
-                    endIcon={isUpdating ? <CircularProgress size={20} /> : <SaveAltOutlined />}
-                    >
-                    {isUpdating ? "Guardando cambios..." : "Guardar Cambios"}
-                </Button>
-                        </Box>
+                    <Box display={{ xs: 'none', sm: 'block' }}>
+                        <Alert severity="warning" sx={{ mb: 0, fontSize: { xs: '0.75rem', lg: '1rem' } }}>
+                            Para mantener los cambios, debes guardar el reclamo antes de cerrar la ventana.
+                        </Alert>
                     </Box>
+                    <Box display={{ xs: 'block', sm: 'none' }}>
+                        <Tooltip title="Para mantener los cambios, debes guardar el reclamo antes de cerrar la ventana.">
+                            <ReportProblemTwoTone sx={{ color: 'warning.main', fontSize: '1.5rem', display: { xs: 'block', md: 'none' } }} />
+                        </Tooltip>
+                    </Box>
+                    <Box>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={handleSubmit(onSubmit)}
+                            disabled={isUpdating}
+                            endIcon={isUpdating ? <CircularProgress size={20} /> : <SaveAltOutlined />}
+                            >
+                            {isUpdating ? "Guardando cambios..." : "Guardar Cambios"}
+                        </Button>
+                    </Box>
+                </Box>
             </DialogActions>}
         </BootstrapDialog>
     );
