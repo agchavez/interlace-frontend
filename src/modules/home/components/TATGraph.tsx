@@ -1,7 +1,7 @@
 import {
   Container,
   Grid,
-  IconButton, LinearProgress,
+  IconButton, LinearProgress, Typography, Box,
 } from "@mui/material";
 import {
   Chart as ChartJS,
@@ -186,48 +186,59 @@ const TATGraph = () => {
 
   return (
     <>
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h6"
+          component="h2"
+          color="primary"
+          fontWeight={500}
+          textAlign="center"
+        >
+          Tiempo Promedio TAT por Centro de Distribución
+        </Typography>
+      </Box>
+
       <Container maxWidth="xl" className="mt-5">
         <div className="row">
           <div className="col-sm-6">
+            <>
+              <div className="d-flex justify-content-between align-items-between">
+                {loading && <LinearProgress color="primary" sx={{width: '100%'}}/>}
+                <Grid container justifyContent="space-between">
+                  <Grid item>
 
-              <>
-                <div className="d-flex justify-content-between align-items-between">
-                  {loading &&<LinearProgress color="primary" sx={{width: '100%'}}/>}
-                  <Grid container justifyContent="space-between">
-                    <Grid item>
-
-                      <div>
-                        <IconButton
-                          onClick={() => setTypeChart(TypeChart.LINE)}
-                          color={
-                            typeChart === TypeChart.LINE ? "primary" : "default"
-                          }
-                        >
-                          <TimelineOutlinedIcon style={{ fontSize: "35px" }} />
-                        </IconButton>
-                        <IconButton
-                          onClick={() => setTypeChart(TypeChart.BAR)}
-                          color={
-                            typeChart === TypeChart.BAR ? "primary" : "default"
-                          }
-                        >
-                          <BarChartOutlinedIcon style={{ fontSize: "35px" }} />
-                        </IconButton>
-                      </div>
-                    </Grid>
-
-                    <Grid item>
-                      <TATGraphFilter/>
-                    </Grid>
+                    <div>
+                      <IconButton
+                        onClick={() => setTypeChart(TypeChart.LINE)}
+                        color={
+                          typeChart === TypeChart.LINE ? "primary" : "default"
+                        }
+                      >
+                        <TimelineOutlinedIcon style={{ fontSize: "35px" }} />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => setTypeChart(TypeChart.BAR)}
+                        color={
+                          typeChart === TypeChart.BAR ? "primary" : "default"
+                        }
+                      >
+                        <BarChartOutlinedIcon style={{ fontSize: "35px" }} />
+                      </IconButton>
+                    </div>
                   </Grid>
-                </div>
-                {typeChart === TypeChart.BAR && (
-                  <Bar options={options} data={data} height={80} />
-                )}
-                {typeChart === TypeChart.LINE && (
-                  <Line options={options} data={data} height={80} />
-                )}
-              </>
+
+                  <Grid item>
+                    <TATGraphFilter/>
+                  </Grid>
+                </Grid>
+              </div>
+              {typeChart === TypeChart.BAR && (
+                <Bar options={options} data={data} height={80} />
+              )}
+              {typeChart === TypeChart.LINE && (
+                <Line options={options} data={data} height={80} />
+              )}
+            </>
           </div>
         </div>
       </Container>

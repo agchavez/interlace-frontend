@@ -1,8 +1,7 @@
 import { Button, Card, Chip, CircularProgress, Container, Divider, Grid, Table, TableContainer, TableHead, TableRow, Typography, TableCell, TableBody, styled, tableCellClasses, IconButton, alpha, MenuProps, Menu, MenuItem } from '@mui/material';
 // import PalletPrintContent from "../../tracker/components/PalletPrint";
-import { useAppSelector } from '../../../store/store';
+import { useAppSelector } from '../../../store';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import image from '../../../assets/layout.png'
 import { useGetdashboardQuery } from '../../../store/auth/authApi';
 import { useState, useEffect } from 'react';
 import { DashboardQueryParams } from '../../../interfaces/login';
@@ -14,6 +13,8 @@ import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import TATGraph from '../components/TATGraph';
+import WelcomeProjectCard from '../components/WelcomeProjectCard';
+
 enum FilterDate {
     TODAY = 'Hoy',
     WEEK = 'Esta semana',
@@ -247,29 +248,9 @@ export default function HomePage() {
             </Grid> */}
 
             <Grid item xs={12} md={6} >
-                <Card elevation={0} sx={{
-                    p: 2, borderRadius: 2
-                }} >
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        <div>
-                            <img src={image} alt="layout" width={40} />
-
-                        </div>
-                        <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-                        <div>
-                            <Typography variant="body1" component="h6" style={{ textAlign: "start" }} color={"secondary"} fontWeight={200}>
-                                Bienvenido(a)
-                            </Typography>
-                            <Divider />
-                            <Typography variant="h6" component="p" style={{ textAlign: "start" }} color={"secondary"} fontWeight={400}>
-                                {user?.first_name} {user?.last_name}
-                            </Typography>
-                        </div>
-                    </div>
-
-                </Card>
-
+                <WelcomeProjectCard />
             </Grid>
+
             <Grid item xs={12} md={6} >
                 <Card elevation={1} sx={{
                     p: 2, borderRadius: 2,
@@ -296,8 +277,8 @@ export default function HomePage() {
                                 <Chip
                                     label={formatDuration(
                                         {
-                                            hours: Math.floor(data?.time_average / 3600), // Calcula las horas
-                                            minutes: Math.floor((data?.time_average % 3600) / 60), // Calcula los minutos
+                                            hours: Math.floor(data?.time_average / 3600),
+                                            minutes: Math.floor((data?.time_average % 3600) / 60),
                                         },
                                         { locale: es, format: ['hours', 'minutes'], delimiter: ' y ' }
                                     )}
@@ -317,6 +298,7 @@ export default function HomePage() {
                 </Card>
 
             </Grid>
+
             <Grid item xs={12} md={6} >
                 <Card elevation={1} sx={{
                     p: 2, borderRadius: 2
@@ -443,7 +425,7 @@ export default function HomePage() {
                 }} >
                 <TATGraph />
                 </Card>
-                </Grid>
+            </Grid>
         </Grid>
     </Container>
 }

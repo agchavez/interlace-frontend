@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import {
     Container,
@@ -139,9 +138,9 @@ export function PeriodListPage() {
     const rows = data?.results || [];
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 2 }}>
+        <Container sx={{ mt: 2 }} maxWidth="xl">
             <Typography variant="h5" mb={1}>
-                Period List
+               Periodos
             </Typography>
             <Divider sx={{ mb: 2 }} />
 
@@ -165,7 +164,6 @@ export function PeriodListPage() {
                     </Button>
                 </Grid>
                 <Grid item xs={12} md={2}>
-                    {/* Botón para abrir el diálogo de carga masiva */}
                     <Button
                         startIcon={<CloudUploadIcon />}
                         fullWidth
@@ -175,23 +173,25 @@ export function PeriodListPage() {
                         Carga Masiva
                     </Button>
                 </Grid>
-            </Grid>
 
-            <div style={{ height: 500, width: "100%" }}>
-                <DataGrid
-                    {...tableBase}
-                    rows={rows}
-                    columns={columns}
-                    rowCount={totalCount}
-                    loading={isLoading}
-                    paginationMode="server"
-                    paginationModel={paginationModel}
-                    onPaginationModelChange={setPaginationModel}
-                    pageSizeOptions={[5, 10, 20]}
-                    getRowId={(row) => row.id}
-                    onCellDoubleClick={(params) => handleOpenEdit(params.row as Period)}
-                />
-            </div>
+                <Grid item xs={12}>
+                    <div style={{ height: 500, width: "100%" }}>
+                        <DataGrid
+                            {...tableBase}
+                            rows={rows}
+                            columns={columns}
+                            rowCount={totalCount}
+                            loading={isLoading}
+                            paginationMode="server"
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                            pageSizeOptions={[5, 10, 20]}
+                            getRowId={(row) => row.id}
+                            onCellDoubleClick={(params) => handleOpenEdit(params.row as Period)}
+                        />
+                    </div>
+                </Grid>
+            </Grid>
 
             {openDialog && (
                 <PeriodDialog
