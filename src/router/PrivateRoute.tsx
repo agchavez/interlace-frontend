@@ -8,18 +8,20 @@ interface Props {
     next?: string;
 }
 
-export const PrivateRoute = ({children, access, path, next}:Props) => {
-    let to = ''
-    if (!access){
-        if (next){
-            to = path+"?next="+next
-        } else {
-            to = path+'?next='+location.pathname
-        }
-    }
-    if (access) {
-        return <>{children}</>
-    } else {
-        return <Navigate to={to} />
-    }
-}
+export const PrivateRoute = ({ children, access, path, next }: Props) => {
+  let to = "";
+  if (!access) {
+    const existingSearchParams = new URLSearchParams(location.search);
+    existingSearchParams.delete("next");
+    const nextPath = next ? next : location.pathname;
+    to =
+      existingSearchParams.toString().length > 0
+        ? path + `?next=${nextPath + "/?" + existingSearchParams.toString()}`
+        : path + `?next=${nextPath}`;
+  }
+  if (access) {
+    return <>{children}</>;
+  } else {
+    return <Navigate to={to} />;
+  }
+};

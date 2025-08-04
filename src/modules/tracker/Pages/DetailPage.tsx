@@ -1,5 +1,5 @@
 import { Container, Divider, Grid, IconButton, Typography } from '@mui/material'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useGetTrackerByIdQuery } from '../../../store/seguimiento/trackerApi';
 
 import { skipToken } from '@reduxjs/toolkit/query';
@@ -9,7 +9,7 @@ import { ArrowBack } from '@mui/icons-material';
 
 import {ClaimModal} from "../components/ClaimDialog.tsx";
 import ClaimEditModal from "../components/ClaimEditModal.tsx";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export const DetailPage = () => {
     const { id } = useParams<{ id: string }>();
@@ -21,6 +21,23 @@ export const DetailPage = () => {
             skip: !id
         }
     );
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const alertClaimOpen = searchParams.get('alertClaimOpen')
+
+    useEffect(() => {
+        function checkUrl() {
+            if (alertClaimOpen === 'true') {
+                setClaimOpen(true)
+                const params = new URLSearchParams(window.location.search)
+                params.delete('alertClaimOpen')
+                setSearchParams(params)
+            }
+        }
+        checkUrl()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     if (isLoading) return <div>Cargando...</div>
     if (error || !data) return <Navigate to="/tracker/manage" />
 
