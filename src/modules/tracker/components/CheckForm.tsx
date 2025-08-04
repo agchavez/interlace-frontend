@@ -71,6 +71,8 @@ import TrackerFilesModal from "./TrackerFilesModal";
 // import { toast } from "sonner";
 import PDFDownloader from "./TrackerPDFV2";
 import { QRCodeSVG } from "qrcode.react";
+import { useGetClaimByIdQuery } from "../../../store/claim/claimApi";
+import ClaimPDFDownloader from "./ClaimPDFDownloaderV2";
 
 export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -132,6 +134,9 @@ export const CheckForm = ({
       limit: 1,
       offset: 0,
     });
+
+  const { data: dataClaim } = useGetClaimByIdQuery(seguimiento.claim || 0, {skip: !seguimiento.claim});
+
   const tiempoEntrada = seguimiento?.timeStart
     ? new Date(seguimiento?.timeStart)
     : null;
@@ -948,7 +953,7 @@ export const CheckForm = ({
                       {seguimiento?.type === "IMPORT" ? "Claim registrado" : "Alerta de Calidad registrada"}
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="outlined"
                       size="small"
                       color="error"
                       onClick={openClaim}
@@ -962,6 +967,8 @@ export const CheckForm = ({
                     >
                       Ver detalles
                     </Button>
+
+                    <ClaimPDFDownloader claim={dataClaim} />
                   </>
                 ) : (
                   <>
