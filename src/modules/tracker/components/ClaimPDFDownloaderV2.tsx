@@ -361,8 +361,8 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
       <Box sx={{ display: "none" }}>
         <QRToBase64
           value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${
-            claim?.id
-          }`}
+            claim?.tracker
+          }?alertClaimOpen=true`}
           logoSrc="/logo-qr.png"
           onReady={(dataUrl) => setQrDataUrl(dataUrl)}
         />
