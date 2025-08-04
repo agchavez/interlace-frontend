@@ -1,9 +1,8 @@
 import * as XLSX from "xlsx";
 import { useGetDistributorCentersQuery } from "../../../store/maintenance/maintenanceApi";
 import { CircularProgress } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/DownloadtwoTone";
 import { Button } from "@mui/material";
-import { Cloud, CloudDownloadTwoTone } from "@mui/icons-material";
+import { CloudDownloadTwoTone } from "@mui/icons-material";
 
 const ExcelDownloader = () => {
   const { data, isLoading, isFetching } = useGetDistributorCentersQuery({

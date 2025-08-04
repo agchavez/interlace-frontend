@@ -117,12 +117,12 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   ) => {
     onChangeRow(detail, "ch-q", quantity);
     // Encuentra el índice del detalle en el estado actual
-    const index = body.findIndex((item) => item.order_detail_id === detail.id);
+    const index = body.findIndex((item) => item.tracker_detail_product === detail.id);
     // Si el índice es -1 y el checkbox no está marcado, no hagas nada
     if (!checked) {
       // Quitar del array el elemento que tenga el id del detalle
       setbody((prevBody) =>
-        prevBody.filter((item) => item.order_detail_id !== detail.id)
+        prevBody.filter((item) => item.tracker_detail_product !== detail.id)
       );
       return;
     }
@@ -130,11 +130,9 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
     // Si el índice es -1 y el checkbox está marcado, agrega un nuevo elemento al estado
     if (index === -1 && checked) {
       const newItem: OrderDetailCreateBody = {
-        order_detail_id: detail.id ?? 0,
+        tracker_detail_product: detail.id ?? 0,
         quantity,
-        expiration_date: detail.expiration_date,
-        order: detail.order,
-        tracker_detail_product: detail.tracker_detail_product,
+        order: detail.order || 0,
       };
 
       setbody((prevBody) => [...prevBody, newItem]);
@@ -494,7 +492,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         />
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
-        TRK-{detail.tracking_id.toString().padStart(5, "0")}
+        TRK-{detail.tracking_id?.toString().padStart(5, "0") || "SIN-TRACKER"}
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
         {detail.product_data?.sap_code}

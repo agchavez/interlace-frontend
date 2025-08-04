@@ -38,7 +38,12 @@ export type EditableOrderCreateBody = Omit<
 export interface OrderDetailCreateBody {
   quantity: number;
   order: number;
-  tracker_detail_product: number;
+  // FUNCIONALIDAD HÍBRIDA: Solo uno de estos debe estar presente
+  tracker_detail_product?: number;
+  // Nuevos campos para producto directo
+  product?: number;
+  distributor_center?: number;
+  expiration_date?: string;
 }
 
 export type EditableOrderDetailCreateBody = Omit<
@@ -50,20 +55,53 @@ export interface OrderDetail {
   id: number | null;
   order_detail_history: OrderDetailHistory[];
   product_data: ProductData | null;
-  tracking_id: number;
+  tracking_id: number | null;
   expiration_date: string;
+  expiration_date_display: string;
   created_at: string;
   quantity: number;
   quantity_available: number;
   order: number;
-  tracker_detail_product: number;
+  // FUNCIONALIDAD HÍBRIDA: Campos para tracker (actual)
+  tracker_detail_product: number | null;
+  // FUNCIONALIDAD HÍBRIDA: Campos para producto directo (nuevo)
+  product: number | null;
+  distributor_center: number | null;
 }
 
-export interface OrderDetailCreateBody {
+export interface OrderDetailCreateBodyLegacy {
   quantity: number;
   tracker_detail_product: number;
   expiration_date: string;
   order_detail_id: number;
+}
+
+// FUNCIONALIDAD HÍBRIDA: Nuevos tipos para ambos modos
+export type OrderDetailMode = "tracker" | "direct";
+
+export interface OrderDetailHybridForm {
+  mode: OrderDetailMode;
+  quantity: number;
+  // Campos para modo tracker (actual)
+  idTracker?: number;
+  idTrackerDetail?: string;
+  idTrackerDetailProduct?: string;
+  tracker_detail_product?: number;
+  expiration_date?: string;
+  // Campos para modo directo (nuevo)
+  product?: number;
+  distributor_center?: number;
+  manual_expiration_date?: string;
+}
+
+export interface DirectProductInventory {
+  id: number;
+  product: ProductData;
+  distributor_center: number;
+  expiration_date: string;
+  total_quantity: number;
+  available_quantity: number;
+  reserved_quantity: number;
 }
 
 export interface OrderDetailHistory {

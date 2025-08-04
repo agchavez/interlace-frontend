@@ -150,7 +150,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
                     <TableRow key={historyRow.id}>
                       <TableCell>
                         TRK-
-                        {historyRow.tracking_id.toString().padStart(8, "0")}
+                        {historyRow.tracking_id?.toString().padStart(8, "0") || "SIN-TRACKER"}
                       </TableCell>
                       <TableCell>{historyRow.product_data?.sap_code}</TableCell>
                       <TableCell>{historyRow.product_data?.name}</TableCell>

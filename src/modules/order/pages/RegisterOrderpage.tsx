@@ -46,7 +46,7 @@ import {
   updateOrder,
 } from "../../../store/order";
 import AddClientModal from "../components/AddClientModal";
-import AddOrderDetailModal from "../components/AddOrderDetailModal";
+import AddOrderDetailModalHybrid from "../components/AddOrderDetailModalHybrid";
 import { format, toDate } from "date-fns-tz";
 import { useGetRouteQuery } from "../../../store/maintenance/maintenanceApi";
 import { DeleteOrderModal } from "../components/DeleteOrderModal";
@@ -203,20 +203,23 @@ export const RegisterOrderpage = () => {
     }
   };
 
-  const handleDownload = () => {
-    const ws = XLSX.utils.aoa_to_sheet([
-      ["tracker_id", "codigo_sap", "fecha_vencimiento", "cantidad"],
-    ]);
+  const handleDownload = (templateType = 'tracker') => {
+    let headers, filename;
+    
+    if (templateType === 'tracker') {
+      // FUNCIONALIDAD HÍBRIDA: Plantilla para productos con tracker (original)
+      headers = ["tracker_id (opcional)", "codigo_sap", "fecha_vencimiento", "cantidad"];
+      filename = 'carga_pedidos_tracker.xlsx';
+    } else {
+      // FUNCIONALIDAD HÍBRIDA: Plantilla para productos directos (nueva)
+      headers = ["codigo_sap", "fecha_vencimiento", "cantidad"];
+      filename = 'carga_pedidos_directos.xlsx';
+    }
+    
+    const ws = XLSX.utils.aoa_to_sheet([headers]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Hoja1');
-    XLSX.writeFile(wb, 'carga_pedidos.xlsx');
-    const blob = XLSX.write(wb, { bookType: 'csv', type: 'array' });
-    const blobURL = URL.createObjectURL(new Blob([blob], { type: 'application/octet-stream' }));
-    const a = document.createElement('a');
-    a.href = blobURL;
-    a.download = 'carga_pedidos.xlsx';
-    a.click();
-    URL.revokeObjectURL(blobURL);
+    XLSX.writeFile(wb, filename);
   }
 
 
@@ -244,7 +247,7 @@ export const RegisterOrderpage = () => {
         handleClose={() => setOpenAddClientModal(false)}
       />
       {openAddOrderDetailtModal && (
-        <AddOrderDetailModal
+        <AddOrderDetailModalHybrid
           open={openAddOrderDetailtModal}
           handleClose={() => setOpenAddOrderDetailModal(false)}
         />
@@ -593,10 +596,27 @@ export const RegisterOrderpage = () => {
                     <Grid item xs={12}>
                       <Typography variant="body1" textAlign="start" sx={{ mb: 1 }} color="text.secondary">
                         Descargue la plantilla para registrar los productos del pedido
-                        <Button variant="text" color="primary" size="small" sx={{ ml: 1 }} endIcon={<CloudDownloadTwoToneIcon />} onClick={handleDownload}>
-                          Descargar plantilla
-                        </Button>
                       </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                        <Button 
+                          variant="outlined" 
+                          color="primary" 
+                          size="small" 
+                          endIcon={<CloudDownloadTwoToneIcon />} 
+                          onClick={() => handleDownload('tracker')}
+                        >
+                          🏷️ Con Tracker
+                        </Button>
+                        <Button 
+                          variant="outlined" 
+                          color="secondary" 
+                          size="small" 
+                          endIcon={<CloudDownloadTwoToneIcon />} 
+                          onClick={() => handleDownload('direct')}
+                        >
+                          📦 Productos Directos
+                        </Button>
+                      </Box>
                       <Divider />
                     </Grid>
                     <Grid item xs={12} md={12} lg={12}>
@@ -748,7 +768,7 @@ const Row = ({
         </TableCell>
         <TableCell>
           TRK-
-          {row.tracking_id.toString().padStart(5, "0")}
+          {row.tracking_id?.toString().padStart(5, "0") || "SIN-TRACKER"}
         </TableCell>
         <TableCell>{row.product_data?.sap_code}</TableCell>
         <TableCell>{row.product_data?.name}</TableCell>
