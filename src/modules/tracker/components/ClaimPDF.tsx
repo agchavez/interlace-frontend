@@ -347,10 +347,10 @@ function ClaimPDF({
 
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_container_closed.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -373,10 +373,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_container_one_open.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -400,10 +400,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_container_two_open.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -427,10 +427,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_container_top.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -454,10 +454,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_during_unload.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -480,10 +480,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_pallet_damage.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -506,10 +506,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_production_batch.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -538,10 +538,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_damaged_product_base.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -567,10 +567,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_damaged_product_dents.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -598,10 +598,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_damaged_boxes.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -627,10 +627,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_grouped_bad_product.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
@@ -658,10 +658,10 @@ function ClaimPDF({
             </View>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               {claim?.photos_repalletized.map((photo) => (
-                <View key={photo.id} style={{ width: "48%", marginBottom: 10 }}>
+                <View key={photo.id} style={{ height: "300px", width: "100%", marginBottom: 10 }}>
                   <Image
                     src={photo.access_url}
-                    style={{ width: "100%" }}
+                    style={{ height: "300px", marginHorizontal: "auto" }}
                   />
                 </View>
               ))}
