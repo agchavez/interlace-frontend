@@ -9,7 +9,9 @@ import {
     Box,
     DialogContent,
     CircularProgress,
-    Alert
+    Alert,
+    useTheme,
+    useMediaQuery
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { toast } from "sonner";
@@ -48,6 +50,9 @@ interface ClaimEditModalProps {
 }
 
 const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, seguimiento }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     // 1) Cargar reclamo
     const { data: claimData, isLoading } = useGetClaimByIdQuery(claimId, {
         skip: !open
@@ -218,7 +223,12 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
     if (!open) return null;
     if (isLoading && !claimData) {
         return (
-            <Dialog open={open} maxWidth="lg" fullWidth>
+            <Dialog
+                open={open}
+                maxWidth={isMobile ? false : "lg"}
+                fullWidth={!isMobile}
+                fullScreen={isMobile}
+            >
                 <Box p={4} textAlign="center">
                     <CircularProgress />
                 </Box>
@@ -228,7 +238,12 @@ const ClaimEditModal: FC<ClaimEditModalProps> = ({ open, onClose, claimId, segui
     if (!claimData) return null;
 
     return (
-        <BootstrapDialog open={open} maxWidth="lg" fullWidth>
+        <BootstrapDialog
+            open={open}
+            maxWidth={isMobile ? false : "lg"}
+            fullWidth={!isMobile}
+            fullScreen={isMobile}
+        >
             <BootstrapDialogTitle onClose={onClose} id="claim-edit-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
                     {seguimiento.type === "IMPORT" ? "Editar Reclamo" : "Editar Alerta de Calidad"}

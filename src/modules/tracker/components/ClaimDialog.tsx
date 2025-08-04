@@ -10,7 +10,9 @@ import {
     Grid,
     DialogContent,
     TextField,
-    CircularProgress
+    CircularProgress,
+    useTheme,
+    useMediaQuery
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { styled } from "@mui/material/styles";
@@ -25,7 +27,7 @@ import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
 import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
 import { Seguimiento, setClaimByTrackerId } from "../../../store/seguimiento/seguimientoSlice.ts";
-import { useAppDispatch } from "../../../store/store.ts";
+import { useAppDispatch } from "../../../store";
 
 export interface FormData {
     tipo: number;
@@ -67,6 +69,9 @@ interface ClaimModalProps {
 }
 
 export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, seguimiento }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabChange = (_event: React.SyntheticEvent, newIndex: number) => {
         setTabIndex(newIndex);
@@ -178,7 +183,7 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
             toast.success("Registro de reclamo", {
                 description: "Reclamo registrado exitosamente"
             });
-        } catch (err: any) {
+        } catch (err) {
             console.error("Error al enviar el reclamo:", err);
             errorApiHandler(err, "Error al registrar el reclamo");
         }
@@ -194,7 +199,12 @@ export const ClaimModal: FC<ClaimModalProps> = ({ open, onClose, tracker, type, 
     }, [isSuccess, isLoading, error, onClose]);
 
     return (
-        <BootstrapDialog open={open} maxWidth="lg" fullWidth>
+        <BootstrapDialog
+            open={open}
+            maxWidth={isMobile ? false : "lg"}
+            fullWidth={!isMobile}
+            fullScreen={isMobile}
+        >
             {/* Conservamos el DialogTitle original */}
             <BootstrapDialogTitle onClose={onClose} id="customized-dialog-title">
                 <Typography variant="h6" color="white" fontWeight={400}>
