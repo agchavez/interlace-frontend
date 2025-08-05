@@ -116,18 +116,7 @@ const ClaimCard: React.FC<ClaimCardProps> = ({ claim }) => {
                                 color: '#37474F',
                                 letterSpacing: '-0.02em',
                             }}>
-                                Reclamo ID {claim.id}
-                                <Box 
-                                    component="span" 
-                                    sx={{ 
-                                        ml: 1, 
-                                        fontSize: '0.9rem',
-                                        opacity: 0.7,
-                                        fontWeight: 400,
-                                    }}
-                                >
-                                    (TRK-{claim.tracker})
-                                </Box>
+                                TRK-{claim.tracker}
                             </Typography>
                             
                             <StatusChip 

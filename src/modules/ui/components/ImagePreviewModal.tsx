@@ -21,6 +21,8 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ image, onC
                     maxWidth: "90%",
                     maxHeight: "90%",
                     overflow: "auto",
+                    display: "block",
+                    width: {xs: "90vw", md: "80vw", lg: "70vw"},
                 }}
             >
                 <img src={image} alt="Preview" style={{ width: "100%", height: "auto" }} />
