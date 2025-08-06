@@ -114,20 +114,22 @@ function TrakerPDFDocument({
     })
     .flat(1);
 
-  const salidaTableData = outputTypeData?.required_details
+  // FUNCIONALIDAD HÍBRIDA: Lógica corregida para mostrar datos híbridos
+  const salidaTableData = outputTypeData?.required_details || outputTypeData?.required_orders
     ? seguimiento.detallesSalida?.map((detail) => [
-      detail.sap_code,
-      detail.name,
-      detail.amount,
-      detail.expiration_date,
-    ]) || []
+        detail.sap_code,
+        detail.name,
+        detail.amount,
+        detail.expiration_date,
+      ]) || []
     : outputTypeDataToShow
       .find((ot) => ot.name.toUpperCase() === outputTypeData?.name)
       ?.rows.map((row) => [row.material, row.description, row.quantity]) ||
     [];
 
+  // FUNCIONALIDAD HÍBRIDA: Estilos corregidos para datos híbridos
   const outputRowCellStyles =
-    outputTypeData && outputTypeData.required_details
+    outputTypeData && (outputTypeData.required_details || outputTypeData.required_orders)
       ? [{ flex: 1 }, { flex: 2 }, { flex: 1 }, { flex: 1 }]
       : [{ flex: 1 }, { flex: 2 }, { flex: 1 }];
 
@@ -501,7 +503,7 @@ function TrakerPDFDocument({
                 <PDFTable
                   data={salidaTableData}
                   header={
-                    outputTypeData.required_details
+                    outputTypeData.required_details || outputTypeData.required_orders
                       ? ["N° Sap", "Producto", "Cantidad", "Fecha Expiración"]
                       : ["Material", "Texto Breve", "Cantidad"]
                   }

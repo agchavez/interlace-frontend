@@ -76,7 +76,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         (d) => {
           const detalle_salida = seguimiento.detallesSalida?.find(
             (ds) =>
-              ds.expiration_date === d.expiration_date &&
+              ds.expiration_date === (d.expiration_date_display || d.expiration_date) &&
               ds.sap_code === d.product_data?.sap_code
           );
           let action: DetalleCargaSalidaUtil | null = null;
@@ -92,7 +92,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                   amount: 0,
                   idDetalle: -1,
                   idProducto: d.product_data.id,
-                  expiration_date: d.expiration_date,
+                  expiration_date: d.expiration_date_display || d.expiration_date,
                 },
                 action: "noaction",
               };
@@ -175,7 +175,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                   order_d.product_data?.sap_code ===
                     oa.detalleCargaSalida.sap_code &&
                   oa.detalleCargaSalida.expiration_date ===
-                    order_d.expiration_date
+                    (order_d.expiration_date_display || order_d.expiration_date)
                 );
               });
             if (idx === undefined || idx < 0 ) {
@@ -235,7 +235,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
       ? seguimiento.detallesSalida.findIndex(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         ) > -1
       : false;
     if (index > -1) {
@@ -432,7 +432,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         detallesSalida.find(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         )?.amount ?? null
       );
     }
@@ -450,7 +450,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
       ? detallesSalida.findIndex(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         ) > -1
       : false;
     setIsChecked(checked);
@@ -501,7 +501,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         {detail.product_data?.name}
       </StyledTableCell>
       <StyledTableCell size="small" align="left">
-        {detail.expiration_date}
+        {detail.expiration_date_display || detail.expiration_date}
       </StyledTableCell>
       <StyledTableCell size="small" align="left">
         {detail.quantity_available}

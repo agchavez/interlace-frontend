@@ -22,8 +22,9 @@ import {
   ToggleButtonGroup,
   Alert,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers";
 import { FunctionComponent, useRef, useEffect, useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 // import * as yup from "yup";
 // import { yupResolver } from "@hookform/resolvers/yup";
@@ -619,15 +620,27 @@ const AddOrderDetailModalHybrid: FunctionComponent<CreateCheckProps> = ({
                         </Grid>
 
                         <Grid item xs={12} md={6}>
-                          <TextField
-                            fullWidth
-                            label="Fecha de Vencimiento"
-                            type="date"
-                            size="small"
-                            InputLabelProps={{ shrink: true }}
-                            {...register("manual_expiration_date")}
-                            error={!!errors.manual_expiration_date}
-                            helperText={errors.manual_expiration_date?.message?.toString() || ""}
+                          <Controller
+                            name="manual_expiration_date"
+                            control={control}
+                            render={({ field, fieldState: { error } }) => (
+                              <DatePicker
+                                label="Fecha de Vencimiento"
+                                value={field.value ? new Date(field.value) : null}
+                                onChange={(newValue) => {
+                                  const dateString = newValue ? newValue.toISOString().split('T')[0] : '';
+                                  field.onChange(dateString);
+                                }}
+                                slotProps={{
+                                  textField: {
+                                    fullWidth: true,
+                                    size: "small",
+                                    error: !!error,
+                                    helperText: error?.message || "",
+                                  },
+                                }}
+                              />
+                            )}
                           />
                         </Grid>
 

@@ -776,7 +776,7 @@ const Row = ({
         <TableCell>{row.quantity_available}</TableCell>
         <TableCell>
           {format(
-            toDate(new Date(row.expiration_date).toISOString().split("T")[0]),
+            toDate(new Date(row.expiration_date_display || row.expiration_date).toISOString().split("T")[0]),
             "yyyy-MM-dd"
           )}
         </TableCell>

@@ -896,7 +896,7 @@ const parseOutputDetailSalida = (
     idDetalle: tracker_detail.id,
     tracker_detail_product: tracker_detail.tracker_detail_product,
     idProducto: tracker_detail.product_data.id,
-    expiration_date: tracker_detail.expiration_date,
+    expiration_date: tracker_detail.expiration_date_display || tracker_detail.expiration_date,
   };
   return detalleSalida;
 };

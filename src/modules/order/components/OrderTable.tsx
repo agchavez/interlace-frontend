@@ -159,7 +159,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
                       <TableCell>
                         {format(
                           toDate(
-                            new Date(historyRow.expiration_date)
+                            new Date(historyRow.expiration_date_display || historyRow.expiration_date)
                               .toISOString()
                               .split("T")[0]
                           ),
