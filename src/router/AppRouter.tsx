@@ -80,7 +80,7 @@ export function AppRouter() {
                     'ui__container': 'ui__container close' :
                     'ui__container__auth'} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, maxWidth: '100%', }}>
                         <Routes>
                             <Route path="/auth/*" element={
                                 <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
