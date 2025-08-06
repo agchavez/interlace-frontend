@@ -208,6 +208,7 @@ export interface TrackerDeailOutput {
   product: number;
   tracker_detail_product: number | null;
   expiration_date: string;
+  expiration_date_display: string;
 }
 export interface DistributorCenterData {
   id: number;

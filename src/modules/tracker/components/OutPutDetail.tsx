@@ -13,7 +13,7 @@ import {
 } from "../../../store/seguimiento/seguimientoSlice";
 import { FC } from "react";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
-import { useAppDispatch, useAppSelector } from "../../../store/store";
+import { useAppDispatch, useAppSelector } from "../../../store";
 import { removeOutProduct } from "../../../store/seguimiento/trackerThunk";
 import { OutputType } from "../../../interfaces/tracking";
 import outputTypeDataToShow from "../../../config/outputTypeData";
@@ -70,7 +70,7 @@ export const OutPutDetail: FC<OutPutDetailProps> = ({
                     {detalle.amount}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    {detalle.expiration_date}
+                    {detalle.expiration_date || 'N/A'}
                   </StyledTableCell>
                   {!disable && (
                     <StyledTableCell align="right">
@@ -143,7 +143,7 @@ export const OutPutDetail: FC<OutPutDetailProps> = ({
                     {detalle.amount}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    {detalle.expiration_date}
+                    {detalle.expiration_date || 'N/A'}
                   </StyledTableCell>
                   {!disable && (
                     <StyledTableCell align="right">

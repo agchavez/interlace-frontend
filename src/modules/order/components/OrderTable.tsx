@@ -150,7 +150,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
                     <TableRow key={historyRow.id}>
                       <TableCell>
                         TRK-
-                        {historyRow.tracking_id.toString().padStart(8, "0")}
+                        {historyRow.tracking_id?.toString().padStart(8, "0") || "SIN-TRACKER"}
                       </TableCell>
                       <TableCell>{historyRow.product_data?.sap_code}</TableCell>
                       <TableCell>{historyRow.product_data?.name}</TableCell>
@@ -159,7 +159,7 @@ function Row(props: { row: Order; refetch?: () => void }) {
                       <TableCell>
                         {format(
                           toDate(
-                            new Date(historyRow.expiration_date)
+                            new Date(historyRow.expiration_date_display || historyRow.expiration_date)
                               .toISOString()
                               .split("T")[0]
                           ),

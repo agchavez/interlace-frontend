@@ -194,7 +194,7 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
     // Si ya existe el detalle en el tracker lanzar error
     if (
       order.order_detail.find(
-        (x) => +x.tracker_detail_product === +data.idTrackerDetailProduct
+        (x) => x.tracker_detail_product !== null && +x.tracker_detail_product === +data.idTrackerDetailProduct
       )
     ) {
       toast.error("El pedido ya contiene este detalle");
@@ -210,11 +210,14 @@ const AddOrderDetailModal: FunctionComponent<CreateCheckProps> = ({
         order_detail_history: [],
         tracking_id: trackerDetailProduct.tracker_id || 0,
         expiration_date: trackerDetailProduct.expiration_date,
+        expiration_date_display: trackerDetailProduct.expiration_date,
         created_at: "",
         quantity: parseInt(data.quantity),
         quantity_available: parseInt(data.quantity),
         order: -1,
         tracker_detail_product: trackerDetailProduct.id,
+        product: null,
+        distributor_center: null,
       })
     );
     reset();

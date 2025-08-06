@@ -718,6 +718,7 @@ export const CheckForm = ({
               onClick={() => setOpenArchivoModal(true)}
               
               sx={{
+
                 position: 'absolute',
                 top: -15,
                 right: -15,
@@ -789,22 +790,22 @@ export const CheckForm = ({
                           right: -10
                         }}
                       />
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
-                      <PDFDownloader
-                        seguimiento={seguimiento}
-                        outputTypeData={outputTypeData}
-                        driver={dataDriver?.results[0]}
-                        op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
-                          ? dataOp1?.results[0]
-                          : undefined}
-                        op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
-                          ? dataOp2?.results[0]
-                          : undefined}
-                        outputLocation={dataOutputLocation?.results[0]}
-                      />
-                    </Box>
-                  </>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, mt: 'auto', pt: 2 }}>
+                          <PDFDownloader
+                            seguimiento={seguimiento}
+                            outputTypeData={outputTypeData}
+                            driver={dataDriver?.results[0]}
+                            op1={seguimiento.opm1 !== undefined && seguimiento.opm1 !== null
+                              ? dataOp1?.results[0]
+                              : undefined}
+                            op2={seguimiento.opm2 !== undefined && seguimiento.opm1 !== null
+                              ? dataOp2?.results[0]
+                              : undefined}
+                            outputLocation={dataOutputLocation?.results[0]}
+                          />
+                        </Box>
+                      </>
                 ) : (
                   <>
                     <Box sx={{ position: 'relative', textAlign: 'center', mb: 2 }}>

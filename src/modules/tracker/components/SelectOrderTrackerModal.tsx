@@ -76,7 +76,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
         (d) => {
           const detalle_salida = seguimiento.detallesSalida?.find(
             (ds) =>
-              ds.expiration_date === d.expiration_date &&
+              ds.expiration_date === (d.expiration_date_display || d.expiration_date) &&
               ds.sap_code === d.product_data?.sap_code
           );
           let action: DetalleCargaSalidaUtil | null = null;
@@ -92,7 +92,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                   amount: 0,
                   idDetalle: -1,
                   idProducto: d.product_data.id,
-                  expiration_date: d.expiration_date,
+                  expiration_date: d.expiration_date_display || d.expiration_date,
                 },
                 action: "noaction",
               };
@@ -117,12 +117,12 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
   ) => {
     onChangeRow(detail, "ch-q", quantity);
     // Encuentra el índice del detalle en el estado actual
-    const index = body.findIndex((item) => item.order_detail_id === detail.id);
+    const index = body.findIndex((item) => item.tracker_detail_product === detail.id);
     // Si el índice es -1 y el checkbox no está marcado, no hagas nada
     if (!checked) {
       // Quitar del array el elemento que tenga el id del detalle
       setbody((prevBody) =>
-        prevBody.filter((item) => item.order_detail_id !== detail.id)
+        prevBody.filter((item) => item.tracker_detail_product !== detail.id)
       );
       return;
     }
@@ -130,11 +130,9 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
     // Si el índice es -1 y el checkbox está marcado, agrega un nuevo elemento al estado
     if (index === -1 && checked) {
       const newItem: OrderDetailCreateBody = {
-        order_detail_id: detail.id ?? 0,
+        tracker_detail_product: detail.id ?? 0,
         quantity,
-        expiration_date: detail.expiration_date,
-        order: detail.order,
-        tracker_detail_product: detail.tracker_detail_product,
+        order: detail.order || 0,
       };
 
       setbody((prevBody) => [...prevBody, newItem]);
@@ -177,7 +175,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
                   order_d.product_data?.sap_code ===
                     oa.detalleCargaSalida.sap_code &&
                   oa.detalleCargaSalida.expiration_date ===
-                    order_d.expiration_date
+                    (order_d.expiration_date_display || order_d.expiration_date)
                 );
               });
             if (idx === undefined || idx < 0 ) {
@@ -237,7 +235,7 @@ export const SelectOrderTrackerModal: FC<SelectOrderTrackerModalProps> = ({
       ? seguimiento.detallesSalida.findIndex(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         ) > -1
       : false;
     if (index > -1) {
@@ -434,7 +432,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         detallesSalida.find(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         )?.amount ?? null
       );
     }
@@ -452,7 +450,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
       ? detallesSalida.findIndex(
           (ds) =>
             ds.sap_code === detail.product_data?.sap_code &&
-            ds.expiration_date === detail.expiration_date
+            ds.expiration_date === (detail.expiration_date_display || detail.expiration_date)
         ) > -1
       : false;
     setIsChecked(checked);
@@ -494,7 +492,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         />
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
-        TRK-{detail.tracking_id.toString().padStart(5, "0")}
+        TRK-{detail.tracking_id?.toString().padStart(5, "0") || "SIN-TRACKER"}
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
         {detail.product_data?.sap_code}
@@ -503,7 +501,7 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         {detail.product_data?.name}
       </StyledTableCell>
       <StyledTableCell size="small" align="left">
-        {detail.expiration_date}
+        {detail.expiration_date_display || detail.expiration_date}
       </StyledTableCell>
       <StyledTableCell size="small" align="left">
         {detail.quantity_available}

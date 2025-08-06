@@ -18,6 +18,7 @@ import {
   OrderDetailCreateBody,
   OutOrder,
   OutOrderData,
+  ProductData,
 } from "../../interfaces/orders";
 import { AxiosError, AxiosResponse } from "axios";
 import { TrackerDetailResponse } from "../../interfaces/tracking";
@@ -41,7 +42,21 @@ export const createOrder = (order: OrderCreateBody, navigate?:(to:string)=>void)
       );
       if (resp.status === 201) {
         const details = order_detail.map((detail) => {
-          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id, order_detail_id: detail.id || 0 });
+          const createBody: OrderDetailCreateBody = {
+            quantity: detail.quantity,
+            order: resp.data.id,
+          };
+          
+          // FUNCIONALIDAD HÍBRIDA: Agregar campos según tipo
+          if (detail.tracker_detail_product) {
+            createBody.tracker_detail_product = detail.tracker_detail_product;
+          } else if (detail.product) {
+            createBody.product = detail.product;
+            createBody.distributor_center = detail.distributor_center || undefined;
+            createBody.expiration_date = detail.expiration_date;
+          }
+          
+          return apicreateOrderDetail(auth.token, createBody);
         });
         Promise.allSettled(details).then(async () => {
           toast.success("Pedido guardado con exito");
@@ -163,7 +178,21 @@ export const updateOrder = (
             return 
             // dispatch(updateOrderDetail(detail.id, detail));
           }
-          return apicreateOrderDetail(auth.token, { ...detail, order: resp.data.id, order_detail_id: detail.id || 0 });
+          const createBody: OrderDetailCreateBody = {
+            quantity: detail.quantity,
+            order: resp.data.id,
+          };
+          
+          // FUNCIONALIDAD HÍBRIDA: Agregar campos según tipo
+          if (detail.tracker_detail_product) {
+            createBody.tracker_detail_product = detail.tracker_detail_product;
+          } else if (detail.product) {
+            createBody.product = detail.product;
+            createBody.distributor_center = detail.distributor_center || undefined;
+            createBody.expiration_date = detail.expiration_date;
+          }
+          
+          return apicreateOrderDetail(auth.token, createBody);
         });
         await Promise.all(details)
           .then(async () => {
@@ -254,10 +283,31 @@ export const createOrderDetail = (
 
 const apicreateOrderDetail = async (token: string, order: OrderDetailCreateBody) => {
   try {
+    // FUNCIONALIDAD HÍBRIDA: Preparar payload según tipo de producto
+    const payload = {
+      quantity: order.quantity,
+      order: order.order,
+    };
+
+    // Si tiene tracker_detail_product, es modo tracker (actual)
+    if (order.tracker_detail_product) {
+      Object.assign(payload, {
+        tracker_detail_product: order.tracker_detail_product,
+      });
+    }
+    // Si tiene product, es modo directo (nuevo)
+    else if (order.product) {
+      Object.assign(payload, {
+        product: order.product,
+        distributor_center: order.distributor_center,
+        expiration_date: order.expiration_date,
+      });
+    }
+
     return await backendApi.post<
       Order,
       AxiosResponse<OrderDetail, AxiosResponse<OrderDetail>>
-    >(`/order-detail/`, order, {
+    >(`/order-detail/`, payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch (error) {
@@ -348,23 +398,53 @@ export const addOrderDetailState = (
     try {
       dispatch(setLoadingOrder(true));
       const { auth } = getState() as RootState;
-      const response = await backendApi.get<TrackerDetailResponse>(
-        `/tracker-detail/${trackerDetailId}/`,
-        {
-          headers: { Authorization: `Bearer ${auth.token}` },
+      
+      // FUNCIONALIDAD HÍBRIDA: Si trackerDetailId es -1, es producto directo
+      if (trackerDetailId === -1) {
+        // Producto directo - necesitamos obtener los datos del producto
+        if (orderDetail.product) {
+          const productResponse = await backendApi.get<ProductData>(
+            `/product/${orderDetail.product}/`,
+            {
+              headers: { Authorization: `Bearer ${auth.token}` },
+            }
+          );
+          if (productResponse.status === 200) {
+            dispatch(
+              addOrderDetail({
+                ...orderDetail,
+                product_data: productResponse.data,
+              })
+            );
+          }
+        } else {
+          dispatch(
+            addOrderDetail({
+              ...orderDetail,
+              product_data: null,
+            })
+          );
         }
-      );
-      const product = response.data.product_data;
-      if (response.status === 200) {
-        dispatch(
-          addOrderDetail({
-            ...orderDetail,
-            product_data: product,
-          })
+      } else {
+        // Producto con tracker (funcionalidad original)
+        const response = await backendApi.get<TrackerDetailResponse>(
+          `/tracker-detail/${trackerDetailId}/`,
+          {
+            headers: { Authorization: `Bearer ${auth.token}` },
+          }
         );
+        const product = response.data.product_data;
+        if (response.status === 200) {
+          dispatch(
+            addOrderDetail({
+              ...orderDetail,
+              product_data: product,
+            })
+          );
+        }
       }
     } catch (error) {
-      errorApiHandler(error, "No se pudo eliminar el detalle de pedido");
+      errorApiHandler(error, "No se pudo agregar el detalle de pedido");
     } finally {
       dispatch(setLoadingOrder(false));
     }
