@@ -492,7 +492,8 @@ const TableRowComponent: FC<TableRowComponentProps> = ({
         />
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
-        TRK-{detail.tracking_id?.toString().padStart(5, "0") || "SIN-TRACKER"}
+        {detail.tracking_id ? 'TRK-' : ""}
+        {detail.tracking_id?.toString().padStart(8, "0") || "NO TRACK CODE"}
       </StyledTableCell>
       <StyledTableCell size="small" align="center">
         {detail.product_data?.sap_code}

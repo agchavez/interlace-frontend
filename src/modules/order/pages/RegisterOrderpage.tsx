@@ -767,8 +767,8 @@ const Row = ({
           </IconButton>
         </TableCell>
         <TableCell>
-          TRK-
-          {row.tracking_id?.toString().padStart(5, "0") || "SIN-TRACKER"}
+          {row.tracking_id ? 'TRK-' : ""}
+          {row.tracking_id?.toString().padStart(8, "0") || "NO TRACK CODE"}
         </TableCell>
         <TableCell>{row.product_data?.sap_code}</TableCell>
         <TableCell>{row.product_data?.name}</TableCell>

@@ -149,8 +149,9 @@ function Row(props: { row: Order; refetch?: () => void }) {
                   {row.order_detail.map((historyRow) => (
                     <TableRow key={historyRow.id}>
                       <TableCell>
-                        TRK-
-                        {historyRow.tracking_id?.toString().padStart(8, "0") || "SIN-TRACKER"}
+                        {/*TRK-*/}
+                        {historyRow.tracking_id ? 'TRK-' : ""}
+                        {historyRow.tracking_id?.toString().padStart(8, "0") || "NO TRACK CODE"}
                       </TableCell>
                       <TableCell>{historyRow.product_data?.sap_code}</TableCell>
                       <TableCell>{historyRow.product_data?.name}</TableCell>
