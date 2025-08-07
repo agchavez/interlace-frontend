@@ -393,6 +393,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
           backdropFilter: "blur(3px)",
           borderRadius: 2,
           backgroundColor: "rgba(54, 32, 28, 0.15)", // color-sidebar-primary con opacidad
+          position: "absolute"
         }}
         open={isProcessing}
       >

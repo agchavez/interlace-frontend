@@ -755,7 +755,8 @@ const PDFDownloader = ({
           zIndex: theme => theme.zIndex.drawer + 1,
           backdropFilter: 'blur(3px)',
           borderRadius: 2,
-          backgroundColor: 'rgba(28, 37, 54, 0.15)' // color-sidebar-primary con opacidad
+          backgroundColor: 'rgba(28, 37, 54, 0.15)', // color-sidebar-primary con opacidad
+          position: 'absolute'
         }}
         open={isProcessing}
       >
