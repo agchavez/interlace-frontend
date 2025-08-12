@@ -266,68 +266,68 @@ export const CheckForm = ({
         <AgregarProductoModal open={open} handleClose={() => setopen(false)} />
       )}
       <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5 }}>
-                              <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3 }}>
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="h4"
-                      component="h1"
-                      fontWeight={400}
-                      bgcolor={"#1c2536"}
-                      color={"white"}
-                      align="center"
-                      borderRadius={2}
-                      sx={{
-                        border: "1px solid #1c2536",
-                        padding: "8px 16px",
-                        paddingLeft: "95px", // Aumentado para dar más espacio al texto principal
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        position: "relative",
-                        overflow: "visible",
-                        minHeight: "64px" // Aumentado ligeramente
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          left: "16px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center"
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            backgroundColor: "white",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            boxShadow: "0 3px 5px rgba(0,0,0,0.2)",
-                            border: "3px solid white", // Aumentado
-                            overflow: "hidden",
-                            borderRadius: "8px",
-                            padding: "0px" // Agregado padding para espacio interno
-                          }}
-                        >
-                          <QRCodeSVG
-                            value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
-                            imageSettings={{
-                              src: "/logo-qr.png",
-                              height: 15,
-                              width: 15,
-                              excavate: true,
-                            }}
-                            size={50}
-                            level="Q"
-                          
-                          />
-                        </Box>
-                      </Box>
-                      TRK-{seguimiento.id?.toString().padStart(5, "0")}
-                    </Typography>
-                  </Grid>
-                </Grid>
+        <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 3 }}>
+          <Grid item xs={12}>
+            <Typography
+              variant="h4"
+              component="h1"
+              fontWeight={400}
+              bgcolor={"#1c2536"}
+              color={"white"}
+              align="center"
+              borderRadius={2}
+              sx={{
+                border: "1px solid #1c2536",
+                padding: "8px 16px",
+                paddingLeft: "95px", // Aumentado para dar más espacio al texto principal
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "visible",
+                minHeight: "64px" // Aumentado ligeramente
+              }}
+            >
+              <Box
+                sx={{
+                  position: "absolute",
+                  left: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: "white",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 3px 5px rgba(0,0,0,0.2)",
+                    border: "3px solid white", // Aumentado
+                    overflow: "hidden",
+                    borderRadius: "8px",
+                    padding: "0px" // Agregado padding para espacio interno
+                  }}
+                >
+                  <QRCodeSVG
+                    value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
+                    imageSettings={{
+                      src: "/logo-qr.png",
+                      height: 15,
+                      width: 15,
+                      excavate: true,
+                    }}
+                    size={50}
+                    level="Q"
+
+                  />
+                </Box>
+              </Box>
+              TRK-{seguimiento.id?.toString().padStart(5, "0")}
+            </Typography>
+          </Grid>
+        </Grid>
         {/* <Grid
           item
           xs={12}
@@ -696,11 +696,12 @@ export const CheckForm = ({
           </Card>
         </Grid>
         {/* Tarjeta de Documentos */}
-        <Grid item xs={12} md={2} sx={{ marginTop: 1 }}>
+        <Grid item xs={12} sm={6} md={2} sx={{ marginTop: 1 }}>
           <Card
             sx={{
               borderRadius: 2,
-              height: '100%',
+              height: isMobile ? 'auto' : '100%',
+              minHeight: isMobile ? '200px' : '300px',
               display: 'flex',
               flexDirection: 'column',
               position: 'relative',
@@ -851,11 +852,12 @@ export const CheckForm = ({
         </Grid>
 
         {/* Tarjeta de Alertas/Reclamos */}
-        <Grid item xs={12} md={2} sx={{ marginTop: 1 }}>
+        <Grid item xs={12} sm={6} md={2} sx={{ marginTop: 1 }}>
           <Card
             sx={{
               borderRadius: 2,
-              height: '100%',
+              height: isMobile ? 'auto' : '100%',
+              minHeight: isMobile ? '200px' : '300px',
               display: 'flex',
               flexDirection: 'column',
               position: 'relative',
@@ -1013,7 +1015,7 @@ export const CheckForm = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6} sx={{ marginTop: 1 }}>
+        <Grid item xs={12} md={seguimiento.type === "LOCAL" ? 6 : 12} sx={{ marginTop: 1 }}>
           <Divider>
             <Typography
               variant="body1"
@@ -1310,7 +1312,7 @@ export const CheckForm = ({
             </Grid>
           </Grid>
         )}
-        <Grid item xs={12} sx={{ marginTop: 1 }} md={6}>
+        <Grid item xs={12} sx={{ marginTop: 1 }} md={seguimiento.type === "LOCAL" ? 6 : 12}>
           <Divider>
             <Typography
               variant="body1"

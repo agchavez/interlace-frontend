@@ -169,7 +169,7 @@ export const CheckPage = () => {
         handleClose={handleCloseCompleteModal}
         copleted={completarOpen.completed}
       />
-      <Container maxWidth="xl">
+      <Container maxWidth="xl" sx={{ paddingTop: 2, width: "100%" }}>
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           <Grid item xs={12}>
             <Typography variant="h5" component="h1" fontWeight={400}>
