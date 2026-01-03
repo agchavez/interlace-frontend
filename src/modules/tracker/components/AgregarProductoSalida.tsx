@@ -20,6 +20,7 @@ import { ProductSelect } from "../../ui/components/ProductSelect";
 import { addOutProduct } from "../../../store/seguimiento/trackerThunk";
 import { format } from "date-fns";
 import voidProductsList from "../../../config/voidProductsList";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 interface CreateCheckProps {
   open: boolean;
@@ -102,24 +103,11 @@ const AgregarProductoSalida: FunctionComponent<CreateCheckProps> = ({
         fullWidth={true}
         maxWidth="md"
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Agregar producto de salida
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={() => handleClose && handleClose({}, "backdropClick")}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-            textDecoration: "underline", // Agrega un subrayado para hacerlo parecer un enlace
-            cursor: "pointer", // Cambia el cursor al estilo "mano" para indicar que es interactivo
-          }}
-          color="primary"
-        >
-          <CloseIcon />
-        </IconButton>
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={() => handleClose && handleClose({}, "backdropClick")}>
+          <Typography variant="h6" fontWeight={600} color={'#fff'}>
+            Agregar producto de salida
+          </Typography>
+        </BootstrapDialogTitle>
         <form onSubmit={handleSubmit(handleSubmitForm)}>
           <DialogContent dividers>
             <Box>

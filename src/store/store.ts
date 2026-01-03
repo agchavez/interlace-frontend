@@ -14,6 +14,7 @@ import { orderApi, orderSlice } from "./order";
 import { inventoryApi } from "./inventory/api";
 import {claimApi} from "./claim/claimApi.ts";
 import {claimSlice} from "./claim/claimSlice.ts";
+import { personnelApi } from "../modules/personnel/services/personnelApi";
 
 export const store = configureStore({
     reducer: {
@@ -38,6 +39,7 @@ export const store = configureStore({
         [distributorCenterApi.reducerPath]: distributorCenterApi.reducer,
         [claimApi.reducerPath]: claimApi.reducer,
         [claimSlice.name]: claimSlice.reducer,
+        [personnelApi.reducerPath]: personnelApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -54,6 +56,7 @@ export const store = configureStore({
         .concat(notificationApi.middleware)
         .concat(distributorCenterApi.middleware)
         .concat(claimApi.middleware)
+        .concat(personnelApi.middleware)
     ,
     devTools: true
 })

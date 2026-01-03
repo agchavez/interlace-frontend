@@ -1,7 +1,7 @@
 
 import { Box, Button, Container, Dialog, DialogActions, DialogContent, Grid, Typography, styled } from "@mui/material";
 import { FunctionComponent } from "react";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {

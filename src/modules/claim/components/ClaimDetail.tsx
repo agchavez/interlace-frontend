@@ -18,6 +18,7 @@ import AttachFileTwoToneIcon from "@mui/icons-material/AttachFileTwoTone";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";
 import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
 import { Tracker } from "../../../interfaces/tracking";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 interface ArchivoModalProps {
   open: boolean;
@@ -39,21 +40,11 @@ const ArchivoModal: FC<ArchivoModalProps> = ({ open, handleClose }) => {
   return (
     <>
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Archivo del tracking
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+        <BootstrapDialogTitle id="archivo-tracking-dialog-title" onClose={handleClose}>
+          <Typography variant="h6" fontWeight={600} color={'#fff'}>
+            Archivo del tracking
+          </Typography>
+        </BootstrapDialogTitle>
         <DialogContent dividers>
 
           <Box sx={{ mt: 3 }}>

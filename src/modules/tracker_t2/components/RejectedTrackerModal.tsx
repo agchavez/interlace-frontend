@@ -3,7 +3,7 @@ import { FC, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store/store';
 import { Alert } from '@mui/material';
 import { changeStatusT2Tracking } from '../../../store/seguimiento/t2TrackingThunk';
-import BootstrapDialogTitle from '../../ui/components/BoostrapDialog';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 
 interface RejectedTrackerModalProps {
     isOpen: boolean

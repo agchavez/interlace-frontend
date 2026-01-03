@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Dialog, DialogActions, DialogContent, LinearProgress, Typography } from '@mui/material';
 import { FC, useMemo } from "react"
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog"
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle"
 import { useAppSelector, useAppDispatch } from '../../../store/store';
 import { Status } from '../../../interfaces/trackingT2';
 import { changeStatusT2Tracking } from '../../../store/seguimiento/t2TrackingThunk';

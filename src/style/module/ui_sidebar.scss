@@ -41,24 +41,22 @@
 }
 
 .base__container{
-  //el width: 100vw menos 170px es para que el contenedor de la pagina se vea completo
-  width: calc(100vw - 272px);
-  left: 255px;
-  top: 70px;
+  //el width: 100vw menos 260px del sidebar
+  width: calc(100vw - 260px);
+  left: 260px;
+  top: 68px;
   position: relative;
-  z-index: 2;
-  transition: all 0.4s ease;
+  z-index: 1;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 
 .base__container.close{
-  //el width: 100vw menos 170px es para que el contenedor de la pagina se vea completo
-  width: calc(100vw - 72px);
-  left: 46px;
-  top: 70px;
-  transition: all 0.4s ease;
-
-
+  //el width: 100vw menos 78px del sidebar cerrado
+  width: calc(100vw - 78px);
+  left: 78px;
+  top: 68px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav__sidebar-module{
@@ -129,31 +127,29 @@
 
 
 /* Google Fonts Import Link */
-@import "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap";
+@import "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap";
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .ui__container {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 240px;
+  margin-left: 260px;
   margin-top: 3rem;
-  width: calc(100vw - 257px);
-  transition: all 0.4s ease;
-
+  width: calc(100vw - 260px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-// Cuando este cerrado el sidebar el contenedor de la pagina se ajusta a 100vw
+// Cuando este cerrado el sidebar el contenedor de la pagina se ajusta
 .ui__container.close {
-  width: calc(100vw - 72px);
-    margin-left: 55px;
-  // transition: all 0.4s ease;
-  transition: all 0.4s ease;
+  width: calc(100vw - 78px);
+  margin-left: 78px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media screen and (max-width: 600px) {
@@ -173,32 +169,35 @@
 
 .sidebar {
   position: fixed;
-  top: 0;
+  top: 68px;
   left: 0;
-  height: 100%;
-  width: 240px;
-  margin-top: 50px;
-  background: #000000;
-  z-index: 100;
-  transition: all 0.5s ease;
+  height: calc(100vh - 68px);
+  width: 260px;
+  background: linear-gradient(180deg, #1c2536 0%, #0f1419 100%);
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.15);
   .logo-details {
     height: 60px;
     width: 100%;
     display: flex;
     align-items: center;
+    padding: 0 14px;
     i {
-      font-size: 30px;
+      font-size: 32px;
       color: #dcbb20;
       height: 50px;
-      min-width: 38px;
+      min-width: 40px;
       text-align: center;
       line-height: 50px;
     }
     .logo_name {
-      font-size: 22px;
+      font-size: 20px;
       color: #dcbb20;
-      font-weight: 600;
-      transition: 0.3s ease;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: -0.02em;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       transition-delay: 0.1s;
     }
   }
@@ -212,9 +211,11 @@
     li {
       position: relative;
       list-style: none;
-      transition: all 0.4s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin: 4px 8px;
+      border-radius: 8px;
       &:hover {
-        background: #1c2536;
+        background: rgba(220, 187, 32, 0.08);
         .sub-menu.blank {
           top: 50%;
           transform: translateY(-50%);
@@ -227,39 +228,49 @@
       }
       i {
         height: 50px;
-        min-width: 50px;
+        min-width: 52px;
         text-align: center;
         line-height: 50px;
-        color: #ffffff;
-        font-size: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 22px;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       a {
         display: flex;
         align-items: center;
         text-decoration: none;
+        padding: 4px 0;
         .link_name {
-          font-size: 12px;
-          font-weight: 100 !important;
-          color: #ffffff !important;
-          transition: all 0.8s ease;
+          font-size: 14px;
+          font-weight: 500 !important;
+          font-family: 'Inter', sans-serif;
+          color: rgba(255, 255, 255, 0.85) !important;
+          letter-spacing: -0.01em;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
       }
       .sub-menu {
-        padding: 6px 6px 14px 25px;
-        margin-top: -10px;
-        background: #1c2536;
+        padding: 8px 8px 12px 28px;
+        margin-top: -4px;
+        background: rgba(28, 37, 54, 0.5);
+        border-radius: 0 0 8px 8px;
         display: none;
         a {
-          color: #ffffff;
-          font-size: 15px;
-          padding: 5px 0;
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 13.5px;
+          font-weight: 500;
+          font-family: 'Inter', sans-serif;
+          padding: 8px 12px;
+          margin: 2px 0;
+          border-radius: 6px;
           white-space: nowrap;
-          opacity: 0.6;
-          transition: all 0.3s ease;
+          display: block;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           &:hover {
-            opacity: 1;
+            color: #ffffff;
+            background: rgba(220, 187, 32, 0.12);
+            padding-left: 16px;
           }
         }
         .link_name {
@@ -287,50 +298,71 @@
   .profile-details {
     position: fixed;
     bottom: 0;
-    width: 240px;
+    width: 260px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    padding: 12px 0;
-    padding-left: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transition: all 0.5s ease;
+    justify-content: flex-start;
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    padding: 14px 12px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 1px solid rgba(220, 187, 32, 0.1);
+    cursor: pointer;
+    &:hover {
+      background: linear-gradient(135deg, #fafbfc 0%, #f5f6f8 100%);
+      box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
+      img {
+        transform: scale(1.05);
+      }
+    }
     .profile-content {
       display: flex;
       align-items: center;
     }
+    > div:first-child {
+      flex-shrink: 0;
+    }
     img {
-      height: 52px;
-      width: 52px;
+      height: 44px;
+      width: 44px;
       object-fit: cover;
-      border-radius: 16px;
-      margin: 0 14px 0 12px;
-      background: #1c2536;
-      transition: all 0.5s ease;
+      border-radius: 12px;
+      margin: 0;
+      background: linear-gradient(135deg, #1c2536 0%, #0f1419 100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .name-job {
+      flex: 1;
+      min-width: 0;
+      margin-left: 12px;
+      overflow: hidden;
     }
     .profile_name {
-      color: $colorSecondary;
-      font-size: 14px;
-      font-weight: 500;
+      color: #1c2536;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+      max-width: 100%;
     }
     .job {
-      color: $colorSecondary;
-      font-size: 18px;
+      color: rgba(28, 37, 54, 0.65);
+      font-size: 11px;
       font-weight: 500;
+      font-family: 'Inter', sans-serif;
       white-space: nowrap;
-      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.3s ease;
+      max-width: 100%;
     }
     .log_out {
-      color: $colorSecondary;
-      margin-right: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      &:hover {
-        background: #ffffff;
-        color: #dcbb20;
-      }
+      display: none;
     }
   }
 
@@ -342,7 +374,7 @@
 
 }
 .sidebar.close {
-  width: 55px;
+  width: 78px;
   .logo-details {
     .logo_name {
       transition-delay: 0s;
@@ -356,7 +388,16 @@
       .iocn-link {
         display: block
       }
+      i {
+        min-width: 78px;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+      }
       a {
+        justify-content: center;
         .link_name {
           opacity: 0;
           pointer-events: none;
@@ -394,12 +435,28 @@
     }
   }
   .profile-details {
-    background: none;
-    width: 58px;
-    padding: 0;
-    padding-left: 8px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.05) 100%);
+    width: 78px;
+    padding: 16px 0;
+    padding-left: 0 !important;
+    justify-content: center;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+    border-top: 1px solid rgba(220, 187, 32, 0.2);
+    &:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
+    }
     img {
-      padding: 10px;
+      padding: 0;
+      margin: 0 auto;
+      height: 44px;
+      width: 44px;
+      display: block;
+    }
+    div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
     }
     i {
       display: none;
@@ -408,6 +465,12 @@
       display: none;
     }
     .job {
+      display: none;
+    }
+    .name-job {
+      display: none;
+    }
+    .log_out {
       display: none;
     }
   }
@@ -445,10 +508,12 @@
 }
 
 .sidebar__active {
-  font-weight: 400;
-  background: #1c2536;
-  color: $colorPrimary !important;
-  opacity: 1.6 !important;
+  font-weight: 600 !important;
+  background: rgba(220, 187, 32, 0.15) !important;
+  color: #dcbb20 !important;
+  opacity: 1 !important;
+  border-left: 3px solid #dcbb20;
+  padding-left: 12px !important;
 }
 
 

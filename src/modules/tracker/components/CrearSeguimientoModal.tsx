@@ -20,7 +20,7 @@ import { useAppDispatch } from "../../../store";
 import { TrailerSelect, TransporterSelect } from "../../ui/components";
 import { Trailer, Transporter } from "../../../interfaces/maintenance";
 import { createTracking } from "../../../store/seguimiento/trackerThunk";
-import DialogTitle from "../../ui/components/BoostrapDialog"
+import DialogTitle from "../../ui/components/BootstrapDialogTitle"
 
 interface CreateCheckProps {
   open: boolean;

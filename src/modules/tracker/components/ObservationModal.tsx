@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { updateTracking } from "../../../store/seguimiento/trackerThunk";
 import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 interface ObservationModalProps {
   open: boolean;
   seguimiento: Seguimiento;

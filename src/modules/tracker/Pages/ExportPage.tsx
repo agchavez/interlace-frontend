@@ -11,7 +11,6 @@ import {
   Button,
   Box,
   Drawer,
-  IconButton,
   CircularProgress,
   CardMedia,
   Paper,
@@ -24,11 +23,11 @@ import {
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import CloseIcon from '@mui/icons-material/Close';
 import { useForm, Controller } from "react-hook-form";
 import { DatePicker } from "@mui/x-date-pickers";
 import { isValid } from "date-fns";
 import { useAppSelector } from "../../../store";
+import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 interface ReportForm {
   date_start: string;
@@ -206,49 +205,27 @@ const ExportDrawer: React.FC<{ open: boolean; onClose: () => void }> = ({
             }
           }}
         >
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              width: 400, 
-              p: 4, 
-              height: '100%', 
+            sx={{
+              width: 400,
+              height: '100%',
               position: 'relative',
-              background: `linear-gradient(to bottom, ${alpha(theme.palette.background.paper, 0.8)}, ${theme.palette.background.paper})`,
+              background: theme.palette.background.paper,
             }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 3,
-              }}
-            >
-              <Typography variant="h5" fontWeight={500}>
-                Exportar Reporte
+            <StandardDrawerHeader
+              title="Exportar Reporte"
+              icon={<DescriptionOutlinedIcon />}
+              onClose={() => !loading && onClose()}
+            />
+
+            <Box sx={{ p: 4 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Selecciona el rango de fechas para exportar los datos en un archivo Excel.
               </Typography>
-              <IconButton 
-                size="small" 
-                onClick={() => !loading && onClose()}
-                disabled={loading}
-                sx={{ 
-                  color: 'grey.600',
-                  bgcolor: 'grey.100',
-                  '&:hover': {
-                    bgcolor: 'grey.200'
-                  }
-                }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Box>
-            <Divider sx={{ mb: 4 }} />
-            
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Selecciona el rango de fechas para exportar los datos en un archivo Excel.
-            </Typography>
-            
-            <form onSubmit={handleSubmit(onSubmit)}>
+
+              <form onSubmit={handleSubmit(onSubmit)}>
               <Typography variant="subtitle2" gutterBottom sx={{ ml: 0.5 }}>
                 Período de tiempo
               </Typography>
@@ -349,7 +326,8 @@ const ExportDrawer: React.FC<{ open: boolean; onClose: () => void }> = ({
                   Cancelar
                 </Button>
               </Box>
-            </form>
+              </form>
+            </Box>
           </Paper>
         </Drawer>
         

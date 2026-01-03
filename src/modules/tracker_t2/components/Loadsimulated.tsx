@@ -1,6 +1,6 @@
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, Grid, LinearProgress, Paper, Typography } from '@mui/material';
 import { FC, useState } from 'react';
-import BootstrapDialogTitle from '../../ui/components/BoostrapDialog';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { FileUploader } from 'react-drag-drop-files';
 import { toast } from 'sonner';

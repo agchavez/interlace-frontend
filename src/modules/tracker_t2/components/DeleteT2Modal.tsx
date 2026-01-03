@@ -1,5 +1,5 @@
 import { FC } from "react";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { Alert, Button, CircularProgress, Dialog, DialogActions, DialogContent, Typography } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { deleteT2Tracking } from "../../../store/seguimiento/t2TrackingThunk";

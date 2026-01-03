@@ -18,7 +18,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "../../ui/components/BoostrapDialog";
+import DialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { login } from "../../../store/auth";
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';

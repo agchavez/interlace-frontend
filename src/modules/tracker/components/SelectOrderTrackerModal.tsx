@@ -31,7 +31,7 @@ import {
   DetalleCargaSalida,
   Seguimiento,
 } from "../../../store/seguimiento/seguimientoSlice";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { toast } from "sonner";
 
 interface SelectOrderTrackerModalProps {

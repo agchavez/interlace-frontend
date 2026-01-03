@@ -27,6 +27,7 @@ import { Seguimiento } from "../../../store/seguimiento/seguimientoSlice";
 import { useUploadFileMutation } from "../../../store/seguimiento/trackerApi";
 import { ImagePreviewDropzone } from "../../ui/components/ImagePreviewDropzone";
 import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 
 interface TrackerFilesModalProps {
@@ -620,28 +621,14 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          backgroundColor: theme.palette.secondary.main,
-          color: 'white',
-          padding: 1,
-        }}>
+        <BootstrapDialogTitle id="tracker-files-dialog-title" onClose={onClose}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <PhotoCameraTwoToneIcon />
-            <Typography variant="h6">
+            <Typography variant="h6" fontWeight={600} color={'#fff'}>
               {isImported ? "Fotografías de importación" : "Documentos"} - TRK-{tracker.id?.toString().padStart(5, "0")}
             </Typography>
           </Box>
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{ color: 'white' }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+        </BootstrapDialogTitle>
         
         <DialogContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 500 }}>
@@ -980,19 +967,15 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
       
       {/* Modal de vista previa de imágenes */}
       {previewImage && (
-        <Dialog 
-          open={!!previewImage} 
+        <Dialog
+          open={!!previewImage}
           onClose={() => setPreviewImage(null)}
           maxWidth="lg"
         >
-          <DialogTitle sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center' 
-          }}>
-            <Typography variant="h6">Vista previa de imagen</Typography>
-            <Box>
-              <IconButton 
+          <BootstrapDialogTitle id="image-preview-dialog-title" onClose={() => setPreviewImage(null)}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+              <Typography variant="h6" fontWeight={600} color={'#fff'}>Vista previa de imagen</Typography>
+              <IconButton
                 onClick={() => {
                   let fileName = "";
                   if (tracker.file_data_1 && tracker.file_data_1.access_url === previewImage) {
@@ -1004,15 +987,12 @@ const TrackerFilesModal: React.FC<TrackerFilesModalProps> = ({
                     handleDownloadFile(previewImage, fileName);
                   }
                 }}
-                sx={{ mr: 1 }}
+                sx={{ mr: 1, color: '#fff' }}
               >
                 <DownloadIcon />
               </IconButton>
-              <IconButton onClick={() => setPreviewImage(null)}>
-                <CloseIcon />
-              </IconButton>
             </Box>
-          </DialogTitle>
+          </BootstrapDialogTitle>
           <DialogContent sx={{ p: 0, overflow: 'hidden' }}>
             <img 
               src={previewImage} 

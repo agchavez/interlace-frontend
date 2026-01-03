@@ -22,7 +22,7 @@ import ClaimProducts, { ProductItem } from "./ClaimProducts";
 import { errorApiHandler } from "../../../utils/error";
 import { useCreateClaimMutation } from "../../../store/claim/claimApi";
 import { toast } from "sonner";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog.tsx";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 import ClaimTypeSelect from "../../ui/components/ClaimTypeSelect.tsx";
 import BookmarkAddTwoToneIcon from '@mui/icons-material/BookmarkAddTwoTone';
 import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';

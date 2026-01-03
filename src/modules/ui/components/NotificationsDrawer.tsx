@@ -1,27 +1,25 @@
 import React from 'react';
 import {
     Drawer,
-    AppBar,
-    Toolbar,
     List,
     Divider,
     Typography,
     Box,
-    IconButton,
     Button,
     Card,
     CardActionArea,
     CardHeader,
     Avatar,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import DocumentIcon from '@mui/icons-material/Description';
 import AlertIcon from '@mui/icons-material/Warning';
 import ConfirmationIcon from '@mui/icons-material/CheckCircle';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {Notificacion} from "../../../interfaces/auth";
+import { StandardDrawerHeader } from './StandardDrawerHeader';
 
 const iconsActionsNotifi: Record<string, Record<string, JSX.Element>> = {
     DOCUMENTOS: {
@@ -103,14 +101,11 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
     return (
         <Drawer anchor="right" open={open} onClose={onClose} sx={{ zIndex: 1300 }}>
             <Box sx={{ width: { xs: 280, sm: 360 }, display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <AppBar position="static" sx={{ backgroundColor: 'white', color: 'black' }}>
-                    <Toolbar variant="dense" sx={{ justifyContent: 'space-between' }}>
-                        <Typography variant="h6">Notificaciones</Typography>
-                        <IconButton onClick={onClose} size="small">
-                            <CloseIcon />
-                        </IconButton>
-                    </Toolbar>
-                </AppBar>
+                <StandardDrawerHeader
+                    title="Notificaciones"
+                    icon={<NotificationsIcon />}
+                    onClose={onClose}
+                />
                 <Box sx={{ flexGrow: 1, overflow: 'auto' }}>{renderNotificationsList(notifications)}</Box>
                 <Box sx={{ p: 2 }}>
                     <Button

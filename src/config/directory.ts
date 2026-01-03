@@ -243,6 +243,74 @@ export const permisions = [
         permissions: [
             "any"
         ]
+    },
+    {
+        url: "/personnel/my-profile",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/personnel",
+        permissions: [
+            "personnel.view_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/dashboard",
+        permissions: [
+            "personnel.view_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/create",
+        permissions: [
+            "personnel.add_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/detail/:id",
+        reg: /\/personnel\/detail\/\d+/,
+        permissions: [
+            "personnel.view_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/certifications",
+        permissions: [
+            "personnel.view_certification"
+        ]
+    },
+    {
+        url: "/personnel/certifications/create",
+        permissions: [
+            "personnel.add_certification"
+        ]
+    },
+    {
+        url: "/personnel/performance",
+        permissions: [
+            "personnel.view_performancemetric"
+        ]
+    },
+    {
+        url: "/personnel/performance/create",
+        permissions: [
+            "personnel.add_performancemetric"
+        ]
+    },
+    {
+        url: "/personnel/profile/:id",
+        reg: /\/personnel\/profile\/[\w-]+/,
+        permissions: [
+            "personnel.view_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/management",
+        permissions: [
+            "personnel.view_personnelprofile"
+        ]
     }
 ]
 
