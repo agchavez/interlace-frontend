@@ -105,7 +105,7 @@ export const PersonnelDashboardPage = () => {
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1600, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 700, mb: 1 }}>
+        <Typography variant="h4" sx={{ fontWeight: 400, mb: 1 }}>
           Dashboard de Personal
         </Typography>
         <Typography variant="body2" color="text.secondary">

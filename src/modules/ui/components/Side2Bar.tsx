@@ -216,6 +216,12 @@ const items: SideBarMainItem[] = [
                 href: "/maintenance/period-center",
                 id: "period-cente",
                 permissions: ["any"],
+            },
+            {
+                text: "Métricas de Desempeño",
+                href: "/maintenance/metric-types",
+                id: "metric-types",
+                permissions: ["personnel.manage"],
             }
         ],
     },

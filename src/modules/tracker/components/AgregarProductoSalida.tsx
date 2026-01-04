@@ -5,14 +5,12 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
   TextField,
+  Typography,
   styled,
 } from "@mui/material";
 import { FunctionComponent, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { Product } from "../../../interfaces/tracking";

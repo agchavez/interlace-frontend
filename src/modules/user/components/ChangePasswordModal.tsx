@@ -1,7 +1,6 @@
 
-import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, Typography, styled } from "@mui/material";
+import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, Grid, TextField, Typography, styled } from "@mui/material";
 import { FunctionComponent, useEffect } from "react";
-import CloseIcon from '@mui/icons-material/Close';
 import { GetAUserResponse, User } from "../../../interfaces/user";
 
 import { useForm } from "react-hook-form";

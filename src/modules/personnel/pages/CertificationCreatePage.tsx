@@ -179,7 +179,8 @@ export const CertificationCreatePage = () => {
       navigate('/personnel/certifications');
     } catch (error: any) {
       console.error('Error al crear certificación:', error);
-      toast.error(error?.data?.detail || 'Error al crear la certificación');
+      const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear la certificación';
+      toast.error(errorMessage);
       setShowConfirmModal(false);
     }
   };
@@ -197,7 +198,7 @@ export const CertificationCreatePage = () => {
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           {/* Header */}
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               Nueva Certificación
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />

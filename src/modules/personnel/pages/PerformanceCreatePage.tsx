@@ -169,7 +169,8 @@ export const PerformanceCreatePage = () => {
       navigate('/personnel/performance');
     } catch (error: any) {
       console.error('Error al crear evaluación:', error);
-      toast.error(error?.data?.detail || 'Error al crear la evaluación');
+      const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear la evaluación';
+      toast.error(errorMessage);
       setShowConfirmModal(false);
     }
   };
@@ -195,7 +196,7 @@ export const PerformanceCreatePage = () => {
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
           {/* Header */}
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               Nueva Evaluación de Desempeño
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />

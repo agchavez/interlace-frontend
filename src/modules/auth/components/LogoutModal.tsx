@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material"
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, Typography } from "@mui/material"
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { closeLogoutModal, logout, startUpdateToken } from "../../../store/auth";

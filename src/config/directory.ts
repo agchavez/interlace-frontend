@@ -245,6 +245,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/maintenance/metric-types",
+        permissions: [
+            "personnel.manage_personnel"
+        ]
+    },
+    {
         url: "/personnel/my-profile",
         permissions: [
             "any"
@@ -285,6 +291,13 @@ export const permisions = [
         url: "/personnel/certifications/create",
         permissions: [
             "personnel.add_certification"
+        ]
+    },
+    {
+        url: "/personnel/certifications/:id",
+        reg: /\/personnel\/certifications\/\d+/,
+        permissions: [
+            "personnel.view_certification"
         ]
     },
     {

@@ -30,6 +30,7 @@ import {
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -52,6 +53,9 @@ import WarningIcon from '@mui/icons-material/Warning';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DescriptionIcon from '@mui/icons-material/Description';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import { QRCodeSVG } from 'qrcode.react';
 import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery } from '../services/personnelApi';
 
 interface TabPanelProps {
@@ -122,6 +126,16 @@ export const PersonnelDetailPage = () => {
     handleCloseMenu();
   };
 
+  const handleNewCertification = () => {
+    navigate(`/personnel/certifications/create?personnel=${id}`);
+    handleCloseMenu();
+  };
+
+  const handleNewEvaluation = () => {
+    navigate(`/personnel/performance/create?personnel=${id}`);
+    handleCloseMenu();
+  };
+
   const handleAddCertification = () => {
     navigate(`/personnel/certifications/create?personnel=${id}`);
   };
@@ -147,42 +161,18 @@ export const PersonnelDetailPage = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3, md: 4, lg: 5 }, width: '100%' }}>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4, lg: 5 }, width: !isMobile ? '80%' : '100%', mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
+        <IconButton
           onClick={handleBack}
-          variant="outlined"
           size={isMobile ? 'small' : 'medium'}
         >
-          Volver
-        </Button>
-        <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 700, flex: 1 }}>
+          <NavigateBeforeIcon fontSize={isMobile ? 'medium' : 'large'} />
+        </IconButton>
+        <Typography variant="h4" sx={{ fontWeight: 400, flex: 1 }}>
           Detalle de Personal
         </Typography>
-        {!isMobile && (
-          <>
-            <Button
-              startIcon={<AddCircleIcon />}
-              onClick={handleAddCertification}
-              variant="contained"
-              color="primary"
-              size="medium"
-            >
-              Nueva Certificación
-            </Button>
-            <Button
-              startIcon={<AddCircleIcon />}
-              onClick={handleAddPerformance}
-              variant="contained"
-              color="secondary"
-              size="medium"
-            >
-              Nueva Evaluación
-            </Button>
-          </>
-        )}
       </Box>
 
       {/* Profile Header Card */}
@@ -196,41 +186,27 @@ export const PersonnelDetailPage = () => {
           borderRadius: 2,
         }}
       >
-        {/* Menu Button */}
-        <IconButton
-          onClick={handleOpenMenu}
-          sx={{
-            position: 'absolute',
-            top: 16,
-            right: 16,
-            color: 'white',
-            bgcolor: 'rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              bgcolor: 'rgba(255, 255, 255, 0.2)',
-            },
-          }}
-        >
-          <MoreVertIcon />
-        </IconButton>
-
-        <Grid container spacing={4} alignItems="center">
-          <Grid item>
-            <Avatar
-              src={profile.photo_url || undefined}
-              alt={profile.full_name}
-              sx={{
-                width: { xs: 100, sm: 120, md: 140 },
-                height: { xs: 100, sm: 120, md: 140 },
-                bgcolor: 'rgba(255,255,255,0.2)',
-                fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-                fontWeight: 700,
-              }}
-            >
-              {profile.first_name[0]}
-              {profile.last_name[0]}
-            </Avatar>
-          </Grid>
-          <Grid item xs>
+        <Grid container spacing={3} alignItems="center" justifyContent="space-between">
+          {/* Lado Izquierdo: Avatar + Información */}
+          <Grid item xs={12} md={8}>
+            <Grid container spacing={3} alignItems="center">
+              <Grid item>
+                <Avatar
+                  src={profile.photo_url || undefined}
+                  alt={profile.full_name}
+                  sx={{
+                    width: { xs: 100, sm: 120, md: 140 },
+                    height: { xs: 100, sm: 120, md: 140 },
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                    fontWeight: 700,
+                  }}
+                >
+                  {profile.first_name[0]}
+                  {profile.last_name[0]}
+                </Avatar>
+              </Grid>
+              <Grid item xs>
             <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 700, mb: 1 }}>
               {profile.full_name}
             </Typography>
@@ -268,6 +244,52 @@ export const PersonnelDetailPage = () => {
                 }}
               />
             </Box>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Lado Derecho: QR + Menú */}
+          <Grid item xs={12} md={4}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+              {/* Menú desplegable */}
+              <IconButton
+                onClick={handleOpenMenu}
+                sx={{
+                  color: 'white',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                }}
+              >
+                <MoreVertIcon />
+              </IconButton>
+
+              {/* QR Code */}
+              <Box
+                sx={{
+                  bgcolor: 'white',
+                  p: 1.5,
+                  borderRadius: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 2,
+                }}
+              >
+                <QRCodeSVG
+                  value={`${import.meta.env.VITE_JS_FRONTEND_URL}/personnel/detail/${profile.id}`}
+                  size={isMobile ? 80 : 100}
+                  level="Q"
+                  imageSettings={{
+                    src: '/logo-qr.png',
+                    height: 20,
+                    width: 20,
+                    excavate: true,
+                  }}
+                />
+              </Box>
+            </Box>
           </Grid>
         </Grid>
       </Paper>
@@ -303,7 +325,7 @@ export const PersonnelDetailPage = () => {
               {/* Información Básica */}
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
-                  <BadgeIcon color="primary" />
+                  <BadgeIcon color="secondary" />
                   Información Básica
                 </Typography>
                 <Grid container spacing={3}>
@@ -350,7 +372,7 @@ export const PersonnelDetailPage = () => {
               {/* Información Organizacional */}
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
-                  <BusinessIcon color="primary" />
+                  <BusinessIcon color="secondary" />
                   Información Organizacional
                 </Typography>
                 <Grid container spacing={3}>
@@ -382,7 +404,7 @@ export const PersonnelDetailPage = () => {
               {/* Información Laboral */}
               <Box sx={{ mb: 4 }}>
                 <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
-                  <WorkIcon color="primary" />
+                  <WorkIcon color="secondary" />
                   Información Laboral
                 </Typography>
                 <Grid container spacing={3}>
@@ -464,178 +486,132 @@ export const PersonnelDetailPage = () => {
                 </Button>
               </Box>
               {certificationsData && certificationsData.results.length > 0 ? (
-                <Grid container spacing={3}>
-                  {certificationsData.results.map((cert: any) => (
-                    <Grid item xs={12} md={6} lg={4} key={cert.id}>
-                      <Card
-                        elevation={4}
-                        sx={{
-                          height: '100%',
-                          position: 'relative',
-                          overflow: 'visible',
-                          transition: 'all 0.3s ease-in-out',
-                          '&:hover': {
-                            transform: 'translateY(-8px)',
-                            boxShadow: '0 12px 24px rgba(0,0,0,0.2)',
-                          },
-                          borderTop: `4px solid ${
-                            cert.is_valid && !cert.is_expired && !cert.is_expiring_soon
-                              ? theme.palette.success.main
-                              : cert.is_expiring_soon
-                              ? theme.palette.warning.main
-                              : theme.palette.error.main
-                          }`,
-                        }}
-                      >
-                        <CardContent sx={{ pb: 1 }}>
-                          {/* Header con icono y estado */}
-                          <Box sx={{ display: 'flex', alignItems: 'start', gap: 2, mb: 2 }}>
-                            <Avatar
-                              sx={{
-                                bgcolor: cert.is_valid && !cert.is_expired && !cert.is_expiring_soon
-                                  ? 'success.main'
-                                  : cert.is_expiring_soon
-                                  ? 'warning.main'
-                                  : 'error.main',
-                                width: 48,
-                                height: 48,
-                              }}
-                            >
-                              <AssignmentIcon />
-                            </Avatar>
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                              <Typography
-                                variant="h6"
+                <Card elevation={2}>
+                  <CardContent sx={{ p: 3 }}>
+                    {certificationsData.results.map((cert: any, index: number) => (
+                      <React.Fragment key={cert.id}>
+                        {index > 0 && <Divider sx={{ my: 3 }} />}
+                        <Box>
+                          {/* Header con título y estado */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Avatar
                                 sx={{
-                                  fontWeight: 700,
-                                  color: 'primary.main',
-                                  lineHeight: 1.2,
-                                  mb: 0.5,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
+                                  bgcolor: cert.is_valid && !cert.is_expired && !cert.is_expiring_soon
+                                    ? 'success.main'
+                                    : cert.is_expiring_soon
+                                    ? 'warning.main'
+                                    : 'error.main',
+                                  width: 40,
+                                  height: 40,
                                 }}
                               >
-                                {cert.certification_type_name}
-                              </Typography>
-                              {cert.is_valid && !cert.is_expired && !cert.is_expiring_soon ? (
-                                <Chip label="Vigente" color="success" size="small" icon={<CheckCircleIcon />} />
-                              ) : cert.is_expiring_soon ? (
-                                <Chip label="Por Vencer" color="warning" size="small" icon={<WarningIcon />} />
-                              ) : (
-                                <Chip label={cert.status_display || "Vencida"} color="error" size="small" icon={<CancelIcon />} />
+                                <AssignmentIcon fontSize="small" />
+                              </Avatar>
+                              <Box>
+                                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'secondary.main' }}>
+                                  {cert.certification_type_name}
+                                </Typography>
+                                {cert.is_valid && !cert.is_expired && !cert.is_expiring_soon ? (
+                                  <Chip label="Vigente" color="success" size="small" icon={<CheckCircleIcon />} />
+                                ) : cert.is_expiring_soon ? (
+                                  <Chip label="Por Vencer" color="warning" size="small" icon={<WarningIcon />} />
+                                ) : (
+                                  <Chip label={cert.status_display || "Vencida"} color="error" size="small" icon={<CancelIcon />} />
+                                )}
+                              </Box>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() => navigate(`/personnel/certifications/${cert.id}`)}
+                                title="Ver Detalle"
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                              {cert.certificate_document && (
+                                <IconButton
+                                  size="small"
+                                  color="secondary"
+                                  onClick={() => window.open(cert.certificate_document, '_blank')}
+                                  title="Ver Documento"
+                                >
+                                  <DescriptionIcon fontSize="small" />
+                                </IconButton>
                               )}
                             </Box>
                           </Box>
 
-                          <Divider sx={{ my: 2 }} />
-
-                          {/* Información */}
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                          {/* Información en columnas */}
+                          <Grid container spacing={2}>
                             {cert.certification_number && (
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <BadgeIcon fontSize="small" color="action" />
-                                <Box>
-                                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 600 }}>
-                                    Número
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    {cert.certification_number}
-                                  </Typography>
-                                </Box>
-                              </Box>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <InfoItem
+                                  icon={<BadgeIcon />}
+                                  label="Número de Certificación"
+                                  value={cert.certification_number}
+                                />
+                              </Grid>
                             )}
+                            <Grid item xs={12} sm={6} md={4}>
+                              <InfoItem
+                                icon={<BusinessIcon />}
+                                label="Autoridad Emisora"
+                                value={cert.issuing_authority || 'N/A'}
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                              <InfoItem
+                                icon={<CalendarTodayIcon />}
+                                label="Fecha de Emisión"
+                                value={new Date(cert.issue_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                              <InfoItem
+                                icon={<CalendarTodayIcon />}
+                                label="Fecha de Vencimiento"
+                                value={new Date(cert.expiration_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              />
+                            </Grid>
+                          </Grid>
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <BusinessIcon fontSize="small" color="action" />
-                              <Box>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 600 }}>
-                                  Autoridad Emisora
-                                </Typography>
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                  {cert.issuing_authority || 'N/A'}
-                                </Typography>
-                              </Box>
-                            </Box>
-
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <CalendarTodayIcon fontSize="small" color="action" />
-                              <Box sx={{ flex: 1 }}>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 600 }}>
-                                  Fechas
-                                </Typography>
-                                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    Emisión: {new Date(cert.issue_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    Vence: {new Date(cert.expiration_date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-
-                            {cert.days_until_expiration !== null && (
-                              <Box
+                          {/* Alerta de vencimiento */}
+                          {cert.days_until_expiration !== null && (
+                            <Box
+                              sx={{
+                                mt: 2,
+                                p: 1.5,
+                                bgcolor: cert.is_expiring_soon ? 'warning.lighter' : cert.is_expired ? 'error.lighter' : 'success.lighter',
+                                borderRadius: 1,
+                                border: `1px solid ${
+                                  cert.is_expiring_soon
+                                    ? theme.palette.warning.main
+                                    : cert.is_expired
+                                    ? theme.palette.error.main
+                                    : theme.palette.success.main
+                                }`,
+                              }}
+                            >
+                              <Typography
+                                variant="body2"
                                 sx={{
-                                  mt: 1,
-                                  p: 1.5,
-                                  bgcolor: cert.is_expiring_soon ? 'warning.lighter' : cert.is_expired ? 'error.lighter' : 'success.lighter',
-                                  borderRadius: 1,
-                                  border: `1px solid ${
-                                    cert.is_expiring_soon
-                                      ? theme.palette.warning.main
-                                      : cert.is_expired
-                                      ? theme.palette.error.main
-                                      : theme.palette.success.main
-                                  }`,
+                                  fontWeight: 600,
+                                  color: cert.is_expiring_soon ? 'warning.dark' : cert.is_expired ? 'error.dark' : 'success.dark',
                                 }}
                               >
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontWeight: 600,
-                                    color: cert.is_expiring_soon ? 'warning.dark' : cert.is_expired ? 'error.dark' : 'success.dark',
-                                    textAlign: 'center',
-                                  }}
-                                >
-                                  {cert.days_until_expiration > 0
-                                    ? `⏰ Vence en ${cert.days_until_expiration} días`
-                                    : `❌ Venció hace ${Math.abs(cert.days_until_expiration)} días`}
-                                </Typography>
-                              </Box>
-                            )}
-                          </Box>
-
-                          {/* Acciones */}
-                          <Box sx={{ display: 'flex', gap: 1, mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              startIcon={<VisibilityIcon />}
-                              fullWidth
-                              onClick={() => navigate(`/personnel/certifications/${cert.id}`)}
-                            >
-                              Ver Detalle
-                            </Button>
-                            {cert.certificate_document && (
-                              <Button
-                                size="small"
-                                variant="outlined"
-                                startIcon={<DescriptionIcon />}
-                                onClick={() => window.open(cert.certificate_document, '_blank')}
-                              >
-                                Doc
-                              </Button>
-                            )}
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
+                                {cert.days_until_expiration > 0
+                                  ? `⏰ Vence en ${cert.days_until_expiration} días`
+                                  : `❌ Venció hace ${Math.abs(cert.days_until_expiration)} días`}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      </React.Fragment>
+                    ))}
+                  </CardContent>
+                </Card>
               ) : (
                 <Card elevation={2}>
                   <CardContent sx={{ py: 8 }}>
@@ -935,6 +911,20 @@ export const PersonnelDetailPage = () => {
           <ListItemText>Editar Perfil</ListItemText>
         </MenuItem>
 
+        <MenuItem onClick={handleNewCertification}>
+          <ListItemIcon>
+            <VerifiedIcon fontSize="small" sx={{ color: 'info.main' }} />
+          </ListItemIcon>
+          <ListItemText>Nuevo Certificado</ListItemText>
+        </MenuItem>
+
+        <MenuItem onClick={handleNewEvaluation}>
+          <ListItemIcon>
+            <AssessmentIcon fontSize="small" sx={{ color: 'warning.main' }} />
+          </ListItemIcon>
+          <ListItemText>Nueva Evaluación</ListItemText>
+        </MenuItem>
+
         {profile && !profile.has_system_access && (
           <MenuItem onClick={handleGrantAccess}>
             <ListItemIcon>
@@ -979,7 +969,7 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value }) => {
           px: 1,
         }}
       >
-        <Box sx={{ color: 'primary.main', mt: 0.5 }}>{icon}</Box>
+        <Box sx={{ color: 'secondary.main', mt: 0.5 }}>{icon}</Box>
         <Box sx={{ flex: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
             {label}

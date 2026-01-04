@@ -4,15 +4,12 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  IconButton,
   InputAdornment,
   TextField,
   Typography,
   alpha
 } from "@mui/material";
 import { FC, useRef, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
 import AttachFileTwoToneIcon from "@mui/icons-material/AttachFileTwoTone";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";

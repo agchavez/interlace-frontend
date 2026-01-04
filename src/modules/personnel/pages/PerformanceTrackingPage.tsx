@@ -29,7 +29,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useNavigate } from 'react-router-dom';
-import { useGetPerformanceMetricsQuery, useGetAreasQuery } from '../services/personnelApi';
+import { useGetEvaluationsQuery, useGetAreasQuery, useGetEvaluationStatisticsQuery } from '../services/personnelApi';
 import type { PerformanceFilterParams } from '../../../interfaces/personnel';
 import { PerformanceFilters } from '../components/PerformanceFilters';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
@@ -53,7 +53,8 @@ export const PerformanceTrackingPage = () => {
     pageSize: 25,
   });
 
-  const { data, isLoading, isFetching } = useGetPerformanceMetricsQuery(filters);
+  const { data, isLoading, isFetching } = useGetEvaluationsQuery(filters);
+  const { data: statsData } = useGetEvaluationStatisticsQuery(filters);
   const { data: areasData } = useGetAreasQuery();
   const { distributionCenters: disctributionCenters } = useAppSelector(state => state.user);
 
@@ -77,6 +78,17 @@ export const PerformanceTrackingPage = () => {
 
   // Calcular estadísticas
   const stats = useMemo(() => {
+    // Usar datos del endpoint de estadísticas si están disponibles
+    if (statsData) {
+      return {
+        total: statsData.total_evaluations || 0,
+        avgScore: statsData.overall_average?.toFixed(2) || '0.0',
+        excellent: statsData.excellent_count || 0,
+        needsImprovement: statsData.needs_improvement_count || 0,
+      };
+    }
+
+    // Fallback: calcular localmente desde los resultados
     if (!data?.results) return { total: 0, avgScore: '0.0', excellent: 0, needsImprovement: 0 };
 
     const total = data.count;
@@ -90,7 +102,7 @@ export const PerformanceTrackingPage = () => {
       excellent,
       needsImprovement,
     };
-  }, [data]);
+  }, [data, statsData]);
 
   const getScoreColor = (score: number) => {
     if (score >= 4.5) return '#4caf50';
@@ -230,7 +242,7 @@ export const PerformanceTrackingPage = () => {
       <Container maxWidth={isFullHD ? 'xl' : 'lg'} sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               Seguimiento de Desempeño
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
@@ -310,12 +322,25 @@ export const PerformanceTrackingPage = () => {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
-                  Promedio por Categoría
+                  Promedio por Métrica
                 </Typography>
-                <PerformanceMetric label="Productividad" value={4.4} color="#2196f3" />
-                <PerformanceMetric label="Calidad" value={3.9} color="#4caf50" />
-                <PerformanceMetric label="Trabajo en Equipo" value={4.3} color="#ff9800" />
-                <PerformanceMetric label="Puntualidad" value={4.2} color="#9c27b0" />
+                {statsData?.metric_averages && statsData.metric_averages.length > 0 ? (
+                  statsData.metric_averages.slice(0, 5).map((metric: any, index: number) => {
+                    const colors = ['#2196f3', '#4caf50', '#ff9800', '#9c27b0', '#f44336'];
+                    return (
+                      <PerformanceMetric
+                        key={metric.metric_name}
+                        label={metric.metric_name}
+                        value={metric.average_value || 0}
+                        color={colors[index % colors.length]}
+                      />
+                    );
+                  })
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No hay datos de métricas disponibles
+                  </Typography>
+                )}
               </CardContent>
             </Card>
           </Grid>

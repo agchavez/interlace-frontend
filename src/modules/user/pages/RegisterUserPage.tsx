@@ -33,8 +33,6 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import PersonIcon from '@mui/icons-material/Person';
 import BadgeIcon from '@mui/icons-material/Badge';
-import WorkIcon from '@mui/icons-material/Work';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { useAppSelector } from '../../../store';
 import { useCreatePersonnelWithUserMutation } from '../../personnel/services/personnelApi';
 import { useGetAreasQuery, useGetDepartmentsQuery } from '../../personnel/services/personnelApi';
@@ -53,7 +51,6 @@ export const RegisterUserPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   const [activeStep, setActiveStep] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
@@ -80,7 +77,7 @@ export const RegisterUserPage = () => {
   const { distributionCenters } = useAppSelector(state => state.user);
   const { groups } = useAppSelector(state => state.maintenance);
   const { data: areas = [] } = useGetAreasQuery();
-  const { data: departments = [] } = useGetDepartmentsQuery();
+  const { data: departments = [] } = useGetDepartmentsQuery({});
 
   const [createPersonnelWithUser, { isLoading }] = useCreatePersonnelWithUserMutation();
 
@@ -122,7 +119,7 @@ export const RegisterUserPage = () => {
 
     if (!profileData.employee_code) newErrors.employee_code = 'El código de empleado es requerido';
     if (!profileData.gender) newErrors.gender = 'El género es requerido';
-    if (!profileData.date_of_birth) newErrors.date_of_birth = 'La fecha de nacimiento es requerida';
+    if (!profileData.birth_date) newErrors.birth_date = 'La fecha de nacimiento es requerida';
     if (!profileData.phone) newErrors.phone = 'El teléfono es requerido';
 
     setErrors(newErrors);
@@ -492,13 +489,13 @@ export const RegisterUserPage = () => {
       <Grid item xs={12} md={6}>
         <DatePicker
           label="Fecha de Nacimiento *"
-          value={profileData.date_of_birth ? new Date(profileData.date_of_birth) : null}
-          onChange={(date) => setProfileData(prev => ({ ...prev, date_of_birth: date?.toISOString().split('T')[0] }))}
+          value={profileData.birth_date ? new Date(profileData.birth_date) : null}
+          onChange={(date) => setProfileData(prev => ({ ...prev, birth_date: date?.toISOString().split('T')[0] }))}
           slotProps={{
             textField: {
               fullWidth: true,
-              error: !!errors.date_of_birth,
-              helperText: errors.date_of_birth,
+              error: !!errors.birth_date,
+              helperText: errors.birth_date,
             },
           }}
         />
@@ -741,7 +738,7 @@ export const RegisterUserPage = () => {
           <Grid item xs={12}>
             <Paper elevation={1} sx={{ p: 3 }}>
               <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel={isMobile}>
-                {steps.map((label, index) => (
+                {steps.map((label) => (
                   <Step key={label}>
                     <StepLabel>{label}</StepLabel>
                   </Step>

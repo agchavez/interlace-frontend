@@ -12,7 +12,6 @@ import {
     Badge,
     Box,
     Dialog,
-    DialogTitle,
     DialogContent,
     DialogContentText,
     DialogActions,

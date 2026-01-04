@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import * as yup from 'yup'
 import { regextEmail } from "../../../utils/common"
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Button, Box, Divider, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid, CircularProgress } from '@mui/material';
+import { Button, Box, IconButton, InputAdornment, OutlinedInput, Paper, TextField, Typography, FormControl, InputLabel, Grid, CircularProgress } from '@mui/material';
 import { useState } from 'react';
 import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 import { useDispatch } from "react-redux";

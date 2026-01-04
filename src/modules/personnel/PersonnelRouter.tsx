@@ -7,7 +7,7 @@ import { CertificationsPage } from "./pages/CertificationsPage";
 import { CertificationCreatePage } from "./pages/CertificationCreatePage";
 import { CertificationDetailPage } from "./pages/CertificationDetailPage";
 import { PerformanceTrackingPage } from "./pages/PerformanceTrackingPage";
-import { PerformanceCreatePage } from "./pages/PerformanceCreatePage";
+import { PerformanceEvaluationCreatePage } from "./pages/PerformanceEvaluationCreatePage";
 import { MyProfilePage } from "./pages/MyProfilePage";
 import { PersonnelManagementPage } from "./pages/PersonnelManagementPage";
 import { PersonnelProfilePage } from "./pages/PersonnelProfilePage";
@@ -43,7 +43,7 @@ function PersonnelRouter() {
 
       {/* Seguimiento de desempeño */}
       <Route element={<PerformanceTrackingPage />} path="/performance" />
-      <Route element={<PerformanceCreatePage />} path="/performance/create" />
+      <Route element={<PerformanceEvaluationCreatePage />} path="/performance/create" />
 
       {/* Redirigir rutas no encontradas */}
       <Route path="*" element={<Navigate to="/personnel" />} />

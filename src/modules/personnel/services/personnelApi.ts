@@ -34,7 +34,7 @@ export const personnelApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['PersonnelProfiles', 'Certifications', 'MedicalRecords', 'PerformanceMetrics'],
+  tagTypes: ['PersonnelProfiles', 'Certifications', 'MedicalRecords', 'PerformanceMetrics', 'MetricTypes', 'Evaluations'],
   endpoints: (builder) => ({
     // ==========================================
     // Personnel Profiles
@@ -398,6 +398,145 @@ export const personnelApi = createApi({
       }),
       invalidatesTags: [{ type: 'PersonnelProfiles', id: 'LIST' }],
     }),
+
+    // ==========================================
+    // Performance Metric Types (New System)
+    // ==========================================
+    getMetricTypes: builder.query<any, { is_active?: boolean; position_type?: string }>({
+      query: (params) => ({
+        url: '/metric-types/',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result?.results
+          ? [
+              ...result.results.map(({ id }: any) => ({ type: 'MetricTypes' as const, id })),
+              { type: 'MetricTypes', id: 'LIST' },
+            ]
+          : [{ type: 'MetricTypes', id: 'LIST' }],
+    }),
+
+    getMetricType: builder.query<any, number>({
+      query: (id) => ({
+        url: `/metric-types/${id}/`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'MetricTypes', id }],
+    }),
+
+    createMetricType: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/metric-types/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'MetricTypes', id: 'LIST' }],
+    }),
+
+    updateMetricType: builder.mutation<any, { id: number; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/metric-types/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'MetricTypes', id },
+        { type: 'MetricTypes', id: 'LIST' },
+      ],
+    }),
+
+    deleteMetricType: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/metric-types/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'MetricTypes', id: 'LIST' }],
+    }),
+
+    getMetricTypesForPosition: builder.query<any[], string>({
+      query: (position_type) => ({
+        url: '/metric-types/for_position_type/',
+        method: 'GET',
+        params: { position_type },
+      }),
+      providesTags: ['MetricTypes'],
+    }),
+
+    reorderMetricTypes: builder.mutation<any, any[]>({
+      query: (order_data) => ({
+        url: '/metric-types/reorder/',
+        method: 'POST',
+        body: order_data,
+      }),
+      invalidatesTags: [{ type: 'MetricTypes', id: 'LIST' }],
+    }),
+
+    // ==========================================
+    // Performance Evaluations (New System)
+    // ==========================================
+    getEvaluations: builder.query<any, any>({
+      query: (params) => ({
+        url: '/evaluations/',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result?.results
+          ? [
+              ...result.results.map(({ id }: any) => ({ type: 'Evaluations' as const, id })),
+              { type: 'Evaluations', id: 'LIST' },
+            ]
+          : [{ type: 'Evaluations', id: 'LIST' }],
+    }),
+
+    getEvaluation: builder.query<any, number>({
+      query: (id) => ({
+        url: `/evaluations/${id}/`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'Evaluations', id }],
+    }),
+
+    createEvaluation: builder.mutation<any, any>({
+      query: (data) => ({
+        url: '/evaluations/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Evaluations', id: 'LIST' }],
+    }),
+
+    updateEvaluation: builder.mutation<any, { id: number; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/evaluations/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Evaluations', id },
+        { type: 'Evaluations', id: 'LIST' },
+      ],
+    }),
+
+    submitEvaluation: builder.mutation<any, number>({
+      query: (id) => ({
+        url: `/evaluations/${id}/submit/`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Evaluations', id },
+        { type: 'Evaluations', id: 'LIST' },
+      ],
+    }),
+
+    getEvaluationStatistics: builder.query<any, any>({
+      query: (params) => ({
+        url: '/evaluations/statistics/',
+        method: 'GET',
+        params,
+      }),
+    }),
   }),
 });
 
@@ -444,4 +583,19 @@ export const {
   // Users Without Profile
   useGetUsersWithoutProfileQuery,
   useCreatePersonnelWithUserMutation,
+  // Metric Types (New System)
+  useGetMetricTypesQuery,
+  useGetMetricTypeQuery,
+  useCreateMetricTypeMutation,
+  useUpdateMetricTypeMutation,
+  useDeleteMetricTypeMutation,
+  useGetMetricTypesForPositionQuery,
+  useReorderMetricTypesMutation,
+  // Evaluations (New System)
+  useGetEvaluationsQuery,
+  useGetEvaluationQuery,
+  useCreateEvaluationMutation,
+  useUpdateEvaluationMutation,
+  useSubmitEvaluationMutation,
+  useGetEvaluationStatisticsQuery,
 } = personnelApi;

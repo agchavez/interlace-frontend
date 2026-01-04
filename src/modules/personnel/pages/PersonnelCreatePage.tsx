@@ -38,7 +38,7 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CakeIcon from '@mui/icons-material/Cake';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetDepartmentsQuery } from '../services/personnelApi';
+import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetDepartmentsQuery, useGetPersonnelProfilesQuery } from '../services/personnelApi';
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { toast } from 'sonner';
 import type { PersonnelProfile } from '../../../interfaces/personnel';
@@ -171,10 +171,17 @@ export const PersonnelCreatePage = () => {
   const { data: departmentsData } = useGetDepartmentsQuery({
     area: formData.area as number | undefined
   });
+  const { data: personnelData } = useGetPersonnelProfilesQuery({
+    hierarchy_level__in: 'SUPERVISOR,AREA_MANAGER,CD_MANAGER',
+    is_active: true,
+    limit: 200,
+    offset: 0
+  });
 
   const distributorCenters = distributorCentersData?.results || [];
   const areas = areasData || [];
   const departments = departmentsData || [];
+  const supervisors = personnelData?.results || [];
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -311,7 +318,8 @@ export const PersonnelCreatePage = () => {
       navigate('/personnel');
     } catch (error: any) {
       console.error('Error al crear personal:', error);
-      toast.error(error?.data?.detail || 'Error al crear el personal');
+      const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear el personal';
+      toast.error(errorMessage);
       setShowConfirmModal(false);
     }
   };
@@ -354,7 +362,7 @@ export const PersonnelCreatePage = () => {
         <Grid container spacing={1} sx={{ marginTop: 2 }}>
         {/* Header */}
         <Grid item xs={12}>
-          <Typography variant="h5" component="h1" fontWeight={400}>
+          <Typography variant="h4" component="h1" fontWeight={400}>
             Nuevo Personal
             {createMode === 'existing_user' && selectedUser && (
               <Typography component="span" variant="body1" color="success.main" sx={{ ml: 2 }}>
@@ -461,6 +469,7 @@ export const PersonnelCreatePage = () => {
                 distributorCenters={distributorCenters}
                 areas={areas}
                 departments={departments}
+                supervisors={supervisors}
               />
             </CustomTabPanel>
 
@@ -736,6 +745,7 @@ interface OrganizationalStepProps extends StepProps {
   distributorCenters: any[];
   areas: any[];
   departments: any[];
+  supervisors: any[];
 }
 
 const BasicInfoStep: React.FC<StepProps> = ({ data, errors, onChange }) => {
@@ -843,7 +853,8 @@ const OrganizationalStep: React.FC<OrganizationalStepProps> = ({
   onChange,
   distributorCenters,
   areas,
-  departments
+  departments,
+  supervisors
 }) => {
   const hierarchyLevels = [
     { value: 'OPERATIVE', label: 'Operativo' },
@@ -987,6 +998,35 @@ const OrganizationalStep: React.FC<OrganizationalStepProps> = ({
             error={!!errors.position_type}
             helperText={errors.position_type}
             size="small"
+          />
+        )}
+        fullWidth
+        size="small"
+      />
+
+      <Autocomplete
+        options={supervisors}
+        getOptionLabel={(option) => `${option.employee_code} - ${option.full_name} (${option.position || 'Sin posición'})`}
+        value={supervisors.find((s: any) => s.id === data.immediate_supervisor) || null}
+        onChange={(_, newValue) => onChange({ immediate_supervisor: newValue?.id })}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Jefe Inmediato"
+            size="small"
+            helperText="Supervisor directo del empleado (opcional)"
+            error={!!errors.immediate_supervisor}
+            InputProps={{
+              ...params.InputProps,
+              startAdornment: (
+                <>
+                  <InputAdornment position="start">
+                    <PersonIcon fontSize="small" />
+                  </InputAdornment>
+                  {params.InputProps.startAdornment}
+                </>
+              ),
+            }}
           />
         )}
         fullWidth

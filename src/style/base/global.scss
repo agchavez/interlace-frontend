@@ -21,6 +21,15 @@ $md-breackpoint: 768px;
     font-size: 0.8rem;
 }
 
+.base__table {
+    background-color: #ffffff !important;
+    height: 59vh !important;
+    scrollbar-width: thin;
+    @media screen and (min-height: 900px) {
+        height: 62vh !important;
+    }
+}
+
 /* Para navegadores basados en WebKit (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {
     width: 5px;  /* Ancho del scroll */

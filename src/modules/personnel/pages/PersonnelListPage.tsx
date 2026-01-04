@@ -330,7 +330,7 @@ export const PersonnelListPage = () => {
       <Container maxWidth={isFullHD ? 'xl' : 'lg'} sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               Gestión de Personal
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />

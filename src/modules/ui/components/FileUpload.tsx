@@ -4,9 +4,7 @@ import {
   Typography,
   Paper,
   IconButton,
-  LinearProgress,
   Alert,
-  Chip,
   useTheme,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';

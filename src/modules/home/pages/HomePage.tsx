@@ -52,7 +52,8 @@ import { setDashboardQueryParams } from '../../../store/ui/uiSlice';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import TATGraph from '../components/TATGraph';
-import { Responsive as ResponsiveGridLayout, Layout } from 'react-grid-layout';
+import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
+import type { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -284,7 +285,7 @@ export default function HomePage() {
   });
 
   // Cargar layouts desde localStorage o usar DEFAULT_LAYOUTS
-  const [layouts, setLayouts] = useState<{ lg: Layout[]; md: Layout[]; sm: Layout[] }>(() => {
+  const [layouts, setLayouts] = useState<{ lg: Layout; md: Layout; sm: Layout }>(() => {
     try {
       const saved = localStorage.getItem('dashboardLayouts');
       if (saved) {
@@ -535,7 +536,7 @@ export default function HomePage() {
 
   const isInitialMount = useRef(true);
 
-  const handleLayoutChange = (currentLayout: Layout[], allLayouts: { lg: Layout[]; md: Layout[]; sm: Layout[] }) => {
+  const handleLayoutChange = (currentLayout: Layout, allLayouts: { lg: Layout; md: Layout; sm: Layout }) => {
     // Prevenir actualización en el primer render (cuando carga la página)
     if (isInitialMount.current) {
       isInitialMount.current = false;

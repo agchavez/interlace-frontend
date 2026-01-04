@@ -31,6 +31,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
+import { QRCodeSVG } from 'qrcode.react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
@@ -166,7 +167,7 @@ export const PersonnelProfilePage = () => {
         {/* Header */}
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               {isMyProfile ? 'Mi Perfil' : 'Perfil de Personal'}
             </Typography>
             <Button
@@ -186,34 +187,20 @@ export const PersonnelProfilePage = () => {
         <Grid item xs={12}>
           <Card elevation={3} sx={{ position: 'relative' }}>
             <CardContent sx={{ bgcolor: theme.palette.secondary.main, color: 'white' }}>
-              {/* Menu Button */}
-              <IconButton
-                onClick={handleOpenMenu}
-                sx={{
-                  position: 'absolute',
-                  top: 16,
-                  right: 16,
-                  color: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  },
-                }}
-              >
-                <MoreVertIcon />
-              </IconButton>
-
-              <Grid container spacing={3} alignItems="center">
-                <Grid item>
-                  <Avatar
-                    src={profile.photo_url || undefined}
-                    alt={profile.full_name}
-                    sx={{ width: 120, height: 120, bgcolor: 'white', color: theme.palette.secondary.main, fontSize: '3rem', fontWeight: 700 }}
-                  >
-                    {profile.first_name?.[0]}{profile.last_name?.[0]}
-                  </Avatar>
-                </Grid>
-                <Grid item xs>
+              <Grid container spacing={3} alignItems="center" justifyContent="space-between">
+                {/* Lado Izquierdo: Avatar + Información */}
+                <Grid item xs={12} md={8}>
+                  <Grid container spacing={3} alignItems="center">
+                    <Grid item>
+                      <Avatar
+                        src={profile.photo_url || undefined}
+                        alt={profile.full_name}
+                        sx={{ width: 120, height: 120, bgcolor: 'white', color: theme.palette.secondary.main, fontSize: '3rem', fontWeight: 700 }}
+                      >
+                        {profile.first_name?.[0]}{profile.last_name?.[0]}
+                      </Avatar>
+                    </Grid>
+                    <Grid item xs>
                   <Typography variant="h4" fontWeight={600} color="white">
                     {profile.full_name}
                   </Typography>
@@ -231,6 +218,52 @@ export const PersonnelProfilePage = () => {
                     {profile.has_system_access && (
                       <Chip icon={<AccountCircleIcon />} label="Acceso al Sistema" color="info" />
                     )}
+                  </Box>
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                {/* Lado Derecho: QR + Menú */}
+                <Grid item xs={12} md={4}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+                    {/* Menú desplegable */}
+                    <IconButton
+                      onClick={handleOpenMenu}
+                      sx={{
+                        color: 'white',
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                        '&:hover': {
+                          bgcolor: 'rgba(255, 255, 255, 0.2)',
+                        },
+                      }}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+
+                    {/* QR Code */}
+                    <Box
+                      sx={{
+                        bgcolor: 'white',
+                        p: 1.5,
+                        borderRadius: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: 2,
+                      }}
+                    >
+                      <QRCodeSVG
+                        value={`${import.meta.env.VITE_JS_FRONTEND_URL}/personnel/profile/${profile.id}`}
+                        size={100}
+                        level="Q"
+                        imageSettings={{
+                          src: '/logo-qr.png',
+                          height: 20,
+                          width: 20,
+                          excavate: true,
+                        }}
+                      />
+                    </Box>
                   </Box>
                 </Grid>
               </Grid>
@@ -273,23 +306,23 @@ export const PersonnelProfilePage = () => {
                 <Card elevation={2}>
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <PersonIcon /> Información Personal
+                      <PersonIcon color="secondary" /> Información Personal
                     </Typography>
                     <List dense>
                       <ListItem>
-                        <ListItemIcon><EmailIcon /></ListItemIcon>
+                        <ListItemIcon><EmailIcon color="secondary" /></ListItemIcon>
                         <ListItemText primary="Email" secondary={profile.email || 'No especificado'} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><PhoneIcon /></ListItemIcon>
+                        <ListItemIcon><PhoneIcon color="secondary" /></ListItemIcon>
                         <ListItemText primary="Teléfono" secondary={profile.phone} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><LocationOnIcon /></ListItemIcon>
+                        <ListItemIcon><LocationOnIcon color="secondary" /></ListItemIcon>
                         <ListItemText primary="Dirección" secondary={`${profile.address}, ${profile.city}`} />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CalendarTodayIcon /></ListItemIcon>
+                        <ListItemIcon><CalendarTodayIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Fecha de Nacimiento"
                           secondary={format(new Date(profile.birth_date), "dd 'de' MMMM 'de' yyyy", { locale: es })}
@@ -305,32 +338,32 @@ export const PersonnelProfilePage = () => {
                 <Card elevation={2}>
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <WorkIcon /> Información Laboral
+                      <WorkIcon color="secondary" /> Información Laboral
                     </Typography>
                     <List dense>
                       <ListItem>
-                        <ListItemIcon><BusinessIcon /></ListItemIcon>
+                        <ListItemIcon><BusinessIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Área"
                           secondary={profile.area?.name || 'No especificada'}
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><BusinessIcon /></ListItemIcon>
+                        <ListItemIcon><BusinessIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Departamento"
                           secondary={profile.department?.name || 'No especificado'}
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><CalendarTodayIcon /></ListItemIcon>
+                        <ListItemIcon><CalendarTodayIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Fecha de Ingreso"
                           secondary={format(new Date(profile.hire_date), "dd 'de' MMMM 'de' yyyy", { locale: es })}
                         />
                       </ListItem>
                       <ListItem>
-                        <ListItemIcon><WorkIcon /></ListItemIcon>
+                        <ListItemIcon><WorkIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Tipo de Contrato"
                           secondary={profile.contract_type}
@@ -338,7 +371,7 @@ export const PersonnelProfilePage = () => {
                       </ListItem>
                       {profile.immediate_supervisor && (
                         <ListItem>
-                          <ListItemIcon><PersonIcon /></ListItemIcon>
+                          <ListItemIcon><PersonIcon color="secondary" /></ListItemIcon>
                           <ListItemText
                             primary="Supervisor Inmediato"
                             secondary={profile.immediate_supervisor.full_name}

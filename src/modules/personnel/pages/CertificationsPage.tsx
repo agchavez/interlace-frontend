@@ -188,7 +188,11 @@ export const CertificationsPage = () => {
         renderCell: (params: GridRenderCellParams) => (
           <Box sx={{ display: 'flex', gap: 0.5 }}>
             <Tooltip title="Ver detalle">
-              <IconButton size="small" color="primary">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => navigate(`/personnel/certifications/${params.row.id}`)}
+              >
                 <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -205,7 +209,7 @@ export const CertificationsPage = () => {
     );
 
     return baseColumns;
-  }, [isMobile, isTablet]);
+  }, [isMobile, isTablet, navigate]);
 
   const clearFilter = (filterKey: keyof CertificationFilterParams) => {
     const newFilters = { ...filters };
@@ -242,7 +246,7 @@ export const CertificationsPage = () => {
       <Container maxWidth={isFullHD ? 'xl' : 'lg'} sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
+            <Typography variant="h4" component="h1" fontWeight={400}>
               Gestión de Certificaciones
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
@@ -416,6 +420,7 @@ export const CertificationsPage = () => {
                 rowCount={data?.count || 0}
                 paginationMode="server"
                 disableRowSelectionOnClick
+                onRowDoubleClick={(params) => navigate(`/personnel/certifications/${params.row.id}`)}
                 autoHeight
                 sx={{
                   border: 0,

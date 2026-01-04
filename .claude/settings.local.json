@@ -15,7 +15,11 @@
       "Bash(cat:*)",
       "Bash(source /c/Users/$USER/anaconda3/Scripts/activate)",
       "Bash(conda activate:*)",
-      "Bash(conda run -n tracker python manage.py shell:*)"
+      "Bash(conda run -n tracker python manage.py shell:*)",
+      "Bash(findstr:*)",
+      "Bash(E:/Programs/Anaconda/envs/tracker/python.exe manage.py makemigrations:*)",
+      "Bash(E:/Programs/Anaconda/envs/tracker/python.exe manage.py:*)",
+      "Bash(/e/Programs/Anaconda/envs/tracker/python.exe manage.py:*)"
     ]
   }
 }

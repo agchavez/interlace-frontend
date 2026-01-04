@@ -1,7 +1,6 @@
 
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, Grid, Typography, styled } from "@mui/material";
 import { FunctionComponent } from "react";
-import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch } from "../../../store";
 import { completeTracker, chanceStatusTracking } from '../../../store/seguimiento/trackerThunk';
 import { useAppSelector } from '../../../store/store';
