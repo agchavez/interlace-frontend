@@ -95,12 +95,12 @@ export const PersonnelManagementPage = () => {
 
   const handleViewDetails = () => {
     if (personnelList[activeTab]) {
-      navigate(`/personnel/profile/${personnelList[activeTab].id}`);
+      navigate(`/personnel/detail/${personnelList[activeTab].id}`);
     }
   };
 
   const handleDoubleClick = (personId: number) => {
-    navigate(`/personnel/profile/${personId}`);
+    navigate(`/personnel/detail/${personId}`);
   };
 
   const handleDeactivate = () => {

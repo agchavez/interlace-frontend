@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, IconButton, SxProps, Theme, Typography } from "@mui/material";
+import { Box, IconButton, SxProps, Theme, Typography, CircularProgress } from "@mui/material";
 import { FileRejection, useDropzone } from "react-dropzone";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -8,6 +8,7 @@ import { PDFPreviewModal } from "./PDFPreviewModal";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import PictureAsPdfTwoToneIcon from '@mui/icons-material/PictureAsPdfTwoTone';
 import { toast } from "sonner";
+import { compressImages } from "../../../utils/imageCompression";
 interface ImagePreviewDropzoneProps {
     files: File[];
     onFilesChange: (files: File[]) => void;
@@ -21,18 +22,37 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
     const [previews, setPreviews] = useState<string[]>(files.map(file => URL.createObjectURL(file)));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
     const [type] = useState<'image' | 'pdf' | 'excel' | null>(accept["application/pdf"] ? 'pdf' : accept["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"] ? 'excel' : 'image');
-    
-    const onDrop = (acceptedFiles: File[]) => {
+    const [isCompressing, setIsCompressing] = useState(false);
+
+    const onDrop = async (acceptedFiles: File[]) => {
         if (files.length + acceptedFiles.length > maxFiles) {
             toast.error(`No puedes subir más de ${maxFiles} archivos.`);
             return;
         }
-        
+
         if (acceptedFiles.length > 0) {
-            const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
-            onFilesChange(newFiles);
+            try {
+                setIsCompressing(true);
+
+                // Solo comprimir imágenes, otros archivos pasan sin modificar
+                const isImage = accept["image/*"] !== undefined;
+                let processedFiles = acceptedFiles;
+
+                if (isImage) {
+                    // Comprimir las imágenes
+                    processedFiles = await compressImages(acceptedFiles);
+                }
+
+                const newFiles = [...files, ...processedFiles].slice(0, maxFiles);
+                onFilesChange(newFiles);
+                setPreviews([...previews, ...processedFiles.map(file => URL.createObjectURL(file))]);
+            } catch (error) {
+                console.error('Error al procesar archivos:', error);
+                toast.error('Error al procesar los archivos');
+            } finally {
+                setIsCompressing(false);
+            }
         }
-        setPreviews([...previews, ...acceptedFiles.map(file => URL.createObjectURL(file))]);
     };
 
     const handleRemove = (index: number) => {
@@ -98,12 +118,33 @@ export const ImagePreviewDropzone: React.FC<ImagePreviewDropzoneProps> = ({ file
     return (
         <Box>
             <Typography variant="body2">{label}</Typography>
-            <Box {...getRootProps()} sx={{ border: "1px dashed grey", padding: 2, textAlign: "center", cursor: "pointer" }}>
-                <input {...getInputProps()} />
-                <CloudUploadIcon sx={{ fontSize: 40 }} />
-                <Typography variant="body2">
-                    Arrastra y suelta los archivos aquí, o haz clic para seleccionar archivos
-                </Typography>
+            <Box
+                {...getRootProps()}
+                sx={{
+                    border: "1px dashed grey",
+                    padding: 2,
+                    textAlign: "center",
+                    cursor: isCompressing ? "wait" : "pointer",
+                    opacity: isCompressing ? 0.6 : 1,
+                    position: "relative"
+                }}
+            >
+                <input {...getInputProps()} disabled={isCompressing} />
+                {isCompressing ? (
+                    <>
+                        <CircularProgress size={40} />
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                            Comprimiendo imágenes...
+                        </Typography>
+                    </>
+                ) : (
+                    <>
+                        <CloudUploadIcon sx={{ fontSize: 40 }} />
+                        <Typography variant="body2">
+                            Arrastra y suelta los archivos aquí, o haz clic para seleccionar archivos
+                        </Typography>
+                    </>
+                )}
             </Box>
             <Box sx={{ display: "flex", flexWrap: "wrap", mt: 0 }}>
                 {previews.map((preview, index) => (

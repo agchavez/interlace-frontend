@@ -91,14 +91,15 @@ export const PersonnelProfilePage = () => {
   const isMyProfile = id === 'me';
 
   // Cargar datos
-  const { data: profile, isLoading, error } = useGetPersonnelProfileQuery(id || '', { skip: !id });
-  const { data: certificationsData } = useGetCertificationsQuery({ personnel: id || '' }, { skip: !id });
-  const { data: performanceData } = useGetPerformanceMetricsQuery({ personnel: id || '' }, { skip: !id });
-  const { data: emergencyContactsData } = useGetEmergencyContactsQuery({ personnel: id || '' }, { skip: !id });
+  const personnelId = id ? Number(id) : 0;
+  const { data: profile, isLoading, error } = useGetPersonnelProfileQuery(personnelId, { skip: !id });
+  const { data: certificationsData } = useGetCertificationsQuery({ personnel: personnelId }, { skip: !id });
+  const { data: performanceData } = useGetPerformanceMetricsQuery({ personnel: personnelId }, { skip: !id });
+  const { data: emergencyContactsData } = useGetEmergencyContactsQuery({ personnel: personnelId }, { skip: !id });
 
   const certifications = certificationsData?.results || [];
   const performanceMetrics = performanceData?.results || [];
-  const emergencyContacts = emergencyContactsData || [];
+  const emergencyContacts = Array.isArray(emergencyContactsData) ? emergencyContactsData : [];
 
   // Permisos: puede agregar certificaciones/desempeño si no es "Mi Perfil"
   const canManage = !isMyProfile;
@@ -253,7 +254,7 @@ export const PersonnelProfilePage = () => {
                       }}
                     >
                       <QRCodeSVG
-                        value={`${import.meta.env.VITE_JS_FRONTEND_URL}/personnel/profile/${profile.id}`}
+                        value={`${import.meta.env.VITE_JS_FRONTEND_URL}/personnel/detail/${profile.id}`}
                         size={100}
                         level="Q"
                         imageSettings={{
@@ -345,14 +346,14 @@ export const PersonnelProfilePage = () => {
                         <ListItemIcon><BusinessIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Área"
-                          secondary={profile.area?.name || 'No especificada'}
+                          secondary={(typeof profile.area === 'object' ? profile.area.name : profile.area_data?.name) || 'No especificada'}
                         />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><BusinessIcon color="secondary" /></ListItemIcon>
                         <ListItemText
                           primary="Departamento"
-                          secondary={profile.department?.name || 'No especificado'}
+                          secondary={(typeof profile.department === 'object' && profile.department ? profile.department.name : profile.department_data?.name) || 'No especificado'}
                         />
                       </ListItem>
                       <ListItem>
@@ -369,12 +370,12 @@ export const PersonnelProfilePage = () => {
                           secondary={profile.contract_type}
                         />
                       </ListItem>
-                      {profile.immediate_supervisor && (
+                      {profile.supervisor_data && (
                         <ListItem>
                           <ListItemIcon><PersonIcon color="secondary" /></ListItemIcon>
                           <ListItemText
                             primary="Supervisor Inmediato"
-                            secondary={profile.immediate_supervisor.full_name}
+                            secondary={profile.supervisor_data.full_name}
                           />
                         </ListItem>
                       )}
@@ -557,20 +558,22 @@ export const PersonnelProfilePage = () => {
               <Card elevation={2}>
                 <CardContent>
                   <List>
+                    {/* User data not available in PersonnelProfile interface
                     <ListItem>
                       <ListItemIcon><AccountCircleIcon /></ListItemIcon>
                       <ListItemText
                         primary="Nombre de Usuario"
-                        secondary={profile.user_data?.username || 'No disponible'}
+                        secondary={'No disponible'}
                       />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><EmailIcon /></ListItemIcon>
                       <ListItemText
                         primary="Email de Usuario"
-                        secondary={profile.user_data?.email || 'No disponible'}
+                        secondary={'No disponible'}
                       />
                     </ListItem>
+                    */}
                     <ListItem>
                       <ListItemIcon><CheckCircleIcon /></ListItemIcon>
                       <ListItemText

@@ -119,7 +119,7 @@ export const ProfileCompletionModal: React.FC<Props> = ({ onComplete }) => {
       case 0: // Información Básica
         return !!(formData.employee_code && formData.first_name && formData.last_name && formData.email);
       case 1: // Información Organizacional
-        return !!(formData.distributor_center && formData.area && formData.hierarchy_level && formData.position && formData.position_type);
+        return !!(formData.primary_distributor_center && formData.area && formData.hierarchy_level && formData.position && formData.position_type);
       case 2: // Información Laboral
         return !!(formData.hire_date && formData.contract_type);
       case 3: // Información Personal

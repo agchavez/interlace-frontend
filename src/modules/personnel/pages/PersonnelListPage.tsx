@@ -389,14 +389,14 @@ export const PersonnelListPage = () => {
                   ]}
                 />
               )}
-              {filters.distributor_center && (
+              {filters.any_distributor_center && (
                 <ChipFilterCategory
                   label="Centro: "
                   items={[
                     {
-                      label: disctributionCenters.find(dc => dc.id === filters.distributor_center)?.name || '',
-                      id: "distributor_center",
-                      deleteAction: () => clearFilter('distributor_center'),
+                      label: disctributionCenters.find(dc => dc.id === filters.any_distributor_center)?.name || '',
+                      id: "any_distributor_center",
+                      deleteAction: () => clearFilter('any_distributor_center'),
                     },
                   ]}
                 />

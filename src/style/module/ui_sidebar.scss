@@ -152,6 +152,22 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+// Nuevo contenedor para V2
+.ui__container__v2 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 60px; // Altura del navbar
+  margin-left: 260px; // Ancho del sidebar abierto
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Cuando el sidebar está colapsado
+.ui__container__v2.collapsed {
+  margin-left: 68px; // Ancho del sidebar colapsado
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @media screen and (max-width: 600px) {
   .ui__container{
     width: 96vw;
@@ -164,6 +180,20 @@
     width: 96vw;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .ui__container__v2 {
+    width: 100vw;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 2vw;
+  }
+
+  .ui__container__v2.collapsed {
+    width: 100vw;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 2vw;
   }
 }
 

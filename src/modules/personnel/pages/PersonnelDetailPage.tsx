@@ -27,6 +27,11 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -56,7 +61,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { QRCodeSVG } from 'qrcode.react';
-import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery } from '../services/personnelApi';
+import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery, useDeactivatePersonnelProfileMutation } from '../services/personnelApi';
+import { toast } from 'sonner';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -88,10 +94,12 @@ export const PersonnelDetailPage = () => {
 
   const [activeTab, setActiveTab] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   const { data: profile, isLoading, error } = useGetPersonnelProfileQuery(Number(id));
   const { data: certificationsData } = useGetCertificationsQuery({ personnel: Number(id), limit: 100, offset: 0 });
   const { data: performanceData } = useGetPerformanceMetricsQuery({ personnel: Number(id), limit: 100, offset: 0 });
+  const [deactivatePersonnel, { isLoading: isDeactivating }] = useDeactivatePersonnelProfileMutation();
 
   const handleBack = () => {
     navigate('/personnel');
@@ -106,8 +114,8 @@ export const PersonnelDetailPage = () => {
   };
 
   const handleEdit = () => {
-    // TODO: Navegar a página de edición
-    console.log('Editar perfil:', id);
+    // Navegar a página de edición (puedes crear una o usar modal)
+    navigate(`/personnel/edit/${id}`);
     handleCloseMenu();
   };
 
@@ -121,9 +129,25 @@ export const PersonnelDetailPage = () => {
   };
 
   const handleDeactivate = () => {
-    // TODO: Implementar desactivación de personal
-    console.log('Desactivar personal:', id);
+    setDeactivateDialogOpen(true);
     handleCloseMenu();
+  };
+
+  const handleConfirmDeactivate = async () => {
+    try {
+      await deactivatePersonnel(Number(id)).unwrap();
+      toast.success('Personal desactivado exitosamente');
+      setDeactivateDialogOpen(false);
+      // Regresar a la lista después de desactivar
+      navigate('/personnel');
+    } catch (error: any) {
+      console.error('Error al desactivar personal:', error);
+      toast.error(error?.data?.message || 'Error al desactivar personal');
+    }
+  };
+
+  const handleCancelDeactivate = () => {
+    setDeactivateDialogOpen(false);
   };
 
   const handleNewCertification = () => {
@@ -341,9 +365,9 @@ export const PersonnelDetailPage = () => {
                   <Grid item xs={12} sm={6}>
                     <InfoItem icon={<PhoneIcon />} label="Teléfono" value={profile.phone || 'No especificado'} />
                   </Grid>
-                  {profile.national_id && (
+                  {profile.personal_id && (
                     <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<BadgeIcon />} label="ID Nacional" value={profile.national_id} />
+                      <InfoItem icon={<BadgeIcon />} label="ID Nacional" value={profile.personal_id} />
                     </Grid>
                   )}
                   {profile.birth_date && (
@@ -377,10 +401,10 @@ export const PersonnelDetailPage = () => {
                 </Typography>
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
-                    <InfoItem icon={<BusinessIcon />} label="Centro de Distribución" value={profile.center_name} />
+                    <InfoItem icon={<BusinessIcon />} label="Centro de Distribución" value={profile.primary_distributor_center_data?.name || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <InfoItem icon={<BusinessIcon />} label="Área" value={profile.area_name} />
+                    <InfoItem icon={<BusinessIcon />} label="Área" value={typeof profile.area === 'object' ? profile.area.name : profile.area_data?.name || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <InfoItem icon={<WorkIcon />} label="Posición" value={profile.position} />
@@ -391,9 +415,9 @@ export const PersonnelDetailPage = () => {
                   <Grid item xs={12} sm={6}>
                     <InfoItem icon={<TrendingUpIcon />} label="Nivel Jerárquico" value={profile.hierarchy_level_display} />
                   </Grid>
-                  {profile.department_name && (
+                  {profile.department_data && (
                     <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_name} />
+                      <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_data.name} />
                     </Grid>
                   )}
                 </Grid>
@@ -416,16 +440,11 @@ export const PersonnelDetailPage = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display} />
+                    <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display || profile.contract_type} />
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <InfoItem icon={<TrendingUpIcon />} label="Antigüedad" value={`${profile.years_of_service} años`} />
                   </Grid>
-                  {profile.base_salary && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<WorkIcon />} label="Salario Base" value={`L ${profile.base_salary}`} />
-                    </Grid>
-                  )}
                   {profile.termination_date && (
                     <Grid item xs={12} sm={6}>
                       <InfoItem
@@ -457,11 +476,6 @@ export const PersonnelDetailPage = () => {
                       value={profile.has_system_access ? 'Sí' : 'No'}
                     />
                   </Grid>
-                  {profile.username && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<PersonIcon />} label="Usuario" value={profile.username} />
-                    </Grid>
-                  )}
                 </Grid>
               </Box>
             </Box>
@@ -530,11 +544,11 @@ export const PersonnelDetailPage = () => {
                               >
                                 <VisibilityIcon fontSize="small" />
                               </IconButton>
-                              {cert.certificate_document && (
+                              {cert.certificate_document_url && (
                                 <IconButton
                                   size="small"
                                   color="secondary"
-                                  onClick={() => window.open(cert.certificate_document, '_blank')}
+                                  onClick={() => window.open(cert.certificate_document_url, '_blank')}
                                   title="Ver Documento"
                                 >
                                   <DescriptionIcon fontSize="small" />
@@ -578,7 +592,7 @@ export const PersonnelDetailPage = () => {
                           </Grid>
 
                           {/* Alerta de vencimiento */}
-                          {cert.days_until_expiration !== null && (
+                          {cert.days_until_expiration !== null && cert.days_until_expiration !== undefined && (
                             <Box
                               sx={{
                                 mt: 2,
@@ -943,6 +957,57 @@ export const PersonnelDetailPage = () => {
           </MenuItem>
         )}
       </Menu>
+
+      {/* Dialog de confirmación de desactivación */}
+      <Dialog
+        open={deactivateDialogOpen}
+        onClose={handleCancelDeactivate}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600, color: 'error.main' }}>
+          Confirmar Desactivación
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Está seguro que desea desactivar a <strong>{profile?.full_name}</strong>?
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 2 }}>
+            Esta acción desactivará:
+          </DialogContentText>
+          <Box component="ul" sx={{ mt: 1, pl: 3 }}>
+            <li>
+              <Typography variant="body2">El perfil del personal</Typography>
+            </li>
+            {profile?.has_system_access && (
+              <li>
+                <Typography variant="body2">El acceso al sistema (usuario asociado)</Typography>
+              </li>
+            )}
+          </Box>
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            El personal desactivado no aparecerá en las listas activas pero su información se mantendrá en el sistema.
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleCancelDeactivate}
+            variant="outlined"
+            disabled={isDeactivating}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDeactivate}
+            variant="contained"
+            color="error"
+            disabled={isDeactivating}
+            startIcon={isDeactivating ? <CircularProgress size={20} /> : <BlockIcon />}
+          >
+            {isDeactivating ? 'Desactivando...' : 'Desactivar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

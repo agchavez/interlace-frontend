@@ -28,8 +28,9 @@ import {setOpenChangeDistributionCenter, toggleSidebar} from '../../../store/ui/
 import NotificationsNoneTwoToneIcon from '@mui/icons-material/NotificationsNoneTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BootstrapDialogTitle from './BootstrapDialogTitle';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useGetMyProfileQuery } from '../../personnel/services/personnelApi';
+import { useSidebar } from '../context/SidebarContext';
 
 interface NavbarProps {
     notificationCount: number;
@@ -44,11 +45,17 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
     const navigate = useNavigate();
     const { status, user } = useAppSelector(state => state.auth);
 
+    // Usar contexto de sidebar V2
+    const { toggleCollapsed } = useSidebar();
+
     // Obtener foto del perfil con SAS token actualizado
-    const { data: profileData } = useGetMyProfileQuery(undefined, {
+    const { data: profileData, error: profileError } = useGetMyProfileQuery(undefined, {
         skip: status !== 'authenticated',
         refetchOnMountOrArgChange: true,
     });
+
+    // Verificar si el usuario tiene perfil
+    const hasProfile = profileData && 'id' in profileData;
 
     const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
         setAnchorEl(event.currentTarget);
@@ -87,7 +94,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                       padding: '8px 16px',
                       paddingRight: '24px',
                       height: '60px',
-                      marginBottom: '8px',
+                      marginBottom: 0,
                       boxShadow: '0px 2px 8px rgba(0,0,0,0.08)',
                       position: 'fixed',
                       backgroundColor: 'white',
@@ -98,13 +105,14 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                       zIndex: 3,
                       borderBottom: '1px solid',
                       borderColor: 'divider',
+                      borderRadius: '0 0 16px 16px', // Bordes redondeados en la parte inferior
                   }}>
                 <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     {status === 'authenticated' && <IconButton
                         aria-label="menu"
                         sx={{ mr: 0 }}
                         onClick={() => {
-                            dispatch(toggleSidebar());
+                            toggleCollapsed();
                         }}
                     >
                         <MenuOutlinedIcon fontSize='medium' color='primary' />
@@ -133,7 +141,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                         sx={{
                             width: 44,
                             height: 44,
-                            borderRadius: 2,
+                            borderRadius: 3, // Aumentado de 2 a 3
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
                                 backgroundColor: 'rgba(220, 187, 32, 0.1)',
@@ -189,7 +197,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     cursor: 'pointer',
                                     px: 1.5,
                                     py: 0.5,
-                                    borderRadius: 1.5,
+                                    borderRadius: 3, // Aumentado de 1.5 a 3
                                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                     '&:hover': {
                                         backgroundColor: 'rgba(220, 187, 32, 0.08)',
@@ -255,6 +263,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                     border: '2px solid',
                                     borderColor: 'transparent',
+                                    borderRadius: 3, // Aumentado para más redondeo
                                     '&:hover': {
                                         transform: 'scale(1.1)',
                                         boxShadow: '0 6px 16px rgba(220, 187, 32, 0.3)',
@@ -278,7 +287,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                             sx: {
                                 mt: 2,
                                 minWidth: 240,
-                                borderRadius: 3,
+                                borderRadius: 4, // Aumentado de 3 a 4
                                 overflow: 'visible',
                                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
                                 border: '1px solid',
@@ -301,7 +310,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                 '& .MuiMenuItem-root': {
                                     px: 2.5,
                                     py: 1.75,
-                                    borderRadius: 2,
+                                    borderRadius: 3, // Aumentado de 2 a 3
                                     mx: 1.5,
                                     my: 0.75,
                                     fontFamily: 'Inter',
@@ -328,7 +337,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     sx={{
                                         width: 32,
                                         height: 32,
-                                        borderRadius: 2,
+                                        borderRadius: 2.5, // Aumentado de 2 a 2.5
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -358,7 +367,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     sx={{
                                         width: 32,
                                         height: 32,
-                                        borderRadius: 2,
+                                        borderRadius: 2.5, // Aumentado de 2 a 2.5
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
@@ -389,7 +398,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                         fullWidth
                         PaperProps={{
                             sx: {
-                                borderRadius: 3,
+                                borderRadius: 4, // Aumentado de 3 a 4 para los diálogos
                                 boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)',
                             },
                         }}
@@ -413,7 +422,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     fontFamily: 'Inter',
                                     fontWeight: 500,
                                     textTransform: 'none',
-                                    borderRadius: 2,
+                                    borderRadius: 3, // Aumentado de 2 a 3
                                 }}
                             >
                                 Cancelar
@@ -426,7 +435,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     fontFamily: 'Inter',
                                     fontWeight: 500,
                                     textTransform: 'none',
-                                    borderRadius: 2,
+                                    borderRadius: 3, // Aumentado de 2 a 3
                                 }}
                             >
                                 Cerrar Sesión

@@ -14,6 +14,7 @@ import { Toaster } from 'sonner'
 import { LocalizationProvider, esES } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { es } from 'date-fns/locale';
+import { SidebarProvider } from './modules/ui/context/SidebarContext';
 
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -26,10 +27,12 @@ function App() {
   return (
     <ThemeProvider theme={maintheme}>
       <Provider store={store}>
-      <LocalizationProvider dateAdapter={AdapterDateFns} localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText} adapterLocale={es}>  
+      <LocalizationProvider dateAdapter={AdapterDateFns} localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText} adapterLocale={es}>
         <BrowserRouter>
+        <SidebarProvider defaultCollapsed={false}>
         <Toaster duration={3000} position="top-right" richColors closeButton />
           <AppRouter />
+        </SidebarProvider>
         </BrowserRouter>
         </LocalizationProvider>
       </Provider>

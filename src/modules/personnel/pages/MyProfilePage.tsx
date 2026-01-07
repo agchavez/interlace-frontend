@@ -21,6 +21,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Button,
+  IconButton,
 } from '@mui/material';
 import BadgeIcon from '@mui/icons-material/Badge';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -35,9 +37,11 @@ import PersonIcon from '@mui/icons-material/Person';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import EditIcon from '@mui/icons-material/Edit';
 import { useGetMyProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery } from '../services/personnelApi';
 import type { PersonnelProfile } from '../../../interfaces/personnel';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const InfoItem: React.FC<{ icon: React.ReactNode; label: string; value: string | number }> = ({
   icon,
@@ -96,17 +100,19 @@ export const MyProfilePage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const navigate = useNavigate();
 
   const { data, isLoading, error } = useGetMyProfileQuery();
 
   // Fetch certifications and performance metrics when profile is loaded
+  const personnelProfile = data && 'id' in data ? data : null;
   const { data: certificationsData } = useGetCertificationsQuery(
-    { personnel: data?.id },
-    { skip: !data?.id }
+    { personnel: personnelProfile?.id as number },
+    { skip: !personnelProfile?.id }
   );
   const { data: performanceData } = useGetPerformanceMetricsQuery(
-    { personnel: data?.id },
-    { skip: !data?.id }
+    { personnel: personnelProfile?.id as number },
+    { skip: !personnelProfile?.id }
   );
 
   const certifications = certificationsData?.results || [];
@@ -143,8 +149,42 @@ export const MyProfilePage = () => {
           bgcolor: theme.palette.secondary.main,
           color: 'white',
           borderRadius: 2,
+          position: 'relative',
         }}
       >
+        {/* Edit Button */}
+        <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+          {isMobile ? (
+            <IconButton
+              onClick={() => navigate('/personnel/my-profile/edit')}
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.3)',
+                },
+              }}
+            >
+              <EditIcon />
+            </IconButton>
+          ) : (
+            <Button
+              variant="contained"
+              startIcon={<EditIcon />}
+              onClick={() => navigate('/personnel/my-profile/edit')}
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.3)',
+                },
+              }}
+            >
+              Editar Perfil
+            </Button>
+          )}
+        </Box>
+
         <Grid container spacing={4} alignItems="center">
           <Grid item xs={12} sm="auto">
             <Avatar
@@ -270,14 +310,14 @@ export const MyProfilePage = () => {
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <InfoItem icon={<WorkIcon />} label="Área" value={profile.area_data?.name || profile.area.name || ''} />
+                  <InfoItem icon={<WorkIcon />} label="Área" value={profile.area_data?.name || (typeof profile.area === 'object' ? profile.area.name : '') || ''} />
                 </Grid>
                 {(profile.department_data || profile.department) && (
                   <Grid item xs={12} sm={6}>
                     <InfoItem
                       icon={<WorkIcon />}
                       label="Departamento"
-                      value={typeof profile.department === 'object' ? profile.department.name : profile.department_data?.name || ''}
+                      value={typeof profile.department === 'object' && profile.department ? profile.department.name : profile.department_data?.name || ''}
                     />
                   </Grid>
                 )}

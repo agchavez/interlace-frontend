@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { PersonnelListPage } from "./pages/PersonnelListPage";
 import { PersonnelDetailPage } from "./pages/PersonnelDetailPage";
 import { PersonnelCreatePage } from "./pages/PersonnelCreatePage";
+import { PersonnelEditPage } from "./pages/PersonnelEditPage";
 import { PersonnelDashboardPage } from "./pages/PersonnelDashboardPage";
 import { CertificationsPage } from "./pages/CertificationsPage";
 import { CertificationCreatePage } from "./pages/CertificationCreatePage";
@@ -9,14 +10,17 @@ import { CertificationDetailPage } from "./pages/CertificationDetailPage";
 import { PerformanceTrackingPage } from "./pages/PerformanceTrackingPage";
 import { PerformanceEvaluationCreatePage } from "./pages/PerformanceEvaluationCreatePage";
 import { MyProfilePage } from "./pages/MyProfilePage";
+import { MyProfileEditPage } from "./pages/MyProfileEditPage";
 import { PersonnelManagementPage } from "./pages/PersonnelManagementPage";
-import { PersonnelProfilePage } from "./pages/PersonnelProfilePage";
 
 function PersonnelRouter() {
   return (
     <Routes>
       {/* Mi Perfil - Perfil del usuario autenticado */}
       <Route element={<MyProfilePage />} path="/my-profile" />
+
+      {/* Editar Mi Perfil */}
+      <Route element={<MyProfileEditPage />} path="/my-profile/edit" />
 
       {/* Dashboard de personal */}
       <Route element={<PersonnelDashboardPage />} path="/dashboard" />
@@ -30,11 +34,11 @@ function PersonnelRouter() {
       {/* Crear nuevo personal */}
       <Route element={<PersonnelCreatePage />} path="/create" />
 
+      {/* Editar personal */}
+      <Route element={<PersonnelEditPage />} path="/edit/:id" />
+
       {/* Detalle de personal */}
       <Route element={<PersonnelDetailPage />} path="/detail/:id" />
-
-      {/* Perfil de personal (nueva página interactiva) */}
-      <Route element={<PersonnelProfilePage />} path="/profile/:id" />
 
       {/* Certificaciones */}
       <Route element={<CertificationsPage />} path="/certifications" />

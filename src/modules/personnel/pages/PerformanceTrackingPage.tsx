@@ -30,7 +30,7 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { useNavigate } from 'react-router-dom';
 import { useGetEvaluationsQuery, useGetAreasQuery, useGetEvaluationStatisticsQuery } from '../services/personnelApi';
-import type { PerformanceFilterParams } from '../../../interfaces/personnel';
+import type { PerformanceFilterParams, PerformanceMetricList } from '../../../interfaces/personnel';
 import { PerformanceFilters } from '../components/PerformanceFilters';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
 import { useAppSelector } from '../../../store';
@@ -92,9 +92,9 @@ export const PerformanceTrackingPage = () => {
     if (!data?.results) return { total: 0, avgScore: '0.0', excellent: 0, needsImprovement: 0 };
 
     const total = data.count;
-    const avgScore = data.results.reduce((sum, p) => sum + p.overall_score, 0) / (data.results.length || 1);
-    const excellent = data.results.filter((p) => p.overall_score >= 4.5).length;
-    const needsImprovement = data.results.filter((p) => p.overall_score < 3.5).length;
+    const avgScore = data.results.reduce((sum: number, p: PerformanceMetricList) => sum + p.overall_score, 0) / (data.results.length || 1);
+    const excellent = data.results.filter((p: PerformanceMetricList) => p.overall_score >= 4.5).length;
+    const needsImprovement = data.results.filter((p: PerformanceMetricList) => p.overall_score < 3.5).length;
 
     return {
       total,
@@ -325,7 +325,7 @@ export const PerformanceTrackingPage = () => {
                   Promedio por Métrica
                 </Typography>
                 {statsData?.metric_averages && statsData.metric_averages.length > 0 ? (
-                  statsData.metric_averages.slice(0, 5).map((metric: any, index: number) => {
+                  statsData.metric_averages.slice(0, 5).map((metric, index: number) => {
                     const colors = ['#2196f3', '#4caf50', '#ff9800', '#9c27b0', '#f44336'];
                     return (
                       <PerformanceMetric
@@ -353,9 +353,9 @@ export const PerformanceTrackingPage = () => {
                 </Typography>
                 {data?.results
                   .slice()
-                  .sort((a, b) => b.overall_score - a.overall_score)
+                  .sort((a: PerformanceMetricList, b: PerformanceMetricList) => b.overall_score - a.overall_score)
                   .slice(0, 3)
-                  .map((perf, index) => (
+                  .map((perf: PerformanceMetricList, index: number) => (
                     <Box
                       key={perf.id}
                       sx={{

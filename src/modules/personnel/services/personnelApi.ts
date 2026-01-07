@@ -20,6 +20,8 @@ import type {
   PerformanceFilterParams,
   Area,
   Department,
+  EvaluationStatistics,
+  MyProfileUpdate,
 } from '../../../interfaces/personnel';
 
 export const personnelApi = createApi({
@@ -119,6 +121,15 @@ export const personnelApi = createApi({
       query: (data) => ({
         url: '/profiles/complete_my_profile/',
         method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['PersonnelProfiles'],
+    }),
+
+    updateMyProfile: builder.mutation<{ message: string; profile: PersonnelProfile }, MyProfileUpdate>({
+      query: (data) => ({
+        url: '/profiles/update_my_profile/',
+        method: 'PATCH',
         body: data,
       }),
       invalidatesTags: ['PersonnelProfiles'],
@@ -319,6 +330,24 @@ export const personnelApi = createApi({
         method: 'GET',
         params,
       }),
+    }),
+
+    createDepartment: builder.mutation<Department, Partial<Department>>({
+      query: (data) => ({
+        url: '/departments/',
+        method: 'POST',
+        body: data,
+      }),
+      // Invalidate departments cache to refetch
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Invalidate the getDepartments cache
+          dispatch(
+            personnelApi.util.invalidateTags([])
+          );
+        } catch {}
+      },
     }),
 
     // ==========================================
@@ -530,7 +559,7 @@ export const personnelApi = createApi({
       ],
     }),
 
-    getEvaluationStatistics: builder.query<any, any>({
+    getEvaluationStatistics: builder.query<EvaluationStatistics, PerformanceFilterParams>({
       query: (params) => ({
         url: '/evaluations/statistics/',
         method: 'GET',
@@ -551,6 +580,7 @@ export const {
   useGetMyProfileQuery,
   useGetProfileCompletionDataQuery,
   useCompleteMyProfileMutation,
+  useUpdateMyProfileMutation,
   // Dashboard
   useGetPersonnelDashboardQuery,
   useGetSupervisedPersonnelQuery,
@@ -572,6 +602,7 @@ export const {
   // Catalogs
   useGetAreasQuery,
   useGetDepartmentsQuery,
+  useCreateDepartmentMutation,
   // Emergency Contacts
   useGetEmergencyContactsQuery,
   useCreateEmergencyContactMutation,

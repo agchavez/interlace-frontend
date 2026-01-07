@@ -41,7 +41,7 @@ export const OrganizationalInfoForm: React.FC<Props> = ({
   };
 
   // Encontrar el valor seleccionado para los autocompletes
-  const selectedDistributorCenter = distributorCenters.find((dc) => dc.id === data.distributor_center) || null;
+  const selectedDistributorCenter = distributorCenters.find((dc) => dc.id === data.primary_distributor_center) || null;
   const selectedArea = areas.find((area) => area.id === data.area) || null;
   const selectedHierarchyLevel = hierarchyLevels.find((level) => level.value === data.hierarchy_level) || null;
   const selectedPositionType = positionTypes.find((type) => type.value === data.position_type) || null;
@@ -61,7 +61,7 @@ export const OrganizationalInfoForm: React.FC<Props> = ({
                 fullWidth
                 options={distributorCenters}
                 value={selectedDistributorCenter}
-                onChange={(_, newValue) => handleChange('distributor_center', newValue?.id || null)}
+                onChange={(_, newValue) => handleChange('primary_distributor_center', newValue?.id || null)}
                 getOptionLabel={(option) => option.name}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 noOptionsText="No hay centros disponibles"
@@ -70,8 +70,8 @@ export const OrganizationalInfoForm: React.FC<Props> = ({
                     {...params}
                     required
                     label="Centro de Distribución"
-                    error={!!errors.distributor_center}
-                    helperText={errors.distributor_center?.[0] || 'Seleccione el centro donde labora'}
+                    error={!!errors.primary_distributor_center}
+                    helperText={errors.primary_distributor_center?.[0] || 'Seleccione el centro donde labora'}
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: (

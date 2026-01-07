@@ -141,6 +141,21 @@ export interface PersonnelProfileCreateUpdate {
   emergency_contacts?: EmergencyContact[];
 }
 
+export interface MyProfileUpdate {
+  email?: string;
+  personal_email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  marital_status?: string;
+  shirt_size?: string;
+  pants_size?: string;
+  shoe_size?: string;
+  glove_size?: string;
+  helmet_size?: string;
+  photo?: File | string | null;
+}
+
 export interface EmergencyContact {
   id?: number;
   full_name: string;
@@ -154,16 +169,29 @@ export interface EmergencyContact {
 export interface Certification {
   id: number;
   personnel: number;
-  certification_type: CertificationType;
+  personnel_name?: string;
+  personnel_code?: string;
+  certification_type: CertificationType | number;
+  certification_type_name?: string;
   certification_number: string;
   issue_date: string;
   expiration_date: string;
-  issuing_organization: string;
+  issuing_organization?: string;
+  issuing_authority?: string;
   is_valid: boolean;
   revoked: boolean;
   revocation_date?: string | null;
   revocation_reason?: string | null;
   days_until_expiration?: number | null;
+  is_expiring_soon?: boolean;
+  is_expired?: boolean;
+  status_display?: string;
+  certificate_document?: string | null;
+  certificate_document_url?: string | null;
+  notes?: string;
+  created_by_name?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CertificationType {
@@ -368,6 +396,8 @@ export interface CertificationList {
   issuing_organization: string;
   status: 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'REVOKED';
   days_until_expiration?: number | null;
+  certificate_document?: string | null;
+  certificate_document_url?: string | null;
   document_url?: string | null;
 }
 
@@ -396,4 +426,19 @@ export interface PerformanceMetricListResponse {
   next?: string | null;
   previous?: string | null;
   results: PerformanceMetricList[];
+}
+
+// Statistics interfaces
+export interface MetricAverage {
+  metric_name: string;
+  average_value: number;
+}
+
+export interface EvaluationStatistics {
+  metric_averages: MetricAverage[];
+  total_evaluations: number;
+  average_overall_score: number;
+  overall_average: number;
+  excellent_count: number;
+  needs_improvement_count: number;
 }

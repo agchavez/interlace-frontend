@@ -77,8 +77,8 @@ export const CertificationDetailPage = () => {
   };
 
   const handleDownload = () => {
-    if (certification?.certificate_document) {
-      window.open(certification.certificate_document, '_blank');
+    if (certification?.certificate_document_url) {
+      window.open(certification.certificate_document_url, '_blank');
     }
     handleCloseMenu();
   };
@@ -245,10 +245,10 @@ export const CertificationDetailPage = () => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <InfoItem icon={<PersonIcon />} label="Nombre Completo" value={certification.personnel_name} />
+                <InfoItem icon={<PersonIcon />} label="Nombre Completo" value={certification.personnel_name || 'N/A'} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <InfoItem icon={<BadgeIcon />} label="Código de Empleado" value={certification.personnel_code} />
+                <InfoItem icon={<BadgeIcon />} label="Código de Empleado" value={certification.personnel_code || 'N/A'} />
               </Grid>
             </Grid>
           </Box>
@@ -263,7 +263,7 @@ export const CertificationDetailPage = () => {
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6} md={4}>
-                <InfoItem icon={<AssignmentIcon />} label="Tipo de Certificación" value={certification.certification_type_name} />
+                <InfoItem icon={<AssignmentIcon />} label="Tipo de Certificación" value={certification.certification_type_name || 'N/A'} />
               </Grid>
               {certification.certification_number && (
                 <Grid item xs={12} sm={6} md={4}>
@@ -323,16 +323,18 @@ export const CertificationDetailPage = () => {
                       color: certification.is_expiring_soon ? 'warning.dark' : certification.is_expired ? 'error.dark' : 'success.dark',
                     }}
                   >
-                    {certification.days_until_expiration > 0
-                      ? `⏰ Vence en ${certification.days_until_expiration} días`
-                      : `❌ Venció hace ${Math.abs(certification.days_until_expiration)} días`}
+                    {certification.days_until_expiration !== null && certification.days_until_expiration !== undefined
+                      ? certification.days_until_expiration > 0
+                        ? `⏰ Vence en ${certification.days_until_expiration} días`
+                        : `❌ Venció hace ${Math.abs(certification.days_until_expiration)} días`
+                      : 'N/A'}
                   </Typography>
                 </Box>
               </Box>
             )}
           </Box>
 
-          {(certification.certificate_document || certification.notes) && (
+          {(certification.certificate_document_url || certification.notes) && (
             <>
               <Divider sx={{ my: 4 }} />
 
@@ -343,7 +345,7 @@ export const CertificationDetailPage = () => {
                   Documento y Notas
                 </Typography>
                 <Grid container spacing={3}>
-                  {certification.certificate_document && (
+                  {certification.certificate_document_url && (
                     <Grid item xs={12} sm={6}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <DescriptionIcon color="secondary" fontSize="small" />
@@ -355,7 +357,7 @@ export const CertificationDetailPage = () => {
                             variant="outlined"
                             size="small"
                             startIcon={<DownloadIcon />}
-                            onClick={() => window.open(certification.certificate_document, '_blank')}
+                            onClick={() => certification.certificate_document_url && window.open(certification.certificate_document_url, '_blank')}
                             sx={{ mt: 0.5 }}
                           >
                             Ver Documento
@@ -410,14 +412,14 @@ export const CertificationDetailPage = () => {
                 <InfoItem
                   icon={<CalendarTodayIcon />}
                   label="Fecha de Creación"
-                  value={format(new Date(certification.created_at), "dd/MM/yyyy HH:mm", { locale: es })}
+                  value={certification.created_at ? format(new Date(certification.created_at), "dd/MM/yyyy HH:mm", { locale: es }) : 'N/A'}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
                 <InfoItem
                   icon={<CalendarTodayIcon />}
                   label="Última Actualización"
-                  value={format(new Date(certification.updated_at), "dd/MM/yyyy HH:mm", { locale: es })}
+                  value={certification.updated_at ? format(new Date(certification.updated_at), "dd/MM/yyyy HH:mm", { locale: es }) : 'N/A'}
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={3}>
@@ -439,7 +441,7 @@ export const CertificationDetailPage = () => {
           </ListItemIcon>
           <ListItemText>Editar</ListItemText>
         </MenuItem>
-        {certification.certificate_document && (
+        {certification.certificate_document_url && (
           <MenuItem onClick={handleDownload}>
             <ListItemIcon>
               <DownloadIcon fontSize="small" sx={{ color: 'info.main' }} />

@@ -282,6 +282,19 @@ export const permisions = [
         ]
     },
     {
+        url: "/personnel/edit/:id",
+        reg: /\/personnel\/edit\/\d+/,
+        permissions: [
+            "personnel.change_personnelprofile"
+        ]
+    },
+    {
+        url: "/personnel/my-profile/edit",
+        permissions: [
+            "any"
+        ]
+    },
+    {
         url: "/personnel/certifications",
         permissions: [
             "personnel.view_certification"
@@ -313,16 +326,15 @@ export const permisions = [
         ]
     },
     {
-        url: "/personnel/profile/:id",
-        reg: /\/personnel\/profile\/[\w-]+/,
+        url: "/personnel/management",
         permissions: [
             "personnel.view_personnelprofile"
         ]
     },
     {
-        url: "/personnel/management",
+        url: "/demo-v2",
         permissions: [
-            "personnel.view_personnelprofile"
+            "any"
         ]
     }
 ]

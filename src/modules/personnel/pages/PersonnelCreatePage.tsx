@@ -41,7 +41,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetDepartmentsQuery, useGetPersonnelProfilesQuery } from '../services/personnelApi';
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { toast } from 'sonner';
-import type { PersonnelProfile } from '../../../interfaces/personnel';
+import type { PersonnelProfile, PersonnelFilterParams } from '../../../interfaces/personnel';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 import { PersonnelCreateModeSelector } from '../components/PersonnelCreateModeSelector';
 import { ExistingUserSelector } from '../components/ExistingUserSelector';
@@ -166,21 +166,20 @@ export const PersonnelCreatePage = () => {
   };
 
   // Cargar catálogos desde API
-  const { data: distributorCentersData } = useGetDistributorCentersQuery({ limit: 100, offset: 0 });
+  const { data: distributorCentersData } = useGetDistributorCentersQuery({ search: '', limit: 100, offset: 0 });
   const { data: areasData } = useGetAreasQuery();
   const { data: departmentsData } = useGetDepartmentsQuery({
     area: formData.area as number | undefined
   });
   const { data: personnelData } = useGetPersonnelProfilesQuery({
-    hierarchy_level__in: 'SUPERVISOR,AREA_MANAGER,CD_MANAGER',
     is_active: true,
     limit: 200,
     offset: 0
-  });
+  } as PersonnelFilterParams);
 
   const distributorCenters = distributorCentersData?.results || [];
-  const areas = areasData || [];
-  const departments = departmentsData || [];
+  const areas = Array.isArray(areasData) ? areasData : [];
+  const departments = Array.isArray(departmentsData) ? departmentsData : [];
   const supervisors = personnelData?.results || [];
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -647,12 +646,6 @@ export const PersonnelCreatePage = () => {
                   {formData.contract_type === 'INTERNSHIP' && 'Pasantía'}
                 </Typography>
               </Grid>
-              {formData.base_salary && (
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="text.secondary">Salario Base:</Typography>
-                  <Typography variant="body1" fontWeight={500}>${formData.base_salary}</Typography>
-                </Grid>
-              )}
             </Grid>
           </Box>
 
@@ -1089,22 +1082,7 @@ const EmploymentStep: React.FC<StepProps> = ({ data, errors, onChange }) => {
         size="small"
       />
 
-      <TextField
-        label="Salario Base"
-        type="number"
-        value={data.base_salary || ''}
-        onChange={(e) => onChange({ base_salary: e.target.value })}
-        fullWidth
-        variant="outlined"
-        size="small"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <AttachMoneyIcon fontSize="small" />
-            </InputAdornment>
-          ),
-        }}
-      />
+      {/* Salario Base field removed - not in PersonnelProfile interface */}
 
       <DatePicker
         label="Fecha de Terminación"

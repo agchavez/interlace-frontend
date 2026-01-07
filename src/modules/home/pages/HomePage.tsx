@@ -19,7 +19,6 @@ import {
   Menu,
   MenuItem,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   List,
@@ -32,7 +31,6 @@ import {
   Box,
   SpeedDial,
   SpeedDialAction,
-  LinearProgress,
   Avatar,
   AvatarGroup,
   useMediaQuery,
@@ -63,7 +61,6 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import GroupsIcon from '@mui/icons-material/Groups';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CloseIcon from '@mui/icons-material/Close';
@@ -85,6 +82,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
 
@@ -264,7 +262,6 @@ export default function HomePage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'lg'));
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
@@ -273,7 +270,7 @@ export default function HomePage() {
   const { dashboardQueryParams } = useAppSelector((state) => state.ui);
 
   // Obtener permisos del usuario
-  const userPermissions = user?.permissions || user?.list_permissions || [];
+  const userPermissions = user?.list_permissions || [];
 
   const [query, setQuery] = useState<DashboardQueryParams>(dashboardQueryParams);
   const { data, isLoading, isFetching, refetch } = useGetdashboardQuery(query, {
@@ -292,7 +289,7 @@ export default function HomePage() {
         const parsed = JSON.parse(saved);
         if (parsed.lg && parsed.md && parsed.sm) {
           // Verificar si los layouts guardados tienen las propiedades actualizadas
-          const welcomeLayout = parsed.lg.find((l: Layout) => l.i === WidgetType.WELCOME);
+          const welcomeLayout = parsed.lg.find((l: { i: string; maxH?: number; h: number }) => l.i === WidgetType.WELCOME);
 
           // Si WELCOME no tiene maxH o tiene altura mayor a 1, limpiar y usar defaults nuevos
           if (!welcomeLayout || !welcomeLayout.hasOwnProperty('maxH') || welcomeLayout.h > 1) {
@@ -317,7 +314,7 @@ export default function HomePage() {
   });
 
   const [enabledWidgets, setEnabledWidgets] = useState<WidgetType[]>(() => {
-    const permissions = user?.permissions || user?.list_permissions || [];
+    const permissions = user?.list_permissions || [];
 
     // Función para obtener widgets por defecto según permisos
     const getDefaultWidgets = () => {
@@ -406,7 +403,7 @@ export default function HomePage() {
   const { data: personnelDashboard } = useGetPersonnelDashboardQuery(undefined, {
     skip: !userPermissions.includes('personnel.view_personnelprofile'),
   });
-  const { data: certificationsExpiring } = useGetCertificationsExpiringQuery(
+  useGetCertificationsExpiringQuery(
     { days: 30 },
     {
       skip: !userPermissions.includes('personnel.view_certification'),
@@ -536,15 +533,18 @@ export default function HomePage() {
 
   const isInitialMount = useRef(true);
 
-  const handleLayoutChange = (currentLayout: Layout, allLayouts: { lg: Layout; md: Layout; sm: Layout }) => {
+  const handleLayoutChange = (currentLayout: Layout, allLayouts: Partial<Record<'sm' | 'md' | 'lg', Layout>>) => {
     // Prevenir actualización en el primer render (cuando carga la página)
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
     }
 
-    setLayouts(allLayouts);
-    console.log('🔄 Layouts actualizados por el usuario');
+    // Asegurar que todos los layouts existen antes de guardar
+    if (allLayouts.lg && allLayouts.md && allLayouts.sm) {
+      setLayouts({ lg: allLayouts.lg, md: allLayouts.md, sm: allLayouts.sm });
+      console.log('🔄 Layouts actualizados por el usuario');
+    }
   };
 
   // Auto-guardar cuando cambian los layouts
@@ -1006,7 +1006,7 @@ export default function HomePage() {
             },
             tooltip: {
               callbacks: {
-                label: function (context: any) {
+                label: function (context: TooltipItem<'bar'>) {
                   return `${context.parsed.y} personas`;
                 },
               },
@@ -1082,7 +1082,7 @@ export default function HomePage() {
             },
             tooltip: {
               callbacks: {
-                label: function (context: any) {
+                label: function (context: TooltipItem<'pie'>) {
                   const label = context.label || '';
                   const value = context.parsed || 0;
                   const total = personnelDashboard?.summary.total_active || 0;
@@ -1230,10 +1230,6 @@ export default function HomePage() {
     }
   };
 
-  // Determinar el breakpoint actual
-  const currentBreakpoint = isMobile ? 'sm' : isTablet ? 'md' : 'lg';
-  const cols = isMobile ? 6 : isTablet ? 12 : 12;
-
   return (
     <Container maxWidth="xl" ref={containerRef}>
       {/* Header */}
@@ -1287,12 +1283,8 @@ export default function HomePage() {
               breakpoints={{ lg: 1200, md: 996, sm: 768 }}
               cols={{ lg: 12, md: 12, sm: 6 }}
               rowHeight={100}
-              width={containerWidth}
-              isDraggable={true}
-              isResizable={true}
+              width={containerWidth || 1200}
               onLayoutChange={handleLayoutChange}
-              compactType="vertical"
-              preventCollision={false}
             >
             {enabledWidgets.map((widgetType) => (
               <div key={widgetType}>
