@@ -20,9 +20,11 @@ export default function SignInSide() {
                     overflow: 'auto',
                     display: 'flex',
                     flexDirection: 'column',
-                    // Añadimos padding top por defecto para evitar problemas con el navbar
-                    pt: { xs: '60px', sm: '70px' },
-                    pb: { xs: '20px' },
+                    justifyContent: 'center',
+                    // Padding reducido y optimizado
+                    pt: { xs: 2, sm: 3, md: 0 },
+                    pb: { xs: 2, sm: 3, md: 0 },
+                    px: { xs: 2, sm: 3, md: 4 },
                     position: 'relative',
                     '&::before': {
                         content: '""',
@@ -38,31 +40,46 @@ export default function SignInSide() {
                     },
                 }}
             >
-                {/* En móviles, primero el contenido, luego el formulario */}
+                {/* En móviles, PRIMERO el formulario (prioridad), DESPUÉS el contenido */}
                 {isMobile ? (
-                    <>
-                        <Box sx={{ p: 2, mb: 4, mt: 100 }}>
-                            <Content />
-                        </Box>
-                        <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+                    <Stack
+                        spacing={3}
+                        sx={{
+                            alignItems: 'center',
+                            width: '100%',
+                        }}
+                    >
+                        {/* Formulario de login primero - lo más importante */}
+                        <Box sx={{ width: '100%', maxWidth: 500 }}>
                             <SignInCard />
                         </Box>
-                    </>
+
+                        {/* Contenido informativo después - opcional de ver */}
+                        <Box sx={{ width: '100%', maxWidth: 500 }}>
+                            <Content />
+                        </Box>
+                    </Stack>
                 ) : (
-                    // En desktop, lado a lado como antes
+                    // En desktop, lado a lado optimizado
                     <Stack
                         direction="row"
                         sx={{
                             justifyContent: 'center',
-                            alignItems: 'center', 
-                            gap: { md: 8, lg: 12 },
-                            p: 2,
+                            alignItems: 'center',
+                            gap: { md: 6, lg: 8 },
                             height: '100%',
-                            flex: 1
+                            flex: 1,
+                            maxWidth: 1400,
+                            mx: 'auto',
+                            width: '100%',
                         }}
                     >
-                        <Content />
-                        <SignInCard />
+                        <Box sx={{ flex: '1 1 auto', maxWidth: 500 }}>
+                            <Content />
+                        </Box>
+                        <Box sx={{ flex: '1 1 auto', maxWidth: 500 }}>
+                            <SignInCard />
+                        </Box>
                     </Stack>
                 )}
             </Box>

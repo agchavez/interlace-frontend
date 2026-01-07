@@ -35,14 +35,13 @@ import {
   useGetPersonnelProfileQuery,
   useUpdatePersonnelProfileMutation,
   useGetAreasQuery,
-  useGetDepartmentsQuery,
   useGetPersonnelProfilesQuery
 } from '../services/personnelApi';
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { toast } from 'sonner';
-import type { PersonnelProfile, PersonnelFilterParams, Department } from '../../../interfaces/personnel';
+import type { PersonnelProfile, PersonnelFilterParams } from '../../../interfaces/personnel';
 import { format, parseISO } from 'date-fns';
-import { AddDepartmentDialog } from '../components/AddDepartmentDialog';
+import { DepartmentSelector } from '../components/DepartmentSelector';
 
 const tabs = [
   { label: 'Información Básica', icon: <BadgeIcon /> },
@@ -89,7 +88,6 @@ export const PersonnelEditPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [formData, setFormData] = useState<Partial<PersonnelProfile>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showAddDepartmentDialog, setShowAddDepartmentDialog] = useState(false);
 
   const { data: personnel, isLoading: isLoadingPersonnel } = useGetPersonnelProfileQuery(Number(id), {
     skip: !id,
@@ -99,9 +97,6 @@ export const PersonnelEditPage = () => {
   // Load catalogs
   const { data: distributorCentersData } = useGetDistributorCentersQuery({ search: '', limit: 100, offset: 0 });
   const { data: areasData } = useGetAreasQuery();
-  const { data: departmentsData } = useGetDepartmentsQuery({
-    area: formData.area as number | undefined
-  });
   const { data: personnelData } = useGetPersonnelProfilesQuery({
     is_active: true,
     limit: 200,
@@ -110,7 +105,6 @@ export const PersonnelEditPage = () => {
 
   const distributorCenters = distributorCentersData?.results || [];
   const areas = Array.isArray(areasData) ? areasData : [];
-  const departments = Array.isArray(departmentsData) ? departmentsData : [];
   const supervisors = personnelData?.results?.filter(p => p.id !== Number(id)) || [];
 
   useEffect(() => {
@@ -152,11 +146,6 @@ export const PersonnelEditPage = () => {
     }
   };
 
-  const handleDepartmentCreated = (department: Department) => {
-    // Set the newly created department as selected
-    handleChange('department', department.id);
-    setShowAddDepartmentDialog(false);
-  };
 
   const validateAll = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -227,20 +216,55 @@ export const PersonnelEditPage = () => {
     } catch (error: any) {
       console.error('Error updating personnel:', error);
 
-      if (error.data) {
-        if (typeof error.data === 'object') {
-          const newErrors: Record<string, string> = {};
-          Object.entries(error.data).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              newErrors[key] = value[0];
-            } else {
-              newErrors[key] = String(value);
+      // Mapear errores del backend al estado
+      const backendErrors: Record<string, string> = {};
+
+      if (error?.data) {
+        // Si hay un mensaje de detail general
+        if (error.data.detail) {
+          toast.error(error.data.detail);
+        }
+
+        // Procesar errores de campos individuales
+        Object.keys(error.data).forEach(key => {
+          if (key !== 'detail' && key !== 'message') {
+            const errorValue = error.data[key];
+
+            // Si el error es un array (formato típico de DRF)
+            if (Array.isArray(errorValue)) {
+              backendErrors[key] = errorValue[0];
             }
-          });
-          setErrors(newErrors);
-          toast.error('Por favor corrige los errores en el formulario');
+            // Si es un string directo
+            else if (typeof errorValue === 'string') {
+              backendErrors[key] = errorValue;
+            }
+            // Si es un objeto (errores anidados)
+            else if (typeof errorValue === 'object') {
+              backendErrors[key] = JSON.stringify(errorValue);
+            }
+          }
+        });
+
+        // Actualizar el estado de errores
+        if (Object.keys(backendErrors).length > 0) {
+          setErrors(backendErrors);
+
+          // Mostrar toast con resumen de errores
+          const errorCount = Object.keys(backendErrors).length;
+          const errorMessages = Object.entries(backendErrors)
+            .map(([field, msg]) => `${field}: ${msg}`)
+            .join('\n');
+
+          toast.error(
+            `Hay ${errorCount} error(es) en el formulario:\n${errorMessages}`,
+            { duration: 10000 }
+          );
+
+          // Scroll al inicio para que el usuario vea los errores
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
-          toast.error(error.data.detail || 'Error al actualizar el personal');
+          // Si no hay errores específicos, mostrar mensaje genérico
+          toast.error(error?.data?.detail || 'Error al actualizar el personal');
         }
       } else {
         toast.error('Error al actualizar el personal');
@@ -450,36 +474,13 @@ export const PersonnelEditPage = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                    <Autocomplete
-                      fullWidth
-                      size="small"
-                      value={departments.find(d => d.id === formData.department) || null}
-                      onChange={(_, newValue) => handleChange('department', newValue?.id || null)}
-                      options={departments}
-                      getOptionLabel={(option) => option.name}
-                      disabled={!formData.area}
-                      noOptionsText={formData.area ? "No hay departamentos para esta área" : "Seleccione primero un área"}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          size="small"
-                          label="Departamento (Opcional)"
-                          error={!!errors.department}
-                          helperText={errors.department || (formData.area && departments.length === 0 ? 'No hay departamentos creados para esta área' : 'Seleccione primero un área')}
-                        />
-                      )}
-                    />
-                    <IconButton
-                      color="primary"
-                      onClick={() => setShowAddDepartmentDialog(true)}
-                      disabled={!formData.area}
-                      sx={{ mt: 0.5 }}
-                      title="Crear nuevo departamento"
-                    >
-                      <AddIcon />
-                    </IconButton>
-                  </Box>
+                  <DepartmentSelector
+                    value={formData.department || null}
+                    onChange={(departmentId) => handleChange('department', departmentId)}
+                    areaId={formData.area || null}
+                    error={errors.department}
+                    size="small"
+                  />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <TextField
@@ -782,14 +783,6 @@ export const PersonnelEditPage = () => {
             {isUpdating ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
         </Box>
-
-        {/* Add Department Dialog */}
-        <AddDepartmentDialog
-          open={showAddDepartmentDialog}
-          onClose={() => setShowAddDepartmentDialog(false)}
-          areaId={formData.area as number}
-          onDepartmentCreated={handleDepartmentCreated}
-        />
       </Container>
     </LocalizationProvider>
   );

@@ -61,8 +61,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { QRCodeSVG } from 'qrcode.react';
-import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery, useDeactivatePersonnelProfileMutation } from '../services/personnelApi';
+import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery, useDeactivatePersonnelProfileMutation, useAssignUserToPersonnelMutation } from '../services/personnelApi';
 import { toast } from 'sonner';
+import { AssignUserDialog } from '../components/AssignUserDialog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -95,11 +96,13 @@ export const PersonnelDetailPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+  const [assignUserDialogOpen, setAssignUserDialogOpen] = useState(false);
 
   const { data: profile, isLoading, error } = useGetPersonnelProfileQuery(Number(id));
   const { data: certificationsData } = useGetCertificationsQuery({ personnel: Number(id), limit: 100, offset: 0 });
   const { data: performanceData } = useGetPerformanceMetricsQuery({ personnel: Number(id), limit: 100, offset: 0 });
   const [deactivatePersonnel, { isLoading: isDeactivating }] = useDeactivatePersonnelProfileMutation();
+  const [assignUserToPersonnel, { isLoading: isAssigning }] = useAssignUserToPersonnelMutation();
 
   const handleBack = () => {
     navigate('/personnel');
@@ -120,12 +123,22 @@ export const PersonnelDetailPage = () => {
   };
 
   const handleGrantAccess = () => {
-    navigate('/personnel/grant-access', {
-      state: {
-        personnel: profile
-      }
-    });
+    setAssignUserDialogOpen(true);
     handleCloseMenu();
+  };
+
+  const handleUserAssigned = async (userData: any) => {
+    try {
+      await assignUserToPersonnel({
+        personnel_id: Number(id),
+        user_data: userData
+      }).unwrap();
+      toast.success('Usuario asignado exitosamente');
+      setAssignUserDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error:', error);
+      toast.error(error?.data?.error || 'Error al asignar usuario');
+    }
   };
 
   const handleDeactivate = () => {
@@ -234,10 +247,16 @@ export const PersonnelDetailPage = () => {
             <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ fontWeight: 700, mb: 1 }}>
               {profile.full_name}
             </Typography>
-            <Typography variant={isMobile ? 'body2' : 'body1'} sx={{ mb: 2, opacity: 0.9 }}>
+            <Typography variant={isMobile ? 'body2' : 'body1'} sx={{ mb: 1, opacity: 0.9 }}>
               {profile.position}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            {profile.supervisor_data && (
+              <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <PersonIcon sx={{ fontSize: 18 }} />
+                Jefe Inmediato: {profile.supervisor_data.full_name}
+              </Typography>
+            )}
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: profile.supervisor_data ? 0 : 2 }}>
               <Chip
                 label={profile.hierarchy_level_display}
                 size={isMobile ? 'small' : 'medium'}
@@ -274,21 +293,16 @@ export const PersonnelDetailPage = () => {
 
           {/* Lado Derecho: QR + Menú */}
           <Grid item xs={12} md={4}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-              {/* Menú desplegable */}
-              <IconButton
-                onClick={handleOpenMenu}
-                sx={{
-                  color: 'white',
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  },
-                }}
-              >
-                <MoreVertIcon />
-              </IconButton>
-
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: { xs: 'row', md: 'column' },
+                alignItems: { xs: 'center', md: 'flex-end' },
+                justifyContent: { xs: 'center', md: 'flex-start' },
+                gap: 2,
+                mt: { xs: 2, md: 0 },
+              }}
+            >
               {/* QR Code */}
               <Box
                 sx={{
@@ -299,11 +313,12 @@ export const PersonnelDetailPage = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   boxShadow: 2,
+                  order: { xs: 1, md: 2 },
                 }}
               >
                 <QRCodeSVG
                   value={`${import.meta.env.VITE_JS_FRONTEND_URL}/personnel/detail/${profile.id}`}
-                  size={isMobile ? 80 : 100}
+                  size={isMobile ? 90 : 100}
                   level="Q"
                   imageSettings={{
                     src: '/logo-qr.png',
@@ -313,6 +328,21 @@ export const PersonnelDetailPage = () => {
                   }}
                 />
               </Box>
+
+              {/* Menú desplegable */}
+              <IconButton
+                onClick={handleOpenMenu}
+                sx={{
+                  color: 'white',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  },
+                  order: { xs: 2, md: 1 },
+                }}
+              >
+                <MoreVertIcon />
+              </IconButton>
             </Box>
           </Grid>
         </Grid>
@@ -328,17 +358,43 @@ export const PersonnelDetailPage = () => {
             scrollButtons={isMobile ? 'auto' : false}
             sx={{
               '& .MuiTab-root': {
-                minHeight: { xs: 48, sm: 64 },
-                fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                minHeight: { xs: 52, sm: 64 }, // 52px mínimo para touch
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' }, // 13px mínimo
                 fontWeight: 500,
+                px: { xs: 1.5, sm: 2 }, // Menos padding horizontal en móvil
               },
             }}
           >
-            <Tab icon={<PersonIcon />} label="Perfil" iconPosition="start" />
-            <Tab icon={<AssignmentIcon />} label="Certificaciones" iconPosition="start" />
-            <Tab icon={<LocalHospitalIcon />} label="Médico" iconPosition="start" />
-            <Tab icon={<TrendingUpIcon />} label="Desempeño" iconPosition="start" />
-            <Tab icon={<ContactEmergencyIcon />} label="Emergencias" iconPosition="start" />
+            <Tab
+              icon={<PersonIcon />}
+              label={isMobile ? undefined : "Perfil"}
+              iconPosition="start"
+              aria-label="Perfil"
+            />
+            <Tab
+              icon={<AssignmentIcon />}
+              label={isMobile ? undefined : "Certificaciones"}
+              iconPosition="start"
+              aria-label="Certificaciones"
+            />
+            <Tab
+              icon={<LocalHospitalIcon />}
+              label={isMobile ? undefined : "Médico"}
+              iconPosition="start"
+              aria-label="Médico"
+            />
+            <Tab
+              icon={<TrendingUpIcon />}
+              label={isMobile ? undefined : "Desempeño"}
+              iconPosition="start"
+              aria-label="Desempeño"
+            />
+            <Tab
+              icon={<ContactEmergencyIcon />}
+              label={isMobile ? undefined : "Emergencias"}
+              iconPosition="start"
+              aria-label="Emergencias"
+            />
           </Tabs>
         </Box>
 
@@ -418,6 +474,15 @@ export const PersonnelDetailPage = () => {
                   {profile.department_data && (
                     <Grid item xs={12} sm={6}>
                       <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_data.name} />
+                    </Grid>
+                  )}
+                  {profile.supervisor_data && (
+                    <Grid item xs={12} sm={6}>
+                      <InfoItem
+                        icon={<PersonIcon />}
+                        label="Supervisor Inmediato"
+                        value={`${profile.supervisor_data.employee_code} - ${profile.supervisor_data.full_name}`}
+                      />
                     </Grid>
                   )}
                 </Grid>
@@ -1008,6 +1073,18 @@ export const PersonnelDetailPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog de asignación de usuario */}
+      {profile && (
+        <AssignUserDialog
+          open={assignUserDialogOpen}
+          onClose={() => setAssignUserDialogOpen(false)}
+          onUserAssigned={handleUserAssigned}
+          personnelFirstName={profile.first_name}
+          personnelLastName={profile.last_name}
+          personnelId={profile.id}
+        />
+      )}
     </Box>
   );
 };

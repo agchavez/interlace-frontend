@@ -283,7 +283,7 @@ const SidebarV2: React.FC = () => {
           backgroundColor: '#1a1a1a',
           top: 60, // Height of navbar (60px)
           height: 'calc(100vh - 60px)',
-          borderRadius: '0 16px 0 0', // Border radius en esquina superior derecha
+          borderRadius: '0 10px 10px 0', // Border radius en esquina superior derecha
           // Mobile responsive
           '@media (max-width: 600px)': {
             display: isCollapsed ? 'none' : 'block',

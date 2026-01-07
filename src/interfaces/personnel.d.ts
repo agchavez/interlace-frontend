@@ -87,6 +87,14 @@ export interface PersonnelProfile {
   shoe_size?: string;
   glove_size?: string;
   helmet_size?: string;
+
+  // Authentication methods
+  authentication_methods?: Array<{
+    type: string;
+    value: string;
+    label: string;
+    enabled: boolean;
+  }>;
 }
 
 export interface PersonnelProfileSummary {
@@ -319,10 +327,19 @@ export interface PersonnelDashboard {
   summary: {
     total_active: number;
     total_inactive: number;
+    with_system_access: number;
+    without_system_access: number;
+    avg_years_of_service: number;
+    growth_trend_percentage: number;
+    new_hires_7_days: number;
     new_hires_30_days: number;
   };
   by_hierarchy: Array<{
     hierarchy_level: string;
+    count: number;
+  }>;
+  by_position_type: Array<{
+    position_type: string;
     count: number;
   }>;
   by_area: Array<{
@@ -333,6 +350,9 @@ export interface PersonnelDashboard {
   certifications: {
     expiring_soon: number;
     expired: number;
+  };
+  evaluations: {
+    pending: number;
   };
 }
 

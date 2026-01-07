@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import {
   Box,
@@ -28,6 +28,16 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({
   const [preview, setPreview] = useState<string | null>(
     typeof value === 'string' ? value : null
   );
+
+  // Actualizar preview cuando cambia el valor (ej: al cargar datos en modo edición)
+  useEffect(() => {
+    if (typeof value === 'string') {
+      setPreview(value);
+    } else if (value === null) {
+      setPreview(null);
+    }
+    // Si value es un File, el preview se manejará en onDrop
+  }, [value]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];

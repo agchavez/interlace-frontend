@@ -88,6 +88,21 @@ export const personnelApi = createApi({
       ],
     }),
 
+    updatePersonnelWithUser: builder.mutation<
+      any,
+      { id: number; user_data?: any; profile_data?: any }
+    >({
+      query: ({ id, user_data, profile_data }) => ({
+        url: `/profiles/${id}/update-with-user/`,
+        method: 'PATCH',
+        body: { user_data, profile_data },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'PersonnelProfiles', id },
+        { type: 'PersonnelProfiles', id: 'LIST' },
+      ],
+    }),
+
     deactivatePersonnelProfile: builder.mutation<void, number>({
       query: (id) => ({
         url: `/profiles/${id}/`,
@@ -324,7 +339,7 @@ export const personnelApi = createApi({
       }),
     }),
 
-    getDepartments: builder.query<Department[], { area?: number }>({
+    getDepartments: builder.query<Department[], { area?: number; search?: string }>({
       query: (params) => ({
         url: '/departments/',
         method: 'GET',
@@ -341,10 +356,12 @@ export const personnelApi = createApi({
       // Invalidate departments cache to refetch
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          await queryFulfilled;
-          // Invalidate the getDepartments cache
+          const { data: newDepartment } = await queryFulfilled;
+          // Optimistically update the cache
           dispatch(
-            personnelApi.util.invalidateTags([])
+            personnelApi.util.updateQueryData('getDepartments', { area: arg.area }, (draft) => {
+              draft.push(newDepartment);
+            })
           );
         } catch {}
       },
@@ -426,6 +443,19 @@ export const personnelApi = createApi({
         body: data,
       }),
       invalidatesTags: [{ type: 'PersonnelProfiles', id: 'LIST' }],
+    }),
+
+    // Assign User to Personnel
+    assignUserToPersonnel: builder.mutation<any, { personnel_id: number; user_data: any }>({
+      query: ({ personnel_id, user_data }) => ({
+        url: `/profiles/${personnel_id}/assign-user/`,
+        method: 'POST',
+        body: user_data,
+      }),
+      invalidatesTags: (result, error, { personnel_id }) => [
+        { type: 'PersonnelProfiles', id: personnel_id },
+        { type: 'PersonnelProfiles', id: 'LIST' },
+      ],
     }),
 
     // ==========================================
@@ -575,6 +605,7 @@ export const {
   useGetPersonnelProfileQuery,
   useCreatePersonnelProfileMutation,
   useUpdatePersonnelProfileMutation,
+  useUpdatePersonnelWithUserMutation,
   useDeactivatePersonnelProfileMutation,
   // Profile Completion
   useGetMyProfileQuery,
@@ -614,6 +645,7 @@ export const {
   // Users Without Profile
   useGetUsersWithoutProfileQuery,
   useCreatePersonnelWithUserMutation,
+  useAssignUserToPersonnelMutation,
   // Metric Types (New System)
   useGetMetricTypesQuery,
   useGetMetricTypeQuery,

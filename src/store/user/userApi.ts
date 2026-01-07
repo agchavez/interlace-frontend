@@ -51,15 +51,40 @@ export const userApi = createApi({
                 url:`/distribution-center/`,
                 method: 'GET',
             })
+        }),
+        generateUsername: builder.mutation<{
+            suggestions: Array<{ username: string; available: boolean }>;
+            first_name: string;
+            last_name: string;
+        }, { first_name: string; last_name: string }>({
+            query: (data) => ({
+                url: `/users/generate-username/`,
+                method: 'POST',
+                body: data
+            })
+        }),
+        checkUsername: builder.mutation<{
+            username: string;
+            available: boolean;
+            message: string;
+            error?: string;
+        }, { username: string }>({
+            query: (data) => ({
+                url: `/users/check-username/`,
+                method: 'POST',
+                body: data
+            })
         })
     })
 })
 
-export const { 
+export const {
     useGetUserQuery,
     useGetAUserQuery,
     useInsertUserMutation,
     useGetDistributionCenterQuery,
     usePatchUserMutation,
+    useGenerateUsernameMutation,
+    useCheckUsernameMutation,
 } = userApi
 

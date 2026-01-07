@@ -44,37 +44,38 @@ export default function Content() {
     
     return (
         <Box sx={{ maxWidth: isMobile ? '100%' : 450 }}>
-            <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', mb: isMobile ? 2 : 3 }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src={logo} alt="img" width={isMobile ? 80 : 100} style={{ marginRight: '4px' }} />
+                    <img src={logo} alt="img" width={isMobile ? 70 : 100} style={{ marginRight: '4px' }} />
                     <Typography variant="body2" component="p" fontWeight={100} sx={{
                         borderLeft: '2px solid black',
                         paddingLeft: '4px',
+                        fontSize: isMobile ? '0.8125rem' : '0.875rem',
                     }}>
                         {import.meta.env.VITE_JS_APP_NAME}
                     </Typography>
                 </div>
             </Box>
-            
+
             {isMobile ? (
                 // En móviles, mostrar en grid compacto
-                <Grid container spacing={2}>
+                <Grid container spacing={1.5}>
                     {items.map((item, index) => (
                         <Grid item xs={6} key={index}>
-                            <Box sx={{ 
-                                p: 1.5, 
+                            <Box sx={{
+                                p: 1.25,
                                 height: '100%',
                                 borderRadius: 1,
                                 backgroundColor: theme.palette.background.paper,
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                             }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.75 }}>
                                     {item.icon}
-                                    <Typography variant="subtitle2" sx={{ ml: 1, fontWeight: 'medium' }}>
+                                    <Typography variant="subtitle2" sx={{ ml: 0.75, fontWeight: 'medium', fontSize: '0.8125rem' }}>
                                         {item.title}
                                     </Typography>
                                 </Box>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.75rem', lineHeight: 1.4 }}>
                                     {item.description}
                                 </Typography>
                             </Box>

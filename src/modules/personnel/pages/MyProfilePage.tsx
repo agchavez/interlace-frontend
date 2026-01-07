@@ -38,6 +38,8 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
+import LockIcon from '@mui/icons-material/Lock';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useGetMyProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery } from '../services/personnelApi';
 import type { PersonnelProfile } from '../../../interfaces/personnel';
 import { format } from 'date-fns';
@@ -255,9 +257,24 @@ export const MyProfilePage = () => {
             },
           }}
         >
-          <Tab icon={<PersonIcon />} iconPosition="start" label="Información General" />
-          <Tab icon={<VerifiedIcon />} iconPosition="start" label="Certificaciones" />
-          <Tab icon={<AssessmentIcon />} iconPosition="start" label="Evaluaciones" />
+          <Tab
+            icon={<PersonIcon />}
+            iconPosition="start"
+            label={isMobile ? undefined : "Información General"}
+            aria-label="Información General"
+          />
+          <Tab
+            icon={<VerifiedIcon />}
+            iconPosition="start"
+            label={isMobile ? undefined : "Certificaciones"}
+            aria-label="Certificaciones"
+          />
+          <Tab
+            icon={<AssessmentIcon />}
+            iconPosition="start"
+            label={isMobile ? undefined : "Evaluaciones"}
+            aria-label="Evaluaciones"
+          />
         </Tabs>
 
         {/* Tab Panel: Información General */}
@@ -279,6 +296,49 @@ export const MyProfilePage = () => {
                 <Grid item xs={12} sm={6}>
                   <InfoItem icon={<PhoneIcon />} label="Teléfono" value={profile.phone} />
                 </Grid>
+                {profile.authentication_methods && profile.authentication_methods.length > 0 && (
+                  <Grid item xs={12}>
+                    <Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: 2,
+                          py: 2.5,
+                          px: 1,
+                        }}
+                      >
+                        <Box sx={{ color: 'primary.main', mt: 0.5 }}>
+                          <LockIcon />
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
+                            Métodos de Autenticación
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
+                            {profile.authentication_methods.map((method: any, index: number) => (
+                              <Chip
+                                key={index}
+                                icon={method.type === 'email' ? <EmailIcon /> : <AccountCircleIcon />}
+                                label={`${method.label}: ${method.value}`}
+                                color={method.enabled ? 'success' : 'default'}
+                                variant="outlined"
+                                sx={{
+                                  fontWeight: 500,
+                                  py: 2,
+                                  '& .MuiChip-icon': {
+                                    color: method.enabled ? 'success.main' : 'text.secondary'
+                                  }
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Divider />
+                    </Box>
+                  </Grid>
+                )}
                 <Grid item xs={12} sm={6}>
                   <InfoItem
                     icon={<CakeIcon />}

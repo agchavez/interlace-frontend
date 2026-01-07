@@ -141,14 +141,16 @@ export const PersonnelListPage = () => {
   };
 
   const columns: GridColDef[] = useMemo(() => {
-    const baseColumns: GridColDef[] = [
-      {
-        field: 'photo_url',
-        headerName: '',
-        width: 60,
+    const baseColumns: GridColDef[] = [];
+
+    // En móvil: Avatar + Nombre + Código combinados en una sola columna
+    if (isMobile) {
+      baseColumns.push({
+        field: 'person_info',
+        headerName: 'Personal',
+        flex: 1,
+        minWidth: 200,
         sortable: false,
-        align: 'center',
-        headerAlign: 'center',
         renderCell: (params: GridRenderCellParams) => {
           const initials = params.row.full_name
             ? params.row.full_name
@@ -160,54 +162,122 @@ export const PersonnelListPage = () => {
             : '?';
 
           return (
-            <Avatar
-              src={params.value || undefined}
-              alt={params.row.full_name}
-              sx={{
-                width: 36,
-                height: 36,
-                fontSize: '0.875rem',
-                bgcolor: 'secondary.main',
-                fontWeight: 600,
-              }}
-            >
-              {initials}
-            </Avatar>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
+              <Avatar
+                src={params.row.photo_url || undefined}
+                alt={params.row.full_name}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  fontSize: '0.875rem',
+                  bgcolor: 'secondary.main',
+                  fontWeight: 600,
+                }}
+              >
+                {initials}
+              </Avatar>
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {params.row.full_name}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <BadgeIcon sx={{ fontSize: 12, flexShrink: 0 }} />
+                  {params.row.employee_code}
+                </Typography>
+              </Box>
+            </Box>
           );
         },
-      },
-      {
-        field: 'employee_code',
-        headerName: 'Código',
-        width: isMobile ? 100 : 120,
-        renderCell: (params: GridRenderCellParams) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <BadgeIcon fontSize="small" color="primary" />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {params.value}
-            </Typography>
-          </Box>
-        ),
-      },
-      {
-        field: 'full_name',
-        headerName: 'Nombre Completo',
-        flex: 1,
-        minWidth: isMobile ? 150 : 200,
-        renderCell: (params: GridRenderCellParams) => (
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              {params.value}
-            </Typography>
-            {params.row.username && (
-              <Typography variant="caption" color="text.secondary">
-                @{params.row.username}
+      });
+    } else {
+      // Desktop: Columnas separadas
+      baseColumns.push(
+        {
+          field: 'photo_url',
+          headerName: '',
+          width: 60,
+          sortable: false,
+          align: 'center',
+          headerAlign: 'center',
+          renderCell: (params: GridRenderCellParams) => {
+            const initials = params.row.full_name
+              ? params.row.full_name
+                  .split(' ')
+                  .slice(0, 2)
+                  .map((n: string) => n[0])
+                  .join('')
+                  .toUpperCase()
+              : '?';
+
+            return (
+              <Avatar
+                src={params.value || undefined}
+                alt={params.row.full_name}
+                sx={{
+                  width: 36,
+                  height: 36,
+                  fontSize: '0.875rem',
+                  bgcolor: 'secondary.main',
+                  fontWeight: 600,
+                }}
+              >
+                {initials}
+              </Avatar>
+            );
+          },
+        },
+        {
+          field: 'employee_code',
+          headerName: 'Código',
+          width: 120,
+          renderCell: (params: GridRenderCellParams) => (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BadgeIcon fontSize="small" color="primary" />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {params.value}
               </Typography>
-            )}
-          </Box>
-        ),
-      },
-    ];
+            </Box>
+          ),
+        },
+        {
+          field: 'full_name',
+          headerName: 'Nombre Completo',
+          flex: 1,
+          minWidth: 200,
+          renderCell: (params: GridRenderCellParams) => (
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {params.value}
+              </Typography>
+              {params.row.username && (
+                <Typography variant="caption" color="text.secondary">
+                  @{params.row.username}
+                </Typography>
+              )}
+            </Box>
+          ),
+        }
+      );
+    }
 
     if (!isMobile) {
       baseColumns.push(
@@ -330,13 +400,18 @@ export const PersonnelListPage = () => {
       <Container maxWidth={isFullHD ? 'xl' : 'lg'} sx={{ marginTop: 2 }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="h4" component="h1" fontWeight={400}>
+            <Typography
+              variant={isMobile ? 'h6' : 'h4'}
+              component="h1"
+              fontWeight={400}
+              sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+            >
               Gestión de Personal
             </Typography>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid item xs={12} sx={{ display: { xs: 'none', sm: 'block' } }}>
             <Typography variant="body2" component="h2" fontWeight={400}>
               A continuación se muestra el listado completo del personal registrado en el sistema.
             </Typography>
@@ -437,14 +512,16 @@ export const PersonnelListPage = () => {
                 paginationMode="server"
                 disableRowSelectionOnClick
                 autoHeight
+                rowHeight={isMobile ? 70 : 52} // Más altura en móvil para touch
                 sx={{
                   border: 0,
                   '& .MuiDataGrid-cell': {
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    fontSize: isMobile ? '0.8125rem' : '0.875rem', // 13px mínimo en móvil
+                    py: isMobile ? 1.5 : 1, // Más espacio para touch
                   },
                   '& .MuiDataGrid-columnHeaders': {
                     backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)',
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    fontSize: isMobile ? '0.8125rem' : '0.875rem', // 13px mínimo
                     fontWeight: 600,
                   },
                   '& .MuiDataGrid-footerContainer': {

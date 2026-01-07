@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -31,7 +31,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EventIcon from '@mui/icons-material/Event';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { useGetPersonnelProfilesQuery } from '../services/personnelApi';
+import { useGetPersonnelDashboardQuery } from '../services/personnelApi';
 
 export const PersonnelDashboardPage = () => {
   const theme = useTheme();
@@ -39,51 +39,8 @@ export const PersonnelDashboardPage = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-  // Obtener datos de personal
-  const { data, isLoading, error } = useGetPersonnelProfilesQuery({ limit: 1000 });
-
-  // Calcular estadísticas
-  const stats = useMemo(() => {
-    if (!data?.results) return null;
-
-    const total = data.count;
-    const active = data.results.filter((p) => p.is_active).length;
-    const withAccess = data.results.filter((p) => p.has_system_access).length;
-
-    // Por nivel jerárquico
-    const byHierarchy = data.results.reduce((acc, p) => {
-      acc[p.hierarchy_level_display] = (acc[p.hierarchy_level_display] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Por tipo de posición
-    const byPositionType = data.results.reduce((acc, p) => {
-      acc[p.position_type_display] = (acc[p.position_type_display] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Por área
-    const byArea = data.results.reduce((acc, p) => {
-      acc[p.area_name] = (acc[p.area_name] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Promedio de antigüedad
-    const avgYears =
-      data.results.reduce((sum, p) => sum + p.years_of_service, 0) / data.results.length;
-
-    return {
-      total,
-      active,
-      inactive: total - active,
-      withAccess,
-      withoutAccess: total - withAccess,
-      byHierarchy,
-      byPositionType,
-      byArea,
-      avgYears: avgYears.toFixed(1),
-    };
-  }, [data]);
+  // Obtener datos del dashboard
+  const { data: dashboardData, isLoading, error } = useGetPersonnelDashboardQuery();
 
   if (isLoading) {
     return (
@@ -118,34 +75,34 @@ export const PersonnelDashboardPage = () => {
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Total Personal"
-            value={stats?.total || 0}
+            value={dashboardData?.summary.total_active || 0}
             icon={<PeopleIcon />}
             color={theme.palette.primary.main}
-            trend="+12%"
+            trend={dashboardData?.summary.growth_trend_percentage ? `${dashboardData.summary.growth_trend_percentage > 0 ? '+' : ''}${dashboardData.summary.growth_trend_percentage}%` : undefined}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Personal Activo"
-            value={stats?.active || 0}
+            value={dashboardData?.summary.total_active || 0}
             icon={<CheckCircleIcon />}
             color="#4caf50"
-            subtitle={`${stats?.inactive || 0} inactivos`}
+            subtitle={`${dashboardData?.summary.total_inactive || 0} inactivos`}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Con Acceso Sistema"
-            value={stats?.withAccess || 0}
+            value={dashboardData?.summary.with_system_access || 0}
             icon={<BadgeIcon />}
             color="#2196f3"
-            subtitle={`${stats?.withoutAccess || 0} sin acceso`}
+            subtitle={`${dashboardData?.summary.without_system_access || 0} sin acceso`}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
             title="Antigüedad Promedio"
-            value={`${stats?.avgYears || 0} años`}
+            value={`${dashboardData?.summary.avg_years_of_service || 0} años`}
             icon={<TrendingUpIcon />}
             color="#ff9800"
           />
@@ -161,16 +118,19 @@ export const PersonnelDashboardPage = () => {
                 Distribución por Nivel Jerárquico
               </Typography>
               <Box>
-                {stats &&
-                  Object.entries(stats.byHierarchy).map(([level, count]) => (
+                {dashboardData?.by_hierarchy && dashboardData.by_hierarchy.length > 0 ? (
+                  dashboardData.by_hierarchy.map((item) => (
                     <ProgressBar
-                      key={level}
-                      label={level}
-                      value={count as number}
-                      total={stats.total}
+                      key={item.hierarchy_level}
+                      label={item.hierarchy_level}
+                      value={item.count}
+                      total={dashboardData.summary.total_active}
                       color={theme.palette.primary.main}
                     />
-                  ))}
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">No hay datos disponibles</Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -184,16 +144,19 @@ export const PersonnelDashboardPage = () => {
                 Distribución por Tipo de Posición
               </Typography>
               <Box>
-                {stats &&
-                  Object.entries(stats.byPositionType).map(([type, count]) => (
+                {dashboardData?.by_position_type && dashboardData.by_position_type.length > 0 ? (
+                  dashboardData.by_position_type.map((item) => (
                     <ProgressBar
-                      key={type}
-                      label={type}
-                      value={count as number}
-                      total={stats.total}
+                      key={item.position_type}
+                      label={item.position_type}
+                      value={item.count}
+                      total={dashboardData.summary.total_active}
                       color="#2196f3"
                     />
-                  ))}
+                  ))
+                ) : (
+                  <Typography variant="body2" color="text.secondary">No hay datos disponibles</Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -207,42 +170,44 @@ export const PersonnelDashboardPage = () => {
                 Personal por Área
               </Typography>
               <Grid container spacing={2}>
-                {stats &&
-                  Object.entries(stats.byArea)
-                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                    .slice(0, 6)
-                    .map(([area, count]) => (
-                      <Grid item xs={12} sm={6} key={area}>
-                        <Paper
-                          elevation={0}
-                          sx={{
-                            p: 2,
-                            bgcolor: 'action.hover',
-                            borderRadius: 2,
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              bgcolor: 'action.selected',
-                              transform: 'translateY(-2px)',
-                            },
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ bgcolor: 'primary.main' }}>
-                              <BusinessIcon />
-                            </Avatar>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                                {area}
-                              </Typography>
-                              <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                                {count as number}
-                              </Typography>
-                            </Box>
+                {dashboardData?.by_area && dashboardData.by_area.length > 0 ? (
+                  dashboardData.by_area.slice(0, 6).map((item) => (
+                    <Grid item xs={12} sm={6} key={item.area__code}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          bgcolor: 'action.hover',
+                          borderRadius: 2,
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          '&:hover': {
+                            bgcolor: 'action.selected',
+                            transform: 'translateY(-2px)',
+                          },
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ bgcolor: 'primary.main' }}>
+                            <BusinessIcon />
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                              {item.area__name}
+                            </Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                              {item.count}
+                            </Typography>
                           </Box>
-                        </Paper>
-                      </Grid>
-                    ))}
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  ))
+                ) : (
+                  <Grid item xs={12}>
+                    <Typography variant="body2" color="text.secondary">No hay datos disponibles</Typography>
+                  </Grid>
+                )}
               </Grid>
             </CardContent>
           </Card>
@@ -264,7 +229,7 @@ export const PersonnelDashboardPage = () => {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Certificaciones por vencer"
-                    secondary="5 certificaciones vencen este mes"
+                    secondary={`${dashboardData?.certifications.expiring_soon || 0} certificaciones vencen pronto`}
                     primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
                     secondaryTypographyProps={{ fontSize: '0.75rem' }}
                   />
@@ -278,7 +243,7 @@ export const PersonnelDashboardPage = () => {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Nuevos ingresos"
-                    secondary="3 empleados esta semana"
+                    secondary={`${dashboardData?.summary.new_hires_7_days || 0} empleados esta semana`}
                     primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
                     secondaryTypographyProps={{ fontSize: '0.75rem' }}
                   />
@@ -292,7 +257,7 @@ export const PersonnelDashboardPage = () => {
                   </ListItemAvatar>
                   <ListItemText
                     primary="Evaluaciones pendientes"
-                    secondary="8 evaluaciones de desempeño"
+                    secondary={`${dashboardData?.evaluations.pending || 0} evaluaciones de desempeño`}
                     primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 500 }}
                     secondaryTypographyProps={{ fontSize: '0.75rem' }}
                   />

@@ -38,11 +38,12 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CakeIcon from '@mui/icons-material/Cake';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetDepartmentsQuery, useGetPersonnelProfilesQuery } from '../services/personnelApi';
+import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetPersonnelProfilesQuery } from '../services/personnelApi';
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { toast } from 'sonner';
 import type { PersonnelProfile, PersonnelFilterParams } from '../../../interfaces/personnel';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
+import { DepartmentSelector } from '../components/DepartmentSelector';
 import { PersonnelCreateModeSelector } from '../components/PersonnelCreateModeSelector';
 import { ExistingUserSelector } from '../components/ExistingUserSelector';
 import { NewUserRegistration } from '../components/NewUserRegistration';
@@ -168,9 +169,6 @@ export const PersonnelCreatePage = () => {
   // Cargar catálogos desde API
   const { data: distributorCentersData } = useGetDistributorCentersQuery({ search: '', limit: 100, offset: 0 });
   const { data: areasData } = useGetAreasQuery();
-  const { data: departmentsData } = useGetDepartmentsQuery({
-    area: formData.area as number | undefined
-  });
   const { data: personnelData } = useGetPersonnelProfilesQuery({
     is_active: true,
     limit: 200,
@@ -179,7 +177,6 @@ export const PersonnelCreatePage = () => {
 
   const distributorCenters = distributorCentersData?.results || [];
   const areas = Array.isArray(areasData) ? areasData : [];
-  const departments = Array.isArray(departmentsData) ? departmentsData : [];
   const supervisors = personnelData?.results || [];
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
@@ -317,8 +314,62 @@ export const PersonnelCreatePage = () => {
       navigate('/personnel');
     } catch (error: any) {
       console.error('Error al crear personal:', error);
-      const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear el personal';
-      toast.error(errorMessage);
+
+      // Mapear errores del backend al estado
+      const backendErrors: Record<string, string> = {};
+
+      if (error?.data) {
+        // Si hay un mensaje de detail general
+        if (error.data.detail) {
+          toast.error(error.data.detail);
+        }
+
+        // Procesar errores de campos individuales
+        Object.keys(error.data).forEach(key => {
+          if (key !== 'detail' && key !== 'message') {
+            const errorValue = error.data[key];
+
+            // Si el error es un array (formato típico de DRF)
+            if (Array.isArray(errorValue)) {
+              backendErrors[key] = errorValue[0];
+            }
+            // Si es un string directo
+            else if (typeof errorValue === 'string') {
+              backendErrors[key] = errorValue;
+            }
+            // Si es un objeto (errores anidados)
+            else if (typeof errorValue === 'object') {
+              backendErrors[key] = JSON.stringify(errorValue);
+            }
+          }
+        });
+
+        // Actualizar el estado de errores
+        if (Object.keys(backendErrors).length > 0) {
+          setErrors(backendErrors);
+
+          // Mostrar toast con resumen de errores
+          const errorCount = Object.keys(backendErrors).length;
+          const errorMessages = Object.entries(backendErrors)
+            .map(([field, msg]) => `${field}: ${msg}`)
+            .join('\n');
+
+          toast.error(
+            `Hay ${errorCount} error(es) en el formulario:\n${errorMessages}`,
+            { duration: 10000 }
+          );
+
+          // Scroll al inicio para que el usuario vea los errores
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          // Si no hay errores específicos, mostrar mensaje genérico
+          const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear el personal';
+          toast.error(errorMessage);
+        }
+      } else {
+        toast.error('Error al crear el personal');
+      }
+
       setShowConfirmModal(false);
     }
   };
@@ -467,7 +518,6 @@ export const PersonnelCreatePage = () => {
                 onChange={updateFormData}
                 distributorCenters={distributorCenters}
                 areas={areas}
-                departments={departments}
                 supervisors={supervisors}
               />
             </CustomTabPanel>
@@ -737,7 +787,6 @@ interface StepProps {
 interface OrganizationalStepProps extends StepProps {
   distributorCenters: any[];
   areas: any[];
-  departments: any[];
   supervisors: any[];
 }
 
@@ -846,7 +895,6 @@ const OrganizationalStep: React.FC<OrganizationalStepProps> = ({
   onChange,
   distributorCenters,
   areas,
-  departments,
   supervisors
 }) => {
   const hierarchyLevels = [
@@ -931,19 +979,11 @@ const OrganizationalStep: React.FC<OrganizationalStepProps> = ({
         size="small"
       />
 
-      <Autocomplete
-        options={departments}
-        getOptionLabel={(option) => option.name || ''}
-        value={departments.find((d: any) => d.id === data.department) || null}
-        onChange={(_, newValue) => onChange({ department: newValue?.id })}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Departamento"
-            size="small"
-          />
-        )}
-        fullWidth
+      <DepartmentSelector
+        value={data.department || null}
+        onChange={(departmentId) => onChange({ department: departmentId || undefined })}
+        areaId={data.area || null}
+        error={errors.department}
         size="small"
       />
 

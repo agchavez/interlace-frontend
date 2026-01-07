@@ -1,5 +1,6 @@
 export { CertificationTypeSelect } from './CertificationTypeSelect';
 export { CertificationFilters } from './CertificationFilters';
+export { DepartmentSelector } from './DepartmentSelector';
 export { ExistingUserSelector } from './ExistingUserSelector';
 export { NewUserRegistration } from './NewUserRegistration';
 export { PerformanceFilters } from './PerformanceFilters';

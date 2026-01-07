@@ -56,7 +56,7 @@ export interface User {
 }
 
 export interface LoginBody {
-    email: string;
+    login: string;
     password: string;
 }
 

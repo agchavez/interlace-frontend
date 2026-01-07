@@ -38,10 +38,94 @@ export const maintheme = createTheme({
     },
     palette: {
         primary: {
-            main:'#dcbb20',
+            main:'#d3a238',
         },
         secondary: {
             main: '#1c2536'
         },
+    },
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    borderRadius: 8, // 3 * 4px = 12px
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    borderRadius:8, // 4 * 4px = 16px
+                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)',
+                },
+            },
+        },
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    '& .MuiOutlinedInput-root': {
+                        borderRadius: 8,
+                        fontFamily: 'Inter',
+                    },
+                },
+            },
+        },
+        MuiSelect: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 8,
+                    fontFamily: 'Inter',
+                },
+            },
+        },
+        MuiAutocomplete: {
+            styleOverrides: {
+                root: {
+                    '& .MuiOutlinedInput-root': {
+                        borderRadius: 8,
+                        fontFamily: 'Inter',
+                    },
+                },
+                paper: {
+                    borderRadius: 8,
+                    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12)',
+                },
+            },
+        },
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 8,
+                    fontFamily: 'Inter',
+                    fontWeight: 500,
+                },
+            },
+        },
+        MuiAlert: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 8,
+                    fontFamily: 'Inter',
+                },
+            },
+        },
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 16
+                }
+            }
+        },
+        MuiCheckbox: {
+            styleOverrides: {
+                root: {
+                    color:'#1c2536',
+                    borderRadius:8
+                }
+            }
+        }
     },
 }, esES)    

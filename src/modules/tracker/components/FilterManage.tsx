@@ -377,8 +377,13 @@ export const FilterManage: FC<FilterManageProps> = ({
                       inputRef={field.ref}
                       format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                        // Actualizar si la fecha es válida o null
+                        if (date === null) {
+                          field.onChange(null);
+                        } else if (isValid(date)) {
+                          field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                        }
+                        // Si la fecha es inválida, no hacer nada (permitir seguir escribiendo)
                       }}
                     />
                   )}
@@ -397,8 +402,13 @@ export const FilterManage: FC<FilterManageProps> = ({
                       value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
                       inputRef={field.ref}
                       onChange={(date) => {
-                        isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                        // Actualizar si la fecha es válida o null
+                        if (date === null) {
+                          field.onChange(null);
+                        } else if (isValid(date)) {
+                          field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                        }
+                        // Si la fecha es inválida, no hacer nada (permitir seguir escribiendo)
                       }}
                     />
                   )}

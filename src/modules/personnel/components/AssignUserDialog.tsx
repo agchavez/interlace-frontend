@@ -16,13 +16,12 @@ import {
   Autocomplete,
   Chip,
 } from '@mui/material';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useAppSelector } from '../../../store';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
@@ -31,12 +30,13 @@ import { UsernameSelector } from '../../user/components/UsernameSelector';
 interface Props {
   open: boolean;
   onClose: () => void;
-  onUserCreated: (userData: any) => void;
+  onUserAssigned: (userData: any) => void;
+  personnelFirstName: string;
+  personnelLastName: string;
+  personnelId: number;
 }
 
 interface UserData {
-  first_name: string;
-  last_name: string;
   username: string;
   email: string;
   password: string;
@@ -46,7 +46,14 @@ interface UserData {
   distributions_centers: number[];
 }
 
-export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCreated }) => {
+export const AssignUserDialog: React.FC<Props> = ({
+  open,
+  onClose,
+  onUserAssigned,
+  personnelFirstName,
+  personnelLastName,
+  personnelId,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showPassword, setShowPassword] = useState(false);
@@ -55,8 +62,6 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
   const { distributionCenters } = useAppSelector(state => state.user);
   const { groups } = useAppSelector(state => state.maintenance);
   const [userData, setUserData] = useState<UserData>({
-    first_name: '',
-    last_name: '',
     username: '',
     email: '',
     password: '',
@@ -108,14 +113,6 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!userData.first_name) {
-      newErrors.first_name = 'El nombre es requerido';
-    }
-
-    if (!userData.last_name) {
-      newErrors.last_name = 'El apellido es requerido';
-    }
-
     if (!userData.username) {
       newErrors.username = 'El nombre de usuario es requerido';
     } else if (userData.username.length < 3) {
@@ -152,17 +149,17 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleContinue = () => {
+  const handleAssign = () => {
     if (validateForm()) {
-      onUserCreated(userData);
-      // Don't call onClose() here - parent will handle closing after user is created
+      onUserAssigned({
+        ...userData,
+        personnel_id: personnelId,
+      });
     }
   };
 
-  const handleBack = () => {
+  const handleCancel = () => {
     setUserData({
-      first_name: '',
-      last_name: '',
       username: '',
       email: '',
       password: '',
@@ -198,8 +195,7 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
     return 'Fuerte';
   };
 
-  const isFormValid = userData.first_name && userData.last_name &&
-                      userData.username && userData.email && userData.password &&
+  const isFormValid = userData.username && userData.email && userData.password &&
                       userData.confirmPassword && userData.group &&
                       userData.password === userData.confirmPassword &&
                       (!needDC || userData.centro_distribucion) &&
@@ -218,13 +214,12 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
         },
       }}
     >
-      {/* Barra Superior Estilizada */}
       <BootstrapDialogTitle
-        id="new-user-dialog-title"
+        id="assign-user-dialog-title"
         onClose={onClose}
       >
         <Typography variant="h6" fontWeight={600} color={'#fff'}>
-          Crear Nuevo Usuario
+          Asignar Acceso al Sistema
         </Typography>
       </BootstrapDialogTitle>
 
@@ -232,7 +227,7 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
         <Box>
           {/* Info Alert */}
           <Alert severity="info" sx={{ mb: 3 }}>
-            Después de crear el usuario, continuarás con el registro del perfil de personal
+            Asignando acceso al sistema para: <strong>{personnelFirstName} {personnelLastName}</strong>
           </Alert>
 
           {/* Form */}
@@ -243,33 +238,11 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
                 Credenciales de Acceso
               </Typography>
               <Box sx={{ display: 'grid', gap: 2 }}>
-                {/* Nombre y Apellido primero para generar username */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
-                  <TextField
-                    size="small"
-                    label="Nombre *"
-                    value={userData.first_name}
-                    onChange={handleChange('first_name')}
-                    error={!!errors.first_name}
-                    helperText={errors.first_name}
-                    fullWidth
-                  />
-                  <TextField
-                    size="small"
-                    label="Apellido *"
-                    value={userData.last_name}
-                    onChange={handleChange('last_name')}
-                    error={!!errors.last_name}
-                    helperText={errors.last_name}
-                    fullWidth
-                  />
-                </Box>
-
                 <UsernameSelector
                   value={userData.username}
                   onChange={(username) => setUserData(prev => ({ ...prev, username }))}
-                  firstName={userData.first_name}
-                  lastName={userData.last_name}
+                  firstName={personnelFirstName}
+                  lastName={personnelLastName}
                   error={errors.username}
                 />
                 <TextField
@@ -478,20 +451,20 @@ export const NewUserRegistration: React.FC<Props> = ({ open, onClose, onUserCrea
           variant="outlined"
           color="secondary"
           startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
+          onClick={handleCancel}
           fullWidth={isMobile}
         >
-          Volver
+          Cancelar
         </Button>
         <Button
           variant="contained"
           color="primary"
-          endIcon={<ArrowForwardIcon />}
-          onClick={handleContinue}
+          endIcon={<PersonAddIcon />}
+          onClick={handleAssign}
           disabled={!isFormValid}
           fullWidth={isMobile}
         >
-          Continuar al Perfil
+          Asignar Acceso
         </Button>
       </DialogActions>
     </Dialog>
