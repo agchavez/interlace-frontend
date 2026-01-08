@@ -16,9 +16,12 @@ import {
     DialogContentText,
     DialogActions,
     Button,
-    ListItemText
+    ListItemText,
+    useTheme,
+    useMediaQuery
 } from '@mui/material';
 import logo from "../../../assets/logo.png";
+import logoSmall from "../../../../public/logo-qr.png";
 import { Logout } from '@mui/icons-material';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -44,6 +47,10 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { status, user } = useAppSelector(state => state.auth);
+
+    // Detectar móvil
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     // Usar contexto de sidebar V2
     const { toggleCollapsed } = useSidebar();
@@ -121,18 +128,26 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
 
                 <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
                     <div className="nav__img" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={logo} alt="img" width={120} className="p-1" style={{ marginRight: '8px' }} />
-                        <Typography variant="body2" component="p" sx={{
-                            borderLeft: '2px solid',
-                            borderColor: 'divider',
-                            paddingLeft: '8px',
-                            fontFamily: 'Inter',
-                            fontWeight: 600,
-                            fontSize: '0.875rem',
-                            color: 'text.primary',
-                        }}>
-                            {import.meta.env.VITE_JS_APP_NAME}
-                        </Typography>
+                        <img
+                            src={isMobile ? logoSmall : logo}
+                            alt="img"
+                            width={isMobile ? 40 : 120}
+                            className="p-1"
+                            style={{ marginRight: isMobile ? '4px' : '8px' }}
+                        />
+                        {!isMobile && (
+                            <Typography variant="body2" component="p" sx={{
+                                borderLeft: '2px solid',
+                                borderColor: 'divider',
+                                paddingLeft: '8px',
+                                fontFamily: 'Inter',
+                                fontWeight: 600,
+                                fontSize: '0.875rem',
+                                color: 'text.primary',
+                            }}>
+                                {import.meta.env.VITE_JS_APP_NAME}
+                            </Typography>
+                        )}
                     </div>
                 </Grid>
                 <Grid item display={'flex'} justifyContent={'right'} alignItems={'center'} sx={{ gap: 2 }}>
