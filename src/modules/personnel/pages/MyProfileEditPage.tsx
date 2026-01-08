@@ -125,34 +125,33 @@ export const MyProfileEditPage = () => {
     try {
       setErrors({});
 
-      // Prepare form data
-      const submitData = new FormData();
-
-      // Add all non-empty fields
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
-          submitData.append(key, value);
-        }
-      });
-
-      // Add photo if selected
+      // Si hay foto, enviar como FormData, sino como objeto JSON
       if (photoFile) {
+        const submitData = new FormData();
+
+        // Add all non-empty fields
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value !== undefined && value !== '') {
+            submitData.append(key, value);
+          }
+        });
+
+        // Add photo
         submitData.append('photo', photoFile);
+
+        await updateMyProfile(submitData as any).unwrap();
+      } else {
+        // Sin foto, enviar como JSON
+        const dataToSend: MyProfileUpdate = {};
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value !== undefined && value !== '') {
+            dataToSend[key as keyof MyProfileUpdate] = value as any;
+          }
+        });
+
+        await updateMyProfile(dataToSend).unwrap();
       }
 
-      // Convert FormData to plain object for the mutation
-      const dataToSend: MyProfileUpdate = {};
-      Object.entries(formData).forEach(([key, value]) => {
-        if (value !== undefined && value !== '') {
-          dataToSend[key as keyof MyProfileUpdate] = value as any;
-        }
-      });
-
-      if (photoFile) {
-        dataToSend.photo = photoFile;
-      }
-
-      await updateMyProfile(dataToSend).unwrap();
       toast.success('Perfil actualizado exitosamente');
       navigate('/personnel/my-profile');
     } catch (error: any) {
