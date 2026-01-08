@@ -37,7 +37,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import BusinessIcon from '@mui/icons-material/Business';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { User, UserQuerySearch } from '../../../interfaces/user';
+import { User, UserQuerySearch, GetAUserResponse } from '../../../interfaces/user';
 import { useGetUserQuery } from '../../../store/user/userApi';
 import { ChangePasswordModal } from '../components/ChangePasswordModal';
 import { useAppSelector } from '../../../store/store';
@@ -102,7 +102,7 @@ export const ListUserPage = () => {
   };
 
   const handleResetPassword = () => {
-    if (selectedRow) {
+    if (selectedRow && selectedRow.id) {
       setSelectedUser(selectedRow.id);
       setOpenChangePassword(true);
     }
@@ -119,7 +119,7 @@ export const ListUserPage = () => {
   };
 
   const userModalChangePassword = useMemo(() => {
-    return data?.results?.find((user) => user.id === selectedUser);
+    return data?.results?.find((user) => user.id === selectedUser) as Partial<User & GetAUserResponse> | undefined;
   }, [data?.results, selectedUser]);
 
   const columns: GridColDef[] = useMemo(() => {

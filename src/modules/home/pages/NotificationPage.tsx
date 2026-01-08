@@ -135,7 +135,7 @@ export const NotificationPage = () => {
           {/* Header */}
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-              <NotificationsActiveIcon
+              <NotificationsIcon
                 fontSize="large"
                 color="secondary"
                 sx={{ fontSize: { xs: 32, sm: 40 } }}

@@ -8,7 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 
 interface StandardDrawerHeaderProps {
-  title: string;
+  title: React.ReactNode;
   icon?: React.ReactNode;
   onClose: () => void;
   onReset?: () => void;

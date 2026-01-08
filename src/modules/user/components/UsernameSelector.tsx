@@ -194,7 +194,7 @@ export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
             label="Nombre de Usuario *"
             value={manualUsername}
             onChange={handleManualChange}
-            error={!!error || (availabilityStatus && !availabilityStatus.available)}
+            error={!!error || !!(availabilityStatus && !availabilityStatus.available)}
             helperText={
               error ||
               (isChecking

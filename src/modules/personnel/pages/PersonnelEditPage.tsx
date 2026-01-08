@@ -475,9 +475,9 @@ export const PersonnelEditPage = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <DepartmentSelector
-                    value={formData.department || null}
+                    value={typeof formData.department === 'object' && formData.department !== null ? formData.department.id : formData.department || null}
                     onChange={(departmentId) => handleChange('department', departmentId)}
-                    areaId={formData.area || null}
+                    areaId={typeof formData.area === 'object' && formData.area !== null ? formData.area.id : formData.area || null}
                     error={errors.department}
                     size="small"
                   />

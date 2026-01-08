@@ -78,7 +78,7 @@ export const options = {
         font: {
           size: 12,
           family: 'Roboto, sans-serif',
-          weight: '500' as const,
+          weight: 500,
         },
         color: '#2C3E50',
       },

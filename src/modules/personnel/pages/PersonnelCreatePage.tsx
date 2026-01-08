@@ -980,9 +980,9 @@ const OrganizationalStep: React.FC<OrganizationalStepProps> = ({
       />
 
       <DepartmentSelector
-        value={data.department || null}
+        value={typeof data.department === 'object' && data.department !== null ? data.department.id : data.department || null}
         onChange={(departmentId) => onChange({ department: departmentId || undefined })}
-        areaId={data.area || null}
+        areaId={typeof data.area === 'object' && data.area !== null ? data.area.id : data.area || null}
         error={errors.department}
         size="small"
       />

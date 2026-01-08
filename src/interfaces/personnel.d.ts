@@ -14,6 +14,7 @@ export interface Department {
   id: number;
   name: string;
   code: string;
+  description?: string;
   area: number;
   area_display?: string;
   is_active: boolean;
