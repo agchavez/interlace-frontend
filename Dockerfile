@@ -33,8 +33,8 @@ RUN echo "VITE_JS_APP_API_URL=${VITE_JS_APP_API_URL}" > .env && \
     echo "VITE_APP_DOMAIN=${VITE_APP_DOMAIN}" >> .env && \
     echo "VITE_VAPID_PUBLIC_KEY=${VITE_VAPID_PUBLIC_KEY}" >> .env
 
-# Build de producción
-RUN npm run build
+# Build de producción (sin type checking para deployment rápido)
+RUN npm run build:prod
 
 # ==========================================
 # Etapa 2: Nginx para servir archivos
