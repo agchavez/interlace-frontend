@@ -582,7 +582,15 @@ export const RegisterUserPage = () => {
         <DatePicker
           label="Fecha de Nacimiento *"
           value={profileData.birth_date ? new Date(profileData.birth_date) : null}
-          onChange={(date) => setProfileData(prev => ({ ...prev, birth_date: date?.toISOString().split('T')[0] }))}
+          onChange={(date) => {
+            // Validar que sea una fecha válida antes de convertir
+            if (date && !isNaN(date.getTime())) {
+              setProfileData(prev => ({ ...prev, birth_date: date.toISOString().split('T')[0] }));
+            } else if (date === null) {
+              setProfileData(prev => ({ ...prev, birth_date: undefined }));
+            }
+            // Si es inválida, no hacer nada para evitar RangeError
+          }}
           slotProps={{
             textField: {
               size: 'small',
@@ -904,7 +912,15 @@ export const RegisterUserPage = () => {
         <DatePicker
           label="Fecha de Contratación *"
           value={profileData.hire_date ? new Date(profileData.hire_date) : null}
-          onChange={(date) => setProfileData(prev => ({ ...prev, hire_date: date?.toISOString().split('T')[0] }))}
+          onChange={(date) => {
+            // Validar que sea una fecha válida antes de convertir
+            if (date && !isNaN(date.getTime())) {
+              setProfileData(prev => ({ ...prev, hire_date: date.toISOString().split('T')[0] }));
+            } else if (date === null) {
+              setProfileData(prev => ({ ...prev, hire_date: undefined }));
+            }
+            // Si es inválida, no hacer nada para evitar RangeError
+          }}
           slotProps={{
             textField: {
               size: 'small',
