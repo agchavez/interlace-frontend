@@ -1,24 +1,25 @@
-import { Avatar, Box, Card, CardActionArea, CardHeader, Chip, CircularProgress, Container, Divider, Grid, IconButton, InputBase, Paper, Typography, useMediaQuery, useTheme, Badge } from "@mui/material"
-import {useSearchParams } from "react-router-dom";
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import { Avatar, Box, Card, CardActionArea, CardHeader, Chip, CircularProgress, Container, Divider, Grid, IconButton, InputBase, Paper, Typography, useMediaQuery, useTheme, Badge, Button } from "@mui/material"
+import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store/store";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
-import masterApi from "../../../config/apiConfig";
-import { NotificationDetail } from "../components/NotificationDetail";
 import { useForm } from "react-hook-form";
-import SearchIcon from '@mui/icons-material/Search';
-import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
-
 import * as Yup from 'yup';
 import { yupResolver } from "@hookform/resolvers/yup";
-import { iconsActionsNotifi } from "../../../utils/notificationsUtils";
-import {updateMarckViewNoti} from "../../../store/auth";
-import {Notificacion, NotificacionQuery} from "../../../interfaces/auth";
-import {useGetNotificacionesQuery, useGetNotificacionQuery} from "../../../store/auth/authApi.ts";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SearchIcon from '@mui/icons-material/Search';
+import CleaningServicesTwoToneIcon from '@mui/icons-material/CleaningServicesTwoTone';
 import NotificationsNoneTwoToneIcon from "@mui/icons-material/NotificationsNoneTwoTone";
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+
+import { useAppDispatch, useAppSelector } from "../../../store/store";
+import masterApi from "../../../config/apiConfig";
+import { NotificationDetail } from "../components/NotificationDetail";
+import { iconsActionsNotifi } from "../../../utils/notificationsUtils";
+import { updateMarckViewNoti } from "../../../store/auth";
+import { Notificacion, NotificacionQuery } from "../../../interfaces/auth";
+import { useGetNotificacionesQuery, useGetNotificacionQuery } from "../../../store/auth/authApi";
 
 const validationSchema = Yup.object().shape({
   search: Yup.string().required('Campo requerido').min(3, 'Mínimo 3 caracteres'),
@@ -522,26 +523,50 @@ export const NotificationPage = () => {
                 </Grid>
               ) : null}
               {/* Right Panel - Notification Detail */}
-              <Grid item xs={12} md={8}>
-                <Box sx={{ pt: { xs: 1, sm: 1.5 } }}>
-                  <Card
-                    elevation={2}
-                    sx={{
-                      height: { xs: 'auto', md: '71vh' },
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
+              {(!media || (media && showDetailOnMobile)) && (
+                <Grid item xs={12} md={8}>
+                  <Box sx={{ pt: { xs: 1, sm: 1.5 } }}>
+                    <Card
+                      elevation={2}
                       sx={{
-                        height: { xs: 'auto', md: '70vh' },
-                        overflowY: 'auto',
-                        scrollbarWidth: 'thin',
+                        height: { xs: 'auto', md: '71vh' },
+                        borderRadius: 2,
+                        overflow: 'hidden',
                       }}
                     >
-                      {select ? (
-                        <NotificationDetail select={select} />
-                      ) : (
+                      {/* Botón volver en móvil */}
+                      {media && showDetailOnMobile && (
+                        <Box
+                          sx={{
+                            p: 2,
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            bgcolor: 'background.paper',
+                          }}
+                        >
+                          <Button
+                            startIcon={<NavigateBeforeIcon />}
+                            onClick={() => setShowDetailOnMobile(false)}
+                            sx={{
+                              minHeight: 48,
+                              fontSize: '0.8125rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Volver a la lista
+                          </Button>
+                        </Box>
+                      )}
+                      <Box
+                        sx={{
+                          height: { xs: 'auto', md: '70vh' },
+                          overflowY: 'auto',
+                          scrollbarWidth: 'thin',
+                        }}
+                      >
+                        {select ? (
+                          <NotificationDetail select={select} />
+                        ) : (
                         <Box
                           sx={{
                             display: 'flex',
@@ -589,6 +614,7 @@ export const NotificationPage = () => {
                   </Card>
                 </Box>
               </Grid>
+              )}
             </Grid>
           </Grid>
         </Grid>
