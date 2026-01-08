@@ -52,12 +52,26 @@ jobs:
             VITE_JS_APP_API_URL=${{ secrets.VITE_JS_APP_API_URL }}
             VITE_JS_APP_API_URL_WS=${{ secrets.VITE_JS_APP_API_URL_WS }}
             VITE_JS_FRONTEND_URL=${{ secrets.VITE_JS_FRONTEND_URL }}
-            VITE_JS_APP_NAME=Tracker
+            VITE_JS_APP_NAME=${{ secrets.VITE_JS_APP_NAME }}
             VITE_JS_APP_VERSION=2.0.0
             VITE_APP_DOMAIN=${{ secrets.VITE_APP_DOMAIN }}
             VITE_VAPID_PUBLIC_KEY=${{ secrets.VITE_VAPID_PUBLIC_KEY }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+  cleanup:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old container versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'tracker-frontend'
+          package-type: 'container'
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: 'false'
 
   deploy:
     needs: build
