@@ -124,7 +124,7 @@ const NotificationManager: React.FC = () => {
                 break;
             case 'ALERTA':
             case 'ADVERTENCIA':
-                toast(notification.title, { ...toastConfig, type: 'warning' });
+                toast.info(notification.title, toastConfig);
                 break;
             case 'CONFIRMACION':
             case 'APROBACION':
