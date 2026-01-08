@@ -15,7 +15,8 @@ export function LoginPage() {
                 justifyContent: 'center',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
                 position: 'relative',
-                py: { xs: 2, sm: 3, md: 3 },
+                pt: { xs: '80px', sm: 3, md: 3 }, // Padding top mayor en móviles para compensar navbar
+                pb: { xs: 2, sm: 3, md: 3 },
                 px: { xs: 1.5, sm: 2, md: 3 },
                 overflow: 'auto',
                 '&::before': {
