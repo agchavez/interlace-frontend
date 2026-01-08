@@ -990,22 +990,9 @@ export default function HomePage() {
             {
               label: 'Personal por Jerarquía',
               data: personnelDashboard?.by_hierarchy?.map((item) => item.count) || [],
-              backgroundColor: [
-                'rgba(220, 187, 32, 0.8)',   // Primary DCBB20
-                'rgba(245, 213, 71, 0.8)',   // Primary Light
-                'rgba(52, 73, 94, 0.8)',     // Secondary Dark
-                'rgba(127, 140, 143, 0.8)',  // Secondary Light
-                'rgba(39, 174, 96, 0.8)',    // Success
-              ],
-              borderColor: [
-                '#DCBB20',
-                '#F5D547',
-                '#34495E',
-                '#7F8C8D',
-                '#27AE60',
-              ],
-              borderWidth: 2,
-              borderRadius: 6,
+              backgroundColor: ['#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50'],
+              borderColor: ['#3f51b5', '#2196f3', '#00bcd4', '#009688', '#4caf50'],
+              borderWidth: 1,
             },
           ],
         };
@@ -1013,30 +1000,14 @@ export default function HomePage() {
         const hierarchyOptions = {
           responsive: true,
           maintainAspectRatio: false,
-          animation: {
-            duration: 1000,
-            easing: 'easeInOutQuart' as const,
-          },
           plugins: {
             legend: {
               display: false,
             },
             tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              padding: 12,
-              borderRadius: 8,
-              titleFont: {
-                size: 14,
-                weight: 'bold' as const,
-              },
-              bodyFont: {
-                size: 13,
-              },
               callbacks: {
                 label: function (context: TooltipItem<'bar'>) {
-                  const total = personnelDashboard?.summary.total_active || 0;
-                  const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(1) : '0';
-                  return `${context.parsed.y} personas (${percentage}%)`;
+                  return `${context.parsed.y} personas`;
                 },
               },
             },
@@ -1046,22 +1017,6 @@ export default function HomePage() {
               beginAtZero: true,
               ticks: {
                 stepSize: 1,
-                font: {
-                  size: 11,
-                },
-              },
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)',
-              },
-            },
-            x: {
-              grid: {
-                display: false,
-              },
-              ticks: {
-                font: {
-                  size: 11,
-                },
               },
             },
           },
@@ -1096,18 +1051,17 @@ export default function HomePage() {
               label: 'Personal por Área',
               data: personnelDashboard?.by_area?.map((item) => item.count) || [],
               backgroundColor: [
-                'rgba(220, 187, 32, 0.85)',   // Primary
-                'rgba(52, 169, 219, 0.85)',   // Info
-                'rgba(39, 174, 96, 0.85)',    // Success
-                'rgba(243, 156, 18, 0.85)',   // Warning
-                'rgba(231, 76, 60, 0.85)',    // Danger
-                'rgba(155, 89, 182, 0.85)',   // Purple
-                'rgba(52, 73, 94, 0.85)',     // Secondary
-                'rgba(149, 165, 166, 0.85)',  // Gray
+                '#ff6384',
+                '#36a2eb',
+                '#ffce56',
+                '#4bc0c0',
+                '#9966ff',
+                '#ff9f40',
+                '#ff6384',
+                '#c9cbcf',
               ],
               borderColor: '#ffffff',
-              borderWidth: 3,
-              hoverOffset: 15,
+              borderWidth: 2,
             },
           ],
         };
@@ -1115,12 +1069,6 @@ export default function HomePage() {
         const areaOptions = {
           responsive: true,
           maintainAspectRatio: false,
-          animation: {
-            animateRotate: true,
-            animateScale: true,
-            duration: 1000,
-            easing: 'easeInOutQuart' as const,
-          },
           plugins: {
             legend: {
               position: 'right' as const,
@@ -1129,30 +1077,17 @@ export default function HomePage() {
                 padding: 10,
                 font: {
                   size: 11,
-                  family: 'Roboto, sans-serif',
                 },
-                usePointStyle: true,
-                color: '#2C3E50',
               },
             },
             tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              padding: 12,
-              borderRadius: 8,
-              titleFont: {
-                size: 14,
-                weight: 'bold' as const,
-              },
-              bodyFont: {
-                size: 13,
-              },
               callbacks: {
                 label: function (context: TooltipItem<'pie'>) {
                   const label = context.label || '';
                   const value = context.parsed || 0;
                   const total = personnelDashboard?.summary.total_active || 0;
                   const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                  return `${label}: ${value} personas (${percentage}%)`;
+                  return `${label}: ${value} (${percentage}%)`;
                 },
               },
             },
@@ -1182,7 +1117,7 @@ export default function HomePage() {
 
       case WidgetType.MY_PERFORMANCE:
         return (
-          <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="body1" component="h6" color="secondary" fontWeight={200}>
                 Mi Desempeño
@@ -1190,26 +1125,51 @@ export default function HomePage() {
               <TrendingUpIcon color="primary" />
             </Box>
             <Divider />
-            <Box sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              py: 4
-            }}>
-              <TrendingUpIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                Evaluaciones de Desempeño
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography variant="h2" color="primary" fontWeight={700}>
+                4.5
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: '80%' }}>
-                Las métricas de desempeño estarán disponibles una vez que completes tu primera evaluación.
+              <Typography variant="body2" color="text.secondary">
+                Promedio General
               </Typography>
             </Box>
+            <Divider sx={{ my: 2 }} />
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Productividad
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  4.8
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Calidad
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  4.6
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Puntualidad
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  4.9
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Trabajo en Equipo
+                </Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  4.3
+                </Typography>
+              </Grid>
+            </Grid>
           </Card>
         );
-
 
       case WidgetType.MY_HISTORY:
         return (
@@ -1221,35 +1181,49 @@ export default function HomePage() {
               <AccessTimeIcon color="secondary" />
             </Box>
             <Divider />
-            <Box sx={{
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              py: 4
-            }}>
-              <AccessTimeIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                Historial de Actividades
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Actividad Reciente
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ maxWidth: '80%' }}>
-                Tu historial de actividades aparecerá aquí. Por ahora, puedes revisar tus notificaciones.
-              </Typography>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                sx={{ mt: 3 }}
-                onClick={() => navigate('/notifications')}
-              >
-                Ver Notificaciones
-              </Button>
+              <TableContainer sx={{ mt: 1, flex: 1 }}>
+                <Table size="small">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={600}>
+                          Perfil Actualizado
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Hace 2 días
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={600}>
+                          Certificación Renovada
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Hace 1 semana
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={600}>
+                          Evaluación Completada
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Hace 2 semanas
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Card>
         );
-
 
       default:
         return null;

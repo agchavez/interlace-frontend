@@ -15,15 +15,22 @@ import { LocalizationProvider, esES } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { es } from 'date-fns/locale';
 import { SidebarProvider } from './modules/ui/context/SidebarContext';
+import { useEffect } from 'react';
 
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { pdfjs } from 'react-pdf';
+import PWANotificationManager from './modules/ui/components/PWANotificationManager';
+import { registerPushServiceWorker } from './utils/registerPushSW';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 function App() {
+  // Registrar el service worker de push al cargar la app
+  useEffect(() => {
+    registerPushServiceWorker();
+  }, []);
   return (
     <ThemeProvider theme={maintheme}>
       <Provider store={store}>
@@ -32,6 +39,9 @@ function App() {
         <SidebarProvider defaultCollapsed={false}>
         <Toaster duration={3000} position="top-right" richColors closeButton />
           <AppRouter />
+
+          {/* PWA: Instalación y Notificaciones Push */}
+          <PWANotificationManager />
         </SidebarProvider>
         </BrowserRouter>
         </LocalizationProvider>

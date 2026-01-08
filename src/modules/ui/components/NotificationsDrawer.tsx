@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Drawer,
     List,
@@ -13,18 +13,29 @@ import {
     Badge,
     useTheme,
     useMediaQuery,
+    CircularProgress,
 } from '@mui/material';
 import DocumentIcon from '@mui/icons-material/Description';
 import AlertIcon from '@mui/icons-material/Warning';
 import ConfirmationIcon from '@mui/icons-material/CheckCircle';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { toast } from 'sonner';
 import {Notificacion} from "../../../interfaces/auth";
 import { StandardDrawerHeader } from './StandardDrawerHeader';
 import { useMarkNotificationAsReadMutation } from '../../../store/auth/notificationApi';
+import { useAppSelector } from '../../../store/store';
+import {
+    subscribeToPushNotifications,
+    unsubscribeFromPushNotifications,
+    getNotificationPermission,
+    getCurrentSubscription
+} from '../../../utils/pushNotifications';
 
 const iconsActionsNotifi: Record<string, Record<string, JSX.Element>> = {
     DOCUMENTOS: {
@@ -49,8 +60,34 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [markAsRead] = useMarkNotificationAsReadMutation();
+    const { token } = useAppSelector((state) => state.auth);
+
+    const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
+    const [isSubscribed, setIsSubscribed] = useState(false);
+    const [isSubscribing, setIsSubscribing] = useState(false);
 
     const unreadCount = notifications.filter(n => !n.read).length;
+
+    // Verificar el estado de permisos y suscripción al abrir el drawer
+    useEffect(() => {
+        const checkSubscriptionStatus = async () => {
+            if (open) {
+                const permission = getNotificationPermission();
+                setPushPermission(permission);
+
+                // Verificar si hay una suscripción activa
+                const subscription = await getCurrentSubscription();
+                setIsSubscribed(!!subscription);
+
+                console.log('Estado de suscripción:', {
+                    permission,
+                    hasSubscription: !!subscription
+                });
+            }
+        };
+
+        checkSubscriptionStatus();
+    }, [open]);
 
     const handleNotificationClick = async (noti: Notificacion) => {
         // Marcar como leída si no lo está
@@ -64,6 +101,62 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
         // Navegar a la página de detalles
         navigate(`/notifications/?id=${noti.id}`);
         onClose();
+    };
+
+    const handlePushSubscription = async () => {
+        if (!token) {
+            toast.error('Debes iniciar sesión para suscribirte a notificaciones');
+            return;
+        }
+
+        setIsSubscribing(true);
+
+        try {
+            if (isSubscribed) {
+                // Desuscribirse
+                console.log('Intentando desuscribirse...');
+                const success = await unsubscribeFromPushNotifications(token);
+                if (success) {
+                    setIsSubscribed(false);
+                    toast.success('Te has desuscrito de las notificaciones push');
+                } else {
+                    toast.error('No se pudo desuscribir. Intenta de nuevo');
+                }
+            } else {
+                // Suscribirse
+                console.log('Intentando suscribirse...');
+                console.log('VAPID KEY:', import.meta.env.VITE_VAPID_PUBLIC_KEY);
+                console.log('API URL:', import.meta.env.VITE_JS_APP_API_URL);
+
+                // Primero pedir permiso si no lo tiene
+                if (pushPermission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    console.log('Permiso obtenido:', permission);
+                    setPushPermission(permission);
+
+                    if (permission !== 'granted') {
+                        toast.error('Debes permitir las notificaciones en tu navegador');
+                        return;
+                    }
+                }
+
+                const subscription = await subscribeToPushNotifications(token);
+                console.log('Resultado de suscripción:', subscription);
+
+                if (subscription) {
+                    setIsSubscribed(true);
+                    setPushPermission('granted');
+                    toast.success('¡Estás suscrito a las notificaciones push!');
+                } else {
+                    toast.error('No se pudo completar la suscripción. Verifica la consola para más detalles');
+                }
+            }
+        } catch (error: any) {
+            console.error('Error al gestionar suscripción push:', error);
+            toast.error(error?.message || 'Ocurrió un error. Intenta de nuevo');
+        } finally {
+            setIsSubscribing(false);
+        }
     };
 
     const renderNotificationsList = (notifications: Notificacion[] = []) => {
@@ -260,31 +353,66 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
                 >
                     {renderNotificationsList(notifications)}
                 </Box>
-                {notifications.length > 0 && (
-                    <>
-                        <Divider />
-                        <Box sx={{ p: 2, bgcolor: 'background.default' }}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                fullWidth
-                                size="large"
-                                onClick={() => {
-                                    navigate('/notifications');
-                                    onClose();
-                                }}
-                                sx={{
-                                    minHeight: 48,
-                                    fontSize: '0.8125rem',
-                                    fontWeight: 600,
-                                    textTransform: 'none',
-                                }}
-                            >
-                                Ver Todas las Notificaciones
-                            </Button>
-                        </Box>
-                    </>
-                )}
+                <Divider />
+                <Box sx={{ p: 2, bgcolor: 'background.default' }}>
+                    {/* Botón de suscripción push */}
+                    <Button
+                        variant={isSubscribed ? 'text' : 'outlined'}
+                        color={isSubscribed ? 'success' : 'primary'}
+                        fullWidth
+                        size="small"
+                        onClick={handlePushSubscription}
+                        disabled={isSubscribing || pushPermission === 'denied'}
+                        startIcon={
+                            isSubscribing ? (
+                                <CircularProgress size={16} />
+                            ) : isSubscribed ? (
+                                <NotificationsActiveIcon fontSize="small" />
+                            ) : pushPermission === 'denied' ? (
+                                <NotificationsOffIcon fontSize="small" />
+                            ) : (
+                                <NotificationsIcon fontSize="small" />
+                            )
+                        }
+                        sx={{
+                            minHeight: 36,
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            textTransform: 'none',
+                            mb: notifications.length > 0 ? 1 : 0,
+                            justifyContent: 'flex-start',
+                            px: 1.5,
+                        }}
+                    >
+                        {isSubscribed
+                            ? 'Push activas'
+                            : pushPermission === 'denied'
+                            ? 'Push bloqueadas'
+                            : 'Activar push'}
+                    </Button>
+
+                    {/* Botón ver todas */}
+                    {notifications.length > 0 && (
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            size="medium"
+                            onClick={() => {
+                                navigate('/notifications');
+                                onClose();
+                            }}
+                            sx={{
+                                minHeight: 42,
+                                fontSize: '0.8125rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                            }}
+                        >
+                            Ver Todas
+                        </Button>
+                    )}
+                </Box>
             </Box>
         </Drawer>
     );

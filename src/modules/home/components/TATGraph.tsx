@@ -60,9 +60,94 @@ const labels = [
 // eslint-disable-next-line react-refresh/only-export-components
 export const options = {
   responsive: true,
+  maintainAspectRatio: true,
+  interaction: {
+    mode: 'index' as const,
+    intersect: false,
+  },
+  animation: {
+    duration: 1000,
+    easing: 'easeInOutQuart' as const,
+  },
   plugins: {
     legend: {
       position: "top" as const,
+      labels: {
+        usePointStyle: true,
+        padding: 15,
+        font: {
+          size: 12,
+          family: 'Roboto, sans-serif',
+          weight: '500' as const,
+        },
+        color: '#2C3E50',
+      },
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      padding: 14,
+      borderRadius: 8,
+      titleFont: {
+        size: 14,
+        weight: 'bold' as const,
+      },
+      bodyFont: {
+        size: 13,
+      },
+      displayColors: true,
+      callbacks: {
+        label: function(context: any) {
+          let label = context.dataset.label || '';
+          if (label) {
+            label += ': ';
+          }
+          if (context.parsed.y !== null) {
+            const hours = Math.floor(context.parsed.y / 3600);
+            const minutes = Math.floor((context.parsed.y % 3600) / 60);
+            label += `${hours}h ${minutes}m`;
+          }
+          return label;
+        }
+      },
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: 'rgba(0, 0, 0, 0.05)',
+        drawBorder: false,
+      },
+      ticks: {
+        font: {
+          size: 11,
+        },
+        color: '#7F8C8D',
+        callback: function(value: any) {
+          const hours = Math.floor(value / 3600);
+          return `${hours}h`;
+        },
+      },
+      title: {
+        display: true,
+        text: 'Tiempo Promedio (horas)',
+        font: {
+          size: 12,
+          weight: 'bold' as const,
+        },
+        color: '#2C3E50',
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        font: {
+          size: 11,
+        },
+        color: '#7F8C8D',
+      },
     },
   },
 };
@@ -87,17 +172,18 @@ const groupByDistributorCenter = (data: TATGraphItem[]) => {
   return groupedData
 };
 
+// Paleta de colores moderna alineada con el tema
 const colors = [
-  "#66b2ff",
-  "#ffcc99",
-  "#99ff99",
-  "#ffb3e6",
-  "#ffff99",
-  "#c2a2ff",
-  "#66ffc2",
-  "#ff9999",
-  "#c2c2c2",
-  "#fff5e1",
+  "#DCBB20",  // Primary (Gold)
+  "#34A2DB",  // Info (Blue)
+  "#27AE60",  // Success (Green)
+  "#F39C12",  // Warning (Orange)
+  "#E74C3C",  // Danger (Red)
+  "#9B59B6",  // Purple
+  "#34495E",  // Secondary Dark
+  "#16A085",  // Teal
+  "#E67E22",  // Carrot
+  "#95A5A6",  // Gray
 ]
 
 const obtenerDatasets = (data: GroupedData, dcs: DistributionCenter[])=>{
@@ -111,12 +197,22 @@ const obtenerDatasets = (data: GroupedData, dcs: DistributionCenter[])=>{
       result.push({
         label: label,
         data: labels.map((_mes, index) => {
-          //TODO: implementar bien
           const dato = itemsForCenter.find((avg) => avg.month === index + 1);
           return dato?.avg_time_invested || 0;
         }),
-        borderColor: colors[index%colors.length],
-        backgroundColor: colors[index%colors.length],
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length] + '33', // 20% opacity for bars
+        borderWidth: 3,
+        tension: 0.4, // Smooth lines
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: '#FFFFFF',
+        pointBorderColor: colors[index % colors.length],
+        pointBorderWidth: 2,
+        pointHoverBackgroundColor: colors[index % colors.length],
+        pointHoverBorderColor: '#FFFFFF',
+        pointHoverBorderWidth: 2,
+        fill: true,
         id: Math.random(),
       })
     }

@@ -118,31 +118,31 @@ const items: SideBarMainItem[] = [
             },
         ],
     },
-    {
-        text: "T2",
-        icon: <ContentPasteGoTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
-        id: "t2",
-        subItems: [
-            {
-                text: "Cargar Preventa",
-                href: "/tracker-t2/pre-sale",
-                id: "outregister",
-                permissions: ["t2.preSale"],
-            },
-            {
-                text: "Gestión",
-                href: "/tracker-t2/manage",
-                id: "outmanage",
-                permissions: ["t2.manage"],
-            },
-            {
-                text: "Revision",
-                href: "/tracker-t2/pre-sale-check",
-                id: "outcheck",
-                permissions: ["t2.check"],
-            },
-        ],
-    },
+    // {
+    //     text: "T2",
+    //     icon: <ContentPasteGoTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+    //     id: "t2",
+    //     subItems: [
+    //         {
+    //             text: "Cargar Preventa",
+    //             href: "/tracker-t2/pre-sale",
+    //             id: "outregister",
+    //             permissions: ["t2.preSale"],
+    //         },
+    //         {
+    //             text: "Gestión",
+    //             href: "/tracker-t2/manage",
+    //             id: "outmanage",
+    //             permissions: ["t2.manage"],
+    //         },
+    //         {
+    //             text: "Revision",
+    //             href: "/tracker-t2/pre-sale-check",
+    //             id: "outcheck",
+    //             permissions: ["t2.check"],
+    //         },
+    //     ],
+    // },
     {
         text: "Reporte",
         icon: <AssessmentOutlinedIcon style={{ marginRight: "5px" }}  color="primary"/>,

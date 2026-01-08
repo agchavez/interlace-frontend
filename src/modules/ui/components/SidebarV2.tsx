@@ -167,16 +167,16 @@ const SidebarV2: React.FC = () => {
         ],
         id: 'movimientos',
       },
-      {
-        text: 'T2',
-        icon: <ContentPasteGoIcon fontSize="small" />,
-        subItems: [
-          { text: 'Cargar Preventa', href: '/tracker-t2/pre-sale', id: 'outregister' },
-          { text: 'Gestión', href: '/tracker-t2/manage', id: 'outmanage' },
-          { text: 'Revisión', href: '/tracker-t2/pre-sale-check', id: 'outcheck' },
-        ],
-        id: 't2',
-      },
+      // {
+      //   text: 'T2',
+      //   icon: <ContentPasteGoIcon fontSize="small" />,
+      //   subItems: [
+      //     { text: 'Cargar Preventa', href: '/tracker-t2/pre-sale', id: 'outregister' },
+      //     { text: 'Gestión', href: '/tracker-t2/manage', id: 'outmanage' },
+      //     { text: 'Revisión', href: '/tracker-t2/pre-sale-check', id: 'outcheck' },
+      //   ],
+      //   id: 't2',
+      // },
       {
         text: 'Reporte',
         icon: <AssessmentIcon fontSize="small" />,

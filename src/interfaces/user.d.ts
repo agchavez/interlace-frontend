@@ -68,11 +68,13 @@ export type User = {
     firstName?:          string;
     lastName?:           string;
     email?:              string;
-    employee_number?:     null;
+    employee_number?:    number | null;
     createdAt?:          Date;
     groups?:             number[];
     userPermissions?:    string[];
     distributions_centers: number[];
+    personnel_profile_id?: number | null;
+    photo_url?:          string | null;
 }
 
 export interface UserQuerySearch {
