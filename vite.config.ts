@@ -7,11 +7,13 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // No registrar SW automáticamente - usamos push-sw.js manual
+      injectRegister: false,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'logo.png', 'icons/*.png'],
-      manifest: false, // Deshabilitamos el manifest automático por ahora
+      manifest: false,
       devOptions: {
-        enabled: false // Deshabilitar en desarrollo para probar
+        enabled: false
       }
     })
   ],
