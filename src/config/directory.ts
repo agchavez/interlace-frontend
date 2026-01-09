@@ -338,6 +338,52 @@ export const permisions = [
         permissions: [
             "any"
         ]
+    },
+    // Tokens
+    {
+        url: "/tokens",
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
+        url: "/tokens/create",
+        permissions: [
+            "tokens.add_tokenrequest"
+        ]
+    },
+    {
+        url: "/tokens/detail/:id",
+        reg: /\/tokens\/detail\/\d+/,
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
+        url: "/tokens/pending",
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
+        url: "/tokens/validate",
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
+        url: "/tokens/:id/complete-delivery",
+        reg: /\/tokens\/\d+\/complete-delivery/,
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
+        url: "/public/token/:uuid",
+        reg: /\/public\/token\/[a-f0-9-]+/,
+        permissions: [
+            "any"
+        ]
     }
 ]
 
