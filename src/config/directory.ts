@@ -202,14 +202,15 @@ export const permisions = [
     {
         url:"/claim",
         permissions: [
-            "any"
+            "imported.view_claimmodel",
+            "imported.change_status_claimmodel"
         ]
     },
     {
         url:"/claim/detail/:id",
         reg: /\/claim\/detail\/\d+/,
         permissions: [
-            "any"
+            "imported.view_claimmodel"
         ]
     },
 
@@ -217,13 +218,14 @@ export const permisions = [
         url:"/claim/editstatus/:id",
         reg: /\/claim\/editstatus\/\d+/,
         permissions: [
-            "any"
+            "imported.view_claimmodel",
+            "imported.change_status_claimmodel"
         ]
     },
     {
         url:"/claim/mine",
         permissions: [
-            "any"
+            "imported.view_claimmodel"
         ]
     },
     {

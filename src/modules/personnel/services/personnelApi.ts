@@ -153,10 +153,11 @@ export const personnelApi = createApi({
     // ==========================================
     // Dashboard & Stats
     // ==========================================
-    getPersonnelDashboard: builder.query<PersonnelDashboard, void>({
-      query: () => ({
+    getPersonnelDashboard: builder.query<PersonnelDashboard, { distributor_center?: number } | void>({
+      query: (params) => ({
         url: '/profiles/dashboard/',
         method: 'GET',
+        params: params || undefined,
       }),
       providesTags: ['PersonnelProfiles'],
     }),

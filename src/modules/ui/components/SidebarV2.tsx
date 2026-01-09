@@ -37,6 +37,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
+import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -190,8 +191,17 @@ const SidebarV2: React.FC = () => {
       {
         text: 'Inventario',
         icon: <InventoryIcon fontSize="small" />,
-        subItems: [{ text: 'Movimientos', href: '/inventory/', id: 'gestion' }],
+        subItems: [{ text: 'Movimientos', href: '/inventory', id: 'gestion' }],
         id: 'inventario',
+      },
+      {
+        text: 'Reclamos',
+        icon: <AssignmentLateTwoToneIcon fontSize="small" />,
+        subItems: [
+          { text: 'Seguimiento', href: '/claim', id: 'reclamos' },
+          { text: 'Mis Reclamos', href: '/claim/mine', id: 'misreclamos' },
+        ],
+        id: 'claim',
       },
       {
         text: 'Mantenimiento',
@@ -223,6 +233,9 @@ const SidebarV2: React.FC = () => {
           user?.distributions_centers &&
           user?.distributions_centers.length >= 1
         ) {
+          sub.visible = true;
+        } else if (sub.permissions?.includes('cd') && user?.centro_distribucion) {
+          // Permiso especial para usuarios con centro de distribución asignado
           sub.visible = true;
         } else {
           sub.visible = sub.permissions?.includes('any')

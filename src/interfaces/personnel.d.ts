@@ -355,6 +355,10 @@ export interface PersonnelDashboard {
   evaluations: {
     pending: number;
   };
+  filter_info?: {
+    distributor_center_id: number | null;
+    distributor_center_name: string | null;
+  };
 }
 
 // ============================
