@@ -7,9 +7,13 @@ import {
   Box,
   Tabs,
   Tab,
+  useMediaQuery,
+  useTheme,
+  IconButton,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
+import RateReviewIcon from "@mui/icons-material/RateReview";
 import {
   ClaimQueryParams,
   useGetClaimsQuery,
@@ -35,6 +39,8 @@ function a11yProps(index: number) {
 
 export function ClaimReviewPage() {
   const dispatch = useAppDispatch();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useAppSelector((state) => state.auth);
   const { claimQueryParams } = useAppSelector((state) => state.ui);
   const { disctributionCenters } = useAppSelector((state) => state.maintenance);
@@ -138,34 +144,64 @@ export function ClaimReviewPage() {
         handleFilter={handleFilter}
         canEditStatus={true}
       />
-      <Container maxWidth="xl" sx={{ marginTop: 2 }}>
+      <Container maxWidth="xl" sx={{ mt: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
         <Grid container spacing={2}>
+          {/* Header */}
           <Grid item xs={12}>
-            <Typography variant="h5" component="h1" fontWeight={400}>
-              Seguimiento de Reclamos
-            </Typography>
-            <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <RateReviewIcon color="secondary" sx={{ fontSize: { xs: 28, sm: 32 } }} />
+                <Typography variant={isMobile ? "h6" : "h5"} component="h1" fontWeight={400}>
+                  Seguimiento de Reclamos
+                </Typography>
+              </Box>
+              {/* Botón filtrar */}
+              {isMobile ? (
+                <IconButton
+                  color="secondary"
+                  onClick={() => setOpenFilter(true)}
+                  sx={{ border: 1, borderColor: 'divider' }}
+                >
+                  <FilterListTwoToneIcon />
+                </IconButton>
+              ) : (
+                <Button
+                  variant="outlined"
+                  color="secondary"
+                  endIcon={<FilterListTwoToneIcon />}
+                  onClick={() => setOpenFilter(true)}
+                >
+                  Filtrar
+                </Button>
+              )}
+            </Box>
+            <Divider sx={{ mt: 1.5, mb: 1 }} />
           </Grid>
+
+          {/* Descripción - oculta en móvil */}
+          {!isMobile && (
+            <Grid item xs={12}>
+              <Typography variant="body2" component="h2" fontWeight={400} color="text.secondary">
+                A continuación se muestra el listado de los reclamos registrados
+                en el sistema. Para ver el detalle de cada uno, haga click en el
+                botón ver o presione doble click sobre el registro.
+              </Typography>
+            </Grid>
+          )}
+
+          {/* Chips de filtros - scrollable en móvil */}
           <Grid item xs={12}>
-            <Typography variant="body2" component="h2" fontWeight={400}>
-              A continuación se muestra el listado de los reclamos registrados
-              en el sistema. Para ver el detalle de cada uno, haga click en el
-              botón ver o presione doble click sobre el registro.
-            </Typography>
-          </Grid>
-          <Grid item xs={12} display="flex" justifyContent="flex-end">
-            <Button
-              variant="outlined"
-              color="secondary"
-              sx={{ marginRight: 1 }}
-              endIcon={<FilterListTwoToneIcon />}
-              onClick={() => setOpenFilter(true)}
+            <Box
+              sx={{
+                display: 'flex',
+                flexWrap: { xs: 'nowrap', sm: 'wrap' },
+                overflowX: { xs: 'auto', sm: 'visible' },
+                gap: 1,
+                pb: { xs: 1, sm: 0 },
+                '&::-webkit-scrollbar': { height: 4 },
+                '&::-webkit-scrollbar-thumb': { bgcolor: 'grey.300', borderRadius: 2 },
+              }}
             >
-              Filtrar
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container spacing={1}>
               {claimQueryParams.search &&
                 claimQueryParams.search.length > 0 && (
                   <ChipFilterCategory
@@ -280,7 +316,7 @@ export function ClaimReviewPage() {
                   ]}
                 />
               )}
-            </Grid>
+            </Box>
           </Grid>
 
           <Grid item xs={12}>
@@ -289,18 +325,26 @@ export function ClaimReviewPage() {
                 value={tabValue}
                 onChange={handleTabChange}
                 aria-label="claim tabs"
+                variant={isMobile ? "fullWidth" : "standard"}
+                sx={{
+                  '& .MuiTab-root': {
+                    minHeight: { xs: 48, sm: 56 },
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    px: { xs: 1, sm: 2 },
+                  }
+                }}
               >
                 <Tab
-                  label="Reclamos Locales"
+                  label={isMobile ? "Locales" : "Reclamos Locales"}
                   {...a11yProps(0)}
-                  icon={<LocalShippingOutlined />}
+                  icon={<LocalShippingOutlined fontSize={isMobile ? "small" : "medium"} />}
                   iconPosition="start"
                   disabled={!enableLocal}
                 />
                 <Tab
-                  label="Reclamos Importados"
+                  label={isMobile ? "Importados" : "Reclamos Importados"}
                   {...a11yProps(1)}
-                  icon={<PublicTwoToneIcon />}
+                  icon={<PublicTwoToneIcon fontSize={isMobile ? "small" : "medium"} />}
                   iconPosition="start"
                   disabled={!enableImport}
                 />

@@ -60,8 +60,12 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import QrCode2Icon from '@mui/icons-material/QrCode2';
 import { QRCodeSVG } from 'qrcode.react';
 import { useGetPersonnelProfileQuery, useGetCertificationsQuery, useGetPerformanceMetricsQuery, useDeactivatePersonnelProfileMutation, useAssignUserToPersonnelMutation } from '../services/personnelApi';
+import { useGetTokensByPersonnelQuery } from '../../tokens/services/tokenApi';
+import { TokenStatus, TokenStatusLabels, TokenType, TokenTypeLabels } from '../../tokens/interfaces/token';
 import { toast } from 'sonner';
 import { AssignUserDialog } from '../components/AssignUserDialog';
 
@@ -101,6 +105,7 @@ export const PersonnelDetailPage = () => {
   const { data: profile, isLoading, error } = useGetPersonnelProfileQuery(Number(id));
   const { data: certificationsData } = useGetCertificationsQuery({ personnel: Number(id), limit: 100, offset: 0 });
   const { data: performanceData } = useGetPerformanceMetricsQuery({ personnel: Number(id), limit: 100, offset: 0 });
+  const { data: tokensData } = useGetTokensByPersonnelQuery({ personnelId: Number(id), limit: 50, offset: 0 });
   const [deactivatePersonnel, { isLoading: isDeactivating }] = useDeactivatePersonnelProfileMutation();
   const [assignUserToPersonnel, { isLoading: isAssigning }] = useAssignUserToPersonnelMutation();
 
@@ -394,6 +399,12 @@ export const PersonnelDetailPage = () => {
               label={isMobile ? undefined : "Emergencias"}
               iconPosition="start"
               aria-label="Emergencias"
+            />
+            <Tab
+              icon={<ConfirmationNumberIcon />}
+              label={isMobile ? undefined : "Tokens"}
+              iconPosition="start"
+              aria-label="Tokens"
             />
           </Tabs>
         </Box>
@@ -952,6 +963,176 @@ export const PersonnelDetailPage = () => {
                   </Card>
                 </Grid>
               </Grid>
+            </Box>
+          </TabPanel>
+
+          {/* Tab 6: Tokens */}
+          <TabPanel value={activeTab} index={5}>
+            <Box sx={{ px: { xs: 2, sm: 4 } }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+                  <ConfirmationNumberIcon color="secondary" />
+                  Tokens del Personal
+                </Typography>
+                <Button
+                  startIcon={<AddCircleIcon />}
+                  onClick={() => navigate(`/tokens/create?personnel=${id}`)}
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                >
+                  Crear Token
+                </Button>
+              </Box>
+
+              {tokensData && tokensData.results && tokensData.results.length > 0 ? (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Código</TableCell>
+                        <TableCell>Tipo</TableCell>
+                        <TableCell>Estado</TableCell>
+                        <TableCell>Válido Desde</TableCell>
+                        <TableCell>Válido Hasta</TableCell>
+                        <TableCell align="center">QR</TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {tokensData.results.map((token: any) => {
+                        const statusColors: Record<string, 'default' | 'warning' | 'success' | 'error' | 'info'> = {
+                          DRAFT: 'default',
+                          PENDING_L1: 'warning',
+                          PENDING_L2: 'warning',
+                          PENDING_L3: 'warning',
+                          APPROVED: 'success',
+                          USED: 'info',
+                          EXPIRED: 'default',
+                          CANCELLED: 'default',
+                          REJECTED: 'error',
+                        };
+                        const typeColors: Record<string, string> = {
+                          PERMIT_HOUR: '#2196F3',
+                          PERMIT_DAY: '#3F51B5',
+                          EXIT_PASS: '#FF9800',
+                          SUBSTITUTION: '#9C27B0',
+                          RATE_CHANGE: '#4CAF50',
+                          OVERTIME: '#F44336',
+                          SHIFT_CHANGE: '#00BCD4',
+                          UNIFORM_DELIVERY: '#795548',
+                        };
+                        return (
+                          <TableRow key={token.id} hover>
+                            <TableCell>
+                              <Typography variant="body2" fontWeight={600}>
+                                {token.display_number}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={TokenTypeLabels[token.token_type as TokenType]}
+                                size="small"
+                                sx={{
+                                  bgcolor: typeColors[token.token_type] || '#666',
+                                  color: 'white',
+                                  fontSize: '0.7rem',
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={TokenStatusLabels[token.status as TokenStatus]}
+                                size="small"
+                                color={statusColors[token.status] || 'default'}
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {new Date(token.valid_from).toLocaleDateString('es-HN')}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {new Date(token.valid_until).toLocaleDateString('es-HN')}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              {token.status === 'APPROVED' && (
+                                <Box
+                                  sx={{
+                                    bgcolor: 'white',
+                                    p: 0.5,
+                                    borderRadius: 1,
+                                    display: 'inline-flex',
+                                    border: '1px solid',
+                                    borderColor: 'divider',
+                                  }}
+                                >
+                                  <QRCodeSVG
+                                    value={`${import.meta.env.VITE_JS_FRONTEND_URL}/public/token/${token.token_code}`}
+                                    size={40}
+                                    level="L"
+                                  />
+                                </Box>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                size="small"
+                                onClick={() => navigate(`/tokens/detail/${token.id}`)}
+                                title="Ver detalle"
+                              >
+                                <VisibilityIcon fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Card elevation={2}>
+                  <CardContent sx={{ py: 8 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <QrCode2Icon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary" gutterBottom>
+                        No hay tokens registrados
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        Cree el primer token para este empleado
+                      </Typography>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<AddCircleIcon />}
+                        onClick={() => navigate(`/tokens/create?personnel=${id}`)}
+                      >
+                        Crear Token
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
+
+              {tokensData && tokensData.count > 0 && (
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Mostrando {tokensData.results.length} de {tokensData.count} tokens
+                  </Typography>
+                  {tokensData.count > tokensData.results.length && (
+                    <Button
+                      size="small"
+                      onClick={() => navigate(`/tokens?personnel=${id}`)}
+                      sx={{ mt: 1 }}
+                    >
+                      Ver todos los tokens
+                    </Button>
+                  )}
+                </Box>
+              )}
             </Box>
           </TabPanel>
         </CardContent>

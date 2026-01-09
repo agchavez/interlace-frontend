@@ -15,6 +15,22 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   method: 'Método',
   data: 'Datos',
 
+  // Tokens
+  token_id: 'ID Token',
+  token_type: 'Tipo de Token',
+  token_type_label: 'Tipo',
+  display_number: 'Número de Token',
+  token_code: 'Código Token',
+  valid_from: 'Válido Desde',
+  valid_until: 'Válido Hasta',
+  personnel: 'Beneficiario',
+  requested_by: 'Solicitado Por',
+  approval_level: 'Nivel de Aprobación',
+  rejection_reason: 'Motivo de Rechazo',
+  approved_by: 'Aprobado Por',
+  rejected_by: 'Rechazado Por',
+  validated_by: 'Validado Por',
+
   // Reuniones y eventos
   meeting_time: 'Hora de reunión',
   attendees: 'Asistentes',
@@ -97,6 +113,27 @@ export const VALUE_TRANSLATIONS: Record<string, string> = {
   in_transit: 'En tránsito',
   delivered: 'Entregado',
   cancelled: 'Cancelado',
+
+  // Estados de Token
+  DRAFT: 'Borrador',
+  PENDING_L1: 'Pendiente Nivel 1',
+  PENDING_L2: 'Pendiente Nivel 2',
+  PENDING_L3: 'Pendiente Nivel 3',
+  APPROVED: 'Aprobado',
+  USED: 'Utilizado',
+  EXPIRED: 'Expirado',
+  CANCELLED: 'Cancelado',
+  REJECTED: 'Rechazado',
+
+  // Tipos de Token
+  PERMIT_HOUR: 'Permiso por Hora',
+  PERMIT_DAY: 'Permiso por Día',
+  EXIT_PASS: 'Pase de Salida',
+  UNIFORM_DELIVERY: 'Entrega de Uniforme',
+  SUBSTITUTION: 'Sustitución',
+  RATE_CHANGE: 'Cambio de Tasa',
+  OVERTIME: 'Horas Extra',
+  SHIFT_CHANGE: 'Cambio de Turno',
 
   // Prioridades
   high: 'Alta',

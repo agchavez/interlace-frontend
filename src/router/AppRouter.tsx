@@ -27,6 +27,8 @@ const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'
 const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
 const MaintenanceRouter = lazy(() => import('../modules/maintenance/MaintenanceRouter'));
 const PersonnelRouter = lazy(() => import('../modules/personnel/PersonnelRouter'));
+const TokenRouter = lazy(() => import('../modules/tokens/TokenRouter'));
+const PublicTokenPage = lazy(() => import('../modules/tokens/pages/PublicTokenPage').then(m => ({ default: m.PublicTokenPage })));
 const SidebarV2Demo = lazy(() => import('../modules/ui/pages/SidebarV2Demo'));
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -87,6 +89,10 @@ export function AppRouter() {
                             AuthRouter
                         } />
                     </PrivateRoute>
+                } />
+                {/* Ruta pública para tokens - sin autenticación */}
+                <Route path="/public/token/:uuid" element={
+                    <LazyLoading Children={PublicTokenPage} />
                 } />
                 <Route path="/user/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
@@ -153,6 +159,13 @@ export function AppRouter() {
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             PersonnelRouter
+                        } />
+                    </PrivateRoute>
+                } />
+                <Route path="/tokens/*" element={
+                    <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                        <LazyLoading Children={
+                            TokenRouter
                         } />
                     </PrivateRoute>
                 } />

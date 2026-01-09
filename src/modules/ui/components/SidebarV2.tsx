@@ -38,6 +38,8 @@ import ContentPasteGoIcon from '@mui/icons-material/ContentPasteGo';
 import BadgeIcon from '@mui/icons-material/Badge';
 import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
 import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -125,9 +127,22 @@ const SidebarV2: React.FC = () => {
     };
   }, [distributorCenters, user?.centro_distribucion]);
 
+  // Check if user is in Security group
+  const isSecurityUser = user?.list_groups?.includes('SEGURIDAD') || false;
+
   // Menu items definition
   const items: SidebarItem[] = useMemo(
     () => [
+      // Security-only item - shown at top for security users
+      ...(isSecurityUser ? [{
+        text: 'Caseta de Seguridad',
+        icon: <QrCodeScannerIcon fontSize="small" />,
+        subItems: [
+          { text: 'Validar Tokens', href: '/tokens/validate', id: 'validate-security', visible: true, permissions: ['any'] as string[] },
+        ],
+        id: 'seguridad',
+        visible: true,
+      }] : []),
       {
         text: 'Inicio',
         icon: <DashboardIcon fontSize="small" />,
@@ -204,6 +219,17 @@ const SidebarV2: React.FC = () => {
         id: 'claim',
       },
       {
+        text: 'Tokens',
+        icon: <ConfirmationNumberIcon fontSize="small" />,
+        subItems: [
+          { text: 'Listado', href: '/tokens', id: 'list' },
+          { text: 'Crear', href: '/tokens/create', id: 'create' },
+          { text: 'Pendientes', href: '/tokens/pending', id: 'pending' },
+          { text: 'Validar', href: '/tokens/validate', id: 'validate' },
+        ],
+        id: 'tokens',
+      },
+      {
         text: 'Mantenimiento',
         icon: <EngineeringTwoToneIcon fontSize="small" />,
         subItems: [
@@ -214,7 +240,7 @@ const SidebarV2: React.FC = () => {
         id: 'mantenimiento',
       },
     ],
-    []
+    [isSecurityUser]
   );
 
   // Add permissions to subitems

@@ -146,6 +146,11 @@ export default function SignInCard() {
         if (next) {
             setTimeout(() => navigate(next), 100);
         } else {
+            // Redirect Security users to validate page
+            const userGroups = resultLogin.data.user.list_groups || [];
+            if (userGroups.includes('SEGURIDAD')) {
+                return <Navigate to="/tokens/validate" />;
+            }
             return <Navigate to="/" />;
         }
     }
