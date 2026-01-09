@@ -94,19 +94,21 @@ export function errorApiHandler(
 export const handleApiError = (error: unknown): void => {
     if (axios.isAxiosError<ErrorApiResponse>(error)) {
         if (error.response) {
-            if (error.response.data.mensage) {
+            if (error.response.data?.mensage) {
                 toast.error(error.response.data.mensage);
                 return;
             }
 
-            const errorDetail = error.response.data.detail;
-            
-            errorDetail.mensage && toast.error(errorDetail.mensage?.message);
-            errorDetail.non_field_errors && errorDetail.non_field_errors.forEach(e=>toast.error(e.message))
-            return;
+            const errorDetail = error.response.data?.detail;
+
+            if (errorDetail) {
+                errorDetail.mensage && toast.error(errorDetail.mensage?.message);
+                errorDetail.non_field_errors && errorDetail.non_field_errors.forEach(e => toast.error(e.message));
+                return;
+            }
         }
     }
     console.log(error);
-    
+
     toast.error("Ha ocurrido un error");
 }
