@@ -1,7 +1,8 @@
 import {
   Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem,
-  FormControlLabel, Switch, Typography
+  FormControlLabel, Switch, Typography, Autocomplete
 } from '@mui/material';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import { DatePicker, TimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
@@ -150,21 +151,61 @@ export const ShiftChangeForm = ({ value, onChange, personnelList = [] }: ShiftCh
           )}
 
           <Grid item xs={12} md={6}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Intercambio con (opcional)</InputLabel>
-              <Select
-                value={value.exchange_with || ''}
-                label="Intercambio con (opcional)"
-                onChange={(e) => handleChange('exchange_with', e.target.value || undefined)}
-              >
-                <MenuItem value="">Ninguno</MenuItem>
-                {personnelList.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.full_name} - {p.employee_code}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              options={personnelList}
+              getOptionLabel={(option) =>
+                `${option.full_name} - ${option.employee_code}`
+              }
+              value={personnelList.find((p) => p.id === value.exchange_with) || null}
+              onChange={(_, newValue) =>
+                handleChange('exchange_with', newValue?.id || undefined)
+              }
+              renderOption={(props, option) => (
+                <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
+                  <Box
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      bgcolor: 'info.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: 600,
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    {option.full_name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" fontWeight={500}>
+                      {option.full_name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {option.employee_code} - {option.position}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Intercambio con (opcional)"
+                  size="small"
+                  placeholder="Buscar personal..."
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <SwapHorizIcon sx={{ color: 'action.active', mr: 1 }} />
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
           </Grid>
 
           <Grid item xs={12}>

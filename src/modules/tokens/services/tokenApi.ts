@@ -13,6 +13,15 @@ import {
   RejectPayload,
   ValidatePayload,
   PublicTokenView,
+  ExternalPerson,
+  ExternalPersonCreatePayload,
+  ExternalPersonListResponse,
+  Material,
+  MaterialCreatePayload,
+  MaterialListResponse,
+  UnitOfMeasure,
+  UnitOfMeasureCreatePayload,
+  UnitOfMeasureListResponse,
 } from '../interfaces/token';
 
 export const tokenApi = createApi({
@@ -27,7 +36,7 @@ export const tokenApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation'],
+  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation', 'ExternalPersons', 'Materials', 'UnitsOfMeasure'],
   endpoints: (builder) => ({
     // List tokens with filters
     getTokens: builder.query<TokenListResponse, TokenFilterParams>({
@@ -226,6 +235,185 @@ export const tokenApi = createApi({
         { type: 'Tokens', id: 'LIST' },
       ],
     }),
+
+    // ============ EXTERNAL PERSONS ============
+
+    // List external persons
+    getExternalPersons: builder.query<ExternalPersonListResponse, { search?: string; is_active?: boolean; limit?: number; offset?: number }>({
+      query: (params) => ({
+        url: '/external-persons/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({
+                type: 'ExternalPersons' as const,
+                id,
+              })),
+              { type: 'ExternalPersons', id: 'LIST' },
+            ]
+          : [{ type: 'ExternalPersons', id: 'LIST' }],
+    }),
+
+    // Get single external person
+    getExternalPerson: builder.query<ExternalPerson, number>({
+      query: (id) => `/external-persons/${id}/`,
+      providesTags: (result, error, id) => [{ type: 'ExternalPersons', id }],
+    }),
+
+    // Create external person
+    createExternalPerson: builder.mutation<ExternalPerson, ExternalPersonCreatePayload>({
+      query: (data) => ({
+        url: '/external-persons/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'ExternalPersons', id: 'LIST' }],
+    }),
+
+    // Update external person
+    updateExternalPerson: builder.mutation<ExternalPerson, { id: number; data: Partial<ExternalPersonCreatePayload> }>({
+      query: ({ id, data }) => ({
+        url: `/external-persons/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'ExternalPersons', id },
+        { type: 'ExternalPersons', id: 'LIST' },
+      ],
+    }),
+
+    // Delete external person
+    deleteExternalPerson: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/external-persons/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'ExternalPersons', id: 'LIST' }],
+    }),
+
+    // ============ MATERIALS ============
+
+    // List materials
+    getMaterials: builder.query<MaterialListResponse, { search?: string; category?: string; requires_return?: boolean; limit?: number; offset?: number }>({
+      query: (params) => ({
+        url: '/materials/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({
+                type: 'Materials' as const,
+                id,
+              })),
+              { type: 'Materials', id: 'LIST' },
+            ]
+          : [{ type: 'Materials', id: 'LIST' }],
+    }),
+
+    // Get single material
+    getMaterial: builder.query<Material, number>({
+      query: (id) => `/materials/${id}/`,
+      providesTags: (result, error, id) => [{ type: 'Materials', id }],
+    }),
+
+    // Create material
+    createMaterial: builder.mutation<Material, MaterialCreatePayload>({
+      query: (data) => ({
+        url: '/materials/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Materials', id: 'LIST' }],
+    }),
+
+    // Update material
+    updateMaterial: builder.mutation<Material, { id: number; data: Partial<MaterialCreatePayload> }>({
+      query: ({ id, data }) => ({
+        url: `/materials/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Materials', id },
+        { type: 'Materials', id: 'LIST' },
+      ],
+    }),
+
+    // Delete material
+    deleteMaterial: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/materials/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Materials', id: 'LIST' }],
+    }),
+
+    // Get material categories
+    getMaterialCategories: builder.query<string[], void>({
+      query: () => '/materials/categories/',
+    }),
+
+    // ============ UNITS OF MEASURE ============
+
+    // List units of measure
+    getUnitsOfMeasure: builder.query<UnitOfMeasureListResponse, { search?: string; limit?: number; offset?: number }>({
+      query: (params) => ({
+        url: '/units/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({
+                type: 'UnitsOfMeasure' as const,
+                id,
+              })),
+              { type: 'UnitsOfMeasure', id: 'LIST' },
+            ]
+          : [{ type: 'UnitsOfMeasure', id: 'LIST' }],
+    }),
+
+    // Get single unit
+    getUnitOfMeasure: builder.query<UnitOfMeasure, number>({
+      query: (id) => `/units/${id}/`,
+      providesTags: (result, error, id) => [{ type: 'UnitsOfMeasure', id }],
+    }),
+
+    // Create unit
+    createUnitOfMeasure: builder.mutation<UnitOfMeasure, UnitOfMeasureCreatePayload>({
+      query: (data) => ({
+        url: '/units/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'UnitsOfMeasure', id: 'LIST' }],
+    }),
+
+    // Update unit
+    updateUnitOfMeasure: builder.mutation<UnitOfMeasure, { id: number; data: Partial<UnitOfMeasureCreatePayload> }>({
+      query: ({ id, data }) => ({
+        url: `/units/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'UnitsOfMeasure', id },
+        { type: 'UnitsOfMeasure', id: 'LIST' },
+      ],
+    }),
+
+    // Delete unit
+    deleteUnitOfMeasure: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/units/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'UnitsOfMeasure', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -247,4 +435,23 @@ export const {
   useLazyGetTokenByCodeQuery,
   useGetTokensByPersonnelQuery,
   useCompleteUniformDeliveryMutation,
+  // External Persons
+  useGetExternalPersonsQuery,
+  useGetExternalPersonQuery,
+  useCreateExternalPersonMutation,
+  useUpdateExternalPersonMutation,
+  useDeleteExternalPersonMutation,
+  // Materials
+  useGetMaterialsQuery,
+  useGetMaterialQuery,
+  useCreateMaterialMutation,
+  useUpdateMaterialMutation,
+  useDeleteMaterialMutation,
+  useGetMaterialCategoriesQuery,
+  // Units of Measure
+  useGetUnitsOfMeasureQuery,
+  useGetUnitOfMeasureQuery,
+  useCreateUnitOfMeasureMutation,
+  useUpdateUnitOfMeasureMutation,
+  useDeleteUnitOfMeasureMutation,
 } = tokenApi;

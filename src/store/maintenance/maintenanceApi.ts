@@ -37,7 +37,7 @@ export const maintenanceApi = createApi({
     },
 
   }),
-  tagTypes: ["Location", "Period"],
+  tagTypes: ["Location", "Period", "Product"],
   endpoints: (builder) => ({
     getTrailer: builder.query<BaseApiResponse<Trailer>, TrailerQuerySearch>({
       query: (params) => ({
@@ -103,6 +103,36 @@ export const maintenanceApi = createApi({
         params: { ...params, id: params.id !== null ? params.id : undefined },
       }),
       keepUnusedDataFor: 120000,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({ type: 'Product' as const, id })),
+              { type: 'Product', id: 'LIST' },
+            ]
+          : [{ type: 'Product', id: 'LIST' }],
+    }),
+    createProduct: builder.mutation<Product, Partial<Product>>({
+      query: (body) => ({
+        url: `/product/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: 'Product', id: 'LIST' }],
+    }),
+    updateProduct: builder.mutation<Product, { id: number; data: Partial<Product> }>({
+      query: ({ id, data }) => ({
+        url: `/product/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [{ type: 'Product', id }, { type: 'Product', id: 'LIST' }],
+    }),
+    deleteProduct: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/product/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: 'Product', id: 'LIST' }],
     }),
     getLocations: builder.query<
       BaseApiResponse<LocationType>,
@@ -331,6 +361,9 @@ export const {
   useGetOperatorByDistributionCenterQuery,
   useGetDriverQuery,
   useGetProductQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
   useGetLocationsQuery,
   useGetProductPeriodQuery,
   useRegisterTrailerMutation,
@@ -342,5 +375,5 @@ export const {
   useCreatePeriodMutation,
   useUpdatePeriodMutation,
   useDeletePeriodMutation,
-    useMassImportPeriodsMutation
+  useMassImportPeriodsMutation
 } = maintenanceApi;

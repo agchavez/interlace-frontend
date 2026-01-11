@@ -237,13 +237,13 @@ export const permisions = [
     {
         url:"/maintenance/distributor-center",
         permissions: [
-            "any"
+            "maintenance.view_distributorcenter"
         ]
     },
     {
         url: "/maintenance/period-center",
         permissions: [
-            "any"
+            "maintenance.view_periodmodel"
         ]
     },
     {
@@ -383,6 +383,26 @@ export const permisions = [
         reg: /\/public\/token\/[a-f0-9-]+/,
         permissions: [
             "any"
+        ]
+    },
+    // Token Catalogs / Maintenance
+    {
+        url: "/tokens/materials",
+        permissions: [
+            "tokens.view_material"
+        ]
+    },
+    {
+        url: "/tokens/external-persons",
+        permissions: [
+            "tokens.view_externalperson"
+        ]
+    },
+    // Maintenance - Products
+    {
+        url: "/maintenance/products",
+        permissions: [
+            "maintenance.view_productmodel"
         ]
     }
 ]

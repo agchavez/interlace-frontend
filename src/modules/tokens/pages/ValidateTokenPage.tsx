@@ -4,6 +4,7 @@
  * - Búsqueda por código (TK-2026-000001)
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { usePermissionWithFallback, TokenPermissions, TokenGroups } from '../../../hooks/usePermission';
 import {
   Container,
   Grid,
@@ -82,6 +83,12 @@ const statusColors: Record<TokenStatus, 'default' | 'primary' | 'secondary' | 'e
 export const ValidateTokenPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Verificar permiso para validar tokens (permiso Django o grupo Seguridad/Gerentes CD)
+  const canUserValidate = usePermissionWithFallback(
+    TokenPermissions.VALIDATE,
+    [TokenGroups.SECURITY, TokenGroups.CD_MANAGERS]
+  );
 
   const [tokenCode, setTokenCode] = useState('');
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -259,7 +266,7 @@ export const ValidateTokenPage = () => {
     }
   };
 
-  const canValidate = tokenData && tokenData.status === TokenStatus.APPROVED;
+  const canValidate = tokenData && tokenData.status === TokenStatus.APPROVED && canUserValidate;
 
   const handleSelectPendingToken = (displayNumber: string) => {
     setTokenCode(displayNumber);
@@ -443,24 +450,26 @@ export const ValidateTokenPage = () => {
                           variant="outlined"
                           sx={{ display: { xs: 'none', md: 'flex' }, fontSize: '0.7rem' }}
                         />
-                        <Tooltip title="Validar Token">
-                          <IconButton
-                            color="success"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectPendingToken(token.display_number);
-                              // After selecting, open confirm dialog
-                              setTimeout(() => setConfirmDialogOpen(true), 300);
-                            }}
-                            sx={{
-                              bgcolor: 'success.light',
-                              '&:hover': { bgcolor: 'success.main', color: 'white' },
-                            }}
-                          >
-                            <ValidateIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        {canUserValidate && (
+                          <Tooltip title="Validar Token">
+                            <IconButton
+                              color="success"
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectPendingToken(token.display_number);
+                                // After selecting, open confirm dialog
+                                setTimeout(() => setConfirmDialogOpen(true), 300);
+                              }}
+                              sx={{
+                                bgcolor: 'success.light',
+                                '&:hover': { bgcolor: 'success.main', color: 'white' },
+                              }}
+                            >
+                              <ValidateIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                       </Box>
                     }
                   >
@@ -748,12 +757,14 @@ export const ValidateTokenPage = () => {
                   </Button>
                 ) : (
                   <Alert
-                    severity={tokenData.status === TokenStatus.USED ? 'info' : 'warning'}
+                    severity={tokenData.status === TokenStatus.USED ? 'info' : (tokenData.status === TokenStatus.APPROVED && !canUserValidate) ? 'error' : 'warning'}
                     icon={tokenData.status === TokenStatus.USED ? <ValidateIcon /> : <WarningIcon />}
                   >
                     {tokenData.status === TokenStatus.USED
                       ? `Este token ya fue validado${tokenData.validated_at ? ` el ${new Date(tokenData.validated_at).toLocaleString('es-HN')}` : ''}`
-                      : `Este token no puede ser validado. Estado: ${TokenStatusLabels[tokenData.status as TokenStatus]}`
+                      : tokenData.status === TokenStatus.APPROVED && !canUserValidate
+                        ? 'No tiene permisos para validar tokens. Solo personal de Seguridad o Gerentes de CD pueden realizar esta acción.'
+                        : `Este token no puede ser validado. Estado: ${TokenStatusLabels[tokenData.status as TokenStatus]}`
                     }
                   </Alert>
                 )}

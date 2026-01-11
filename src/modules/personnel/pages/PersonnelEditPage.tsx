@@ -105,7 +105,31 @@ export const PersonnelEditPage = () => {
 
   const distributorCenters = distributorCentersData?.results || [];
   const areas = Array.isArray(areasData) ? areasData : [];
-  const supervisors = personnelData?.results?.filter(p => p.id !== Number(id)) || [];
+
+  // Filter potential supervisors based on hierarchy level
+  // Only show people with higher hierarchy than the employee being edited
+  const getEligibleSupervisors = () => {
+    if (!personnelData?.results || !formData.hierarchy_level) return [];
+
+    const hierarchyOrder: Record<string, number> = {
+      'OPERATIVE': 1,
+      'SUPERVISOR': 2,
+      'AREA_MANAGER': 3,
+      'CD_MANAGER': 4,
+    };
+
+    const currentLevel = hierarchyOrder[formData.hierarchy_level] || 0;
+
+    return personnelData.results.filter(p => {
+      // Exclude self
+      if (p.id === Number(id)) return false;
+      // Only show people with higher hierarchy level
+      const supervisorLevel = hierarchyOrder[p.hierarchy_level] || 0;
+      return supervisorLevel > currentLevel;
+    });
+  };
+
+  const supervisors = getEligibleSupervisors();
 
   useEffect(() => {
     if (personnel) {
@@ -505,19 +529,30 @@ export const PersonnelEditPage = () => {
                     size="small"
                     value={supervisors.find(s => s.id === formData.immediate_supervisor) || null}
                     onChange={(_, newValue) => handleChange('immediate_supervisor', newValue?.id || null)}
-                    options={supervisors.filter(s =>
-                      ['SUPERVISOR', 'AREA_MANAGER', 'CD_MANAGER'].includes(s.hierarchy_level)
-                    )}
+                    options={supervisors}
                     getOptionLabel={(option) => `${option.employee_code} - ${option.full_name}`}
+                    renderOption={(props, option) => (
+                      <Box component="li" {...props}>
+                        <Box>
+                          <Typography variant="body2" fontWeight={500}>
+                            {option.employee_code} - {option.full_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {option.hierarchy_level_display || option.hierarchy_level} - {option.position}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         size="small"
-                        label="Supervisor Inmediato"
+                        label="Jefe Inmediato"
                         error={!!errors.immediate_supervisor}
-                        helperText={errors.immediate_supervisor}
+                        helperText={errors.immediate_supervisor || 'Solo muestra personal de nivel jerárquico superior'}
                       />
                     )}
+                    noOptionsText="No hay personal de nivel superior disponible"
                   />
                 </Grid>
               </Grid>

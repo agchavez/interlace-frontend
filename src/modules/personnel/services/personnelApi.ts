@@ -177,6 +177,16 @@ export const personnelApi = createApi({
       }),
     }),
 
+    // Get personnel eligible for token creation (filtered by requester's hierarchy)
+    getEligibleForToken: builder.query<PersonnelProfileList[], { token_type?: string }>({
+      query: (params) => ({
+        url: '/profiles/eligible_for_token/',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['PersonnelProfiles'],
+    }),
+
     getPerformanceSummary: builder.query<any, { id: number; period?: string; months?: number }>({
       query: ({ id, period, months }) => ({
         url: `/profiles/${id}/performance_summary/`,
@@ -617,6 +627,7 @@ export const {
   useGetPersonnelDashboardQuery,
   useGetSupervisedPersonnelQuery,
   useGetSubordinatesTreeQuery,
+  useGetEligibleForTokenQuery,
   useGetPerformanceSummaryQuery,
   useGetCertificationsExpiringQuery,
   // Certifications
