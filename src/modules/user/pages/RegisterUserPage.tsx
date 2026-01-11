@@ -649,6 +649,7 @@ export const RegisterUserPage = () => {
           lastName={profileData.last_name || ''}
           error={errors.username}
           disabled={isCompleteProfile}
+          isEditMode={isEditMode}
         />
       </Grid>
 
@@ -670,8 +671,8 @@ export const RegisterUserPage = () => {
         <Autocomplete
           options={groups}
           getOptionLabel={(option) => option.group.name}
-          value={groups.find(g => g.id === userData.group) || null}
-          onChange={(_, newValue) => setUserData(prev => ({ ...prev, group: newValue?.id || null }))}
+          value={groups.find(g => g.group.id === userData.group) || null}
+          onChange={(_, newValue) => setUserData(prev => ({ ...prev, group: newValue?.group.id || null }))}
           renderInput={(params) => (
             <TextField
               {...params}

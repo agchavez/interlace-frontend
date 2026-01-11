@@ -236,6 +236,9 @@ const SidebarV2: React.FC = () => {
           { text: 'Centros de Distribución', href: '/maintenance/distributor-center', id: 'cd' },
           { text: 'Periodos', href: '/maintenance/period-center', id: 'period-center' },
           { text: 'Métricas de Desempeño', href: '/maintenance/metric-types', id: 'metric-types' },
+          { text: 'Productos', href: '/maintenance/products', id: 'products' },
+          { text: 'Materiales', href: '/tokens/materials', id: 'materials' },
+          { text: 'Personas Externas', href: '/tokens/external-persons', id: 'external-persons' },
         ],
         id: 'mantenimiento',
       },
@@ -252,26 +255,39 @@ const SidebarV2: React.FC = () => {
 
   // Filter items based on permissions
   const sidebarItems = useMemo(() => {
+    const isSuperuser = user?.is_superuser === true;
+
     return items.map((item) => {
       const subitems = item.subItems.map((sub) => {
+        // Get permissions from directory if not set
+        const permissions = sub.permissions || RoutePermissionsDirectory[sub.href || ''] || [];
+
         if (
-          sub.permissions?.includes('cd.more') &&
+          permissions.includes('cd.more') &&
           user?.distributions_centers &&
           user?.distributions_centers.length >= 1
         ) {
           sub.visible = true;
-        } else if (sub.permissions?.includes('cd') && user?.centro_distribucion) {
+        } else if (permissions.includes('cd') && user?.centro_distribucion) {
           // Permiso especial para usuarios con centro de distribución asignado
           sub.visible = true;
         } else {
-          sub.visible = sub.permissions?.includes('any')
-            ? true
-            : sub.permissions?.every((perm) => {
-                return (
-                  user?.list_permissions.includes(perm) ||
-                  user?.user_permissions.includes(perm)
-                );
-              });
+          // Superusers see everything
+          if (isSuperuser) {
+            sub.visible = true;
+          } else if (!permissions || permissions.length === 0) {
+            // No permissions defined - hide by default
+            sub.visible = false;
+          } else {
+            sub.visible = permissions.includes('any')
+              ? true
+              : permissions.every((perm: string) => {
+                  return (
+                    user?.list_permissions?.includes(perm) ||
+                    user?.user_permissions?.includes(perm)
+                  );
+                });
+          }
         }
         return sub;
       });

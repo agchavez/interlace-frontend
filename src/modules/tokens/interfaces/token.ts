@@ -313,6 +313,90 @@ export interface DistributorCenterBasic {
   name: string;
 }
 
+// External Person (for exit passes)
+export interface ExternalPerson {
+  id: number;
+  name: string;
+  company: string;
+  identification: string;
+  phone: string;
+  email: string;
+  notes: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ExternalPersonCreatePayload {
+  name: string;
+  company?: string;
+  identification?: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  is_active?: boolean;
+}
+
+export interface ExternalPersonListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ExternalPerson[];
+}
+
+// ============ CATALOGS ============
+
+// Unit of Measure
+export interface UnitOfMeasure {
+  id: number;
+  code: string;
+  name: string;
+  abbreviation: string;
+}
+
+export interface UnitOfMeasureCreatePayload {
+  code: string;
+  name: string;
+  abbreviation?: string;
+}
+
+// Material
+export interface Material {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  unit_of_measure: number;
+  unit_of_measure_name: string;
+  unit_value: number;
+  requires_return: boolean;
+  category: string;
+}
+
+export interface MaterialCreatePayload {
+  code: string;
+  name: string;
+  description?: string;
+  unit_of_measure: number;
+  unit_value?: number;
+  requires_return?: boolean;
+  category?: string;
+}
+
+export interface MaterialListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Material[];
+}
+
+export interface UnitOfMeasureListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: UnitOfMeasure[];
+}
+
 // ============ TOKEN TYPE DETAILS ============
 
 // Permit Hour Detail
@@ -360,6 +444,7 @@ export interface ExitPassItem {
   quantity: number;
   unit_value: number;
   total_value: number;
+  weight_kg: number | null;
   requires_return: boolean;
   return_date: string | null;
   returned: boolean;
@@ -376,6 +461,8 @@ export interface ExitPassDetail {
   vehicle_plate: string;
   driver_name: string;
   expected_return_date: string | null;
+  is_external: boolean;
+  external_person: ExternalPerson | null;
   items: ExitPassItem[];
   total_value: number;
   requires_level_3_approval: boolean;
@@ -500,9 +587,9 @@ export interface TokenListItem {
   token_type_display: string;
   status: TokenStatus;
   status_display: string;
-  personnel: number;
-  personnel_name: string;
-  personnel_code: string;
+  personnel: number | null;
+  personnel_name: string | null;
+  personnel_code: string | null;
   requested_by: number;
   requested_by_name: string;
   distributor_center: number;
@@ -523,7 +610,7 @@ export interface TokenDetail {
   token_type_display: string;
   status: TokenStatus;
   status_display: string;
-  personnel: PersonnelBasic;
+  personnel: PersonnelBasic | null;
   requested_by: UserBasic;
   requested_by_name: string | null;
   distributor_center: DistributorCenterBasic;
@@ -562,8 +649,11 @@ export interface TokenDetail {
   current_approval_level: number | null;
   is_valid: boolean;
   can_be_used: boolean;
+  requires_validation: boolean;
+  validation_type: 'security' | 'payroll' | null;
   can_user_approve: boolean;
   can_user_complete_delivery: boolean;
+  can_user_validate: boolean;
   created_at: string;
   // Type-specific details
   permit_hour_detail: PermitHourDetail | null;
@@ -624,6 +714,7 @@ export interface ExitPassItemCreatePayload {
   custom_description?: string;
   quantity: number;
   unit_value: number;
+  weight_kg?: number;
   requires_return: boolean;
   return_date?: string;
 }
@@ -634,6 +725,8 @@ export interface ExitPassCreatePayload {
   vehicle_plate?: string;
   driver_name?: string;
   expected_return_date?: string;
+  is_external?: boolean;
+  external_person?: number;
   items: ExitPassItemCreatePayload[];
 }
 
@@ -704,7 +797,7 @@ export interface ShiftChangeCreatePayload {
 
 export interface TokenCreatePayload {
   token_type: TokenType;
-  personnel: number;
+  personnel?: number;
   distributor_center: number;
   valid_from: string;
   valid_until: string;

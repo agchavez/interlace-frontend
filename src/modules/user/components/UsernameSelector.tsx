@@ -24,6 +24,7 @@ interface UsernameSelectorProps {
   lastName: string;
   error?: string;
   disabled?: boolean;
+  isEditMode?: boolean; // Indicates if we're editing an existing user
 }
 
 export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
@@ -33,10 +34,13 @@ export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
   lastName,
   error,
   disabled = false,
+  isEditMode = false,
 }) => {
-  const [autoGenerate, setAutoGenerate] = useState(true);
+  // In edit mode with existing value, start in manual mode
+  const [autoGenerate, setAutoGenerate] = useState(!isEditMode && !value);
   const [selectedSuggestion, setSelectedSuggestion] = useState<string>('');
   const [manualUsername, setManualUsername] = useState(value);
+  const [isExistingUsername, setIsExistingUsername] = useState(isEditMode && !!value);
 
   const [generateUsername, { data: suggestions, isLoading: isGenerating }] = useGenerateUsernameMutation();
   const [checkUsername, { isLoading: isChecking }] = useCheckUsernameMutation();
@@ -67,6 +71,15 @@ export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
 
   // Verificar disponibilidad en modo manual
   useEffect(() => {
+    // Skip availability check if it's the original username in edit mode
+    if (isExistingUsername && debouncedManualUsername === value) {
+      setAvailabilityStatus({
+        available: true,
+        message: 'Username actual del usuario',
+      });
+      return;
+    }
+
     if (!autoGenerate && debouncedManualUsername && debouncedManualUsername.length >= 3) {
       checkUsername({ username: debouncedManualUsername })
         .unwrap()
@@ -94,7 +107,7 @@ export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedManualUsername, autoGenerate, checkUsername]);
+  }, [debouncedManualUsername, autoGenerate, checkUsername, isExistingUsername, value]);
 
   const handleModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const isAuto = event.target.checked;

@@ -24,10 +24,19 @@ import {
   alpha,
   Chip,
   FormControl,
+  FormControlLabel,
   InputLabel,
   Select,
   MenuItem,
+  Switch,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  createFilterOptions,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 import {
   ArrowBack as BackIcon,
   Save as SaveIcon,
@@ -73,11 +82,34 @@ import {
   ShiftChangeForm,
 } from '../components/forms';
 import { useAppSelector } from '../../../store';
-import { useGetPersonnelProfilesQuery } from '../../personnel/services/personnelApi';
+import { useGetEligibleForTokenQuery } from '../../personnel/services/personnelApi';
+import { useGetExternalPersonsQuery, useCreateExternalPersonMutation } from '../services/tokenApi';
+import type { ExternalPersonCreatePayload } from '../interfaces/token';
 import type { PersonnelProfileList } from '../../../interfaces/personnel';
+import type { ExternalPerson } from '../interfaces/token';
 import BusinessIcon from '@mui/icons-material/Business';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
 
 const steps = ['Tipo de Token', 'Beneficiario', 'Detalles', 'Confirmar'];
+
+// Filter options for external person autocomplete (allows adding new)
+interface ExternalPersonOption extends ExternalPerson {
+  inputValue?: string;
+  isNew?: boolean;
+}
+
+const filterExternalPersons = createFilterOptions<ExternalPersonOption>();
+
+// Initial form data for new external person
+const initialExternalPersonForm: ExternalPersonCreatePayload = {
+  name: '',
+  company: '',
+  identification: '',
+  phone: '',
+  email: '',
+  notes: '',
+  is_active: true,
+};
 
 // Token type configuration with icons, colors, and descriptions
 const tokenTypeConfig: Record<TokenType, {
@@ -148,12 +180,31 @@ export const TokenCreatePage = () => {
   const [tokenType, setTokenType] = useState<TokenType | ''>('');
   const [createToken, { isLoading }] = useCreateTokenMutation();
 
-  // Personnel list for selectors
-  const { data: personnelData } = useGetPersonnelProfilesQuery({
-    limit: 500,
-    is_active: true
-  });
-  const personnelList: PersonnelProfileList[] = useMemo(() => personnelData?.results || [], [personnelData]);
+  // State for external person (EXIT_PASS only)
+  const [isExternalPerson, setIsExternalPerson] = useState(false);
+  const [selectedExternalPerson, setSelectedExternalPerson] = useState<number | null>(null);
+
+  // State for creating new external person
+  const [openExternalPersonDialog, setOpenExternalPersonDialog] = useState(false);
+  const [externalPersonForm, setExternalPersonForm] = useState<ExternalPersonCreatePayload>(initialExternalPersonForm);
+  const [createExternalPerson, { isLoading: isCreatingExternalPerson }] = useCreateExternalPersonMutation();
+
+  // Personnel list for selectors (filtered by requester's hierarchy and token type)
+  const { data: eligiblePersonnel } = useGetEligibleForTokenQuery(
+    { token_type: tokenType || undefined },
+    { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
+  );
+  const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
+
+  // External persons list (for EXIT_PASS with is_external=true)
+  const { data: externalPersonsData, refetch: refetchExternalPersons } = useGetExternalPersonsQuery(
+    { is_active: true, limit: 100 },
+    { skip: tokenType !== TokenType.EXIT_PASS || !isExternalPerson }
+  );
+  const externalPersonsList: ExternalPersonOption[] = useMemo(
+    () => (externalPersonsData?.results || []) as ExternalPersonOption[],
+    [externalPersonsData]
+  );
 
   // Base data
   const [baseData, setBaseData] = useState<{
@@ -232,14 +283,71 @@ export const TokenCreatePage = () => {
     is_permanent: false,
   });
 
+  // Clear personnel selection when token type changes (eligible list may differ)
+  const handleTokenTypeChange = (newType: TokenType) => {
+    if (newType !== tokenType) {
+      setTokenType(newType);
+      setBaseData((prev) => ({ ...prev, personnel: null }));
+      // Reset external person state when changing token type
+      setIsExternalPerson(false);
+      setSelectedExternalPerson(null);
+    }
+  };
+
+  // Handle external person toggle (EXIT_PASS only)
+  const handleExternalToggle = (isExternal: boolean) => {
+    setIsExternalPerson(isExternal);
+    if (isExternal) {
+      setBaseData((prev) => ({ ...prev, personnel: null }));
+    } else {
+      setSelectedExternalPerson(null);
+    }
+  };
+
+  // Handle opening dialog to create new external person
+  const handleOpenExternalPersonDialog = (inputValue: string) => {
+    setExternalPersonForm({ ...initialExternalPersonForm, name: inputValue });
+    setOpenExternalPersonDialog(true);
+  };
+
+  // Handle creating new external person
+  const handleCreateExternalPerson = async () => {
+    if (!externalPersonForm.name.trim()) {
+      toast.error('El nombre es requerido');
+      return;
+    }
+    try {
+      const newPerson = await createExternalPerson(externalPersonForm).unwrap();
+      toast.success('Persona externa creada exitosamente');
+      setOpenExternalPersonDialog(false);
+      setExternalPersonForm(initialExternalPersonForm);
+      // Refresh list and select the new person
+      await refetchExternalPersons();
+      setSelectedExternalPerson(newPerson.id);
+    } catch (error: unknown) {
+      const err = error as { data?: { detail?: string } };
+      toast.error(err?.data?.detail || 'Error al crear persona externa');
+    }
+  };
+
   const handleNext = () => {
     if (activeStep === 0 && !tokenType) {
       toast.error('Seleccione un tipo de token');
       return;
     }
-    if (activeStep === 1 && !baseData.personnel) {
-      toast.error('Seleccione un beneficiario');
-      return;
+    if (activeStep === 1) {
+      // For EXIT_PASS with external person, validate external_person instead of personnel
+      if (tokenType === TokenType.EXIT_PASS && isExternalPerson) {
+        if (!selectedExternalPerson) {
+          toast.error('Seleccione una persona externa');
+          return;
+        }
+      } else {
+        if (!baseData.personnel) {
+          toast.error('Seleccione un beneficiario');
+          return;
+        }
+      }
     }
     setActiveStep((prev) => prev + 1);
   };
@@ -249,19 +357,35 @@ export const TokenCreatePage = () => {
   };
 
   const handleSubmit = async () => {
-    if (!tokenType || !baseData.personnel || !baseData.distributor_center) {
+    // Validate required fields
+    if (!tokenType || !baseData.distributor_center) {
       toast.error('Complete todos los campos requeridos');
+      return;
+    }
+
+    // For EXIT_PASS with external person, personnel is not required
+    const isExternalExitPass = tokenType === TokenType.EXIT_PASS && isExternalPerson;
+    if (!isExternalExitPass && !baseData.personnel) {
+      toast.error('Seleccione un beneficiario');
+      return;
+    }
+    if (isExternalExitPass && !selectedExternalPerson) {
+      toast.error('Seleccione una persona externa');
       return;
     }
 
     const payload: TokenCreatePayload = {
       token_type: tokenType,
-      personnel: baseData.personnel,
       distributor_center: baseData.distributor_center,
       valid_from: baseData.valid_from,
       valid_until: baseData.valid_until,
       requester_notes: baseData.requester_notes,
     };
+
+    // Add personnel only if not external EXIT_PASS
+    if (!isExternalExitPass) {
+      payload.personnel = baseData.personnel!;
+    }
 
     // Add type-specific data
     switch (tokenType) {
@@ -272,7 +396,11 @@ export const TokenCreatePage = () => {
         payload.permit_day_detail = permitDayData;
         break;
       case TokenType.EXIT_PASS:
-        payload.exit_pass_detail = exitPassData;
+        payload.exit_pass_detail = {
+          ...exitPassData,
+          is_external: isExternalPerson,
+          external_person: isExternalPerson ? selectedExternalPerson! : undefined,
+        };
         break;
       case TokenType.UNIFORM_DELIVERY:
         payload.uniform_delivery_detail = uniformDeliveryData;
@@ -329,7 +457,7 @@ export const TokenCreatePage = () => {
                 }}
               >
                 <CardActionArea
-                  onClick={() => setTokenType(value as TokenType)}
+                  onClick={() => handleTokenTypeChange(value as TokenType)}
                   sx={{ height: '100%', p: 2 }}
                 >
                   <Box
@@ -437,66 +565,217 @@ export const TokenCreatePage = () => {
             </Grid>
           )}
 
-          <Grid item xs={12} md={6}>
-            <Autocomplete
-              options={personnelList}
-              getOptionLabel={(option) =>
-                `${option.full_name} - ${option.employee_code}`
-              }
-              value={personnelList.find((p: PersonnelProfileList) => p.id === baseData.personnel) || null}
-              onChange={(_, newValue) =>
-                setBaseData({ ...baseData, personnel: newValue?.id || null })
-              }
-              renderOption={(props, option) => (
-                <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
-                  <Box
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      bgcolor: 'primary.main',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'white',
-                      fontWeight: 600,
-                      fontSize: '0.875rem',
+          {/* External Person Toggle (EXIT_PASS only) */}
+          {tokenType === TokenType.EXIT_PASS && (
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isExternalPerson}
+                    onChange={(e) => handleExternalToggle(e.target.checked)}
+                    color="warning"
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PersonOffIcon color={isExternalPerson ? 'warning' : 'disabled'} />
+                    <Typography>Pase para persona externa (Proveedor/Visitante)</Typography>
+                  </Box>
+                }
+              />
+              {isExternalPerson && (
+                <Alert severity="info" sx={{ mt: 1 }}>
+                  Este pase es para una persona externa al centro de distribución (proveedor, visitante, etc.).
+                </Alert>
+              )}
+            </Grid>
+          )}
+
+          {/* Personnel Selector (when not external) */}
+          {!isExternalPerson && (
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={personnelList}
+                getOptionLabel={(option) =>
+                  `${option.full_name} - ${option.employee_code}`
+                }
+                value={personnelList.find((p: PersonnelProfileList) => p.id === baseData.personnel) || null}
+                onChange={(_, newValue) =>
+                  setBaseData({ ...baseData, personnel: newValue?.id || null })
+                }
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {option.full_name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        {option.full_name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {option.employee_code} - {option.position}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label="Beneficiario"
+                    required
+                    placeholder="Buscar personal..."
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <PersonIcon sx={{ color: 'action.active', mr: 1 }} />
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
                     }}
-                  >
-                    {option.full_name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
-                  </Box>
-                  <Box>
-                    <Typography variant="body2" fontWeight={500}>
-                      {option.full_name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {option.employee_code} - {option.position}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Beneficiario"
-                  required
-                  placeholder="Buscar personal..."
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: (
+                  />
+                )}
+              />
+            </Grid>
+          )}
+
+          {/* External Person Selector (EXIT_PASS with is_external=true) */}
+          {isExternalPerson && (
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={externalPersonsList}
+                getOptionLabel={(option: ExternalPersonOption) => {
+                  if (option.inputValue) return option.inputValue;
+                  return `${option.name}${option.company ? ` - ${option.company}` : ''}`;
+                }}
+                value={externalPersonsList.find((p) => p.id === selectedExternalPerson) || null}
+                onChange={(_, newValue) => {
+                  if (newValue?.isNew && newValue.inputValue) {
+                    handleOpenExternalPersonDialog(newValue.inputValue);
+                  } else {
+                    setSelectedExternalPerson(newValue?.id || null);
+                  }
+                }}
+                filterOptions={(options, params) => {
+                  const filtered = filterExternalPersons(options, params);
+                  const { inputValue } = params;
+                  // Add option to create new person if input doesn't match any existing
+                  const isExisting = options.some((opt) =>
+                    opt.name.toLowerCase().includes(inputValue.toLowerCase())
+                  );
+                  if (inputValue !== '' && !isExisting) {
+                    filtered.push({
+                      inputValue,
+                      isNew: true,
+                      name: `Agregar "${inputValue}"`,
+                      id: -1,
+                      company: '',
+                      identification: '',
+                      phone: '',
+                      email: '',
+                      notes: '',
+                      is_active: true,
+                      created_at: '',
+                      updated_at: '',
+                    });
+                  }
+                  return filtered;
+                }}
+                renderOption={(props, option: ExternalPersonOption) => (
+                  <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
+                    {option.isNew ? (
                       <>
-                        <PersonIcon sx={{ color: 'action.active', mr: 1 }} />
-                        {params.InputProps.startAdornment}
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            bgcolor: 'success.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                          }}
+                        >
+                          <AddIcon />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" fontWeight={500} color="success.main">
+                            {option.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Registrar nueva persona externa
+                          </Typography>
+                        </Box>
                       </>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </Grid>
+                    ) : (
+                      <>
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            bgcolor: 'warning.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                          }}
+                        >
+                          <PersonOffIcon />
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" fontWeight={500}>
+                            {option.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {option.company || 'Sin empresa'} {option.identification && `- ${option.identification}`}
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label="Persona Externa"
+                    required
+                    placeholder="Buscar o escriba para agregar..."
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <PersonOffIcon sx={{ color: 'warning.main', mr: 1 }} />
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+          )}
 
           <Grid item xs={12} md={6}>
-            <FormControl fullWidth required>
+            <FormControl fullWidth size="small" required>
               <InputLabel id="distributor-center-label">Centro de Distribución</InputLabel>
               <Select
                 labelId="distributor-center-label"
@@ -524,7 +803,7 @@ export const TokenCreatePage = () => {
               onChange={(date) =>
                 setBaseData({ ...baseData, valid_from: date?.format('YYYY-MM-DDTHH:mm') || '' })
               }
-              slotProps={{ textField: { fullWidth: true } }}
+              slotProps={{ textField: { fullWidth: true, size: 'small' } }}
             />
           </Grid>
 
@@ -536,13 +815,14 @@ export const TokenCreatePage = () => {
                 setBaseData({ ...baseData, valid_until: date?.format('YYYY-MM-DDTHH:mm') || '' })
               }
               minDateTime={dayjs(baseData.valid_from)}
-              slotProps={{ textField: { fullWidth: true } }}
+              slotProps={{ textField: { fullWidth: true, size: 'small' } }}
             />
           </Grid>
 
           <Grid item xs={12}>
             <TextField
               fullWidth
+              size="small"
               label="Notas del Solicitante (opcional)"
               multiline
               rows={2}
@@ -634,42 +914,74 @@ export const TokenCreatePage = () => {
           </Grid>
         )}
 
-        {/* Beneficiary Card */}
+        {/* Beneficiary / External Person Card */}
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box
-                  sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    fontWeight: 600,
-                  }}
-                >
-                  {selectedPersonnel?.full_name
-                    .split(' ')
-                    .slice(0, 2)
-                    .map(n => n[0])
-                    .join('')
-                    .toUpperCase() || '?'}
-                </Box>
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Beneficiario
-                  </Typography>
-                  <Typography variant="h6" fontWeight={600}>
-                    {selectedPersonnel?.full_name || '-'}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {selectedPersonnel?.employee_code}
-                  </Typography>
-                </Box>
+                {isExternalPerson ? (
+                  <>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        bgcolor: 'warning.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                      }}
+                    >
+                      <PersonOffIcon />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Persona Externa
+                      </Typography>
+                      <Typography variant="h6" fontWeight={600}>
+                        {externalPersonsList.find(p => p.id === selectedExternalPerson)?.name || '-'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {externalPersonsList.find(p => p.id === selectedExternalPerson)?.company || 'Sin empresa'}
+                      </Typography>
+                    </Box>
+                  </>
+                ) : (
+                  <>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: '50%',
+                        bgcolor: 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {selectedPersonnel?.full_name
+                        .split(' ')
+                        .slice(0, 2)
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase() || '?'}
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Beneficiario
+                      </Typography>
+                      <Typography variant="h6" fontWeight={600}>
+                        {selectedPersonnel?.full_name || '-'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {selectedPersonnel?.employee_code}
+                      </Typography>
+                    </Box>
+                  </>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -809,7 +1121,8 @@ export const TokenCreatePage = () => {
                   size={isMobile ? 'medium' : 'large'}
                   disabled={
                     (activeStep === 0 && !tokenType) ||
-                    (activeStep === 1 && !baseData.personnel)
+                    (activeStep === 1 && !isExternalPerson && !baseData.personnel) ||
+                    (activeStep === 1 && isExternalPerson && !selectedExternalPerson)
                   }
                   sx={{
                     bgcolor: tokenType
@@ -840,6 +1153,149 @@ export const TokenCreatePage = () => {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Dialog for creating new external person */}
+      <Dialog
+        open={openExternalPersonDialog}
+        onClose={() => setOpenExternalPersonDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <BootstrapDialogTitle
+          id="create-external-person-dialog"
+          onClose={() => setOpenExternalPersonDialog(false)}
+        >
+          <Typography variant="subtitle1" fontWeight={600} color="white">
+            Nueva Persona Externa
+          </Typography>
+        </BootstrapDialogTitle>
+        <DialogContent sx={{ pt: 4, pb: 3 }}>
+          <Box sx={{ mb: 3 }}>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              Complete los datos de la persona externa (proveedor, visitante, contratista, etc.)
+            </Alert>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Nombre Completo"
+                required
+                value={externalPersonForm.name}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, name: e.target.value })
+                }
+                InputProps={{
+                  startAdornment: <PersonIcon sx={{ color: 'action.active', mr: 1 }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Empresa / Organizacion"
+                value={externalPersonForm.company}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, company: e.target.value })
+                }
+                InputProps={{
+                  startAdornment: <BusinessIcon sx={{ color: 'action.active', mr: 1 }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Identificacion (ID/RTN/DNI)"
+                value={externalPersonForm.identification}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, identification: e.target.value })
+                }
+                InputProps={{
+                  startAdornment: <QrCodeIcon sx={{ color: 'action.active', mr: 1 }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Telefono"
+                value={externalPersonForm.phone}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, phone: e.target.value })
+                }
+                InputProps={{
+                  startAdornment: (
+                    <Box component="span" sx={{ color: 'action.active', mr: 1, display: 'flex' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                      </svg>
+                    </Box>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Correo Electronico"
+                type="email"
+                value={externalPersonForm.email}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, email: e.target.value })
+                }
+                InputProps={{
+                  startAdornment: (
+                    <Box component="span" sx={{ color: 'action.active', mr: 1, display: 'flex' }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                      </svg>
+                    </Box>
+                  ),
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Notas / Observaciones"
+                multiline
+                rows={3}
+                value={externalPersonForm.notes}
+                onChange={(e) =>
+                  setExternalPersonForm({ ...externalPersonForm, notes: e.target.value })
+                }
+                placeholder="Informacion adicional sobre esta persona..."
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={() => setOpenExternalPersonDialog(false)}
+            color="inherit"
+            size="small"
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleCreateExternalPerson}
+            variant="contained"
+            color="warning"
+            size="small"
+            disabled={isCreatingExternalPerson}
+            startIcon={isCreatingExternalPerson ? <CircularProgress size={16} /> : <AddIcon />}
+          >
+            Registrar Persona
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
