@@ -204,14 +204,10 @@ npm run build
 
 ## Contacto
 
-Para solicitar acceso o información adicional sobre este proyecto, contactar al equipo de desarrollo de **AC Solutions**.
+Para solicitar acceso o información adicional sobre este proyecto, contactar al equipo de desarrollo.
 
 ---
 
 <p align="center">
   <sub>Desarrollado con React + TypeScript</sub>
-</p>
-
-<p align="center">
-  <strong>© 2024-2026 AC Solutions. Todos los derechos reservados.</strong>
 </p>
