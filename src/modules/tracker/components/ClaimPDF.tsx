@@ -8,7 +8,6 @@ import PDFSubTitle from "../../ui/components/pdfDocs/PDFSubTitle";
 import { Claim } from "../../../store/claim/claimApi";
 import PDFTable from "../../ui/components/pdfDocs/Table";
 import { useEffect, useMemo, useState } from "react";
-import logo_ch from "../../../assets/logo-ch.png";
 
 const styles = StyleSheet.create({
   page: {
@@ -90,24 +89,16 @@ function ClaimPDF({
       title={islocal ? "Datos Alerta de Calidad" : "Datos CLAIM"}
       language="es"
       style={{ fontFamily: "Helvetica" }}
-      author="AbinBev"
-      creator="AbinBev Tracker"
-      keywords="Tracker, AbinBev, PDF, Seguimiento, Claim, Alerta de Calidad"
+      author="AC Solutions"
+      creator="Tracker"
+      keywords="Tracker, PDF, Seguimiento, Claim, Alerta de Calidad"
     >
       <Page size="LETTER" style={styles.page}>
         <View
           style={{ ...styles.section, display: "flex", flexDirection: "row" }}
         >
           <View style={{ flex: 1 }}>
-            <Image src="/logo.png" style={{ width: 200 }} />
-          </View>
-          {
-            claim?.tracking?.distributor_center_data?.country_code && (
-              <View style={{ flex: 1}}>
-                <Image src={logo_ch} style={{ width: 150, marginHorizontal: "auto" }} />
-              </View>
-            )
-          }
+                      </View>
           <View style={{ flex: islocal? 1: 0.5, textAlign: "right", color: "red" }}>
             <PDFTitle style={{ fontSize: islocal? 20: 30, textAlign: "right" }}>
               {

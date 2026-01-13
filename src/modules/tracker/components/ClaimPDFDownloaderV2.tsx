@@ -330,8 +330,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
       const blob = await pdf(
         <ClaimPDF
           claim={claimData}
-          imageUrl="/logo.png"
-          qrDataUrl={qrDataUrl}
+                    qrDataUrl={qrDataUrl}
         />
       ).toBlob();
 
@@ -363,8 +362,7 @@ const ClaimPDFDownloader = ({ claim }: ClaimPDFDownloaderProps) => {
           value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${
             claim?.tracker
           }?alertClaimOpen=true`}
-          logoSrc="/logo-qr.png"
-          onReady={(dataUrl) => setQrDataUrl(dataUrl)}
+                    onReady={(dataUrl) => setQrDataUrl(dataUrl)}
         />
       </Box>
 

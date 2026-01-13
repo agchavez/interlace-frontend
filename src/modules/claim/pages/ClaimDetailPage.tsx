@@ -128,7 +128,7 @@ export default function ClaimDetailPage({
 
   return (
     <>
-      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}?alertClaimOpen=true`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
+      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}?alertClaimOpen=true`} onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
      {claim && <ClaimEditModal
           open={claimOpen}
           onClose={() => setClaimOpen(false)}

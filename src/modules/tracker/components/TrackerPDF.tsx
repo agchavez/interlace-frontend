@@ -160,13 +160,12 @@ function TrakerPDFDocument({
       title="Datos Tracker"
       language="es"
       style={{ fontFamily: "Helvetica" }}
-      author="AbinBev"
-      creator="AbinBev Tracker"
-      keywords="Tracker, AbinBev, PDF, Seguimiento"
+      author="AC Solutions"
+      creator="Tracker"
+      keywords="Tracker, PDF, Seguimiento"
     >
       <Page size="LETTER" style={styles.page}>
         <View style={{ ...styles.section }}>
-          <Image src="/logo.png" style={{ width: 200 }} />
         </View>
         <View style={{ ...styles.divider }} />
         <View style={{ ...styles.section, backgroundColor: "#1c2536" }}>

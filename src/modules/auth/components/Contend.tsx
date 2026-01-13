@@ -9,7 +9,6 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Grid from '@mui/material/Grid';
 
-import logo from "../../../assets/logo.png";
 
 const items = [
     {
@@ -45,15 +44,9 @@ export default function Content() {
     return (
         <Box sx={{ maxWidth: isMobile ? '100%' : 450 }}>
             <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', mb: 3 }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img src={logo} alt="img" width={isMobile ? 80 : 100} style={{ marginRight: '4px' }} />
-                    <Typography variant="body2" component="p" fontWeight={100} sx={{
-                        borderLeft: '2px solid black',
-                        paddingLeft: '4px',
-                    }}>
-                        {import.meta.env.VITE_JS_APP_NAME}
-                    </Typography>
-                </div>
+                <Typography variant="h4" component="p" fontWeight={600}>
+                    {import.meta.env.VITE_JS_APP_NAME}
+                </Typography>
             </Box>
             
             {isMobile ? (

@@ -288,13 +288,7 @@ const PalletPrintContent: FunctionComponent<PalletPrintContentProps> = ({
                 }?tracker_id=${pallet?.trackingId}&tracker_detail=${
                   pallet?.tracker_detail
                 }`}
-                imageSettings={{
-                  src: "/logo-qr.png",
-                  height: 40,
-                  width: 40,
-                  excavate: true,
-                }}
-                level="Q"
+                                level="Q"
               />
             </Grid>
             <Grid item xs={6} container margin="auto" direction="column">

@@ -46,14 +46,14 @@ export const ChangePasswordModal: FunctionComponent<DeleteCheckProps> = ({ open,
     } = useForm<ChangePasswordForm>({
         defaultValues: {
             // Una contraseña por defecto abindeb<numero random de 4 digitos>
-            password: "Abinbev" + Math.floor(Math.random() * 10000)
+            password: "Tracker" + Math.floor(Math.random() * 10000)
         },
         resolver: yupResolver(schema)
     });
 
     useEffect(() => {
         reset({
-            password: "Abinbev" + Math.floor(Math.random() * 10000)
+            password: "Tracker" + Math.floor(Math.random() * 10000)
         });
     }, [reset, user]);
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Grid, Tooltip, IconButton, Avatar, Typography, Menu, MenuItem, Divider, ListItemIcon } from '@mui/material';
-import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
 
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
@@ -52,9 +51,9 @@ const Navbar = () => {
                     <MenuOutlinedIcon fontSize='medium' color='primary' />
                 </IconButton>}
 
-                <div className="nav__img">
-                    <img src={logo} alt="img" width={120} className="p-1" />
-                </div>
+                <Typography variant="h6" component="p" fontWeight={600} className="p-1">
+                    {import.meta.env.VITE_JS_APP_NAME}
+                </Typography>
             </Grid>
             <Grid item>
                 {/* Nombre del usuario */}

@@ -312,15 +312,8 @@ export const CheckForm = ({
                 >
                   <QRCodeSVG
                     value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento?.id}`}
-                    imageSettings={{
-                      src: "/logo-qr.png",
-                      height: 15,
-                      width: 15,
-                      excavate: true,
-                    }}
                     size={50}
                     level="Q"
-
                   />
                 </Box>
               </Box>

@@ -20,7 +20,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import PictureAsPdfTwoToneIcon from "@mui/icons-material/PictureAsPdfTwoTone";
 import Box from "@mui/material/Box";
-import logo_ch from "../../../assets/logo-ch.png";
 import QRToBase64 from "../../claim/components/QRToBase64";
 import Backdrop from '@mui/material/Backdrop';
 
@@ -182,22 +181,16 @@ function TrakerPDFDocument({
       title="Datos Tracker"
       language="es"
       style={{ fontFamily: "Helvetica" }}
-      author="AbinBev"
-      creator="AbinBev Tracker"
-      keywords="Tracker, AbinBev, PDF, Seguimiento"
+      author="AC Solutions"
+      creator="Tracker"
+      keywords="Tracker, PDF, Seguimiento"
     >
       <Page size="LETTER" style={styles.page}>
         <View
           style={{ ...styles.section, display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
           <View style={{ flex: 1, alignItems: "flex-start" }}>
-            <Image src="/logo.png" style={{ width: 180 }} />
-          </View>
+                      </View>
           
-          {seguimiento?.country_code === "HN" && (
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
-              <Image src={logo_ch} style={{ width: 130 }} />
-            </View>
-          )}
         </View>
         <View style={{ ...styles.divider }} />
         
@@ -724,10 +717,9 @@ const PDFDownloader = ({
     <Box>
       {/* Componente QRToBase64 que siempre está presente pero invisible */}
       <Box sx={{ display: 'none' }}>
-        <QRToBase64 
-          value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento.id}`} 
-          logoSrc="/logo-qr.png" 
-          onReady={(dataUrl) => setQrDataUrl(dataUrl)} 
+        <QRToBase64
+          value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${seguimiento.id}`}
+          onReady={(dataUrl) => setQrDataUrl(dataUrl)}
         />
       </Box>
 

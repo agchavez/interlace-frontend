@@ -11,7 +11,6 @@ import {
     ListItemIcon,
     Badge
 } from '@mui/material';
-import logo from "../../../assets/logo.png";
 import { Logout } from '@mui/icons-material';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -69,15 +68,9 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                 </Grid>
 
                 <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
-                    <div className="nav__img" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src={logo} alt="img" width={120} className="p-1" style={{ marginRight: '4px' }} />
-                        <Typography variant="body2" component="p" fontWeight={100} className="p-1" sx={{
-                            borderLeft: '2px solid black',
-                            paddingLeft: '4px',
-                        }}>
-                            {import.meta.env.VITE_JS_APP_NAME}
-                        </Typography>
-                    </div>
+                    <Typography variant="h6" component="p" fontWeight={600} className="p-1">
+                        {import.meta.env.VITE_JS_APP_NAME}
+                    </Typography>
                 </Grid>
                 <Grid item display={'flex'} justifyContent={'right'} alignItems={'center'} sx={{ gap: 2 }}>
                     {status === 'authenticated' && <IconButton onClick={onDrawerOpen}>

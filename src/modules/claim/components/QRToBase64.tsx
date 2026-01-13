@@ -3,7 +3,7 @@ import QRCode from 'qrcode';
 
 interface QRWithEmbeddedLogoProps {
   value: string;
-  logoSrc: string;
+  logoSrc?: string;
   size?: number;
   onReady: (dataUrl: string) => void;
 }
@@ -11,7 +11,7 @@ interface QRWithEmbeddedLogoProps {
 const QRWithEmbeddedLogo: React.FC<QRWithEmbeddedLogoProps> = ({ value, logoSrc, size = 256, onReady }) => {
 
   useEffect(() => {
-    const generateQRWithLogo = async () => {
+    const generateQR = async () => {
       const canvas = document.createElement('canvas');
       canvas.width = size;
       canvas.height = size;
@@ -21,29 +21,34 @@ const QRWithEmbeddedLogo: React.FC<QRWithEmbeddedLogoProps> = ({ value, logoSrc,
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      const logo = new Image();
-      logo.crossOrigin = 'anonymous'; // importante si el logo viene de otro dominio
-      logo.src = logoSrc;
+      // Si hay logo, dibujarlo
+      if (logoSrc) {
+        const logo = new Image();
+        logo.crossOrigin = 'anonymous';
+        logo.src = logoSrc;
 
-      logo.onload = () => {
-        const logoSize = size * 0.20;
-        const x = (size - logoSize) / 2;
-        const y = (size - logoSize) / 2;
+        logo.onload = () => {
+          const logoSize = size * 0.20;
+          const x = (size - logoSize) / 2;
+          const y = (size - logoSize) / 2;
 
-        // ✅ Dibujar fondo blanco antes del logo
-        const padding = 8;
-        ctx.fillStyle = 'white';
-        ctx.fillRect(x - padding / 2, y - padding / 2, logoSize + padding, logoSize + padding);
+          const padding = 8;
+          ctx.fillStyle = 'white';
+          ctx.fillRect(x - padding / 2, y - padding / 2, logoSize + padding, logoSize + padding);
 
-        // ✅ Dibujar logo encima
-        ctx.drawImage(logo, x, y, logoSize, logoSize);
+          ctx.drawImage(logo, x, y, logoSize, logoSize);
 
+          const dataUrl = canvas.toDataURL('image/png');
+          onReady(dataUrl);
+        };
+      } else {
+        // Sin logo, devolver el QR directamente
         const dataUrl = canvas.toDataURL('image/png');
         onReady(dataUrl);
-      };
+      }
     };
 
-    generateQRWithLogo();
+    generateQR();
   }, [value, logoSrc, size, onReady]);
 
   return null;
