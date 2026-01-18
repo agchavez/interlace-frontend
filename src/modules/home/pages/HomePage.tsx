@@ -273,8 +273,12 @@ export default function HomePage() {
   const userPermissions = user?.list_permissions || [];
 
   const [query, setQuery] = useState<DashboardQueryParams>(dashboardQueryParams);
+
+  // Verificar si el usuario tiene permiso para ver el dashboard de tracker
+  const canViewTrackerDashboard = userPermissions.includes('tracker.view_trackermodel');
+
   const { data, isLoading, isFetching, refetch } = useGetdashboardQuery(query, {
-    skip: !userPermissions.includes('tracker.view_trackermodel'),
+    skip: !canViewTrackerDashboard,
   });
   const availableWidgetsForUser = AVAILABLE_WIDGETS.filter((widget) => {
     if (!widget.requiredPermission) return true;
@@ -433,16 +437,16 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
-  // Auto-refresh
+  // Auto-refresh (solo si la query está habilitada)
   useEffect(() => {
-    if (autoRefresh) {
+    if (autoRefresh && canViewTrackerDashboard) {
       const interval = setInterval(() => {
         refetch();
       }, 60000);
       return () => clearInterval(interval);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoRefresh]);
+  }, [autoRefresh, canViewTrackerDashboard]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -489,7 +493,10 @@ export default function HomePage() {
       end_date,
     });
     localStorage.setItem('filterDate', filter);
-    refetch();
+    // Solo hacer refetch si la query está habilitada
+    if (canViewTrackerDashboard) {
+      refetch();
+    }
     handleClose();
   };
 
@@ -1376,7 +1383,9 @@ export default function HomePage() {
             localStorage.setItem('dashboardAutoRefresh', JSON.stringify(!autoRefresh));
           }}
         />
-        <SpeedDialAction icon={<RefreshIcon />} tooltipTitle="Actualizar Ahora" onClick={() => refetch()} />
+        {canViewTrackerDashboard && (
+          <SpeedDialAction icon={<RefreshIcon />} tooltipTitle="Actualizar Ahora" onClick={() => refetch()} />
+        )}
       </SpeedDial>
 
       {/* Dialog de configuración */}
