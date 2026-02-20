@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from "react-hook-form";
+import logo from "../../../assets/logo.png";
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch } from "react-redux";
@@ -102,9 +103,13 @@ export default function SignInCard() {
     }
 
     return (
-        <>
+        <Box>
             {/* Encabezado */}
             <Box sx={{ mb: 4 }}>
+                {/* Insertar logo */}
+                <Box sx={{ display: 'flex', justifyContent: 'start', mb: 2 }}>
+                    <img src={logo} alt="Logo" style={{ width: '120px', height: 'auto' }} />
+                </Box>
                 <Typography
                     component="h1"
                     sx={{
@@ -114,19 +119,13 @@ export default function SignInCard() {
                         color: '#0f172a',
                         letterSpacing: '-0.03em',
                         lineHeight: 1.2,
-                        mb: 1,
+                        mb: 0.75,
                     }}
                 >
                     Bienvenido de vuelta
                 </Typography>
-                <Typography
-                    sx={{
-                        fontFamily: 'Inter',
-                        fontSize: '0.9rem',
-                        color: '#64748b',
-                        fontWeight: 400,
-                    }}
-                >
+                
+                <Typography sx={{ fontFamily: 'Inter', fontSize: '0.9rem', color: '#64748b', fontWeight: 400 }}>
                     Ingresa tus credenciales para continuar
                 </Typography>
             </Box>
@@ -136,9 +135,9 @@ export default function SignInCard() {
                 component="form"
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
-                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}
             >
-                {/* Campo usuario */}
+                {/* Usuario */}
                 <Box>
                     <Typography
                         component="label"
@@ -150,7 +149,6 @@ export default function SignInCard() {
                             color: '#374151',
                             display: 'block',
                             mb: 0.75,
-                            letterSpacing: '0.01em',
                         }}
                     >
                         Usuario o correo electrónico
@@ -168,9 +166,7 @@ export default function SignInCard() {
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <PersonOutlineRounded
-                                        sx={{ fontSize: '1.1rem', color: errors.login ? 'error.main' : '#94a3b8' }}
-                                    />
+                                    <PersonOutlineRounded sx={{ fontSize: '1.1rem', color: errors.login ? 'error.main' : '#94a3b8' }} />
                                 </InputAdornment>
                             ),
                         }}
@@ -183,14 +179,14 @@ export default function SignInCard() {
                                 transition: 'all 0.2s',
                                 '& fieldset': { borderColor: '#e2e8f0', borderWidth: '1.5px' },
                                 '&:hover fieldset': { borderColor: '#94a3b8' },
-                                '&.Mui-focused fieldset': { borderColor: '#1976d2', borderWidth: '2px' },
+                                '&.Mui-focused fieldset': { borderColor: '#1565c0', borderWidth: '2px' },
                             },
                             '& .MuiFormHelperText-root': { fontFamily: 'Inter', fontSize: '0.75rem', mx: 0 },
                         }}
                     />
                 </Box>
 
-                {/* Campo contraseña */}
+                {/* Contraseña */}
                 <Box>
                     <Typography
                         component="label"
@@ -202,7 +198,6 @@ export default function SignInCard() {
                             color: '#374151',
                             display: 'block',
                             mb: 0.75,
-                            letterSpacing: '0.01em',
                         }}
                     >
                         Contraseña
@@ -220,9 +215,7 @@ export default function SignInCard() {
                         InputProps={{
                             startAdornment: (
                                 <InputAdornment position="start">
-                                    <LockOutlined
-                                        sx={{ fontSize: '1.1rem', color: errors.password ? 'error.main' : '#94a3b8' }}
-                                    />
+                                    <LockOutlined sx={{ fontSize: '1.1rem', color: errors.password ? 'error.main' : '#94a3b8' }} />
                                 </InputAdornment>
                             ),
                             endAdornment: (
@@ -232,7 +225,7 @@ export default function SignInCard() {
                                         onMouseDown={e => e.preventDefault()}
                                         edge="end"
                                         size="small"
-                                        sx={{ color: '#94a3b8', '&:hover': { color: '#1976d2' } }}
+                                        sx={{ color: '#94a3b8', '&:hover': { color: '#1565c0' } }}
                                     >
                                         {showPassword
                                             ? <VisibilityOutlined sx={{ fontSize: '1.1rem' }} />
@@ -250,14 +243,14 @@ export default function SignInCard() {
                                 transition: 'all 0.2s',
                                 '& fieldset': { borderColor: '#e2e8f0', borderWidth: '1.5px' },
                                 '&:hover fieldset': { borderColor: '#94a3b8' },
-                                '&.Mui-focused fieldset': { borderColor: '#1976d2', borderWidth: '2px' },
+                                '&.Mui-focused fieldset': { borderColor: '#1565c0', borderWidth: '2px' },
                             },
                             '& .MuiFormHelperText-root': { fontFamily: 'Inter', fontSize: '0.75rem', mx: 0 },
                         }}
                     />
                 </Box>
 
-                {/* Recordar sesión */}
+                {/* Recordar + ¿Sin acceso? */}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: -0.5 }}>
                     <FormControlLabel
                         control={
@@ -265,11 +258,7 @@ export default function SignInCard() {
                                 checked={remember}
                                 onChange={() => setRemember(!remember)}
                                 size="small"
-                                sx={{
-                                    color: '#cbd5e1',
-                                    '&.Mui-checked': { color: '#1976d2' },
-                                    p: 0.75,
-                                }}
+                                sx={{ color: '#cbd5e1', '&.Mui-checked': { color: '#1565c0' }, p: 0.75 }}
                             />
                         }
                         label={
@@ -284,9 +273,9 @@ export default function SignInCard() {
                             fontFamily: 'Inter',
                             fontSize: '0.82rem',
                             fontWeight: 500,
-                            color: '#1976d2',
+                            color: '#1565c0',
                             cursor: 'pointer',
-                            '&:hover': { color: '#1565c0', textDecoration: 'underline' },
+                            '&:hover': { color: '#0d47a1', textDecoration: 'underline' },
                             transition: 'color 0.2s',
                         }}
                     >
@@ -294,7 +283,7 @@ export default function SignInCard() {
                     </Typography>
                 </Box>
 
-                {/* Botón submit */}
+                {/* Botón */}
                 <Button
                     type="submit"
                     variant="contained"
@@ -302,28 +291,28 @@ export default function SignInCard() {
                     disabled={resultLogin.isLoading}
                     startIcon={resultLogin.isLoading ? <CircularProgress size={16} color="inherit" /> : null}
                     sx={{
-                        mt: 1,
+                        mt: 0.5,
                         py: isMobile ? 1.25 : 1.5,
                         fontFamily: 'Inter',
                         fontWeight: 600,
                         fontSize: '0.9rem',
                         textTransform: 'none',
                         borderRadius: '10px',
-                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-                        boxShadow: '0 4px 14px rgba(25, 118, 210, 0.35)',
+                        background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                        boxShadow: '0 4px 14px rgba(13, 71, 161, 0.35)',
                         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover:not(:disabled)': {
-                            background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
-                            boxShadow: '0 6px 20px rgba(25, 118, 210, 0.45)',
+                            background: 'linear-gradient(135deg, #0d47a1 0%, #0a3578 100%)',
+                            boxShadow: '0 6px 20px rgba(13, 71, 161, 0.45)',
                             transform: 'translateY(-1px)',
                         },
                         '&:active:not(:disabled)': {
                             transform: 'translateY(0)',
-                            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
+                            boxShadow: '0 2px 8px rgba(13, 71, 161, 0.3)',
                         },
                         '&:disabled': {
-                            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-                            opacity: 0.6,
+                            background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                            opacity: 0.5,
                         },
                     }}
                 >
@@ -332,21 +321,14 @@ export default function SignInCard() {
             </Box>
 
             {/* Footer */}
-            <Box sx={{ mt: 4 }}>
-                <Divider sx={{ mb: 3, borderColor: '#e2e8f0' }} />
-                <Typography
-                    sx={{
-                        fontFamily: 'Inter',
-                        fontSize: '0.75rem',
-                        color: '#94a3b8',
-                        textAlign: 'center',
-                    }}
-                >
-                    Sistema de Gestión de Recursos Humanos
+            <Box sx={{ mt: 5 }}>
+                <Divider sx={{ mb: 2.5, borderColor: '#e2e8f0' }} />
+                <Typography sx={{ fontFamily: 'Inter', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
+                    © {new Date().getFullYear()} Interlace
                 </Typography>
             </Box>
 
-            {/* Dialog solicitud de acceso */}
+            {/* Dialog */}
             <BootstrapDialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
                 <DialogTitle onClose={() => setOpenDialog(false)} id="access-dialog-title">
                     Solicitar Acceso al Sistema
@@ -363,6 +345,6 @@ export default function SignInCard() {
                     </Box>
                 </DialogContent>
             </BootstrapDialog>
-        </>
+        </Box>
     );
 }

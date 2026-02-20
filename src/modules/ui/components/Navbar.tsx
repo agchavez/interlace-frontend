@@ -21,7 +21,7 @@ import {
     useMediaQuery
 } from '@mui/material';
 import logo from "../../../assets/logo.png";
-import logoSmall from "../../../../public/logo-qr.png";
+const logoSmall = '/logo-qr.png';
 import { Logout } from '@mui/icons-material';
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { useAppDispatch, useAppSelector } from '../../../store';

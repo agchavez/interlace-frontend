@@ -40,98 +40,59 @@ export default function SignInSide() {
     return (
         <>
             <CssBaseline enableColorScheme />
-            <Box sx={{ display: 'flex', minHeight: '100vh' }}>
 
-                {/* ── PANEL IZQUIERDO (branding) ── */}
+            {/* Contenedor raíz: ocupa exactamente 100vw x 100vh */}
+            <Box sx={{ display: 'flex', width: '100vw', minHeight: '100vh', overflow: 'hidden' }}>
+
+                {/* ── PANEL IZQUIERDO ── */}
                 {!isMobile && (
                     <Box
                         sx={{
-                            flex: '0 0 44%',
+                            width: '45%',
+                            flexShrink: 0,
+                            minHeight: '100vh',
                             background: 'linear-gradient(160deg, #0a1628 0%, #0d2151 45%, #1565c0 100%)',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
-                            px: 6,
+                            px: 7,
                             py: 7,
                             position: 'relative',
                             overflow: 'hidden',
-                            // Círculo decorativo superior
                             '&::before': {
                                 content: '""',
                                 position: 'absolute',
-                                width: 480,
-                                height: 480,
+                                width: 500,
+                                height: 500,
                                 borderRadius: '50%',
                                 border: '1px solid rgba(255,255,255,0.06)',
                                 top: -160,
                                 right: -160,
+                                pointerEvents: 'none',
                             },
-                            // Círculo decorativo inferior
                             '&::after': {
                                 content: '""',
                                 position: 'absolute',
-                                width: 320,
-                                height: 320,
+                                width: 340,
+                                height: 340,
                                 borderRadius: '50%',
                                 border: '1px solid rgba(255,255,255,0.05)',
                                 bottom: -80,
                                 left: -80,
+                                pointerEvents: 'none',
                             },
                         }}
                     >
-                        {/* Logotipo */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, zIndex: 1 }}>
-                            <Box
-                                sx={{
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.12)',
-                                    border: '1px solid rgba(255,255,255,0.2)',
-                                    backdropFilter: 'blur(8px)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Typography sx={{ color: 'white', fontWeight: 800, fontSize: '1.1rem', fontFamily: 'Inter' }}>
-                                    I
-                                </Typography>
-                            </Box>
-                            <Typography
-                                sx={{
-                                    color: 'white',
-                                    fontWeight: 700,
-                                    fontSize: '1.2rem',
-                                    fontFamily: 'Inter',
-                                    letterSpacing: '-0.01em',
-                                }}
-                            >
-                                Interlace
-                            </Typography>
-                        </Box>
+                        <Box />
 
-                        {/* Contenido principal */}
+                        {/* Contenido central */}
                         <Box sx={{ zIndex: 1 }}>
-                            <Typography
-                                sx={{
-                                    color: 'rgba(255,255,255,0.5)',
-                                    fontFamily: 'Inter',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    letterSpacing: '0.12em',
-                                    textTransform: 'uppercase',
-                                    mb: 2,
-                                }}
-                            >
-                                Plataforma de RRHH
-                            </Typography>
-
+                            
                             <Typography
                                 sx={{
                                     color: 'white',
                                     fontWeight: 800,
-                                    fontSize: { md: '2rem', lg: '2.5rem' },
+                                    fontSize: { md: '2rem', lg: '2.6rem' },
                                     fontFamily: 'Inter',
                                     letterSpacing: '-0.03em',
                                     lineHeight: 1.15,
@@ -146,29 +107,28 @@ export default function SignInSide() {
 
                             <Typography
                                 sx={{
-                                    color: 'rgba(255,255,255,0.55)',
+                                    color: 'rgba(255,255,255,0.5)',
                                     fontFamily: 'Inter',
                                     fontSize: '0.9rem',
-                                    lineHeight: 1.65,
+                                    lineHeight: 1.7,
                                     mb: 5,
-                                    maxWidth: 340,
+                                    maxWidth: 380,
                                 }}
                             >
-                                Centraliza la información de tu personal, automatiza solicitudes y
-                                mantén el control de certificaciones desde un solo lugar.
+                                Centraliza la información de tu personal, automatiza solicitudes
+                                y mantén el control de certificaciones desde un solo lugar.
                             </Typography>
 
-                            {/* Features */}
-                            <Stack spacing={2.5}>
+                            <Stack spacing={3}>
                                 {features.map((f) => (
                                     <Box key={f.label} sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
                                         <Box
                                             sx={{
-                                                width: 34,
-                                                height: 34,
-                                                borderRadius: '8px',
-                                                background: 'rgba(96,165,250,0.15)',
-                                                border: '1px solid rgba(96,165,250,0.25)',
+                                                width: 36,
+                                                height: 36,
+                                                borderRadius: '9px',
+                                                background: 'rgba(96,165,250,0.13)',
+                                                border: '1px solid rgba(96,165,250,0.22)',
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
@@ -179,25 +139,10 @@ export default function SignInSide() {
                                             {f.icon}
                                         </Box>
                                         <Box>
-                                            <Typography
-                                                sx={{
-                                                    color: 'rgba(255,255,255,0.9)',
-                                                    fontWeight: 600,
-                                                    fontFamily: 'Inter',
-                                                    fontSize: '0.85rem',
-                                                    mb: 0.25,
-                                                }}
-                                            >
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontFamily: 'Inter', fontSize: '0.875rem', mb: 0.25 }}>
                                                 {f.label}
                                             </Typography>
-                                            <Typography
-                                                sx={{
-                                                    color: 'rgba(255,255,255,0.45)',
-                                                    fontFamily: 'Inter',
-                                                    fontSize: '0.78rem',
-                                                    lineHeight: 1.5,
-                                                }}
-                                            >
+                                            <Typography sx={{ color: 'rgba(255,255,255,0.42)', fontFamily: 'Inter', fontSize: '0.8rem', lineHeight: 1.5 }}>
                                                 {f.desc}
                                             </Typography>
                                         </Box>
@@ -206,27 +151,27 @@ export default function SignInSide() {
                             </Stack>
                         </Box>
 
-                        {/* Footer del panel */}
+                        {/* Footer panel */}
                         <Box sx={{ zIndex: 1 }}>
-                            <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter', fontSize: '0.75rem' }}>
+                            <Typography sx={{ color: 'rgba(255,255,255,0.25)', fontFamily: 'Inter', fontSize: '0.75rem' }}>
                                 © {new Date().getFullYear()} Interlace · Todos los derechos reservados
                             </Typography>
                         </Box>
                     </Box>
                 )}
 
-                {/* ── PANEL DERECHO (formulario) ── */}
+                {/* ── PANEL DERECHO ── */}
                 <Box
                     sx={{
                         flex: 1,
+                        minHeight: '100vh',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        px: { xs: 2, sm: 4, md: 5, lg: 8 },
-                        py: { xs: 4, md: 6 },
                         backgroundColor: '#f8fafc',
-                        minHeight: '100vh',
+                        px: { xs: 3, sm: 6, md: 8, lg: 12 },
+                        py: { xs: 5, md: 6 },
                     }}
                 >
                     {/* Logo móvil */}
@@ -253,7 +198,8 @@ export default function SignInSide() {
                         </Box>
                     )}
 
-                    <Box sx={{ width: '100%', maxWidth: 420 }}>
+                    {/* Formulario — ancho máximo razonable dentro del panel */}
+                    <Box sx={{ width: '100%', maxWidth: 440 }}>
                         <SignInCard />
                     </Box>
                 </Box>
