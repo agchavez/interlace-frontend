@@ -85,8 +85,6 @@ const SidebarV2: React.FC = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  // Check if user has profile (not 404)
-  const hasProfile = profileData && 'id' in profileData;
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -148,8 +146,8 @@ const SidebarV2: React.FC = () => {
         icon: <DashboardIcon fontSize="small" />,
         subItems: [
           { text: 'Dashboard', href: '/', id: 'dashboard' },
-          { text: 'IN-OUT', href: '/tracker/view', id: 'vista' },
-          { text: 'Dashboard CD', href: '/dashboard/cd', id: 'dashboardcd' },
+          // { text: 'IN-OUT', href: '/tracker/view', id: 'vista' },
+          // { text: 'Dashboard CD', href: '/dashboard/cd', id: 'dashboardcd' },
         ],
         id: 'inicio',
       },
@@ -173,16 +171,16 @@ const SidebarV2: React.FC = () => {
         ],
         id: 'personal',
       },
-      {
-        text: 'T1',
-        icon: <AssignmentIcon fontSize="small" />,
-        subItems: [
-          { text: 'En Atención', href: '/tracker/check', id: 'nuevo' },
-          { text: 'Gestión', href: '/tracker/manage', id: 'gestion' },
-          { text: 'Pedidos', href: '/order/manage', id: 'order' },
-        ],
-        id: 'movimientos',
-      },
+      // {
+      //   text: 'T1',
+      //   icon: <AssignmentIcon fontSize="small" />,
+      //   subItems: [
+      //     { text: 'En Atención', href: '/tracker/check', id: 'nuevo' },
+      //     { text: 'Gestión', href: '/tracker/manage', id: 'gestion' },
+      //     { text: 'Pedidos', href: '/order/manage', id: 'order' },
+      //   ],
+      //   id: 'movimientos',
+      // },
       // {
       //   text: 'T2',
       //   icon: <ContentPasteGoIcon fontSize="small" />,
@@ -197,27 +195,27 @@ const SidebarV2: React.FC = () => {
         text: 'Reporte',
         icon: <AssessmentIcon fontSize="small" />,
         subItems: [
-          { text: 'Movimientos', href: '/movimientos/crear', id: 'nuevo' },
-          { text: 'Productos', href: '/report/shift', id: 'turno' },
-          { text: 'RISKS - STOCK AGE', href: '/report/por-expirar', id: 'porExpirar' },
+          // { text: 'Movimientos', href: '/movimientos/crear', id: 'nuevo' },
+          // { text: 'Productos', href: '/report/shift', id: 'turno' },
+          // { text: 'RISKS - STOCK AGE', href: '/report/por-expirar', id: 'porExpirar' },
         ],
         id: 'reportes',
       },
-      {
-        text: 'Inventario',
-        icon: <InventoryIcon fontSize="small" />,
-        subItems: [{ text: 'Movimientos', href: '/inventory', id: 'gestion' }],
-        id: 'inventario',
-      },
-      {
-        text: 'Reclamos',
-        icon: <AssignmentLateTwoToneIcon fontSize="small" />,
-        subItems: [
-          { text: 'Seguimiento', href: '/claim', id: 'reclamos' },
-          { text: 'Mis Reclamos', href: '/claim/mine', id: 'misreclamos' },
-        ],
-        id: 'claim',
-      },
+      // {
+      //   text: 'Inventario',
+      //   icon: <InventoryIcon fontSize="small" />,
+      //   subItems: [{ text: 'Movimientos', href: '/inventory', id: 'gestion' }],
+      //   id: 'inventario',
+      // },
+      // {
+      //   text: 'Reclamos',
+      //   icon: <AssignmentLateTwoToneIcon fontSize="small" />,
+      //   subItems: [
+      //     { text: 'Seguimiento', href: '/claim', id: 'reclamos' },
+      //     { text: 'Mis Reclamos', href: '/claim/mine', id: 'misreclamos' },
+      //   ],
+      //   id: 'claim',
+      // },
       {
         text: 'Tokens',
         icon: <ConfirmationNumberIcon fontSize="small" />,
@@ -233,8 +231,8 @@ const SidebarV2: React.FC = () => {
         text: 'Mantenimiento',
         icon: <EngineeringTwoToneIcon fontSize="small" />,
         subItems: [
-          { text: 'Centros de Distribución', href: '/maintenance/distributor-center', id: 'cd' },
-          { text: 'Periodos', href: '/maintenance/period-center', id: 'period-center' },
+          // { text: 'Centros de Distribución', href: '/maintenance/distributor-center', id: 'cd' },
+          // { text: 'Periodos', href: '/maintenance/period-center', id: 'period-center' },
           { text: 'Métricas de Desempeño', href: '/maintenance/metric-types', id: 'metric-types' },
           { text: 'Productos', href: '/maintenance/products', id: 'products' },
           { text: 'Materiales', href: '/tokens/materials', id: 'materials' },

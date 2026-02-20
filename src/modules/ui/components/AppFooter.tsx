@@ -26,7 +26,7 @@ const AppFooter = () => {
         color="text.secondary"
         fontWeight={300}
       >
-        © {currentYear} {projectName || 'Tracker'} - Todos los derechos reservados
+        © {currentYear} {projectName || 'Interlace'} - Todos los derechos reservados
       </Typography>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

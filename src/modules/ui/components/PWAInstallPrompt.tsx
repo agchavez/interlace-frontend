@@ -116,7 +116,7 @@ export default function PWAInstallPrompt({
           </Box>
         }
       >
-        <strong>Instala Tracker</strong> en tu dispositivo para un acceso más rápido
+        <strong>Instala Interlace</strong> en tu dispositivo para un acceso más rápido
       </Alert>
     </Snackbar>
   );

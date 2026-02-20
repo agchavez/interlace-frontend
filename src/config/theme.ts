@@ -38,7 +38,7 @@ export const maintheme = createTheme({
     },
     palette: {
         primary: {
-            main:'#d3a238',
+            main:'#1976d2',
         },
         secondary: {
             main: '#1c2536'
