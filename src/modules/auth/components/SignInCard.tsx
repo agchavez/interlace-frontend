@@ -8,9 +8,6 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import MuiCard from '@mui/material/Card';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
@@ -23,78 +20,29 @@ import { login } from "../../../store/auth";
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
-import { VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
+import Divider from '@mui/material/Divider';
+import {
+    VisibilityOutlined,
+    VisibilityOffOutlined,
+    PersonOutlineRounded,
+    LockOutlined,
+} from "@mui/icons-material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialogContent-root": {
-        padding: theme.spacing(2),
-    },
-    "& .MuiDialogActions-root": {
-        padding: theme.spacing(1),
-    },
+    "& .MuiDialogContent-root": { padding: theme.spacing(2) },
+    "& .MuiDialogActions-root": { padding: theme.spacing(1) },
 }));
 
 const schema = yup.object().shape({
     login: yup.string()
-        .required('El correo o nombre de usuario es requerido')
+        .required('El usuario o correo es requerido')
         .min(3, 'Mínimo 3 caracteres'),
     password: yup.string()
         .required('La contraseña es requerida')
-        .min(6, 'Mínimo 6 caracteres')
+        .min(6, 'Mínimo 6 caracteres'),
 });
-
-const Card = styled(MuiCard)(({ theme }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-    padding: theme.spacing(4),
-    gap: theme.spacing(2.5),
-    boxShadow: theme.palette.mode === 'dark'
-        ? '0 8px 32px rgba(0, 0, 0, 0.4)'
-        : '0 8px 32px rgba(0, 0, 0, 0.08)',
-    borderRadius: '16px',
-    background: theme.palette.mode === 'dark'
-        ? theme.palette.background.paper
-        : '#ffffff',
-    border: `1px solid ${theme.palette.divider}`,
-
-    [theme.breakpoints.up('sm')]: {
-        width: '480px',
-    },
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(3),
-        gap: theme.spacing(2),
-    },
-}));
-
-const LoginContainer = styled(Box)(() => ({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    padding: 0,
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-    padding: theme.spacing(1.5),
-    fontSize: '1rem',
-    fontWeight: 600,
-    textTransform: 'none',
-    borderRadius: '8px',
-    boxShadow: 'none',
-
-    '&:hover': {
-        boxShadow: 'none',
-    },
-
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(1.25),
-        fontSize: '0.9375rem',
-    },
-}));
 
 interface FormData {
     login: string;
@@ -107,36 +55,35 @@ export default function SignInCard() {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [loginAPI, resultLogin] = useLoginMutation();
     const [openDialog, setOpenDialog] = useState(false);
-    const [remember, setRemember] = useState(localStorage.getItem('remember') ? true : false);
+    const [remember, setRemember] = useState(!!localStorage.getItem('remember'));
     const [showPassword, setShowPassword] = useState(false);
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         defaultValues: {
             login: localStorage.getItem('remember') || '',
-            password: ''
+            password: '',
         },
-        resolver: yupResolver(schema)
+        resolver: yupResolver(schema),
     });
 
     const location = useLocation();
     const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     const navigate = useNavigate();
 
-    const onSubmit = async (data: FormData): Promise<void> => {
-        const { login, password } = data;
+    const onSubmit = async (data: FormData) => {
         if (remember) {
-            localStorage.setItem('remember', login);
+            localStorage.setItem('remember', data.login);
         } else {
             localStorage.removeItem('remember');
         }
-        await loginAPI({ login, password });
+        await loginAPI({ login: data.login, password: data.password });
     };
 
     useEffect(() => {
         if (resultLogin.error) {
             const error: any = resultLogin.error;
-            const errorMessage = error?.data?.mensage || error?.data?.detail || "Correo o Contraseña incorrectos";
-            toast.error(errorMessage);
+            const msg = error?.data?.mensage || error?.data?.detail || 'Credenciales incorrectas';
+            toast.error(msg);
         }
     }, [resultLogin.error]);
 
@@ -146,7 +93,6 @@ export default function SignInCard() {
         if (next) {
             setTimeout(() => navigate(next), 100);
         } else {
-            // Redirect Security users to validate page
             const userGroups = resultLogin.data.user.list_groups || [];
             if (userGroups.includes('SEGURIDAD')) {
                 return <Navigate to="/tokens/validate" />;
@@ -156,181 +102,267 @@ export default function SignInCard() {
     }
 
     return (
-        <LoginContainer>
-            <Card variant="outlined">
-                <Box sx={{ mb: 1 }}>
-                    <Typography
-                        component="h1"
-                        variant="h4"
-                        fontWeight="bold"
-                        sx={{
-                            mb: 0.5,
-                            fontSize: { xs: '1.75rem', sm: '2rem' },
-                        }}
-                    >
-                        Iniciar Sesión
-                    </Typography>
-                    <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ fontSize: { xs: '0.875rem', sm: '0.9375rem' } }}
-                    >
-                        Ingrese sus credenciales para acceder al sistema
-                    </Typography>
-                </Box>
-
-                <Box
-                    component="form"
-                    onSubmit={handleSubmit(onSubmit)}
-                    noValidate
+        <>
+            {/* Encabezado */}
+            <Box sx={{ mb: 4 }}>
+                <Typography
+                    component="h1"
                     sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2.5
+                        fontFamily: 'Inter',
+                        fontWeight: 800,
+                        fontSize: { xs: '1.6rem', sm: '1.875rem' },
+                        color: '#0f172a',
+                        letterSpacing: '-0.03em',
+                        lineHeight: 1.2,
+                        mb: 1,
                     }}
                 >
-                    <FormControl fullWidth>
-                        <FormLabel
-                            htmlFor="login"
-                            sx={{
-                                mb: 0.75,
-                                fontWeight: 500,
-                                fontSize: '0.875rem',
-                            }}
-                        >
-                            Correo electrónico o nombre de usuario
-                        </FormLabel>
-                        <TextField
-                            id="login"
-                            type="text"
-                            autoComplete="username"
-                            placeholder="correo@ejemplo.com o usuario"
-                            {...register("login")}
-                            error={!!errors.login}
-                            helperText={errors.login?.message}
-                            required
-                            fullWidth
-                            size={isMobile ? "small" : "medium"}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                },
-                            }}
-                        />
-                    </FormControl>
+                    Bienvenido de vuelta
+                </Typography>
+                <Typography
+                    sx={{
+                        fontFamily: 'Inter',
+                        fontSize: '0.9rem',
+                        color: '#64748b',
+                        fontWeight: 400,
+                    }}
+                >
+                    Ingresa tus credenciales para continuar
+                </Typography>
+            </Box>
 
-                    <FormControl fullWidth>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-                            <FormLabel
-                                htmlFor="password"
-                                sx={{
-                                    fontWeight: 500,
-                                    fontSize: '0.875rem',
-                                }}
-                            >
-                                Contraseña
-                            </FormLabel>
-                        </Box>
-                        <TextField
-                            id="password"
-                            type={showPassword ? "text" : "password"}
-                            autoComplete="current-password"
-                            placeholder="••••••••"
-                            {...register("password")}
-                            error={!!errors.password}
-                            helperText={errors.password?.message}
-                            required
-                            size={isMobile ? "small" : "medium"}
-                            fullWidth
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={() => setShowPassword(prevState => !prevState)}
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            edge="end"
-                                            size="small"
-                                        >
-                                            {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                )
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                },
-                            }}
-                        />
-                    </FormControl>
+            {/* Formulario */}
+            <Box
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+                noValidate
+                sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+            >
+                {/* Campo usuario */}
+                <Box>
+                    <Typography
+                        component="label"
+                        htmlFor="login-field"
+                        sx={{
+                            fontFamily: 'Inter',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            color: '#374151',
+                            display: 'block',
+                            mb: 0.75,
+                            letterSpacing: '0.01em',
+                        }}
+                    >
+                        Usuario o correo electrónico
+                    </Typography>
+                    <TextField
+                        id="login-field"
+                        type="text"
+                        autoComplete="username"
+                        placeholder="nombre.usuario o correo@ejemplo.com"
+                        {...register("login")}
+                        error={!!errors.login}
+                        helperText={errors.login?.message}
+                        fullWidth
+                        size={isMobile ? 'small' : 'medium'}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <PersonOutlineRounded
+                                        sx={{ fontSize: '1.1rem', color: errors.login ? 'error.main' : '#94a3b8' }}
+                                    />
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                fontFamily: 'Inter',
+                                fontSize: '0.9rem',
+                                borderRadius: '10px',
+                                backgroundColor: 'white',
+                                transition: 'all 0.2s',
+                                '& fieldset': { borderColor: '#e2e8f0', borderWidth: '1.5px' },
+                                '&:hover fieldset': { borderColor: '#94a3b8' },
+                                '&.Mui-focused fieldset': { borderColor: '#1976d2', borderWidth: '2px' },
+                            },
+                            '& .MuiFormHelperText-root': { fontFamily: 'Inter', fontSize: '0.75rem', mx: 0 },
+                        }}
+                    />
+                </Box>
 
+                {/* Campo contraseña */}
+                <Box>
+                    <Typography
+                        component="label"
+                        htmlFor="password-field"
+                        sx={{
+                            fontFamily: 'Inter',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            color: '#374151',
+                            display: 'block',
+                            mb: 0.75,
+                            letterSpacing: '0.01em',
+                        }}
+                    >
+                        Contraseña
+                    </Typography>
+                    <TextField
+                        id="password-field"
+                        type={showPassword ? 'text' : 'password'}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        {...register("password")}
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
+                        fullWidth
+                        size={isMobile ? 'small' : 'medium'}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <LockOutlined
+                                        sx={{ fontSize: '1.1rem', color: errors.password ? 'error.main' : '#94a3b8' }}
+                                    />
+                                </InputAdornment>
+                            ),
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => setShowPassword(p => !p)}
+                                        onMouseDown={e => e.preventDefault()}
+                                        edge="end"
+                                        size="small"
+                                        sx={{ color: '#94a3b8', '&:hover': { color: '#1976d2' } }}
+                                    >
+                                        {showPassword
+                                            ? <VisibilityOutlined sx={{ fontSize: '1.1rem' }} />
+                                            : <VisibilityOffOutlined sx={{ fontSize: '1.1rem' }} />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                fontFamily: 'Inter',
+                                fontSize: '0.9rem',
+                                borderRadius: '10px',
+                                backgroundColor: 'white',
+                                transition: 'all 0.2s',
+                                '& fieldset': { borderColor: '#e2e8f0', borderWidth: '1.5px' },
+                                '&:hover fieldset': { borderColor: '#94a3b8' },
+                                '&.Mui-focused fieldset': { borderColor: '#1976d2', borderWidth: '2px' },
+                            },
+                            '& .MuiFormHelperText-root': { fontFamily: 'Inter', fontSize: '0.75rem', mx: 0 },
+                        }}
+                    />
+                </Box>
+
+                {/* Recordar sesión */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: -0.5 }}>
                     <FormControlLabel
                         control={
                             <Checkbox
                                 checked={remember}
                                 onChange={() => setRemember(!remember)}
-                                value={remember}
-                                size={isMobile ? "small" : "medium"}
+                                size="small"
+                                sx={{
+                                    color: '#cbd5e1',
+                                    '&.Mui-checked': { color: '#1976d2' },
+                                    p: 0.75,
+                                }}
                             />
                         }
                         label={
-                            <Typography
-                                variant="body2"
-                                sx={{ fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}
-                            >
-                                Recordar en este dispositivo
+                            <Typography sx={{ fontFamily: 'Inter', fontSize: '0.82rem', color: '#64748b' }}>
+                                Recordar sesión
                             </Typography>
                         }
-                        sx={{ mt: -0.5 }}
                     />
-
-                    <StyledButton
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        fullWidth
-                        disabled={resultLogin.isLoading}
-                        startIcon={resultLogin.isLoading ? <CircularProgress size={20} color="inherit" /> : null}
-                    >
-                        {resultLogin.isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
-                    </StyledButton>
-
-                    <Button
-                        color="inherit"
+                    <Typography
                         onClick={() => setOpenDialog(true)}
                         sx={{
-                            mt: -0.5,
-                            textTransform: 'none',
-                            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                            fontFamily: 'Inter',
+                            fontSize: '0.82rem',
                             fontWeight: 500,
-                            color: 'text.secondary',
-                            '&:hover': {
-                                color: 'primary.main',
-                                backgroundColor: 'transparent',
-                            },
+                            color: '#1976d2',
+                            cursor: 'pointer',
+                            '&:hover': { color: '#1565c0', textDecoration: 'underline' },
+                            transition: 'color 0.2s',
                         }}
                     >
-                        ¿No tienes cuenta? Solicitar acceso
-                    </Button>
+                        ¿Sin acceso?
+                    </Typography>
                 </Box>
-            </Card>
 
+                {/* Botón submit */}
+                <Button
+                    type="submit"
+                    variant="contained"
+                    fullWidth
+                    disabled={resultLogin.isLoading}
+                    startIcon={resultLogin.isLoading ? <CircularProgress size={16} color="inherit" /> : null}
+                    sx={{
+                        mt: 1,
+                        py: isMobile ? 1.25 : 1.5,
+                        fontFamily: 'Inter',
+                        fontWeight: 600,
+                        fontSize: '0.9rem',
+                        textTransform: 'none',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                        boxShadow: '0 4px 14px rgba(25, 118, 210, 0.35)',
+                        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover:not(:disabled)': {
+                            background: 'linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)',
+                            boxShadow: '0 6px 20px rgba(25, 118, 210, 0.45)',
+                            transform: 'translateY(-1px)',
+                        },
+                        '&:active:not(:disabled)': {
+                            transform: 'translateY(0)',
+                            boxShadow: '0 2px 8px rgba(25, 118, 210, 0.3)',
+                        },
+                        '&:disabled': {
+                            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                            opacity: 0.6,
+                        },
+                    }}
+                >
+                    {resultLogin.isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                </Button>
+            </Box>
+
+            {/* Footer */}
+            <Box sx={{ mt: 4 }}>
+                <Divider sx={{ mb: 3, borderColor: '#e2e8f0' }} />
+                <Typography
+                    sx={{
+                        fontFamily: 'Inter',
+                        fontSize: '0.75rem',
+                        color: '#94a3b8',
+                        textAlign: 'center',
+                    }}
+                >
+                    Sistema de Gestión de Recursos Humanos
+                </Typography>
+            </Box>
+
+            {/* Dialog solicitud de acceso */}
             <BootstrapDialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-                <DialogTitle onClose={() => setOpenDialog(false)} id="customized-dialog-title">
-                    Solicitud de Acceso al Sistema
+                <DialogTitle onClose={() => setOpenDialog(false)} id="access-dialog-title">
+                    Solicitar Acceso al Sistema
                 </DialogTitle>
                 <DialogContent>
-                    <Box sx={{ p: 2 }}>
-                        <Typography variant="body1" gutterBottom>
-                            Para obtener acceso al sistema, por favor comunícate con el administrador o el departamento de TI de tu organización.
+                    <Box sx={{ p: 1 }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'Inter', mb: 1 }}>
+                            Para obtener acceso al sistema comunícate con el administrador
+                            o el departamento de TI de tu organización.
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            Ellos te proporcionarán las credenciales necesarias para iniciar sesión.
+                        <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'Inter' }}>
+                            Ellos te proporcionarán las credenciales necesarias para ingresar.
                         </Typography>
                     </Box>
                 </DialogContent>
             </BootstrapDialog>
-        </LoginContainer>
+        </>
     );
 }
