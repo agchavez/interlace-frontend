@@ -14,27 +14,27 @@ import logo from "../../../assets/logo.png";
 const items = [
     {
         icon: <SettingsSuggestRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Rendimiento adaptable',
+        title: 'Gestión de Personal',
         description:
-            'Nuestra plataforma se ajusta sin esfuerzo a tus necesidades, mejorando la eficiencia y simplificando la gestión de traslados.',
+            'Administra tu equipo de trabajo de manera centralizada: perfiles, departamentos, historial y documentación de cada colaborador.',
     },
     {
         icon: <ConstructionRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Construido para durar',
+        title: 'Tokens y Solicitudes',
         description:
-            'Experimenta una durabilidad inigualable que va más allá, asegurando una inversión a largo plazo en la gestión de logística.',
+            'Gestiona permisos, horas extra, cambios de turno y pases de salida con un flujo de aprobación claro y trazable.',
     },
     {
         icon: <ThumbUpAltRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Excelente experiencia de usuario',
+        title: 'Evaluaciones de Desempeño',
         description:
-            'Integra nuestra plataforma en tu rutina con una interfaz intuitiva y fácil de usar, optimizando la gestión de pedidos y stocks.',
+            'Realiza seguimiento del rendimiento de tu personal con métricas configurables, evaluaciones periódicas y reportes detallados.',
     },
     {
         icon: <AutoFixHighRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Funcionalidad innovadora',
+        title: 'Certificaciones y Competencias',
         description:
-            'Mantente a la vanguardia con características que establecen nuevos estándares, abordando tus necesidades logísticas en constante evolución.',
+            'Controla las certificaciones de tu equipo, recibe alertas de vencimiento y asegura el cumplimiento de requisitos en todo momento.',
     },
 ];
 

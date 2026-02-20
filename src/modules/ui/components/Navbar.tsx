@@ -159,7 +159,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                             borderRadius: 3, // Aumentado de 2 a 3
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                             '&:hover': {
-                                backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                                backgroundColor: 'rgba(25, 118, 210, 0.1)',
                                 transform: 'scale(1.05)',
                             },
                         }}
@@ -215,7 +215,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     borderRadius: 3, // Aumentado de 1.5 a 3
                                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                     '&:hover': {
-                                        backgroundColor: 'rgba(220, 187, 32, 0.08)',
+                                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
                                         '& .MuiTypography-root': {
                                             color: 'primary.main',
                                         }
@@ -281,8 +281,8 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     borderRadius: 3, // Aumentado para más redondeo
                                     '&:hover': {
                                         transform: 'scale(1.1)',
-                                        boxShadow: '0 6px 16px rgba(220, 187, 32, 0.3)',
-                                        borderColor: 'rgba(220, 187, 32, 0.2)',
+                                        boxShadow: '0 6px 16px rgba(25, 118, 210, 0.3)',
+                                        borderColor: 'rgba(25, 118, 210, 0.2)',
                                     },
                                 }}
                             >
@@ -333,7 +333,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                     fontWeight: 500,
                                     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                     '&:hover': {
-                                        backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                                        backgroundColor: 'rgba(25, 118, 210, 0.1)',
                                         transform: 'translateX(4px)',
                                     },
                                     '&:first-of-type': {
@@ -356,7 +356,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                                        backgroundColor: 'rgba(25, 118, 210, 0.1)',
                                         transition: 'all 0.2s ease',
                                     }}
                                 >

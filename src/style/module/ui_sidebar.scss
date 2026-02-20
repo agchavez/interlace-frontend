@@ -245,7 +245,7 @@
       margin: 4px 8px;
       border-radius: 8px;
       &:hover {
-        background: rgba(220, 187, 32, 0.08);
+        background: rgba(25, 118, 210, 0.08);
         .sub-menu.blank {
           top: 50%;
           transform: translateY(-50%);
@@ -299,7 +299,7 @@
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           &:hover {
             color: #ffffff;
-            background: rgba(220, 187, 32, 0.12);
+            background: rgba(25, 118, 210, 0.12);
             padding-left: 16px;
           }
         }
@@ -336,7 +336,7 @@
     padding: 14px 12px;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-top: 1px solid rgba(220, 187, 32, 0.1);
+    border-top: 1px solid rgba(25, 118, 210, 0.1);
     cursor: pointer;
     &:hover {
       background: linear-gradient(135deg, #fafbfc 0%, #f5f6f8 100%);
@@ -471,7 +471,7 @@
     padding-left: 0 !important;
     justify-content: center;
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
-    border-top: 1px solid rgba(220, 187, 32, 0.2);
+    border-top: 1px solid rgba(25, 118, 210, 0.2);
     &:hover {
       background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%);
     }
@@ -539,7 +539,7 @@
 
 .sidebar__active {
   font-weight: 600 !important;
-  background: rgba(220, 187, 32, 0.15) !important;
+  background: rgba(25, 118, 210, 0.15) !important;
   color: #dcbb20 !important;
   opacity: 1 !important;
   border-left: 3px solid #dcbb20;

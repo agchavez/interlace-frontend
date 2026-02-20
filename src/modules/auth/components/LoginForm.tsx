@@ -173,22 +173,22 @@ export function LoginForm() {
                         width: { xs: 60, sm: 90, md: 100 },
                         height: { xs: 60, sm: 90, md: 100 },
                         borderRadius: { xs: '16px', sm: '24px' },
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         boxShadow: {
-                            xs: '0 8px 20px rgba(102, 126, 234, 0.35), 0 0 0 3px rgba(255, 255, 255, 0.25)',
-                            sm: '0 12px 32px rgba(102, 126, 234, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.3)',
+                            xs: '0 8px 20px rgba(25, 118, 210, 0.35), 0 0 0 3px rgba(255, 255, 255, 0.25)',
+                            sm: '0 12px 32px rgba(25, 118, 210, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.3)',
                         },
                         position: 'relative',
                         animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         '@keyframes pulse': {
                             '0%, 100%': {
-                                boxShadow: '0 12px 32px rgba(102, 126, 234, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.3)',
+                                boxShadow: '0 12px 32px rgba(25, 118, 210, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.3)',
                             },
                             '50%': {
-                                boxShadow: '0 12px 40px rgba(102, 126, 234, 0.6), 0 0 0 6px rgba(255, 255, 255, 0.5)',
+                                boxShadow: '0 12px 40px rgba(25, 118, 210, 0.6), 0 0 0 6px rgba(255, 255, 255, 0.5)',
                             },
                         },
                     }}
@@ -203,7 +203,7 @@ export function LoginForm() {
                             textShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                         }}
                     >
-                        T
+                        I
                     </Typography>
                 </Box>
             </Box>
@@ -430,7 +430,7 @@ export function LoginForm() {
                                         size={isMobile ? "small" : "medium"}
                                         sx={{
                                             '&:hover': {
-                                                backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                                                backgroundColor: 'rgba(25, 118, 210, 0.04)',
                                             },
                                         }}
                                     />
@@ -488,8 +488,8 @@ export function LoginForm() {
                         fontFamily: 'Inter',
                         textTransform: 'none',
                         borderRadius: { xs: 2, sm: 2.5 },
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+                        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                        boxShadow: '0 8px 20px rgba(25, 118, 210, 0.4)',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         position: 'relative',
                         overflow: 'hidden',
@@ -504,7 +504,7 @@ export function LoginForm() {
                             transition: 'left 0.5s ease',
                         },
                         '&:hover:not(:disabled)': {
-                            boxShadow: '0 12px 28px rgba(102, 126, 234, 0.5)',
+                            boxShadow: '0 12px 28px rgba(25, 118, 210, 0.5)',
                             transform: 'translateY(-2px)',
                             '&::before': {
                                 left: '100%',
@@ -512,10 +512,10 @@ export function LoginForm() {
                         },
                         '&:active:not(:disabled)': {
                             transform: 'translateY(0)',
-                            boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+                            boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
                         },
                         '&:disabled': {
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
                             opacity: 0.7,
                             cursor: 'not-allowed',
                         },

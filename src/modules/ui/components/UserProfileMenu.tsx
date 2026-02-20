@@ -151,7 +151,7 @@ export const UserProfileMenu: React.FC<Props> = ({
               fontWeight: 500,
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
-                backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
                 transform: 'translateX(4px)',
               },
               '&:first-of-type': {
@@ -174,7 +174,7 @@ export const UserProfileMenu: React.FC<Props> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
                 transition: 'all 0.2s ease',
               }}
             >

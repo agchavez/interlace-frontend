@@ -208,7 +208,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
                             elevation={0}
                             sx={{
                                 borderRadius: 0,
-                                bgcolor: !noti.read ? 'rgba(220, 187, 32, 0.05)' : 'transparent',
+                                bgcolor: !noti.read ? 'rgba(25, 118, 210, 0.05)' : 'transparent',
                             }}
                         >
                             <CardActionArea
@@ -216,7 +216,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
                                     minHeight: 52,
                                     transition: 'all 0.3s ease',
                                     '&:hover': {
-                                        bgcolor: 'rgba(220, 187, 32, 0.08)',
+                                        bgcolor: 'rgba(25, 118, 210, 0.08)',
                                     },
                                 }}
                                 onClick={() => handleNotificationClick(noti)}

@@ -362,7 +362,7 @@ export const TokenListPage = () => {
           onClick={(e) => handleOpenMenu(e, params.row)}
           sx={{
             '&:hover': {
-              bgcolor: 'rgba(220, 187, 32, 0.1)',
+              bgcolor: 'rgba(25, 118, 210, 0.1)',
             },
           }}
         >
@@ -564,7 +564,7 @@ export const TokenListPage = () => {
               mx: 1,
               my: 0.5,
               '&:hover': {
-                backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
               },
             },
           },
