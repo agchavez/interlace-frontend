@@ -420,7 +420,7 @@ export const ListUserPage = () => {
               onClick={(e) => handleOpenMenu(e, params.row)}
               sx={{
                 '&:hover': {
-                  bgcolor: 'rgba(220, 187, 32, 0.1)',
+                  bgcolor: 'rgba(25, 118, 210, 0.1)',
                 },
               }}
             >

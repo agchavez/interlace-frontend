@@ -204,7 +204,7 @@ export const NotificationDetail: FC<NotificationDetailProps> = ({ select }) => {
                                                     key={index}
                                                     sx={{
                                                         bgcolor: isHighlighted
-                                                            ? 'rgba(220, 187, 32, 0.05)'
+                                                            ? 'rgba(25, 118, 210, 0.05)'
                                                             : 'transparent',
                                                     }}
                                                 >

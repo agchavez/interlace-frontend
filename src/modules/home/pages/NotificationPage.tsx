@@ -182,7 +182,7 @@ export const NotificationPage = () => {
                   fontSize: '0.8125rem',
                   fontWeight: 500,
                   '&:hover': {
-                    bgcolor: query.read === undefined ? 'primary.dark' : 'rgba(220, 187, 32, 0.08)',
+                    bgcolor: query.read === undefined ? 'primary.dark' : 'rgba(25, 118, 210, 0.08)',
                   },
                 }}
               />
@@ -204,7 +204,7 @@ export const NotificationPage = () => {
                   fontSize: '0.8125rem',
                   fontWeight: 500,
                   '&:hover': {
-                    bgcolor: query.read === false ? 'primary.dark' : 'rgba(220, 187, 32, 0.08)',
+                    bgcolor: query.read === false ? 'primary.dark' : 'rgba(25, 118, 210, 0.08)',
                   },
                 }}
               />
@@ -357,7 +357,7 @@ export const NotificationPage = () => {
                               sx={{
                                 borderRadius: 0,
                                 bgcolor: !noti.read
-                                  ? 'rgba(220, 187, 32, 0.06)'
+                                  ? 'rgba(25, 118, 210, 0.06)'
                                   : 'transparent',
                               }}
                             >
@@ -365,12 +365,12 @@ export const NotificationPage = () => {
                                 sx={{
                                   bgcolor:
                                     select?.id === noti.id
-                                      ? 'rgba(220, 187, 32, 0.15)'
+                                      ? 'rgba(25, 118, 210, 0.15)'
                                       : 'transparent',
                                   minHeight: 52,
                                   transition: 'all 0.3s ease',
                                   '&:hover': {
-                                    bgcolor: 'rgba(220, 187, 32, 0.12)',
+                                    bgcolor: 'rgba(25, 118, 210, 0.12)',
                                   },
                                 }}
                                 onClick={() => {

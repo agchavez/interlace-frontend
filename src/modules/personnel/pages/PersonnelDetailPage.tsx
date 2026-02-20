@@ -1158,7 +1158,7 @@ export const PersonnelDetailPage = () => {
               mx: 1,
               my: 0.5,
               '&:hover': {
-                backgroundColor: 'rgba(220, 187, 32, 0.1)',
+                backgroundColor: 'rgba(25, 118, 210, 0.1)',
               },
             },
           },

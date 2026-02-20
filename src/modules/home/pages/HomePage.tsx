@@ -998,7 +998,7 @@ export default function HomePage() {
               label: 'Personal por Jerarquía',
               data: personnelDashboard?.by_hierarchy?.map((item) => item.count) || [],
               backgroundColor: [
-                'rgba(220, 187, 32, 0.8)',   // Primary DCBB20
+                'rgba(25, 118, 210, 0.8)',   // Primary DCBB20
                 'rgba(245, 213, 71, 0.8)',   // Primary Light
                 'rgba(52, 73, 94, 0.8)',     // Secondary Dark
                 'rgba(127, 140, 143, 0.8)',  // Secondary Light
@@ -1103,7 +1103,7 @@ export default function HomePage() {
               label: 'Personal por Área',
               data: personnelDashboard?.by_area?.map((item) => item.count) || [],
               backgroundColor: [
-                'rgba(220, 187, 32, 0.85)',   // Primary
+                'rgba(25, 118, 210, 0.85)',   // Primary
                 'rgba(52, 169, 219, 0.85)',   // Info
                 'rgba(39, 174, 96, 0.85)',    // Success
                 'rgba(243, 156, 18, 0.85)',   // Warning

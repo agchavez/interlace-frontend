@@ -13,7 +13,7 @@ export function LoginPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+                background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 50%, #0d47a1 100%)',
                 position: 'relative',
                 pt: { xs: '80px', sm: 3, md: 3 }, // Padding top mayor en móviles para compensar navbar
                 pb: { xs: 2, sm: 3, md: 3 },
@@ -26,7 +26,7 @@ export function LoginPage() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'radial-gradient(circle at 20% 50%, rgba(220, 187, 32, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.2) 0%, transparent 50%)',
+                    background: 'radial-gradient(circle at 20% 50%, rgba(25, 118, 210, 0.2) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(25, 118, 210, 0.2) 0%, transparent 50%)',
                     pointerEvents: 'none',
                     animation: 'gradient-shift 15s ease infinite',
                 },
