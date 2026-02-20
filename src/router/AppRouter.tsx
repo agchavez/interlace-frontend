@@ -1,5 +1,5 @@
 
-import { useEffect, lazy, useMemo, useState } from 'react'
+import { useEffect, lazy, useMemo } from 'react'
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { PrivateRoute } from "./PrivateRoute";
 import { useAppDispatch, useAppSelector } from '../store';
@@ -19,17 +19,17 @@ import { useSidebar } from '../modules/ui/context/SidebarContext';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
-const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
-const TrackerT2Router = lazy(() => import('../modules/tracker_t2/TrackerT2Router'));
-const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
-const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
+// const TrackerRouter = lazy(() => import('../modules/tracker/TrackerRouter'));
+// const TrackerT2Router = lazy(() => import('../modules/tracker_t2/TrackerT2Router'));
+// const ReportRouter = lazy(() => import('../modules/report/ReportRouter'));
+// const OrderRouter = lazy(() => import('../modules/order/OrderRouter'));
 const InventoryRouter = lazy(() => import('../modules/inventory/InventoryRouter'));
-const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
+// const ClaimRouter = lazy(() => import('../modules/claim/ClaimRouter.tsx'));
 const MaintenanceRouter = lazy(() => import('../modules/maintenance/MaintenanceRouter'));
 const PersonnelRouter = lazy(() => import('../modules/personnel/PersonnelRouter'));
 const TokenRouter = lazy(() => import('../modules/tokens/TokenRouter'));
 const PublicTokenPage = lazy(() => import('../modules/tokens/pages/PublicTokenPage').then(m => ({ default: m.PublicTokenPage })));
-const SidebarV2Demo = lazy(() => import('../modules/ui/pages/SidebarV2Demo'));
+
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch()
@@ -101,39 +101,39 @@ export function AppRouter() {
                         } />
                     </PrivateRoute>
                 } />
-                <Route path="/tracker/*" element={
+                {/* <Route path="/tracker/*" element={
                     <PrivateRoute access={status === 'authenticated'} path='/' next={next || undefined}>
                         <LazyLoading Children={
                             TrackerRouter
                         } />
                     </PrivateRoute>
-                } />
-                <Route path="/tracker-t2/*" element={
+                } /> */}
+                {/* <Route path="/tracker-t2/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             TrackerT2Router
                         } />
                     </PrivateRoute>
-                } />
+                } /> */}
                 <Route path="/*" element={
                     <PrivateRoute access={status === 'authenticated'} path='/auth/login' next={next || undefined}>
                         <HomeRouter />
                     </PrivateRoute>
                 } />
-                <Route path="/report/*" element={
+                {/* <Route path="/report/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             ReportRouter
                         } />
                     </PrivateRoute>
-                } />
-                <Route path="/order/*" element={
+                } /> */}
+                {/* <Route path="/order/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             OrderRouter
                         } />
                     </PrivateRoute>
-                } />
+                } /> */}
                 <Route path="/inventory/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
@@ -148,13 +148,13 @@ export function AppRouter() {
                         } />
                     </PrivateRoute>
                 } />
-                <Route path="/claim/*" element={
+                {/* <Route path="/claim/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             ClaimRouter
                         } />
                     </PrivateRoute>
-                } />
+                } /> */}
                 <Route path="/personnel/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={

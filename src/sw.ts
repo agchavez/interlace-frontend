@@ -72,7 +72,7 @@ self.addEventListener('push', (event: PushEvent) => {
     body: notificationData.body,
     icon: notificationData.icon,
     badge: notificationData.badge,
-    tag: notificationData.tag || 'tracker-notification',
+    tag: notificationData.tag || 'interlace-notification',
     data: notificationData.data,
     requireInteraction: false,
     vibrate: [200, 100, 200],
