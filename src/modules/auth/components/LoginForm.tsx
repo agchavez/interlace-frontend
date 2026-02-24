@@ -107,8 +107,24 @@ export function LoginForm() {
                 setErrorMessage(error.data.mensage)
                 toast.error(error.data.mensage)
             } else if (error?.data?.detail) {
-                setErrorMessage(error.data.detail)
-                toast.error(error.data.detail)
+                const detail = error.data.detail
+                let msg: string
+                if (typeof detail === 'string') {
+                    msg = detail
+                } else {
+                    const msgs: string[] = []
+                    Object.keys(detail).forEach((key) => {
+                        const field = detail[key]
+                        if (Array.isArray(field)) {
+                            field.forEach((e: any) => {
+                                msgs.push(typeof e === 'string' ? e : e?.message ?? '')
+                            })
+                        }
+                    })
+                    msg = msgs[0] || 'Error al iniciar sesión'
+                }
+                setErrorMessage(msg)
+                toast.error(msg)
             } else if (error?.data?.non_field_errors) {
                 const errorMsg = Array.isArray(error.data.non_field_errors)
                     ? error.data.non_field_errors[0]
