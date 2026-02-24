@@ -93,7 +93,7 @@ export function LoginForm() {
 
         // Transformar data para que coincida con LoginBody
         await loginAPI({
-            email: data.email,
+            login: data.email,
             password: data.password
         })
     }
