@@ -306,7 +306,7 @@ export const MetricTypesPage = () => {
 
       <Alert severity="info" sx={{ mb: 3 }}>
         <strong>Métricas Automáticas:</strong> Las métricas se pueden alimentar automáticamente desde otros sistemas
-        como TAT (para OPM) o módulo de Picking/Conteo (para Pickers). Configure el tipo y unidad correctamente.
+        . Configure el tipo y unidad correctamente.
       </Alert>
 
       <Card>

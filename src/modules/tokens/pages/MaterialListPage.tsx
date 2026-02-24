@@ -229,7 +229,7 @@ export const MaterialListPage = () => {
       width: 120,
       renderCell: (params: GridRenderCellParams<Material>) => (
         <Typography variant="body2">
-          L {params.row.unit_value.toFixed(2)}
+          L {parseFloat(params.row.unit_value as any || 0).toFixed(2)}
         </Typography>
       ),
     },
