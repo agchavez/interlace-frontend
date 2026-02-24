@@ -27,11 +27,11 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { logout } from '../../../store/auth';
 import { ChangeDistributorCenter } from './ChangeDistributorCenter';
-import {setOpenChangeDistributionCenter, toggleSidebar} from '../../../store/ui/uiSlice';
+import {setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice';
 import NotificationsNoneTwoToneIcon from '@mui/icons-material/NotificationsNoneTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BootstrapDialogTitle from './BootstrapDialogTitle';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useGetMyProfileQuery } from '../../personnel/services/personnelApi';
 import { useSidebar } from '../context/SidebarContext';
 
@@ -56,13 +56,11 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
     const { toggleCollapsed } = useSidebar();
 
     // Obtener foto del perfil con SAS token actualizado
-    const { data: profileData, error: profileError } = useGetMyProfileQuery(undefined, {
+    const { data: profileData } = useGetMyProfileQuery(undefined, {
         skip: status !== 'authenticated',
         refetchOnMountOrArgChange: true,
     });
 
-    // Verificar si el usuario tiene perfil
-    const hasProfile = profileData && 'id' in profileData;
 
     const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
         setAnchorEl(event.currentTarget);
