@@ -7,12 +7,10 @@ import {
   Divider,
   Typography,
   Grid,
-  IconButton,
   TextField,
 } from "@mui/material";
 import { FC, useEffect } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { useAppSelector } from "../../../store";
 import { ProductSelect } from "../../ui/components/ProductSelect";
 import { Controller, useForm } from "react-hook-form";
@@ -21,6 +19,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { format, isValid } from "date-fns";
 import MultipleSelectChip from "./MultipleSelectChip";
 import { DistributionCenter } from "../../../interfaces/maintenance";
+import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 export interface FormFilterInventory {
   limit: number;
@@ -167,34 +166,13 @@ export const FilterInventory: FC<FilterManageProps> = ({
         <Box
           sx={{ width: 350 }}
           role="presentation"
-          //   onClick={toggleDrawer(anchor, false)}
-          //   onKeyDown={toggleDrawer(anchor, false)}
         >
-          <div
-            style={{ padding: "0.5rem", display: "flex", alignItems: "center" }}
-          >
-            <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-              <FilterListTwoToneIcon sx={{ mr: 1 }} />
-              <Typography
-                variant="h6"
-                component="div"
-                fontWeight={200}
-                lineHeight="2rem"
-              >
-                Filtros
-              </Typography>
-            </div>
-            <div>
-              <IconButton
-                size="small"
-                onClick={handleReset}
-                // Al poner el cursor encima del icono se muestra el texto
-                title="Limpiar filtros"
-              >
-                <RotateLeftIcon />
-              </IconButton>
-            </div>
-          </div>
+          <StandardDrawerHeader
+            title="Filtros"
+            icon={<FilterListTwoToneIcon />}
+            onClose={handleClose || (() => {})}
+            onReset={handleReset}
+          />
           <Divider />
           <List>
             <ListItem disablePadding sx={{ pl: 2 }}>

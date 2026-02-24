@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 
 import { errorApiHandler } from "../../../utils/error";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 import ClaimTabs from "./ClaimTabs";
 
 import ClaimEditDocumentation, { EditFormData } from "./ClaimEditDocumentation";

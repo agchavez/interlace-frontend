@@ -72,7 +72,7 @@ export const TakeClaimModal: FC<ClaimModalProps> = ({
   return (
     <BootstrapDialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
       <BootstrapDialogTitleGray onClose={onClose} id="customized-dialog-title">
-        <Typography variant="h6" color="black" fontWeight={450}>
+        <Typography variant="h6" color="#fff" fontWeight={450}>
           {islocal ? "Tomar Alerta de Calidad - Tracker Local" : "Tomar Reclamo - Tracker Importado"}
         </Typography>
       </BootstrapDialogTitleGray>

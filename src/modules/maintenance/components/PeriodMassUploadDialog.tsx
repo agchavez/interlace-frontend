@@ -11,7 +11,7 @@ import {
     Paper,
 } from "@mui/material";
 
-import DialogTitle from "../../ui/components/BoostrapDialog";
+import DialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { BootstrapDialog } from "../../tracker/components/ClaimDialog";
 import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";

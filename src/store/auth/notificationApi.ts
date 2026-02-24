@@ -43,10 +43,30 @@ export const notificationApiALL = createApi({
                 `/notification/?limit=${limit}&offset=${offset}`,
             providesTags: ['Notifications'],
         }),
+
+        // Marcar como leída
+        markNotificationAsRead: builder.mutation<Notification, number>({
+            query: (id) => ({
+                url: `/notification/${id}/mark_read/`,
+                method: 'POST',
+            }),
+            invalidatesTags: ['Notifications'],
+        }),
+
+        // Marcar todas como leídas
+        markAllNotificationsAsRead: builder.mutation<void, void>({
+            query: () => ({
+                url: `/notification/mark_all_read/`,
+                method: 'POST',
+            }),
+            invalidatesTags: ['Notifications'],
+        }),
     }),
 });
 
 export const {
     useGetUnreadNotificationsQuery,
     useGetAllNotificationsQuery,
+    useMarkNotificationAsReadMutation,
+    useMarkAllNotificationsAsReadMutation,
 } = notificationApiALL;

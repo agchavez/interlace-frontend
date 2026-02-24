@@ -1,12 +1,12 @@
 import { FC, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useAppSelector } from "../../../store";
-import { Box, Drawer, Typography, IconButton, Divider, List, Grid, TextField, FormControlLabel, Checkbox, ListItem, ListItemText, FormGroup, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Drawer, Typography, Divider, List, Grid, TextField, FormControlLabel, Checkbox, ListItem, ListItemText, FormGroup, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import FilterListTwoToneIcon from '@mui/icons-material/FilterListTwoTone';
-import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import { Status } from "../../../interfaces/trackingT2";
 import { DatePicker } from "@mui/x-date-pickers";
 import { format, isValid } from "date-fns";
+import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -104,34 +104,13 @@ export const FilterPreSale:FC<FilterT2ManageProps> = ({open, handleClose, handle
         <Box
           sx={{ width: 350 }}
           role="presentation"
-          //   onClick={toggleDrawer(anchor, false)}
-          //   onKeyDown={toggleDrawer(anchor, false)}
         >
-          <div
-            style={{ padding: "0.5rem", display: "flex", alignItems: "center" }}
-          >
-            <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-              <FilterListTwoToneIcon sx={{ mr: 1 }} />
-              <Typography
-                variant="h6"
-                component="div"
-                fontWeight={200}
-                lineHeight="2rem"
-              >
-                Filtros
-              </Typography>
-            </div>
-            <div>
-              <IconButton
-                size="small"
-                onClick={handleReset}
-                // Al poner el cursor encima del icono se muestra el texto
-                title="Limpiar filtros"
-              >
-                <RotateLeftIcon />
-              </IconButton>
-            </div>
-          </div>
+          <StandardDrawerHeader
+            title="Filtros"
+            icon={<FilterListTwoToneIcon />}
+            onClose={handleClose || (() => {})}
+            onReset={handleReset}
+          />
           <Divider />
           <List>
             <Grid container sx={{ p: 1 }}>

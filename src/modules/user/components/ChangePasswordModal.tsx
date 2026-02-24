@@ -1,7 +1,6 @@
 
-import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, TextField, Typography, styled } from "@mui/material";
+import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, Grid, TextField, Typography, styled } from "@mui/material";
 import { FunctionComponent, useEffect } from "react";
-import CloseIcon from '@mui/icons-material/Close';
 import { GetAUserResponse, User } from "../../../interfaces/user";
 
 import { useForm } from "react-hook-form";
@@ -9,6 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { startResetPassword } from '../../../store/user/thunk';
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -59,24 +59,11 @@ export const ChangePasswordModal: FunctionComponent<DeleteCheckProps> = ({ open,
 
 
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-            Restablecer Contraseña
-        </DialogTitle>
-        <IconButton
-            aria-label="close"
-            onClick={() => handleClose && handleClose()}
-            sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-                textDecoration: 'underline', // Agrega un subrayado para hacerlo parecer un enlace
-                cursor: 'pointer', // Cambia el cursor al estilo "mano" para indicar que es interactivo
-            }}
-            color="primary"
-        >
-            <CloseIcon />
-        </IconButton>
+        <BootstrapDialogTitle id="customized-dialog-title" onClose={() => handleClose && handleClose()}>
+            <Typography variant="h6" fontWeight={600} color={'#fff'}>
+                Restablecer Contraseña
+            </Typography>
+        </BootstrapDialogTitle>
         <DialogContent dividers >
             <Box >
                 <Container maxWidth="xl">

@@ -7,7 +7,7 @@ import {
     Button,
     TextField, Typography, Box, Divider
 } from "@mui/material";
-import DialogTitle from "../../ui/components/BoostrapDialog";
+import DialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { useForm } from "react-hook-form";
 import {CountrySelect} from "../../ui/components/CountrySelect.tsx";
 import {DistributorCenter} from "../../../interfaces/maintenance";

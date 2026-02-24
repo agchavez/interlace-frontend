@@ -1,0 +1,112 @@
+name: Build and Deploy Frontend QA
+
+on:
+  push:
+    branches: [feature/personal]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: trainer
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=qa-
+            type=raw,value=qa-latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_JS_APP_API_URL=${{ secrets.VITE_JS_APP_API_URL }}
+            VITE_JS_APP_API_URL_WS=${{ secrets.VITE_JS_APP_API_URL_WS }}
+            VITE_JS_FRONTEND_URL=${{ secrets.VITE_JS_FRONTEND_URL }}
+            VITE_JS_APP_NAME=${{ secrets.VITE_JS_APP_NAME }}
+            VITE_JS_APP_VERSION=2.0.0
+            VITE_APP_DOMAIN=${{ secrets.VITE_APP_DOMAIN }}
+            VITE_VAPID_PUBLIC_KEY=${{ secrets.VITE_VAPID_PUBLIC_KEY }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+
+  cleanup:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: Delete old container versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'tracker-frontend'
+          package-type: 'container'
+          min-versions-to-keep: 5
+          delete-only-untagged-versions: 'false'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: trainer
+    steps:
+      - name: Trigger Dokploy deployment
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_APP_ID: ${{ secrets.DOKPLOY_FRONTEND_APP_ID }}
+        run: |
+          DOKPLOY_URL=${DOKPLOY_URL%/}
+
+          echo "Deploying Frontend to Dokploy..."
+
+          ENDPOINT="/api/application.deploy"
+          DATA="{\"applicationId\": \"$DOKPLOY_APP_ID\"}"
+
+          HTTP_CODE=$(curl -X 'POST' \
+            "$DOKPLOY_URL$ENDPOINT" \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -H "x-api-key: $DOKPLOY_API_KEY" \
+            -d "$DATA" \
+            -w "%{http_code}" \
+            -o response.txt \
+            -s)
+
+          echo "HTTP Status Code: $HTTP_CODE"
+          cat response.txt
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Deployment failed!"
+            exit 1
+          fi
+
+          echo "Frontend deployment triggered successfully!"

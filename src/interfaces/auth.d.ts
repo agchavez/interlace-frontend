@@ -53,8 +53,8 @@ export interface AccesoDetail {
 }
 
 
-type tipoNotificacion = 'UBICACION' | 'ALERTA' | 'RECORDATORIO' | 'TAREA' | 'MENSAJE' | 'OTRO' | 'CLAIM';
-type moduloNotificacion = 'DOCUMENTO' | 'OTRO';
+type tipoNotificacion = 'UBICACION' | 'ALERTA' | 'RECORDATORIO' | 'TAREA' | 'MENSAJE' | 'OTRO' | 'CLAIM' | 'ERROR' | 'ADVERTENCIA' | 'CONFIRMACION' | 'APROBACION' | 'APROVAL' | 'REJECTION';
+type moduloNotificacion = 'DOCUMENTO' | 'DOCUMENTOS' | 'OTRO' | 'TOKENS' | 'CLAIMS';
 export interface Notificacion {
     id:            number;
     created_at:        string;
@@ -63,8 +63,8 @@ export interface Notificacion {
     subtitle:     string;
     description:   string;
     read:         boolean;
-    identifier: null;
-    url:           null;
+    identifier:    number | null;
+    url:           string | null;
     module:        moduloNotificacion;
     user:       number;
     html:          string;

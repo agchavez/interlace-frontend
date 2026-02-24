@@ -92,7 +92,7 @@ export const RejectClaimModal: FC<ClaimModalProps> = ({
   return (
     <BootstrapDialog open={open} maxWidth="lg" fullWidth onClose={onClose}>
       <BootstrapDialogTitleGray onClose={onClose} id="customized-dialog-title">
-        <Typography variant="h6" color="#000" fontWeight={450}>
+        <Typography variant="h6" color="#fff" fontWeight={450}>
           {islocal
             ? "Rechazar Alerta de Calidad - Tracker Local"
             : "Rechazar Reclamo - Tracker Importado"}

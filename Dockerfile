@@ -1,20 +1,60 @@
-# Usa una imagen base adecuada
-FROM node:20
+# ==========================================
+# Etapa 1: Build de la aplicación
+# ==========================================
+FROM node:18-alpine AS builder
 
-# Establece el directorio de trabajo
+# Directorio de trabajo
 WORKDIR /app
 
-# Copia el package.json y package-lock.json
+# Copiar package files
 COPY package*.json ./
 
-# Instala las dependencias
-RUN npm install
+# Instalar dependencias (usar ci para builds reproducibles)
+RUN npm ci
 
-# Copia el resto de la aplicación
+# Copiar código fuente
 COPY . .
 
-# Expone el puerto en el que corre la aplicación
-EXPOSE 3000
+# Build arguments para variables de entorno
+ARG VITE_JS_APP_API_URL
+ARG VITE_JS_APP_API_URL_WS
+ARG VITE_JS_FRONTEND_URL
+ARG VITE_JS_APP_NAME=Tracker
+ARG VITE_JS_APP_VERSION=2.0.0
+ARG VITE_APP_DOMAIN
+ARG VITE_VAPID_PUBLIC_KEY
 
-# Comando para correr la aplicación en modo desarrollo
-CMD ["npm", "run", "dev"]
+# Crear archivo .env para el build
+RUN echo "VITE_JS_APP_API_URL=${VITE_JS_APP_API_URL}" > .env && \
+    echo "VITE_JS_APP_API_URL_WS=${VITE_JS_APP_API_URL_WS}" >> .env && \
+    echo "VITE_JS_FRONTEND_URL=${VITE_JS_FRONTEND_URL}" >> .env && \
+    echo "VITE_JS_APP_NAME=${VITE_JS_APP_NAME}" >> .env && \
+    echo "VITE_JS_APP_VERSION=${VITE_JS_APP_VERSION}" >> .env && \
+    echo "VITE_APP_DOMAIN=${VITE_APP_DOMAIN}" >> .env && \
+    echo "VITE_VAPID_PUBLIC_KEY=${VITE_VAPID_PUBLIC_KEY}" >> .env
+
+# Build de producción
+RUN npm run build
+
+# ==========================================
+# Etapa 2: Nginx para servir archivos
+# ==========================================
+FROM nginx:alpine
+
+# Copiar configuración de nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copiar archivos compilados desde builder
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Copiar service worker de push notifications (IMPORTANTE!)
+COPY --from=builder /app/public/push-sw.js /usr/share/nginx/html/push-sw.js
+
+# Copiar iconos PWA
+COPY --from=builder /app/public/icons /usr/share/nginx/html/icons
+
+# Exponer puerto 80
+EXPOSE 80
+
+# Iniciar nginx
+CMD ["nginx", "-g", "daemon off;"]

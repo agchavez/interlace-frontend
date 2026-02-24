@@ -19,7 +19,7 @@ import { useAppDispatch } from "../../../store/store";
 import ExportManageMenu from "../components/ExportManageMenu";
 import { TabsGridManage } from '../components/TabsGridManage';
 import ChipFilterCategory from "../../ui/components/ChipFilter";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 
 
 
@@ -201,15 +201,15 @@ export const ManagePage = () => {
               )}
               {
                 (manageQueryParams.date_after || manageQueryParams.date_before) &&
-                <ChipFilterCategory 
+                <ChipFilterCategory
                     label="Fecha de Registro: "
                     items={[
                       {
-                          label: `Mayor que: ${manageQueryParams.date_after && format(new Date(manageQueryParams.date_after), 'dd/MM/yyyy')}`,
+                          label: `Mayor que: ${manageQueryParams.date_after && isValid(new Date(manageQueryParams.date_after)) ? format(new Date(manageQueryParams.date_after), 'dd/MM/yyyy') : 'N/A'}`,
                           id: "date_after",
                       },
                       {
-                          label: `Menor que: ${manageQueryParams.date_before && format(new Date(manageQueryParams.date_before), 'dd/MM/yyyy')}`,
+                          label: `Menor que: ${manageQueryParams.date_before && isValid(new Date(manageQueryParams.date_before)) ? format(new Date(manageQueryParams.date_before), 'dd/MM/yyyy') : 'N/A'}`,
                           id: "date_before",
                       },
                     ]}

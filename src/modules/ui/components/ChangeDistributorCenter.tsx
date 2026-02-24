@@ -3,7 +3,7 @@ import { Alert, Avatar, Dialog, List, ListItem, ListItemAvatar, ListItemButton, 
 import { useAppDispatch, useAppSelector } from '../../../store'
 import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice'
 import { changeDistributionCenter } from '../../../store/auth'
-import BootstrapDialogTitle from './BoostrapDialog'
+import BootstrapDialogTitle from './BootstrapDialogTitle'
 
 
 export const ChangeDistributorCenter = () => {

@@ -32,7 +32,7 @@ import {
 } from "../../../store/seguimiento/trackerApi";
 import { addOrderDetailState } from "../../../store/order";
 import { Tracker, TrackerProductDetail } from "../../../interfaces/tracking";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 interface CreateCheckProps {
   open: boolean;

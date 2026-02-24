@@ -5,9 +5,9 @@ import {
   Box,
   Button,
   Card,
+  CardContent,
   Chip,
   CircularProgress,
-  Divider,
   Grid,
   IconButton,
   Paper,
@@ -18,6 +18,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
@@ -35,9 +36,6 @@ import { PDFPreviewModal } from "../../ui/components/PDFPreviewModal";
 import { ImagePreviewModal } from "../../ui/components/ImagePreviewModal";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import TableChartIcon from "@mui/icons-material/TableChart";
-// Añadir estas importaciones al inicio del archivo
-import { useTheme } from "@mui/material";
-import PhotoCameraTwoToneIcon from "@mui/icons-material/PhotoCameraTwoTone";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import InventoryTwoToneIcon from "@mui/icons-material/InventoryTwoTone";
 import RejectClaimModal from "../components/RejectClaimModal";
@@ -50,13 +48,34 @@ import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import { useAppSelector } from "../../../store";
 import QRToBase64 from "../components/QRToBase64";
 import { parseTrackerSeguimiento } from "../../../store/seguimiento/trackerThunk";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 
-const claimStatuses = [
-  { value: "PENDIENTE", label: "Pendiente" },
-  { value: "EN_REVISION", label: "En Revisión" },
-  { value: "RECHAZADO", label: "Rechazado" },
-  { value: "APROBADO", label: "Aprobado" },
-];
+const claimStatuses: Record<string, { label: string; color: string; bgcolor: string; icon: React.ReactNode }> = {
+  PENDIENTE: { label: "Pendiente", color: "#ed6c02", bgcolor: "#fff4e5", icon: <PendingOutlinedIcon /> },
+  EN_REVISION: { label: "En Revisión", color: "#0288d1", bgcolor: "#e3f2fd", icon: <HourglassEmptyIcon /> },
+  RECHAZADO: { label: "Rechazado", color: "#d32f2f", bgcolor: "#ffebee", icon: <CancelOutlinedIcon /> },
+  APROBADO: { label: "Aprobado", color: "#2e7d32", bgcolor: "#e8f5e9", icon: <CheckCircleOutlineIcon /> },
+};
+
+// Componente para mostrar un campo de información
+const InfoField = ({ label, value, icon, color = "#1976d2" }: { label: string; value: React.ReactNode; icon?: React.ReactNode; color?: string }) => (
+  <Box sx={{ mb: 2 }}>
+    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+      {icon && <Box sx={{ color, display: 'flex' }}>{icon}</Box>}
+      {label}
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+      {value || "--"}
+    </Typography>
+  </Box>
+);
 
 interface ClaimDetailPageProps {
   canEditStatus?: boolean;
@@ -126,505 +145,287 @@ export default function ClaimDetailPage({
   if (!user||!claim) return null;
   if (!canViewPage) return (<Navigate to="/" />);
 
+  const statusConfig = claim?.status ? claimStatuses[claim.status] : null;
+
   return (
-    <>
-      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}?alertClaimOpen=true`} onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
-     {claim && <ClaimEditModal
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1600, mx: 'auto' }}>
+      <QRToBase64 value={`${import.meta.env.VITE_JS_FRONTEND_URL}/tracker/detail/${claim?.tracking?.id}?alertClaimOpen=true`} logoSrc="/logo-qr.png" onReady={(dataUrl) => setQrDataUrl(dataUrl)} />
+      {claim && <ClaimEditModal
           open={claimOpen}
           onClose={() => setClaimOpen(false)}
           claimId={claim?.id || 0}
           seguimiento={parseTrackerSeguimiento(claim.tracking)}
       />}
-      <Grid container spacing={1} sx={{ marginTop: 2, marginBottom: 5, mx: 2 }}>
-        <Grid item xs={12} md={showEditButton? 10: 11}>
-          <Typography
-            variant="h4"
-            component="h1"
-            fontWeight={400}
-            color={"#1c2536"}
-            align="center"
-            borderRadius={2}
-            sx={{
-              border: "1px solid #1c2536",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              padding: "8px 16px",
-            }}
-          >
-            {claim?.tracking?.distributor_center_data?.country_code && (
-              <Box
-                component="img"
-                src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png`}
-                srcSet={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png 2x`}
-                alt={claim?.tracking?.distributor_center_data.country_code}
-                sx={{
-                  width: 60,
-                  height: 40,
-                  border: "1px solid rgba(0,0,0,0.1)",
-                  borderRadius: "2px",
-                  boxShadow: "0px 1px 3px rgba(0,0,0,0.1)",
-                }}
-              />
-            )}
-            TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
-          </Typography>
-        </Grid>
-        {
-          showEditButton && canChangeInfo && (
-          <Grid 
-            item
-            xs={6}
-            md={1}
-            container
-            justifyContent="flex-end"
-            justifyItems="flex-end"
-            alignItems="center"
-            gap={1}
-          >
-            <IconButton color="primary" sx={{border: "1px solid #dadde9"}} onClick={() => setClaimOpen(true)}>
-              <EditTwoToneIcon fontSize="large" />
-            </IconButton>
-          </Grid>
-          )
-        }
-        <Grid
-          item
-          xs={6}
-          md={1}
-          container
-          justifyContent="flex-end"
-          justifyItems="flex-end"
-          alignItems="center"
-          gap={1}
-        >
-          <PDFDownloadLink
-            fileName={
-              claim ? `CLAIM-${claim.id?.toString().padStart(5, "0")}` : ""
-            }
-            document={<ClaimPDF claim={claim ? claim : undefined} qrDataUrl={qrDataUrl||''} />}
-          >
-            {({ loading: pdfLoading }) => {
-              const loading = pdfLoading;
-              return (
-                <IconButton color="secondary" disabled={loading}>
-                  <PictureAsPdfTwoToneIcon fontSize="large" />
-                </IconButton>
-              );
-            }}
-          </PDFDownloadLink>
-        </Grid>
 
-        <Grid item xs={12}>
-          <Card
-            sx={{
-              borderRadius: 2,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: 2,
-              }}
-            >
-              <Typography
-                variant="h6"
-                component="h1"
-                fontWeight={400}
-                color={"gray.500"}
-              >
-                Datos Generales
-              </Typography>
-              {/* Boton de editar datos */}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
-                {canChangeStatus && claim?.status === "PENDIENTE" && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="medium"
-                    onClick={() => setOpenTake(true)}
-                    startIcon={<AssignmentTurnedInTwoToneIcon />}
-                  >
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={400}
-                      color={"secondary"}
-                    >
-                      {islocal ? "Tomar Alerta de Calidad" : "Tomar Reclamo"}
-                    </Typography>
-                  </Button>
-                )}
-                {canChangeStatus && claim?.status === "EN_REVISION" && (!islocal) && (
-                  <Button
-                    variant="contained"
-                    color="error"
-                    size="medium"
-                    onClick={() => setOpenReject(true)}
-                    startIcon={<CancelTwoToneIcon />}
-                  >
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={400}
-                    >
-                      Rechazar
-                    </Typography>
-                  </Button>
-                )}
-                {canChangeStatus && claim?.status === "EN_REVISION" && (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    size="medium"
-                    onClick={() => setOpenAccept(true)}
-                    startIcon={<AssignmentTurnedInTwoToneIcon />}
-                  >
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={400}
-                    >
-                      Finalizar
-                    </Typography>
-                  </Button>
-                )}
+      {/* Header Principal */}
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 2,
+          bgcolor: '#1c2536',
+          color: 'white',
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', md: 'center' }, gap: 2 }}>
+            {/* Info Principal */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {claim?.tracking?.distributor_center_data?.country_code && (
+                <Box
+                  component="img"
+                  src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png`}
+                  alt={claim?.tracking?.distributor_center_data.country_code}
+                  sx={{ width: 50, height: 35, borderRadius: 1, border: '2px solid rgba(255,255,255,0.3)' }}
+                />
+              )}
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                  TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                  <Chip
+                    label={islocal ? "Alerta de Calidad" : "Importación"}
+                    size="small"
+                    sx={{ bgcolor: islocal ? 'warning.main' : 'info.main', color: 'white', fontWeight: 600, height: 24 }}
+                  />
+                  <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    {claim?.tracking?.distributor_center_data?.name}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-            <Divider />
-            <Box sx={{ padding: 2 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    {islocal ? "Motivo de Alerta de Calidad" : "Tipo de Reclamo"} 
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={600}
-                    color={"gray.500"}
-                  >
-                    {
-                      claim?.claim_type_data?.name
-                    }
-                  </Typography>
+
+            {/* Estado y Acciones */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {statusConfig && (
+                <Chip
+                  icon={<Box sx={{ color: 'inherit', display: 'flex', '& svg': { fontSize: 16 } }}>{statusConfig.icon}</Box>}
+                  label={statusConfig.label}
+                  sx={{
+                    bgcolor: statusConfig.bgcolor,
+                    color: statusConfig.color,
+                    fontWeight: 600,
+                    '& .MuiChip-icon': { ml: 0.5, color: statusConfig.color }
+                  }}
+                />
+              )}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {showEditButton && canChangeInfo && (
+                  <IconButton onClick={() => setClaimOpen(true)} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
+                    <EditTwoToneIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <PDFDownloadLink
+                  fileName={claim ? `CLAIM-${claim.id?.toString().padStart(5, "0")}` : ""}
+                  document={<ClaimPDF claim={claim ? claim : undefined} qrDataUrl={qrDataUrl || undefined} />}
+                >
+                  {({ loading: pdfLoading }) => (
+                    <IconButton disabled={pdfLoading} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' } }}>
+                      {pdfLoading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <PictureAsPdfTwoToneIcon fontSize="small" />}
+                    </IconButton>
+                  )}
+                </PDFDownloadLink>
+              </Box>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Botones de Acción */}
+      {canChangeStatus && (claim?.status === "PENDIENTE" || claim?.status === "EN_REVISION") && (
+        <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+          {claim?.status === "PENDIENTE" && (
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => setOpenTake(true)}
+              startIcon={<AssignmentTurnedInTwoToneIcon />}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1.5,
+                textTransform: 'none',
+                fontWeight: 600,
+                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+              }}
+            >
+              {islocal ? "Tomar Alerta de Calidad" : "Tomar Reclamo"}
+            </Button>
+          )}
+          {claim?.status === "EN_REVISION" && !islocal && (
+            <Button
+              variant="contained"
+              color="error"
+              size="large"
+              onClick={() => setOpenReject(true)}
+              startIcon={<CancelTwoToneIcon />}
+              sx={{ borderRadius: 2, px: 3, py: 1.5, textTransform: 'none', fontWeight: 600 }}
+            >
+              Rechazar Reclamo
+            </Button>
+          )}
+          {claim?.status === "EN_REVISION" && (
+            <Button
+              variant="contained"
+              color="success"
+              size="large"
+              onClick={() => setOpenAccept(true)}
+              startIcon={<AssignmentTurnedInTwoToneIcon />}
+              sx={{ borderRadius: 2, px: 3, py: 1.5, textTransform: 'none', fontWeight: 600, boxShadow: '0 4px 12px rgba(46, 125, 50, 0.3)' }}
+            >
+              Finalizar y Aprobar
+            </Button>
+          )}
+        </Box>
+      )}
+
+      <Grid container spacing={2}>
+        {/* Información General */}
+        <Grid item xs={12} md={8}>
+          <Card variant="outlined" sx={{ borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <InfoOutlinedIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                Información General
+              </Typography>
+
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InfoField label={islocal ? "Motivo de Alerta" : "Tipo de Reclamo"} value={claim?.claim_type_data?.name} />
                 </Grid>
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    Centro de Distribución
-                  </Typography>
-                  <Divider />
-                  <Chip
-                      sx={{ cursor: "default" }}
-                      label={claim?.tracking?.distributor_center_data.name}
-                      size={"small"}
-                      avatar={
-                          // <Box
-                          //     component="img"
-                          //     src={`https://flagcdn.com/w20/${row.data_country.flag.toLowerCase()}.png`}
-                          //     srcSet={`https://flagcdn.com/w40/${row.data_country.flag.toLowerCase()}.png 2x`}
-                          //     alt=""
-                          //     sx={{ width: 20, height: 14, ml: 1 }}
-                          // />
-                          <Avatar
-                              src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data.country_code.toLowerCase()}.png`}
-                              alt={claim?.tracking?.distributor_center_data.country_code}
-                              sizes={"small"}
-                              />
-                      }
+                <Grid item xs={12} sm={6} md={4}>
+                  <InfoField label={islocal ? "No. Memorandum" : "No. Reclamo"} value={claim?.claim_number} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <InfoField label="Tracking" value={`TRK-${claim?.tracking?.id?.toString().padStart(5, "0")}`} />
+                </Grid>
+                {!islocal && (
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoField label="Documento de Descarte" value={claim?.discard_doc} />
+                  </Grid>
+                )}
+                <Grid item xs={12} sm={6} md={4}>
+                  <InfoField
+                    label="Centro de Distribución"
+                    value={
+                      <Chip
+                        size="small"
+                        label={claim?.tracking?.distributor_center_data?.name}
+                        avatar={<Avatar src={`https://flagcdn.com/w80/${claim?.tracking?.distributor_center_data?.country_code?.toLowerCase()}.png`} sx={{ width: 20, height: 20 }} />}
+                        sx={{ mt: 0.5 }}
+                      />
+                    }
                   />
                 </Grid>
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    {
-                      islocal ? "Numero de Memorandum" : "Número de Reclamo"
-                    }
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={600}
-                    color={"gray.500"}
-                  >
-                    {claim?.claim_number}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    Tracking
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={600}
-                    color={"gray.500"}
-                  >
-                    TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
-                  </Typography>
-                </Grid>
-
-                {/* Documento de Descarte */}
-                {
-                  !islocal && (
-                    <Grid item xs={6} md={6} lg={4} xl={3}>
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={400}
-                        color={"gray.500"}
-                      >
-                        Documento de Descarte{" "}
-                      </Typography>
-                      <Divider />
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={400}
-                        color={"gray.500"}
-                      >
-                        {claim?.discard_doc}
-                      </Typography>
-                    </Grid>
-                  )
-                }
-                {/* Estado del Reclamo */}
-                <Grid item xs={6} md={6} lg={4} xl={3}>
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={400}
-                    color={"gray.500"}
-                  >
-                    Estado
-                  </Typography>
-                  <Divider />
-                  <Typography
-                    variant="body1"
-                    component="h1"
-                    fontWeight={600}
-                    color={"gray.500"}
-                  >
-                    {claim?.status &&
-                      claimStatuses.find(
-                        (status) => status.value === claim.status
-                      )?.label}
-                  </Typography>
-                </Grid>
-
-                {/* Motivo de Rechazo */}
-                {claim?.status === "RECHAZADO" && (
-                  <Grid item xs={12}>
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={400}
-                      color={"gray.500"}
-                    >
-                      Motivo de Rechazo
-                    </Typography>
-                    <Divider />
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={600}
-                      color={"gray.500"}
-                    >
-                      {claim?.reject_reason}
-                    </Typography>
-                  </Grid>
-                )}
-
-                {/* Observaciones */}
-                <Grid item xs={12}>
-                  <Grid
-                    container
-                    direction="row"
-                    justifyContent="space-between"
-                  >
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={400}
-                      color={"gray.500"}
-                    >
-                      Observaciones del Reclamo
-                    </Typography>
-                  </Grid>
-                  <Divider />
-                  <pre>
-                    <Typography
-                      variant="body1"
-                      component="h1"
-                      fontWeight={600}
-                      color={"gray.500"}
-                      // que se acomode al texto
-                      style={{ whiteSpace: "pre-wrap" }}
-                    >
-                      {claim?.observations || "--"}
-                    </Typography>
-                  </pre>
-                </Grid>
-
-                {/* Observaciones aprobadas */}
-                {claim?.status === "APROBADO" && (
-                  <Grid item xs={12}>
-                    <Grid
-                      container
-                      direction="row"
-                      justifyContent="space-between"
-                    >
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={400}
-                        color={"gray.500"}
-                      >
-                        Observaciones de Aprobación
-                      </Typography>
-                    </Grid>
-                    <Divider />
-                    <pre>
-                      <Typography
-                        variant="body1"
-                        component="h1"
-                        fontWeight={600}
-                        color={"gray.500"}
-                        // que se acomode al texto
-                        style={{ whiteSpace: "pre-wrap" }}
-                      >
-                        {claim?.approve_observations || "--"}
-                      </Typography>
-                    </pre>
-                  </Grid>
-                )}
               </Grid>
-            </Box>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ my: 3, p: 2 }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  mb: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  borderBottom: `2px solid ${theme.palette.primary.main}`,
-                  pb: 1,
-                }}
-              >
-                <InventoryIcon sx={{ mr: 1 }} />
-                Productos asociados al reclamo
+
+              {/* Observaciones */}
+              <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.50', borderRadius: 2, border: '1px solid', borderColor: 'grey.200' }}>
+                <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <DescriptionOutlinedIcon sx={{ fontSize: 18 }} /> Observaciones del Reclamo
+                </Typography>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary' }}>
+                  {claim?.observations || "Sin observaciones"}
+                </Typography>
+              </Box>
+
+              {/* Motivo de Rechazo */}
+              {claim?.status === "RECHAZADO" && claim?.reject_reason && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: '#ffebee', borderRadius: 2, border: '1px solid #ffcdd2' }}>
+                  <Typography variant="subtitle2" sx={{ color: '#c62828', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CancelOutlinedIcon sx={{ fontSize: 18 }} /> Motivo de Rechazo
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#b71c1c' }}>
+                    {claim?.reject_reason}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Observaciones de Aprobación */}
+              {claim?.status === "APROBADO" && claim?.approve_observations && (
+                <Box sx={{ mt: 2, p: 2, bgcolor: '#e8f5e9', borderRadius: 2, border: '1px solid #c8e6c9' }}>
+                  <Typography variant="subtitle2" sx={{ color: '#2e7d32', mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleOutlineIcon sx={{ fontSize: 18 }} /> Observaciones de Aprobación
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#1b5e20' }}>
+                    {claim?.approve_observations}
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Datos del Transporte */}
+        <Grid item xs={12} md={4}>
+          <Card variant="outlined" sx={{ borderRadius: 2, height: '100%' }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <LocalShippingOutlinedIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                Datos del Transporte
+              </Typography>
+
+              <InfoField label="Transportista" value={claim?.tracking?.transporter_data?.name} />
+              <InfoField label="Número de Placa" value={claim?.tracking?.plate_number} />
+              <InfoField label="Número de Rastra" value={claim?.tracking?.tariler_data?.code} />
+              {claim?.tracking?.type === "IMPORT" && (
+                <>
+                  <InfoField label="No. Contenedor" value={claim?.tracking?.container_number} />
+                  <InfoField label="No. Factura" value={claim?.tracking?.invoice_number} />
+                </>
+              )}
+              {claim?.tracking?.type === "LOCAL" && (
+                <InfoField label="Transferencia de Entrada" value={claim?.tracking?.input_document_number} />
+              )}
+              <InfoField label="Origen" value={claim?.origin_location_data?.name ? `${claim?.origin_location_data?.name} (${claim?.origin_location_data?.code})` : null} />
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Productos Afectados */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <InventoryIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                Productos Afectados
+                <Chip label={claim?.claim_products?.length || 0} size="small" sx={{ ml: 1, height: 20 }} />
               </Typography>
 
               {claim?.claim_products && claim.claim_products.length > 0 ? (
-                <TableContainer
-                  component={Paper}
-                  elevation={0}
-                  sx={{
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 1,
-                    mb: 3,
-                  }}
-                >
-                  <Table
-                    size="small"
-                    aria-label="tabla de productos reclamados"
-                  >
-                    <TableHead
-                      sx={{ backgroundColor: theme.palette.background.default }}
-                    >
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: "bold" }}>
-                          Código SAP
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: "bold" }}>
-                          Producto
-                        </TableCell>
-                        <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                          Cantidad
-                        </TableCell>
-                        <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                          Fecha
-                        </TableCell>
+                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 1 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: 'grey.50' }}>
+                        <TableCell sx={{ fontWeight: 600 }}>Código SAP</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Producto</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 600 }}>Cantidad</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Lote</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600 }}>Fecha</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {claim.claim_products.map((product) => (
-                        <TableRow
-                          key={product.id}
-                          sx={{
-                            "&:last-child td, &:last-child th": { border: 0 },
-                            "&:hover": {
-                              backgroundColor: alpha(
-                                theme.palette.primary.light,
-                                0.1
-                              ),
-                            },
-                            transition: "background-color 0.2s",
-                          }}
-                        >
-                          <TableCell component="th" scope="row">
-                            <Typography
-                              variant="body2"
-                              fontFamily="monospace"
-                              fontWeight={500}
-                            >
+                        <TableRow key={product.id} hover>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 500 }}>
                               {product.sap_code}
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2">
-                              {product.product_name}
-                            </Typography>
+                            <Typography variant="body2">{product.product_name}</Typography>
                           </TableCell>
                           <TableCell align="center">
-                            <Chip
-                              label={product.quantity}
-                              size="small"
-                              sx={{
-                                minWidth: "60px",
-                                backgroundColor: alpha(
-                                  theme.palette.primary.main,
-                                  0.1
-                                ),
-                                color: theme.palette.primary.main,
-                                fontWeight: "bold",
-                              }}
-                            />
+                            <Chip label={product.quantity} size="small" color="primary" variant="outlined" />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                              {product.batch || '--'}
+                            </Typography>
                           </TableCell>
                           <TableCell align="right">
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {new Date(
-                                product.created_at
-                              ).toLocaleDateString()}
+                            <Typography variant="body2" color="text.secondary">
+                              {new Date(product.created_at).toLocaleDateString()}
                             </Typography>
                           </TableCell>
                         </TableRow>
@@ -671,96 +472,78 @@ export default function ClaimDetailPage({
                   </Box>
                 </Paper>
               )}
-            </Box>
+            </CardContent>
           </Card>
-          <Divider sx={{ my: 2 }} />
-          <Grid item container xs={12}>
-            <FilesPreview
-              files={claim?.claim_file ? [claim?.claim_file] : []}
-              label={
-                islocal
-                  ? "Solicitud de Resolución (PDF/Excel)"
-                  : "Archivo Claim (PDF/Excel)"
-              }
-              colWidth={4}
-            />
-            <FilesPreview
-              files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
-              label="Memorandum (PDF)"
-              colWidth={4}
-            />
-            <FilesPreview
-              files={claim?.observations_file ? [claim?.observations_file] : []}
-              label="Observaciones (PDF)"
-              colWidth={4}
-            />
-          </Grid>
         </Grid>
-        <Divider sx={{ my: 2 }} />
-        <Grid item container xs={12}>
-          <Divider>
-            <Typography variant="body2" color="textSecondary">
-              Fotografías
-            </Typography>
-          </Divider>
-        </Grid>
-        <FilesPreview
-          files={claim?.photos_container_closed || []}
-          label={islocal ? "Rastra con Puerta/Lona Cerrada" : "Contenedor Cerrado"}
-        />
-        <FilesPreview
-          files={claim?.photos_container_one_open || []}
-          label={islocal ? "Rastra Con 1 Puerta/Lona Abierta" : "Contenedor Con 1 Puerta Abierta"}
-        />
-        <FilesPreview
-          files={claim?.photos_container_two_open || []}
-          label={islocal ? "Rastra Con 2 Puertas Abiertas" : "Contenedor con 2 puertas abiertas"}
-        />
-        <FilesPreview
-          files={claim?.photos_container_top || []}
-          label={islocal ? "Vista Superior del Contenido de la Rastra" : "Vista Superior del contenido del contenedor"}
-        />
-        <FilesPreview
-          files={claim?.photos_during_unload || []}
-          label="Fotografía durante la descarga"
-        />
-        <FilesPreview
-          files={claim?.photos_pallet_damage || []}
-          label="Fisuras/abolladuras de pallets"
-        />
-        <FilesPreview
-          files={claim?.photos_production_batch || []}
-          label="Lote de Producción"
-        />
-        <>
-          <Grid item container xs={12}>
-            <Divider>
-              <Typography variant="body2" color="textSecondary">
-                Producto dañado
+
+        {/* Documentos Adjuntos */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <DescriptionOutlinedIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                Documentos Adjuntos
               </Typography>
-            </Divider>
-          </Grid>
-          <FilesPreview
-            files={claim?.photos_damaged_product_base || []}
-            label="Base de la lata/botella (fecha de vencimiento y lote)"
-          />
-          <FilesPreview
-            files={claim?.photos_damaged_product_dents || []}
-            label="Abolladuras (mínimo 3 diferentes)"
-          />
-          <FilesPreview
-            files={claim?.photos_damaged_boxes || []}
-            label="Cajas dañadas por golpes o problemas de calidad"
-          />
-          <FilesPreview
-            files={claim?.photos_grouped_bad_product || []}
-            label="Producto en mal estado agrupado en 1 pallet"
-          />
-          <FilesPreview
-            files={claim?.photos_repalletized || []}
-            label="Repaletizado por identificación de producto dañado"
-          />
-        </>
+              <Grid container spacing={2}>
+                <FilesPreview
+                  files={claim?.claim_file ? [claim?.claim_file] : []}
+                  label={islocal ? "Solicitud de Resolución" : "Archivo Claim"}
+                  colWidth={4}
+                />
+                <FilesPreview
+                  files={claim?.credit_memo_file ? [claim?.credit_memo_file] : []}
+                  label="Memorandum"
+                  colWidth={4}
+                />
+                <FilesPreview
+                  files={claim?.observations_file ? [claim?.observations_file] : []}
+                  label="Observaciones"
+                  colWidth={4}
+                />
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Fotografías del Contenedor/Rastra */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PhotoLibraryIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                {islocal ? "Fotografías de la Rastra" : "Fotografías del Contenedor"}
+              </Typography>
+              <Grid container spacing={2}>
+                <FilesPreview files={claim?.photos_container_closed || []} label={islocal ? "Rastra Cerrada" : "Contenedor Cerrado"} />
+                <FilesPreview files={claim?.photos_container_one_open || []} label={islocal ? "1 Puerta/Lona Abierta" : "1 Puerta Abierta"} />
+                <FilesPreview files={claim?.photos_container_two_open || []} label={islocal ? "2 Puertas Abiertas" : "2 Puertas Abiertas"} />
+                <FilesPreview files={claim?.photos_container_top || []} label="Vista Superior" />
+                <FilesPreview files={claim?.photos_during_unload || []} label="Durante la Descarga" />
+                <FilesPreview files={claim?.photos_pallet_damage || []} label="Daños en Pallets" />
+                <FilesPreview files={claim?.photos_production_batch || []} label="Lote de Producción" />
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Fotografías de Producto Dañado */}
+        <Grid item xs={12}>
+          <Card variant="outlined" sx={{ borderRadius: 2 }}>
+            <CardContent sx={{ p: 2.5 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <InventoryTwoToneIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
+                Producto Dañado
+              </Typography>
+              <Grid container spacing={2}>
+                <FilesPreview files={claim?.photos_damaged_product_base || []} label="Base del Producto (Lote/Vencimiento)" />
+                <FilesPreview files={claim?.photos_damaged_product_dents || []} label="Abolladuras" />
+                <FilesPreview files={claim?.photos_damaged_boxes || []} label="Cajas Dañadas" />
+                <FilesPreview files={claim?.photos_grouped_bad_product || []} label="Producto Agrupado" />
+                <FilesPreview files={claim?.photos_repalletized || []} label="Repaletizado" />
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
       {openTake && (
         <TakeClaimModal
@@ -783,7 +566,7 @@ export default function ClaimDetailPage({
           open={openAccept}
         />
       )}
-    </>
+    </Box>
   );
 }
 
@@ -796,7 +579,6 @@ function FilesPreview({
   files?: ClaimFile[];
   colWidth?: number;
 }) {
-  const theme = useTheme(); // Añadir este hook
   const [selectedFile, setSelectedFile] = useState<ClaimFile | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -807,7 +589,7 @@ function FilesPreview({
       setLoading(true);
       const respuesta = await fetch(file.access_url);
       if (!respuesta.ok) throw new Error('Error al descargar el archivo');
-  
+
       const blob = await respuesta.blob();
       const enlace = document.createElement('a');
       enlace.href = URL.createObjectURL(blob);
@@ -835,227 +617,139 @@ function FilesPreview({
     setSelectedFile({ ...file, extension: filename.split(".").pop() || "" });
   };
 
-  // Obtener el icono adecuado según la extensión del archivo
-  const getFileIcon = (extension: string | undefined) => {
-    if (!extension)
-      return <InsertDriveFileIcon sx={{ fontSize: 30 }} color="disabled" />;
-
-    if (extension === "pdf") {
-      return <PictureAsPdfTwoToneIcon sx={{ fontSize: 30 }} color="error" />;
-    } else if (["jpg", "jpeg", "png", "webp"].includes(extension)) {
-      return <PhotoCameraTwoToneIcon sx={{ fontSize: 30 }} color="primary" />;
-    } else if (["xlsx", "xls", "csv"].includes(extension)) {
-      return <TableChartIcon sx={{ fontSize: 30 }} color="success" />;
-    } else {
-      return <InsertDriveFileIcon sx={{ fontSize: 30 }} color="action" />;
-    }
-  };
-
-  // Contenedor común para todos los tipos de archivos
-  const fileContainer = {
-    height: 200,
-    display: "flex",
-    flexDirection: "column",
-    border: "1px solid",
-    borderColor: theme.palette.divider,
-    borderRadius: 1,
-    p: 1,
-    m: 1,
-    position: "relative",
-    transition: "all 0.2s",
-    "&:hover": {
-      boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-      borderColor: theme.palette.primary.light,
-    },
-  };
-
   if (!files) return null;
 
   return (
-    <Grid item xs={12} md={colWidth}>
-      <Box
-        sx={{
-          borderBottom: `2px solid ${theme.palette.primary.main}`,
-          mb: 1,
-          pb: 0.5,
-          display: "flex",
-          alignItems: "center",
-          gap: 1,
-        }}
-      >
-        {getFileIcon(files?.[0]?.name.split(".").pop())}
-        <Typography variant="subtitle1" fontWeight={500}>
+    <Grid item xs={12} sm={6} md={colWidth}>
+      {/* Header de la sección */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
           {label}
         </Typography>
+        {files.length > 0 && (
+          <Chip label={files.length} size="small" sx={{ height: 20, fontSize: '0.7rem' }} />
+        )}
       </Box>
 
       {files.length === 0 ? (
-        // Placeholder uniforme cuando no hay archivos
-        <Box
-          sx={{
-            ...fileContainer,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: theme.palette.background.default,
-            height: 200,
-            cursor: "default",
-          }}
-        >
-          <InsertDriveFileIcon
-            sx={{ fontSize: 50, color: theme.palette.text.disabled, mb: 2 }}
-          />
-          <Typography variant="body2" color="text.secondary" align="center">
-            No hay documentos disponibles
+        <Box sx={{
+          p: 2,
+          borderRadius: 2,
+          border: '1px dashed',
+          borderColor: 'grey.300',
+          bgcolor: 'grey.50',
+          textAlign: 'center',
+          minHeight: 100,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <InsertDriveFileIcon sx={{ fontSize: 32, color: 'grey.400', mb: 1 }} />
+          <Typography variant="caption" color="text.secondary">
+            Sin archivos
           </Typography>
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexWrap: "wrap", mt: 1, minHeight: 200 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {files.map((file, index) => {
-            const extension = file.name.split(".").pop();
-            const isImage = ["jpg", "jpeg", "png", "webp"].includes(
-              extension || ""
-            );
+            const extension = file.name?.split(".")?.pop();
+            const isImage = ["jpg", "jpeg", "png", "webp"].includes(extension || "");
             const isPdf = extension === "pdf";
-            const isSpreadsheet = ["xlsx", "xls", "csv"].includes(
-              extension || ""
-            );
+            const isSpreadsheet = ["xlsx", "xls", "csv"].includes(extension || "");
 
             return (
               <Box
                 key={index}
                 sx={{
-                  ...fileContainer,
-                  width: files.length > 1 ? 140 : "100%",
+                  width: files.length === 1 ? '100%' : 120,
+                  height: files.length === 1 ? 180 : 120,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  position: 'relative',
+                  cursor: isImage || isPdf ? 'pointer' : 'default',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    transform: 'scale(1.02)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    borderColor: 'primary.main',
+                    '& .file-overlay': { opacity: 1 }
+                  },
                 }}
+                onClick={() => { if (isImage || isPdf) handlePreviewArchivo(index); }}
               >
-                {/* Parte superior - Contenido del archivo */}
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                    borderRadius: 1,
-                    cursor: isImage || isPdf ? "pointer" : "default",
-                    position: "relative",
-                    "&:hover .preview-overlay": {
-                      opacity: 1,
-                    },
-                  }}
-                  onClick={() => {
-                    if (isImage || isPdf) handlePreviewArchivo(index);
-                  }}
-                >
-                  {isImage ? (
-                    <>
-                      <img
-                        src={file.access_url}
-                        alt={`Documento ${index + 1}`}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                      <Box
-                        className="preview-overlay"
-                        sx={{
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                          width: "100%",
-                          height: "100%",
-                          backgroundColor: "rgba(0,0,0,0.5)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          opacity: 0,
-                          transition: "opacity 0.2s",
-                        }}
-                      >
-                        <ZoomInIcon sx={{ color: "white", fontSize: 28 }} />
-                      </Box>
-                    </>
-                  ) : (
-                    <Box sx={{ textAlign: "center" }}>
-                      {isPdf ? (
-                        <PictureAsPdfTwoToneIcon
-                          sx={{ fontSize: 50 }}
-                          color="error"
-                        />
-                      ) : isSpreadsheet ? (
-                        <TableChartIcon sx={{ fontSize: 50 }} color="success" />
-                      ) : (
-                        <InsertDriveFileIcon
-                          sx={{ fontSize: 50 }}
-                          color="action"
-                        />
-                      )}
-                      <Typography
-                        variant="caption"
-                        display="block"
-                        textTransform="uppercase"
-                      >
-                        {extension}
-                      </Typography>
+                {isImage ? (
+                  <>
+                    <img
+                      src={file.access_url}
+                      alt={`Archivo ${index + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <Box
+                      className="file-overlay"
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        bgcolor: 'rgba(0,0,0,0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        opacity: 0,
+                        transition: 'opacity 0.2s',
+                      }}
+                    >
+                      <ZoomInIcon sx={{ color: 'white', fontSize: 32 }} />
                     </Box>
-                  )}
-                </Box>
+                  </>
+                ) : (
+                  <Box sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: isPdf ? '#ffebee' : isSpreadsheet ? '#e8f5e9' : 'grey.100',
+                  }}>
+                    {isPdf ? (
+                      <PictureAsPdfTwoToneIcon sx={{ fontSize: 40 }} color="error" />
+                    ) : isSpreadsheet ? (
+                      <TableChartIcon sx={{ fontSize: 40 }} color="success" />
+                    ) : (
+                      <InsertDriveFileIcon sx={{ fontSize: 40 }} color="action" />
+                    )}
+                    <Typography variant="caption" sx={{ textTransform: 'uppercase', fontWeight: 600, color: 'text.secondary', mt: 0.5 }}>
+                      .{extension}
+                    </Typography>
+                  </Box>
+                )}
 
-                {/* Parte inferior - Nombre del archivo y acciones */}
+                {/* Botón de descarga */}
                 <Box
                   sx={{
-                    mt: 1,
-                    borderTop: `1px solid ${theme.palette.divider}`,
-                    pt: 1,
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    display="block"
-                    sx={{
-                      textOverflow: "ellipsis",
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                      textAlign: "center",
-                    }}
-                  >
-                    {file.name.split("/").pop()}
-                  </Typography>
-                </Box>
-
-                {/* Botones de acción */}
-                <Box
-                  sx={{
-                    position: "absolute",
+                    position: 'absolute',
                     top: 4,
                     right: 4,
-                    backgroundColor: "rgba(255,255,255,0.8)",
-                    borderRadius: "4px",
-                    padding: "2px",
-                    display: "flex",
-                    flexDirection: "column",
+                    display: 'flex',
+                    gap: 0.5,
                   }}
                 >
                   <IconButton
                     size="small"
-                    onClick={() => handleDownloadFile(index)}
-                    sx={{ mb: isImage || isPdf ? 0.5 : 0 }}
+                    onClick={(e) => { e.stopPropagation(); handleDownloadFile(index); }}
+                    sx={{
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                      '&:hover': { bgcolor: 'white' },
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    }}
                   >
-                    {
-                      loading ? <CircularProgress size={20} /> : <DownloadIcon fontSize="small" />
-                    }
+                    {loading ? <CircularProgress size={16} /> : <DownloadIcon sx={{ fontSize: 18 }} />}
                   </IconButton>
-
-                  {(isImage || isPdf) && (
-                    <IconButton
-                      size="small"
-                      onClick={() => handlePreviewArchivo(index)}
-                    >
-                      <ZoomInIcon fontSize="small" />
-                    </IconButton>
-                  )}
                 </Box>
               </Box>
             );

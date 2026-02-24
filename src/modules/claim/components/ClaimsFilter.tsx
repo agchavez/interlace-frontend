@@ -7,7 +7,6 @@ import {
   Typography,
   TextField,
   Grid,
-  IconButton,
   FormControl,
   InputLabel,
   Select,
@@ -16,11 +15,11 @@ import {
 import { FC, useEffect } from "react";
 import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { Controller, useForm } from "react-hook-form";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { isValid, format } from "date-fns";
 import { useAppSelector } from "../../../store";
 import { DatePicker } from "@mui/x-date-pickers";
 import { ClaimQueryParams, useGetClaimTypesQuery } from "../../../store/claim/claimApi";
+import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -176,30 +175,12 @@ export const ClaimsFilter: FC<ClaimsFilterProps> = ({
     <>
       <Drawer anchor="right" open={open} onClose={handleClose}>
         <Box sx={{ width: 350 }} role="presentation">
-          <div
-            style={{ padding: "0.5rem", display: "flex", alignItems: "center" }}
-          >
-            <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-              <FilterListTwoToneIcon sx={{ mr: 1 }} />
-              <Typography
-                variant="h6"
-                component="div"
-                fontWeight={200}
-                lineHeight="2rem"
-              >
-                Filtros
-              </Typography>
-            </div>
-            <div>
-              <IconButton
-                size="small"
-                onClick={handleReset}
-                title="Limpiar filtros"
-              >
-                <RotateLeftIcon />
-              </IconButton>
-            </div>
-          </div>
+          <StandardDrawerHeader
+            title="Filtros"
+            icon={<FilterListTwoToneIcon />}
+            onClose={handleClose || (() => {})}
+            onReset={handleReset}
+          />
           <Divider />
 
           {/* Búsqueda general */}

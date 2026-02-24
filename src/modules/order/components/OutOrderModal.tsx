@@ -22,7 +22,7 @@ import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { toast } from "sonner";
 import { OrderStore, addOutOrder } from "../../../store/order";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { FileUploader } from "react-drag-drop-files";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { FleetType, OutOrderType } from "../../../interfaces/orders";

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material"
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, Typography } from "@mui/material"
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAppDispatch, useAppSelector } from "../../../store";
 import { closeLogoutModal, logout, startUpdateToken } from "../../../store/auth";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 export const LogoutModal = () => {
 
@@ -66,15 +67,11 @@ export const LogoutModal = () => {
                     maxWidth='xs'
                     fullWidth
                 >
-                    <DialogTitle id="customized-dialog-title"> 
-                        <Typography
-                            variant="h6"
-                            component="span"
-                            sx={{ mr: 1 }}
-                        >
-                            {'Sesión expirada'}
+                    <BootstrapDialogTitle id="customized-dialog-title" onClose={logoutType === 'timeout' ? undefined : handleClose}>
+                        <Typography variant="h6" fontWeight={600} color={'#fff'}>
+                            Sesión expirada
                         </Typography>
-                    </DialogTitle>
+                    </BootstrapDialogTitle>
                     <DialogContent dividers>
                         <Typography
                             variant="body2"

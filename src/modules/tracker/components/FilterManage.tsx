@@ -11,7 +11,6 @@ import {
   FormControlLabel,
   TextField,
   Grid,
-  IconButton,
   FormControl,
   InputLabel,
   Select,
@@ -22,10 +21,10 @@ import FilterListTwoToneIcon from "@mui/icons-material/FilterListTwoTone";
 import { Controller, useForm } from "react-hook-form";
 import { TrailerSelect } from "../../ui/components";
 import { FilterDate } from "../../../interfaces/tracking";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import { isValid, format } from "date-fns";
 import { useAppSelector } from "../../../store";
 import { DatePicker } from "@mui/x-date-pickers";
+import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 
 const ITEM_HEIGHT = 48;
@@ -189,34 +188,13 @@ export const FilterManage: FC<FilterManageProps> = ({
         <Box
           sx={{ width: 350 }}
           role="presentation"
-          //   onClick={toggleDrawer(anchor, false)}
-          //   onKeyDown={toggleDrawer(anchor, false)}
         >
-          <div
-            style={{ padding: "0.5rem", display: "flex", alignItems: "center" }}
-          >
-            <div style={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-              <FilterListTwoToneIcon sx={{ mr: 1 }} />
-              <Typography
-                variant="h6"
-                component="div"
-                fontWeight={200}
-                lineHeight="2rem"
-              >
-                Filtros
-              </Typography>
-            </div>
-            <div>
-              <IconButton
-                size="small"
-                onClick={handleReset}
-                // Al poner el cursor encima del icono se muestra el texto
-                title="Limpiar filtros"
-              >
-                <RotateLeftIcon />
-              </IconButton>
-            </div>
-          </div>
+          <StandardDrawerHeader
+            title="Filtros"
+            icon={<FilterListTwoToneIcon />}
+            onClose={handleClose || (() => {})}
+            onReset={handleReset}
+          />
           <Divider />
           <List>
             <Grid container sx={{ p: 1 }}>
@@ -399,8 +377,13 @@ export const FilterManage: FC<FilterManageProps> = ({
                       inputRef={field.ref}
                       format="dd/MM/yyyy"
                       onChange={(date) => {
-                        isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                        // Actualizar si la fecha es válida o null
+                        if (date === null) {
+                          field.onChange(null);
+                        } else if (isValid(date)) {
+                          field.onChange(format(new Date(date), 'yyyy-MM-dd 00:00:00'));
+                        }
+                        // Si la fecha es inválida, no hacer nada (permitir seguir escribiendo)
                       }}
                     />
                   )}
@@ -419,8 +402,13 @@ export const FilterManage: FC<FilterManageProps> = ({
                       value={ isValid(new Date(watch("date_before") )) ? new Date(watch("date_before")) : null}
                       inputRef={field.ref}
                       onChange={(date) => {
-                        isValid(date) && date &&
-                        field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                        // Actualizar si la fecha es válida o null
+                        if (date === null) {
+                          field.onChange(null);
+                        } else if (isValid(date)) {
+                          field.onChange(format(new Date(date), 'yyyy-MM-dd 23:59:59'));
+                        }
+                        // Si la fecha es inválida, no hacer nada (permitir seguir escribiendo)
                       }}
                     />
                   )}

@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../store/store";
 import { toast } from "sonner";
 import { createLocationAndRoute } from "../../../store/order";
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog";
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle";
 
 interface CreateCheckProps {
   open: boolean;

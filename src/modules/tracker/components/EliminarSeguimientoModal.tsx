@@ -1,10 +1,9 @@
 
-import { Box, Button, Container, Dialog, DialogActions, DialogContent, Grid, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, Container, Dialog, DialogActions, DialogContent, Grid, Typography, styled } from "@mui/material";
 import { FunctionComponent } from "react";
-import CloseIcon from '@mui/icons-material/Close';
 import { useAppDispatch } from "../../../store";
 import { removeTracking } from "../../../store/seguimiento/trackerThunk";
-import DialogTitle from "../../ui/components/BoostrapDialog"
+import DialogTitle from "../../ui/components/BootstrapDialogTitle"
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -29,26 +28,11 @@ export const EliminarSeguimientoModal: FunctionComponent<DeleteCheckProps> = ({ 
         dispatch(removeTracking(index, seguimientoId))
     }
     return <BootstrapDialog open={open} onClose={handleClose} fullWidth={true} maxWidth="sm">
-        <DialogTitle id="customized-dialog-title">
-            <Box sx={{ m: 0, p: 2 }}>
+        <DialogTitle id="customized-dialog-title" onClose={() => handleClose && handleClose({}, "backdropClick")}>
+            <Typography variant="h6" fontWeight={600} color={'#fff'}>
                 Eliminar Seguimiento
-            </Box>
+            </Typography>
         </DialogTitle>
-        <IconButton
-            aria-label="close"
-            onClick={() => handleClose && handleClose({}, "backdropClick")}
-            sx={{
-                position: 'absolute',
-                right: 8,
-                top: 8,
-                color: (theme) => theme.palette.grey[500],
-                textDecoration: 'underline', // Agrega un subrayado para hacerlo parecer un enlace
-                cursor: 'pointer', // Cambia el cursor al estilo "mano" para indicar que es interactivo
-            }}
-            color="primary"
-        >
-            <CloseIcon />
-        </IconButton>
         <DialogContent dividers >
             <Box >
                 <Container maxWidth="xl">

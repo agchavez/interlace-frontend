@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { BootstrapDialog } from "../../tracker/components/ClaimDialog";
 import { Period } from "../../../interfaces/maintenance";
 import { ProductSelect } from "../../ui/components/ProductSelect";
-import DialogTitle from "../../ui/components/BoostrapDialog";
+import DialogTitle from "../../ui/components/BootstrapDialogTitle";
 import { format, isValid } from "date-fns";
 import { utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 import { useCreatePeriodMutation, useUpdatePeriodMutation } from "../../../store/maintenance/maintenanceApi.ts";

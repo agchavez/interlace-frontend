@@ -1,6 +1,6 @@
 import { Dialog, DialogActions, DialogContent, Typography, TextField, Button, Box, LinearProgress } from '@mui/material'
 import { FC, useRef } from "react"
-import BootstrapDialogTitle from "../../ui/components/BoostrapDialog"
+import BootstrapDialogTitle from "../../ui/components/BootstrapDialogTitle"
 import { useAppSelector, useAppDispatch } from '../../../store/store';
 import { useForm } from 'react-hook-form';
 import * as yup from 'yup';

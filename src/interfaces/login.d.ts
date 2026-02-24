@@ -52,10 +52,11 @@ export interface User {
     groups:              number[];
     user_permissions:    string[];
     distributions_centers: number[];
+    photo_url?:          string | null;
 }
 
 export interface LoginBody {
-    email: string;
+    login: string;
     password: string;
 }
 

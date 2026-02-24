@@ -9,31 +9,32 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import Grid from '@mui/material/Grid';
 
+import logo from "../../../assets/logo.png";
 
 const items = [
     {
         icon: <SettingsSuggestRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Rendimiento adaptable',
+        title: 'Gestión de Personal',
         description:
-            'Nuestra plataforma se ajusta sin esfuerzo a tus necesidades, mejorando la eficiencia y simplificando la gestión de traslados.',
+            'Administra tu equipo de trabajo de manera centralizada: perfiles, departamentos, historial y documentación de cada colaborador.',
     },
     {
         icon: <ConstructionRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Construido para durar',
+        title: 'Tokens y Solicitudes',
         description:
-            'Experimenta una durabilidad inigualable que va más allá, asegurando una inversión a largo plazo en la gestión de logística.',
+            'Gestiona permisos, horas extra, cambios de turno y pases de salida con un flujo de aprobación claro y trazable.',
     },
     {
         icon: <ThumbUpAltRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Excelente experiencia de usuario',
+        title: 'Evaluaciones de Desempeño',
         description:
-            'Integra nuestra plataforma en tu rutina con una interfaz intuitiva y fácil de usar, optimizando la gestión de pedidos y stocks.',
+            'Realiza seguimiento del rendimiento de tu personal con métricas configurables, evaluaciones periódicas y reportes detallados.',
     },
     {
         icon: <AutoFixHighRoundedIcon sx={{ color: 'text.secondary' }} />,
-        title: 'Funcionalidad innovadora',
+        title: 'Certificaciones y Competencias',
         description:
-            'Mantente a la vanguardia con características que establecen nuevos estándares, abordando tus necesidades logísticas en constante evolución.',
+            'Controla las certificaciones de tu equipo, recibe alertas de vencimiento y asegura el cumplimiento de requisitos en todo momento.',
     },
 ];
 
@@ -43,31 +44,38 @@ export default function Content() {
     
     return (
         <Box sx={{ maxWidth: isMobile ? '100%' : 450 }}>
-            <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', mb: 3 }}>
-                <Typography variant="h4" component="p" fontWeight={600}>
-                    {import.meta.env.VITE_JS_APP_NAME}
-                </Typography>
+            <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', mb: isMobile ? 2 : 3 }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <img src={logo} alt="img" width={isMobile ? 70 : 100} style={{ marginRight: '4px' }} />
+                    <Typography variant="body2" component="p" fontWeight={100} sx={{
+                        borderLeft: '2px solid black',
+                        paddingLeft: '4px',
+                        fontSize: isMobile ? '0.8125rem' : '0.875rem',
+                    }}>
+                        {import.meta.env.VITE_JS_APP_NAME}
+                    </Typography>
+                </div>
             </Box>
-            
+
             {isMobile ? (
                 // En móviles, mostrar en grid compacto
-                <Grid container spacing={2}>
+                <Grid container spacing={1.5}>
                     {items.map((item, index) => (
                         <Grid item xs={6} key={index}>
-                            <Box sx={{ 
-                                p: 1.5, 
+                            <Box sx={{
+                                p: 1.25,
                                 height: '100%',
                                 borderRadius: 1,
                                 backgroundColor: theme.palette.background.paper,
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                             }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.75 }}>
                                     {item.icon}
-                                    <Typography variant="subtitle2" sx={{ ml: 1, fontWeight: 'medium' }}>
+                                    <Typography variant="subtitle2" sx={{ ml: 0.75, fontWeight: 'medium', fontSize: '0.8125rem' }}>
                                         {item.title}
                                     </Typography>
                                 </Box>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
+                                <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', fontSize: '0.75rem', lineHeight: 1.4 }}>
                                     {item.description}
                                 </Typography>
                             </Box>

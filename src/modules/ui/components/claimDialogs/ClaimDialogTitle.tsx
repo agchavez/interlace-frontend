@@ -15,8 +15,8 @@ function BootstrapDialogTitleGray(props: DialogTitleProps) {
       sx={{
         m: 0,
         p: 0.5,
-        backgroundColor: "#eaedf6",
-        color: "#000",
+        backgroundColor: "#1c2536",
+        color: "#fff",
       }}
       {...other}
     >
@@ -36,10 +36,10 @@ function BootstrapDialogTitleGray(props: DialogTitleProps) {
             position: "absolute",
             right: 0,
             top: 2,
-            color: "#000",
+            color: "#fff",
           }}
         >
-          <CloseIcon fontSize="small" sx={{ color: "#000" }} />
+          <CloseIcon fontSize="small" sx={{ color: "#fff" }} />
         </IconButton>
       ) : null}
     </DialogTitle>

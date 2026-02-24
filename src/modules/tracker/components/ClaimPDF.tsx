@@ -135,9 +135,11 @@ function ClaimPDF({
               TRK-{claim?.tracking?.id?.toString().padStart(5, "0")}
             </PDFTitle>
           </View>
-          <View style={{ marginLeft: 10, marginRight: 10, borderRadius: 7 }}>
-            <Image src={qrDataUrl||''} style={{ width: 50, borderRadius: 7 }} />
-          </View>
+          {qrDataUrl && (
+            <View style={{ marginLeft: 10, marginRight: 10, borderRadius: 7 }}>
+              <Image src={qrDataUrl} style={{ width: 50, borderRadius: 7 }} />
+            </View>
+          )}
         </View>
         <View style={{ display: "flex", flexDirection: "row" }}>
           <View style={{ ...styles.section, flex: 1 }}>

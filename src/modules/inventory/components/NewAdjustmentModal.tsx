@@ -7,7 +7,7 @@ import { InventarioMovimentResult } from '../../../interfaces/tracking';
 import { SaveAltTwoTone } from '@mui/icons-material';
 import { NewAdjustmentForm } from './NewAdjustmentForm';
 import { VoucherNewAdjunstment } from './VoucherNewAdjunstment';
-import BootstrapDialogTitle from '../../ui/components/BoostrapDialog';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 
 interface NewAdjustmentModalProps {
     isOpen: boolean

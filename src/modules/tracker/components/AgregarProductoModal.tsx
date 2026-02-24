@@ -13,7 +13,7 @@ import { Product } from '../../../interfaces/tracking';
 import { ProductSelect } from "../../ui/components/ProductSelect";
 import { getArticlesByBarcode } from '../../../store/maintenance/maintenanceThunk';
 import { addDetalle } from "../../../store/seguimiento/trackerThunk";
-import DialogTitle from "../../ui/components/BoostrapDialog";
+import DialogTitle from "../../ui/components/BootstrapDialogTitle";
 interface CreateCheckProps {
     open: boolean;
     handleClose?: ((event: object, reason: "backdropClick" | "escapeKeyDown") => void) | undefined;

@@ -1,8 +1,6 @@
 import React, { FunctionComponent, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../../store";
-import { logout } from "../../../store/auth"; // o la acción real de logout
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import DashboardTwoToneIcon from "@mui/icons-material/DashboardTwoTone";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
@@ -10,11 +8,12 @@ import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
 import ContentPasteGoTwoToneIcon from "@mui/icons-material/ContentPasteGoTwoTone";
 import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
+import BadgeTwoToneIcon from '@mui/icons-material/BadgeTwoTone';
 import { SideBarItem } from "./SideBar2Item";
-import {Avatar, Tooltip, useMediaQuery} from "@mui/material";
-import {RoutePermissionsDirectory} from "../../../config/directory.ts";
+import { useMediaQuery, Avatar } from "@mui/material";
+import { RoutePermissionsDirectory } from "../../../config/directory.ts";
 import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
-import {toggleSidebar} from "../../../store/ui/uiSlice.ts";
+import { toggleSidebar } from "../../../store/ui/uiSlice.ts";
 
 // ============================
 // Interfaz para subitems
@@ -119,31 +118,31 @@ const items: SideBarMainItem[] = [
             },
         ],
     },
-    {
-        text: "T2",
-        icon: <ContentPasteGoTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
-        id: "t2",
-        subItems: [
-            {
-                text: "Cargar Preventa",
-                href: "/tracker-t2/pre-sale",
-                id: "outregister",
-                permissions: ["t2.preSale"],
-            },
-            {
-                text: "Gestión",
-                href: "/tracker-t2/manage",
-                id: "outmanage",
-                permissions: ["t2.manage"],
-            },
-            {
-                text: "Revision",
-                href: "/tracker-t2/pre-sale-check",
-                id: "outcheck",
-                permissions: ["t2.check"],
-            },
-        ],
-    },
+    // {
+    //     text: "T2",
+    //     icon: <ContentPasteGoTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+    //     id: "t2",
+    //     subItems: [
+    //         {
+    //             text: "Cargar Preventa",
+    //             href: "/tracker-t2/pre-sale",
+    //             id: "outregister",
+    //             permissions: ["t2.preSale"],
+    //         },
+    //         {
+    //             text: "Gestión",
+    //             href: "/tracker-t2/manage",
+    //             id: "outmanage",
+    //             permissions: ["t2.manage"],
+    //         },
+    //         {
+    //             text: "Revision",
+    //             href: "/tracker-t2/pre-sale-check",
+    //             id: "outcheck",
+    //             permissions: ["t2.check"],
+    //         },
+    //     ],
+    // },
     {
         text: "Reporte",
         icon: <AssessmentOutlinedIcon style={{ marginRight: "5px" }}  color="primary"/>,
@@ -217,6 +216,43 @@ const items: SideBarMainItem[] = [
                 href: "/maintenance/period-center",
                 id: "period-cente",
                 permissions: ["any"],
+            },
+            {
+                text: "Métricas de Desempeño",
+                href: "/maintenance/metric-types",
+                id: "metric-types",
+                permissions: ["personnel.manage"],
+            }
+        ],
+    },
+    {
+        text: "Personal",
+        icon: <BadgeTwoToneIcon style={{ marginRight: "5px" }}  color="primary"/>,
+        id: "personnel",
+        subItems: [
+            {
+                text: "Dashboard",
+                href: "/personnel/dashboard",
+                id: "personnel-dashboard",
+                permissions: ["personnel.view"],
+            },
+            {
+                text: "Gestión",
+                href: "/personnel",
+                id: "personnel-management",
+                permissions: ["personnel.view"],
+            },
+            {
+                text: "Certificaciones",
+                href: "/personnel/certifications",
+                id: "certifications",
+                permissions: ["personnel.certifications"],
+            },
+            {
+                text: "Desempeño",
+                href: "/personnel/performance",
+                id: "performance",
+                permissions: ["personnel.performance"],
             }
         ],
     }
@@ -287,11 +323,6 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
         });
     }, [user, sidebarSelected]);
 
-    const handleClickLogout = () => {
-        // Llamar tu logout
-        dispatch(logout());
-    };
-
     const isMobile = useMediaQuery('(max-width:600px)');
 
     const handleCloseByMobile = () => {
@@ -328,50 +359,43 @@ export const Side2bar: FunctionComponent<Props> = ({ setOpen }) => {
                         />
                     );
                 })}
-
                 <li>
-                    <div className="profile-details" >
-                        <div className="">
+                    <div className="profile-details">
+                        <div>
                             <Avatar
                                 variant="rounded"
                                 alt={country_code}
                                 src={flagurl}
+                                sx={{
+                                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                                }}
                             />
                         </div>
-                        <div className="name-job" style={{ maxWidth: 160, overflow: "hidden" }}>
+                        <div className="name-job" style={{ maxWidth: 160, overflow: 'hidden' }}>
                             <div
                                 className="profile_name"
                                 style={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    fontWeight: 500,
-                                    maxWidth: "100%",
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: '100%',
                                 }}
-                                title={`${user?.first_name ?? ""} ${user?.last_name ?? ""}`}
+                                title={`${user?.first_name ?? ''} ${user?.last_name ?? ''}`}
                             >
                                 {user?.first_name} {user?.last_name}
                             </div>
                             <div
                                 className="job"
                                 style={{
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    fontSize: 13,
-                                    maxWidth: "100%",
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    maxWidth: '100%',
                                 }}
-                                title={user?.centro_distribucion_name || "--"}
+                                title={user?.centro_distribucion_name || '--'}
                             >
-                                {user?.centro_distribucion_name || "--"}
+                                {user?.centro_distribucion_name || '--'}
                             </div>
-                        </div>
-                        <div className="log_out">
-                        <Tooltip title="Cerrar sesion" placement="right">
-                            <i className='bx bx-log-out' onClick={handleClickLogout} style={{ cursor: 'pointer' }}>
-                                <LogoutOutlinedIcon fontSize="medium" color="secondary" />
-                            </i>
-                        </Tooltip>
                         </div>
                     </div>
                 </li>
