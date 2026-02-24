@@ -109,7 +109,7 @@ export default function SignInCard() {
                 {/* Insertar logo */}
                 <Box sx={{ display: 'flex', justifyContent: 'start', mb: 2 }}>
                     <img src={logo} alt="Logo" style={{ width: '120px', height: 'auto' }} />
-                </Box>
+                </Box> 
                 <Typography
                     component="h1"
                     sx={{
