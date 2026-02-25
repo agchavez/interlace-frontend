@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="src/assets/logo.png" alt="Tracker Logo" width="200"/>
+  <img src="src/assets/logo.png" alt="Interlace Logo" width="200"/>
 </p>
 
-<h1 align="center">Tracker Frontend</h1>
+<h1 align="center">Interlace Frontend</h1>
 
 <p align="center">
   <strong>Sistema de Gestión y Seguimiento de Operaciones Logísticas</strong>
@@ -33,7 +33,7 @@
 
 ## Descripción
 
-**Tracker** es una aplicación web empresarial diseñada para la gestión integral de operaciones logísticas. Proporciona herramientas avanzadas para el seguimiento de productos, gestión de inventarios, control de órdenes y generación de reportes en tiempo real.
+**Interlace** es una aplicación web empresarial diseñada para la gestión integral de operaciones logísticas. Proporciona herramientas avanzadas para el seguimiento de productos, gestión de inventarios, control de órdenes y generación de reportes en tiempo real.
 
 ### Características Principales
 
@@ -124,10 +124,10 @@ src/
 
 ```bash
 # Clonar el repositorio (requiere acceso autorizado)
-git clone https://github.com/agchavez/tracker-frontend.git
+git clone https://github.com/agchavez/interlace-frontend.git
 
 # Navegar al directorio
-cd tracker-frontend
+cd interlace-frontend
 
 # Instalar dependencias
 npm install
@@ -172,7 +172,7 @@ Manejo de autenticación, login, logout y gestión de sesiones con temporizador 
 ### Home
 Dashboard principal con métricas, gráficos TAT (Turn Around Time) y tablas de resumen operativo.
 
-### Tracker
+### Interlace
 Sistema de seguimiento de productos con visualización de rutas, impresión de pallets y códigos QR.
 
 ### Inventory
