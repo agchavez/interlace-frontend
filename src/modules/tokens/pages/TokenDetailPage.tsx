@@ -344,16 +344,17 @@ export const TokenDetailPage = () => {
       }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const printWindow = window.open(url);
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print();
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = url;
+      document.body.appendChild(iframe);
+      iframe.onload = () => {
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          document.body.removeChild(iframe);
           URL.revokeObjectURL(url);
-        };
-      } else {
-        URL.revokeObjectURL(url);
-        toast.error('No se pudo abrir la ventana de impresión. Permite las ventanas emergentes.');
-      }
+        }, 1000);
+      };
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al generar el recibo');
     } finally {
