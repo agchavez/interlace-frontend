@@ -160,6 +160,7 @@ export const TokenDetailPage = () => {
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [isPrintingReceipt, setIsPrintingReceipt] = useState(false);
 
   // Store token from auth for PDF fetch
   const authToken = useAppSelector((state) => state.auth.token);
@@ -329,9 +330,10 @@ export const TokenDetailPage = () => {
     }
   };
 
-  // Handler for downloading receipt (thermal printer format)
-  const handleDownloadReceipt = async () => {
+  // Handler for printing receipt (thermal printer format)
+  const handlePrintReceipt = async () => {
     if (!receiptUrl || !authToken) return;
+    setIsPrintingReceipt(true);
     try {
       const response = await fetch(receiptUrl, {
         headers: { 'Authorization': `Bearer ${authToken}` },
@@ -342,16 +344,20 @@ export const TokenDetailPage = () => {
       }
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `recibo_${token?.display_number || id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      toast.success('Recibo descargado');
+      const printWindow = window.open(url);
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+          URL.revokeObjectURL(url);
+        };
+      } else {
+        URL.revokeObjectURL(url);
+        toast.error('No se pudo abrir la ventana de impresión. Permite las ventanas emergentes.');
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al descargar el recibo');
+      toast.error(err instanceof Error ? err.message : 'Error al generar el recibo');
+    } finally {
+      setIsPrintingReceipt(false);
     }
   };
 
@@ -964,10 +970,11 @@ export const TokenDetailPage = () => {
                     fullWidth
                     variant="contained"
                     color="secondary"
-                    startIcon={<ReceiptIcon />}
-                    onClick={handleDownloadReceipt}
+                    startIcon={isPrintingReceipt ? <CircularProgress size={18} color="inherit" /> : <ReceiptIcon />}
+                    onClick={handlePrintReceipt}
+                    disabled={isPrintingReceipt}
                   >
-                    Imprimir Recibo
+                    {isPrintingReceipt ? 'Preparando...' : 'Imprimir Recibo'}
                   </Button>
                 )}
               </Box>
