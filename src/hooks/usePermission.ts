@@ -131,7 +131,8 @@ export const TokenPermissions = {
   CANCEL: 'tokens.can_cancel_token',
 
   // Permisos de validación
-  VALIDATE: 'tokens.can_validate_token',
+  VALIDATE: 'tokens.can_validate_token',        // Seguridad (EXIT_PASS)
+  VALIDATE_PAYROLL: 'tokens.can_validate_payroll', // Planilla/People (PERMIT_HOUR, OVERTIME, etc.)
 
   // Permisos de documentos
   DOWNLOAD_PDF: 'tokens.can_download_pdf',
@@ -155,4 +156,5 @@ export const TokenGroups = {
   AREA_MANAGERS: 'Jefes de Area',
   SUPERVISORS: 'Supervisores',
   HR: 'Personal RRHH',
+  PEOPLE: 'People',
 } as const;

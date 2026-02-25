@@ -52,6 +52,17 @@ export const UsernameSelector: React.FC<UsernameSelectorProps> = ({
 
   const debouncedManualUsername = useDebounce(manualUsername, 500);
 
+  // Sincronizar manualUsername cuando el valor externo cambia (p.ej. carga desde API en modo edición)
+  useEffect(() => {
+    if (!autoGenerate && value !== manualUsername) {
+      setManualUsername(value);
+      if (isEditMode && value) {
+        setIsExistingUsername(true);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
   // Generar sugerencias cuando cambian nombre o apellido (modo automático)
   useEffect(() => {
     if (autoGenerate && firstName && lastName) {

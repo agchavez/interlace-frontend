@@ -92,7 +92,7 @@ export const ListUserPage = () => {
     if (selectedRow) {
       // Si el usuario tiene perfil de personal, editar con el ID del perfil
       if (selectedRow.personnel_profile_id) {
-        navigate(`/user/register?edit=${selectedRow.personnel_profile_id}`);
+        navigate(`/user/register?edit=${selectedRow.personnel_profile_id}&userEdit=${selectedRow.id}`);
       } else {
         // Si no tiene perfil, crear uno nuevo con datos del usuario
         navigate(`/user/register?userId=${selectedRow.id}`);

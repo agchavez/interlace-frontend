@@ -57,6 +57,7 @@ export const RegisterUserPage = () => {
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit'); // ID del perfil de personal
   const userId = searchParams.get('userId'); // ID del usuario (para completar perfil)
+  const userEditId = searchParams.get('userEdit'); // ID del usuario en modo edición
   const isEditMode = !!editId;
   const isCompleteProfile = !!userId;
 
@@ -97,6 +98,12 @@ export const RegisterUserPage = () => {
   const { data: existingUser, isLoading: isLoadingUser } = useGetAUserQuery(
     Number(userId!),
     { skip: !userId }
+  );
+
+  // Cargar datos del usuario en modo edición (cuando viene de ListUserPage con userEdit param)
+  const { data: editModeUser } = useGetAUserQuery(
+    Number(userEditId!),
+    { skip: !userEditId || !isEditMode }
   );
 
   // Validar que sean arrays
@@ -143,6 +150,19 @@ export const RegisterUserPage = () => {
       }
     }
   }, [existingProfile, isEditMode]);
+
+  // Cargar datos del usuario en modo edición (desde userEdit param)
+  React.useEffect(() => {
+    if (editModeUser && isEditMode) {
+      const user = editModeUser as any;
+      setUserData(prev => ({
+        ...prev,
+        username: user.username || '',
+        email: user.email || '',
+        group: user.groups?.[0] || null,
+      }));
+    }
+  }, [editModeUser, isEditMode]);
 
   // Cargar datos del usuario en modo "completar perfil"
   React.useEffect(() => {

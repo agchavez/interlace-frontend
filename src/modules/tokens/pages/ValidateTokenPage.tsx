@@ -4,7 +4,7 @@
  * - Búsqueda por código (TK-2026-000001)
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePermissionWithFallback, TokenPermissions, TokenGroups } from '../../../hooks/usePermission';
+import { usePermissionWithFallback, useAnyGroup, TokenPermissions, TokenGroups } from '../../../hooks/usePermission';
 import {
   Container,
   Grid,
@@ -68,6 +68,20 @@ import {
   TokenType,
 } from '../interfaces/token';
 
+// EXIT_PASS → validación física en portería (Seguridad)
+const SECURITY_VALIDATION_TYPES: TokenType[] = [
+  TokenType.EXIT_PASS,
+];
+
+// PERMIT_HOUR, OVERTIME, SHIFT_CHANGE, SUBSTITUTION, RATE_CHANGE → Planilla/People
+const PAYROLL_VALIDATION_TYPES: TokenType[] = [
+  TokenType.PERMIT_HOUR,
+  TokenType.OVERTIME,
+  TokenType.SHIFT_CHANGE,
+  TokenType.SUBSTITUTION,
+  TokenType.RATE_CHANGE,
+];
+
 const statusColors: Record<TokenStatus, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
   [TokenStatus.DRAFT]: 'default',
   [TokenStatus.PENDING_L1]: 'warning',
@@ -84,11 +98,25 @@ export const ValidateTokenPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Verificar permiso para validar tokens (permiso Django o grupo Seguridad/Gerentes CD)
-  const canUserValidate = usePermissionWithFallback(
+  // Seguridad / Gerentes CD → validan EXIT_PASS (portería física)
+  // Permiso backend: tokens.can_validate_token
+  const isSecurityUser = usePermissionWithFallback(
     TokenPermissions.VALIDATE,
     [TokenGroups.SECURITY, TokenGroups.CD_MANAGERS]
   );
+
+  // People / Planilla → validan PERMIT_HOUR, OVERTIME, SHIFT_CHANGE, SUBSTITUTION, RATE_CHANGE
+  // Permiso backend: tokens.can_validate_payroll
+  const isHRUser = usePermissionWithFallback(
+    TokenPermissions.VALIDATE_PAYROLL,
+    [TokenGroups.PEOPLE, TokenGroups.HR]
+  );
+
+  // Tipos que puede validar este usuario según su rol
+  const userValidationTypes: TokenType[] = [
+    ...(isSecurityUser ? SECURITY_VALIDATION_TYPES : []),
+    ...(isHRUser ? PAYROLL_VALIDATION_TYPES : []),
+  ];
 
   const [tokenCode, setTokenCode] = useState('');
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -105,7 +133,12 @@ export const ValidateTokenPage = () => {
 
   const [getTokenByCode, { data: tokenData, isLoading: loadingToken, error: tokenError }] = useLazyGetTokenByCodeQuery();
   const [validateToken, { isLoading: validating }] = useValidateTokenMutation();
-  const { data: pendingTokens, isLoading: loadingPending } = useGetPendingValidationQuery();
+  const { data: pendingTokensRaw, isLoading: loadingPending } = useGetPendingValidationQuery();
+
+  // Solo muestra los tokens que corresponden al rol del usuario actual
+  const pendingTokens = pendingTokensRaw?.filter(
+    (t) => userValidationTypes.includes(t.token_type as TokenType)
+  );
 
   // Cleanup scanner on unmount
   useEffect(() => {
@@ -266,7 +299,14 @@ export const ValidateTokenPage = () => {
     }
   };
 
-  const canValidate = tokenData && tokenData.status === TokenStatus.APPROVED && canUserValidate;
+  // El token cargado es de un tipo que este usuario puede validar
+  const tokenRequiresUserValidation =
+    tokenData && userValidationTypes.includes(tokenData.token_type as TokenType);
+
+  const canValidate = tokenData &&
+    tokenData.status === TokenStatus.APPROVED &&
+    (isSecurityUser || isHRUser) &&
+    tokenRequiresUserValidation;
 
   const handleSelectPendingToken = (displayNumber: string) => {
     setTokenCode(displayNumber);
@@ -450,7 +490,7 @@ export const ValidateTokenPage = () => {
                           variant="outlined"
                           sx={{ display: { xs: 'none', md: 'flex' }, fontSize: '0.7rem' }}
                         />
-                        {canUserValidate && (
+                        {(isSecurityUser || isHRUser) && (
                           <Tooltip title="Validar Token">
                             <IconButton
                               color="success"
@@ -742,7 +782,11 @@ export const ValidateTokenPage = () => {
                 <Divider sx={{ my: 3 }} />
 
                 {/* Validate Button */}
-                {canValidate ? (
+                {!tokenRequiresUserValidation ? (
+                  <Alert severity="info" icon={<WarningIcon />}>
+                    Este tipo de token ({TokenTypeLabels[tokenData.token_type as TokenType]}) no requiere validación por tu grupo. Se mantiene en estado {TokenStatusLabels[tokenData.status as TokenStatus]}.
+                  </Alert>
+                ) : canValidate ? (
                   <Button
                     fullWidth
                     variant="contained"
@@ -757,13 +801,13 @@ export const ValidateTokenPage = () => {
                   </Button>
                 ) : (
                   <Alert
-                    severity={tokenData.status === TokenStatus.USED ? 'info' : (tokenData.status === TokenStatus.APPROVED && !canUserValidate) ? 'error' : 'warning'}
+                    severity={tokenData.status === TokenStatus.USED ? 'info' : (tokenData.status === TokenStatus.APPROVED && !(isSecurityUser || isHRUser)) ? 'error' : 'warning'}
                     icon={tokenData.status === TokenStatus.USED ? <ValidateIcon /> : <WarningIcon />}
                   >
                     {tokenData.status === TokenStatus.USED
                       ? `Este token ya fue validado${tokenData.validated_at ? ` el ${new Date(tokenData.validated_at).toLocaleString('es-HN')}` : ''}`
-                      : tokenData.status === TokenStatus.APPROVED && !canUserValidate
-                        ? 'No tiene permisos para validar tokens. Solo personal de Seguridad o Gerentes de CD pueden realizar esta acción.'
+                      : tokenData.status === TokenStatus.APPROVED && !(isSecurityUser || isHRUser)
+                        ? 'No tiene permisos para validar tokens. Solo personal de Seguridad, Gerentes de CD o People pueden realizar esta acción.'
                         : `Este token no puede ser validado. Estado: ${TokenStatusLabels[tokenData.status as TokenStatus]}`
                     }
                   </Alert>
