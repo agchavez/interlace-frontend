@@ -29,7 +29,8 @@ const CardContentStyled = ({ row, isFetching, isLoading }: { row: DashboardCds, 
               </Typography>
             </Box>}
             subheader={<Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
+              {/* T1 y TAT deshabilitados temporalmente */}
+              {/* <Grid item xs={12} md={4}>
                 <Typography variant="body1" component="h2" fontWeight={400} color="primary">
                   Unidades T1 atendidas
                 </Typography>
@@ -56,8 +57,8 @@ const CardContentStyled = ({ row, isFetching, isLoading }: { row: DashboardCds, 
                   label={
                     row.tat === 0 ? "--" : formatDuration(
                       {
-                        hours: Math.floor(row?.tat / 3600), // Calcula las horas
-                        minutes: Math.floor((row?.tat % 3600) / 60), // Calcula los minutos
+                        hours: Math.floor(row?.tat / 3600),
+                        minutes: Math.floor((row?.tat % 3600) / 60),
                       },
                       { locale: es, format: ['hours', 'minutes'], delimiter: ' y ' }
                     )
@@ -70,7 +71,7 @@ const CardContentStyled = ({ row, isFetching, isLoading }: { row: DashboardCds, 
                     isLoading || isFetching ? <CircularProgress size={20} /> : <AccessTimeIcon />
                   }
                 />
-              </Grid>
+              </Grid> */}
             </Grid>}
 
           />

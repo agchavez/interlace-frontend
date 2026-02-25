@@ -145,30 +145,31 @@ const AVAILABLE_WIDGETS: WidgetDefinition[] = [
     title: 'Bienvenida',
     icon: <Box component="img" src={image} alt="layout" width={24} />,
   },
-  {
-    id: WidgetType.TAT,
-    title: 'Tiempo Promedio (TAT)',
-    icon: <AccessTimeIcon />,
-    requiredPermission: 'tracker.view_trackermodel',
-  },
-  {
-    id: WidgetType.PENDING_TRACKERS,
-    title: 'Pendientes',
-    icon: <ArrowForwardIcon />,
-    requiredPermission: 'tracker.view_trackermodel',
-  },
-  {
-    id: WidgetType.COMPLETED_TRACKERS,
-    title: 'Completados',
-    icon: <ArrowForwardIcon />,
-    requiredPermission: 'tracker.view_trackermodel',
-  },
-  {
-    id: WidgetType.TAT_GRAPH,
-    title: 'Gráfico TAT',
-    icon: <TrendingUpIcon />,
-    requiredPermission: 'tracker.view_trackermodel',
-  },
+  // TAT y T1 deshabilitados temporalmente
+  // {
+  //   id: WidgetType.TAT,
+  //   title: 'Tiempo Promedio (TAT)',
+  //   icon: <AccessTimeIcon />,
+  //   requiredPermission: 'tracker.view_trackermodel',
+  // },
+  // {
+  //   id: WidgetType.PENDING_TRACKERS,
+  //   title: 'Pendientes',
+  //   icon: <ArrowForwardIcon />,
+  //   requiredPermission: 'tracker.view_trackermodel',
+  // },
+  // {
+  //   id: WidgetType.COMPLETED_TRACKERS,
+  //   title: 'Completados',
+  //   icon: <ArrowForwardIcon />,
+  //   requiredPermission: 'tracker.view_trackermodel',
+  // },
+  // {
+  //   id: WidgetType.TAT_GRAPH,
+  //   title: 'Gráfico TAT',
+  //   icon: <TrendingUpIcon />,
+  //   requiredPermission: 'tracker.view_trackermodel',
+  // },
   {
     id: WidgetType.PERSONNEL_STATS,
     title: 'Estadísticas Personal',
@@ -689,156 +690,157 @@ export default function HomePage() {
           </Card>
         );
 
-      case WidgetType.TAT:
-        return (
-          <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
-            <div className="home__dashboard-card">
-              <div>
-                <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
-                  Tiempo promedio de atención
-                </Typography>
-                <Divider />
-                <Typography variant="h6" component="p" color={'secondary'} fontWeight={400}>
-                  {user?.centro_distribucion_name}
-                </Typography>
-              </div>
-              <div>
-                <Typography variant="h2" component="p" color={'secondary'} fontWeight={400}>
-                  TAT
-                </Typography>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                {data?.time_average === 0 || data?.time_average === undefined ? (
-                  '--'
-                ) : (
-                  <Chip
-                    label={formatDuration(
-                      {
-                        hours: Math.floor(data?.time_average / 3600),
-                        minutes: Math.floor((data?.time_average % 3600) / 60),
-                      },
-                      { locale: es, format: ['hours', 'minutes'], delimiter: ' y ' }
-                    )}
-                    variant="outlined"
-                    color="success"
-                    size="medium"
-                    sx={{ fontSize: '30px' }}
-                    icon={isLoading || isFetching ? <CircularProgress size={20} /> : <AccessTimeIcon />}
-                  />
-                )}
-              </div>
-            </div>
-          </Card>
-        );
+      // TAT y T1 deshabilitados temporalmente
+      // case WidgetType.TAT:
+      //   return (
+      //     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+      //       <div className="home__dashboard-card">
+      //         <div>
+      //           <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
+      //             Tiempo promedio de atención
+      //           </Typography>
+      //           <Divider />
+      //           <Typography variant="h6" component="p" color={'secondary'} fontWeight={400}>
+      //             {user?.centro_distribucion_name}
+      //           </Typography>
+      //         </div>
+      //         <div>
+      //           <Typography variant="h2" component="p" color={'secondary'} fontWeight={400}>
+      //             TAT
+      //           </Typography>
+      //         </div>
+      //         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      //           {data?.time_average === 0 || data?.time_average === undefined ? (
+      //             '--'
+      //           ) : (
+      //             <Chip
+      //               label={formatDuration(
+      //                 {
+      //                   hours: Math.floor(data?.time_average / 3600),
+      //                   minutes: Math.floor((data?.time_average % 3600) / 60),
+      //                 },
+      //                 { locale: es, format: ['hours', 'minutes'], delimiter: ' y ' }
+      //               )}
+      //               variant="outlined"
+      //               color="success"
+      //               size="medium"
+      //               sx={{ fontSize: '30px' }}
+      //               icon={isLoading || isFetching ? <CircularProgress size={20} /> : <AccessTimeIcon />}
+      //             />
+      //           )}
+      //         </div>
+      //       </div>
+      //     </Card>
+      //   );
 
-      case WidgetType.PENDING_TRACKERS:
-        return (
-          <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
-                T1 - Pendientes
-              </Typography>
-              {isLoading || isFetching ? (
-                <CircularProgress size={20} />
-              ) : (
-                <Typography variant="h6" component="p" color={'secondary'} fontWeight={600}>
-                  {data?.total_trackers_pending.length === 0 ? '--' : data?.total_trackers_pending.length}
-                </Typography>
-              )}
-            </div>
-            <Divider />
-            <TableContainer sx={{ mt: 1, flex: 1, overflow: 'auto' }}>
-              <Table size="small" aria-label="a dense table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell align="left">Tracking</StyledTableCell>
-                    <StyledTableCell align="left">Atraso</StyledTableCell>
-                    <StyledTableCell align="right"></StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.total_trackers_pending.map((row) => (
-                    <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell align="left" component="th" scope="row">
-                        TRK-{row.id.toString().padStart(5, '0')}
-                      </TableCell>
-                      <TableCell align="left">
-                        {formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })}
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small" color="primary" onClick={() => navigate('/tracker/detail/' + row.id)}>
-                          <ArrowForwardIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Card>
-        );
+      // case WidgetType.PENDING_TRACKERS:
+      //   return (
+      //     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      //       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      //         <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
+      //           T1 - Pendientes
+      //         </Typography>
+      //         {isLoading || isFetching ? (
+      //           <CircularProgress size={20} />
+      //         ) : (
+      //           <Typography variant="h6" component="p" color={'secondary'} fontWeight={600}>
+      //             {data?.total_trackers_pending.length === 0 ? '--' : data?.total_trackers_pending.length}
+      //           </Typography>
+      //         )}
+      //       </div>
+      //       <Divider />
+      //       <TableContainer sx={{ mt: 1, flex: 1, overflow: 'auto' }}>
+      //         <Table size="small" aria-label="a dense table">
+      //           <TableHead>
+      //             <TableRow>
+      //               <StyledTableCell align="left">Tracking</StyledTableCell>
+      //               <StyledTableCell align="left">Atraso</StyledTableCell>
+      //               <StyledTableCell align="right"></StyledTableCell>
+      //             </TableRow>
+      //           </TableHead>
+      //           <TableBody>
+      //             {data?.total_trackers_pending.map((row) => (
+      //               <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+      //                 <TableCell align="left" component="th" scope="row">
+      //                   TRK-{row.id.toString().padStart(5, '0')}
+      //                 </TableCell>
+      //                 <TableCell align="left">
+      //                   {formatDistanceToNow(new Date(row?.created_at), { addSuffix: true, locale: es })}
+      //                 </TableCell>
+      //                 <TableCell align="right">
+      //                   <IconButton size="small" color="primary" onClick={() => navigate('/tracker/detail/' + row.id)}>
+      //                     <ArrowForwardIcon />
+      //                   </IconButton>
+      //                 </TableCell>
+      //               </TableRow>
+      //             ))}
+      //           </TableBody>
+      //         </Table>
+      //       </TableContainer>
+      //     </Card>
+      //   );
 
-      case WidgetType.COMPLETED_TRACKERS:
-        return (
-          <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
-                T1 - Completado
-              </Typography>
-              {isLoading || isFetching ? (
-                <CircularProgress size={20} />
-              ) : (
-                <Typography variant="h6" component="p" color={'secondary'} fontWeight={600}>
-                  {data?.total_trackers_completed === 0 ? '--' : data?.total_trackers_completed}
-                </Typography>
-              )}
-            </div>
-            <Divider />
-            <TableContainer sx={{ mt: 1, flex: 1, overflow: 'auto' }}>
-              <Table size="small" aria-label="a dense table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell align="left">Tracking</StyledTableCell>
-                    <StyledTableCell align="left">Traslado 5001</StyledTableCell>
-                    <StyledTableCell align="right"></StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data?.last_trackers.map((row) => (
-                    <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell align="left" component="th" scope="row">
-                        TRK-{row.id.toString().padStart(5, '0')}
-                      </TableCell>
-                      <TableCell align="left">{row?.transfer_number}</TableCell>
-                      <TableCell align="right">
-                        <IconButton size="small" color="primary" onClick={() => navigate('/tracker/detail/' + row.id)}>
-                          <ArrowForwardIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Button
-              variant="text"
-              color="primary"
-              size="medium"
-              sx={{ mt: 1 }}
-              endIcon={<ArrowForwardIcon />}
-              onClick={() => navigate('/tracker/manage/?status=COMPLETE')}
-            >
-              Ver más
-            </Button>
-          </Card>
-        );
+      // case WidgetType.COMPLETED_TRACKERS:
+      //   return (
+      //     <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      //       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      //         <Typography variant="body1" component="h6" color={'secondary'} fontWeight={200}>
+      //           T1 - Completado
+      //         </Typography>
+      //         {isLoading || isFetching ? (
+      //           <CircularProgress size={20} />
+      //         ) : (
+      //           <Typography variant="h6" component="p" color={'secondary'} fontWeight={600}>
+      //             {data?.total_trackers_completed === 0 ? '--' : data?.total_trackers_completed}
+      //           </Typography>
+      //         )}
+      //       </div>
+      //       <Divider />
+      //       <TableContainer sx={{ mt: 1, flex: 1, overflow: 'auto' }}>
+      //         <Table size="small" aria-label="a dense table">
+      //           <TableHead>
+      //             <TableRow>
+      //               <StyledTableCell align="left">Tracking</StyledTableCell>
+      //               <StyledTableCell align="left">Traslado 5001</StyledTableCell>
+      //               <StyledTableCell align="right"></StyledTableCell>
+      //             </TableRow>
+      //           </TableHead>
+      //           <TableBody>
+      //             {data?.last_trackers.map((row) => (
+      //               <TableRow key={row.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+      //                 <TableCell align="left" component="th" scope="row">
+      //                   TRK-{row.id.toString().padStart(5, '0')}
+      //                 </TableCell>
+      //                 <TableCell align="left">{row?.transfer_number}</TableCell>
+      //                 <TableCell align="right">
+      //                   <IconButton size="small" color="primary" onClick={() => navigate('/tracker/detail/' + row.id)}>
+      //                     <ArrowForwardIcon />
+      //                   </IconButton>
+      //                 </TableCell>
+      //               </TableRow>
+      //             ))}
+      //           </TableBody>
+      //         </Table>
+      //       </TableContainer>
+      //       <Button
+      //         variant="text"
+      //         color="primary"
+      //         size="medium"
+      //         sx={{ mt: 1 }}
+      //         endIcon={<ArrowForwardIcon />}
+      //         onClick={() => navigate('/tracker/manage/?status=COMPLETE')}
+      //       >
+      //         Ver más
+      //       </Button>
+      //     </Card>
+      //   );
 
-      case WidgetType.TAT_GRAPH:
-        return (
-          <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
-            <TATGraph />
-          </Card>
-        );
+      // case WidgetType.TAT_GRAPH:
+      //   return (
+      //     <Card elevation={2} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+      //       <TATGraph />
+      //     </Card>
+      //   );
 
       case WidgetType.PERSONNEL_STATS:
         return (
