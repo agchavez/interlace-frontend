@@ -345,15 +345,22 @@ export const TokenDetailPage = () => {
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '1px';
+      iframe.style.height = '1px';
+      iframe.style.border = '0';
       iframe.src = url;
       document.body.appendChild(iframe);
       iframe.onload = () => {
-        iframe.contentWindow?.print();
         setTimeout(() => {
-          document.body.removeChild(iframe);
-          URL.revokeObjectURL(url);
-        }, 1000);
+          iframe.contentWindow?.print();
+          setTimeout(() => {
+            document.body.removeChild(iframe);
+            URL.revokeObjectURL(url);
+          }, 1000);
+        }, 500);
       };
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al generar el recibo');
