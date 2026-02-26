@@ -319,14 +319,29 @@ export const PersonnelCreatePage = () => {
       const backendErrors: Record<string, string> = {};
 
       if (error?.data) {
-        // Si hay un mensaje de detail general
-        if (error.data.detail) {
-          toast.error(error.data.detail);
+        const detail = error.data.detail;
+
+        // Si detail es un objeto con errores de campo (formato DRF anidado)
+        if (detail && typeof detail === 'object' && !Array.isArray(detail)) {
+          Object.keys(detail).forEach(key => {
+            const errorValue = detail[key];
+            if (Array.isArray(errorValue)) {
+              backendErrors[key] = errorValue[0];
+            } else if (typeof errorValue === 'string') {
+              backendErrors[key] = errorValue;
+            } else if (typeof errorValue === 'object' && errorValue !== null) {
+              backendErrors[key] = JSON.stringify(errorValue);
+            }
+          });
+        } else if (typeof detail === 'string') {
+          toast.error(detail);
+        } else if (Array.isArray(detail)) {
+          toast.error(detail[0]);
         }
 
-        // Procesar errores de campos individuales
+        // Procesar errores de campos individuales en el nivel raíz (fuera de detail)
         Object.keys(error.data).forEach(key => {
-          if (key !== 'detail' && key !== 'message') {
+          if (key !== 'detail' && key !== 'message' && key !== 'status_code') {
             const errorValue = error.data[key];
 
             // Si el error es un array (formato típico de DRF)
@@ -338,7 +353,7 @@ export const PersonnelCreatePage = () => {
               backendErrors[key] = errorValue;
             }
             // Si es un objeto (errores anidados)
-            else if (typeof errorValue === 'object') {
+            else if (typeof errorValue === 'object' && errorValue !== null) {
               backendErrors[key] = JSON.stringify(errorValue);
             }
           }
@@ -361,10 +376,9 @@ export const PersonnelCreatePage = () => {
 
           // Scroll al inicio para que el usuario vea los errores
           window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          // Si no hay errores específicos, mostrar mensaje genérico
-          const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear el personal';
-          toast.error(errorMessage);
+        } else if (!detail) {
+          // Si no hay errores específicos ni detail, mostrar mensaje genérico
+          toast.error(error?.data?.mensage || 'Error al crear el personal');
         }
       } else {
         toast.error('Error al crear el personal');

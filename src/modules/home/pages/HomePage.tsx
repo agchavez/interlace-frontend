@@ -298,23 +298,16 @@ export default function HomePage() {
 
           // Si WELCOME no tiene maxH o tiene altura mayor a 1, limpiar y usar defaults nuevos
           if (!welcomeLayout || !welcomeLayout.hasOwnProperty('maxH') || welcomeLayout.h > 1) {
-            console.log('⚠️ Layouts antiguos detectados, limpiando y usando nuevos defaults...');
             localStorage.removeItem('dashboardLayouts');
             return DEFAULT_LAYOUTS;
           }
 
-          console.log('✅ Layouts cargados al inicializar:', {
-            lg: parsed.lg.length,
-            md: parsed.md.length,
-            sm: parsed.sm.length,
-          });
           return parsed;
         }
       }
     } catch (error) {
       console.error('Error cargando layouts:', error);
     }
-    console.log('📐 Usando DEFAULT_LAYOUTS al inicializar');
     return DEFAULT_LAYOUTS;
   });
 
@@ -369,22 +362,15 @@ export default function HomePage() {
             if (!widget.requiredPermission) return true;
             return permissions.includes(widget.requiredPermission);
           });
-          console.log(`✅ Widgets cargados desde localStorage: ${filtered.length} widgets`);
           return filtered;
-        } else {
-          console.warn('⚠️ savedWidgets no es un array, usando defaults');
         }
-      } else {
-        console.log('ℹ️ No hay widgets guardados, usando defaults');
       }
     } catch (error) {
-      console.error('❌ Error parsing dashboardEnabledWidgets from localStorage:', error);
+      console.error('Error parsing dashboardEnabledWidgets from localStorage:', error);
       localStorage.removeItem('dashboardEnabledWidgets');
     }
 
-    const defaultWidgets = getDefaultWidgets();
-    console.log(`📊 Usando widgets por defecto: ${defaultWidgets.length} widgets`);
-    return defaultWidgets;
+    return getDefaultWidgets();
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -430,7 +416,6 @@ export default function HomePage() {
       if (containerRef.current) {
         const width = containerRef.current.offsetWidth;
         setContainerWidth(width);
-        console.log('📏 Ancho del contenedor actualizado:', width, 'px');
       }
     };
     updateWidth();
@@ -531,11 +516,6 @@ export default function HomePage() {
       md: layouts.md.filter((layout) => enabledWidgets.includes(layout.i as WidgetType)),
       sm: layouts.sm.filter((layout) => enabledWidgets.includes(layout.i as WidgetType)),
     };
-    console.log('🔍 Layouts a renderizar:', {
-      total: { lg: layouts.lg.length, md: layouts.md.length, sm: layouts.sm.length },
-      filtrados: { lg: filtered.lg.length, md: filtered.md.length, sm: filtered.sm.length },
-      widgets: enabledWidgets.length,
-    });
     return filtered;
   }, [layouts, enabledWidgets]);
 
@@ -551,7 +531,6 @@ export default function HomePage() {
     // Asegurar que todos los layouts existen antes de guardar
     if (allLayouts.lg && allLayouts.md && allLayouts.sm) {
       setLayouts({ lg: allLayouts.lg, md: allLayouts.md, sm: allLayouts.sm });
-      console.log('🔄 Layouts actualizados por el usuario');
     }
   };
 
@@ -573,49 +552,26 @@ export default function HomePage() {
       if (layoutsString !== layoutsStringRef.current) {
         layoutsStringRef.current = layoutsString;
         localStorage.setItem('dashboardLayouts', layoutsString);
-        console.log('💾 Auto-guardado: Layouts guardados automáticamente');
       }
     }
   }, [layouts]);
 
   const handleSaveLayout = () => {
-    console.log('💾 GUARDANDO CONFIGURACIÓN...');
-    console.log('Layouts actuales:', layouts);
-    console.log('Widgets habilitados:', enabledWidgets);
-
     try {
-      // Validar que layouts tiene la estructura correcta antes de guardar
       if (layouts && layouts.lg && layouts.md && layouts.sm) {
-        const layoutsToSave = JSON.stringify(layouts);
-        localStorage.setItem('dashboardLayouts', layoutsToSave);
-        console.log(`✅ Layouts guardados correctamente (${layoutsToSave.length} caracteres)`);
-        console.log('📐 Layouts guardados:', {
-          lg: layouts.lg.length + ' items',
-          md: layouts.md.length + ' items',
-          sm: layouts.sm.length + ' items',
-        });
-      } else {
-        console.warn('⚠️ Layouts tiene estructura inválida, NO se guardó');
+        localStorage.setItem('dashboardLayouts', JSON.stringify(layouts));
       }
 
-      // Validar que enabledWidgets es un array
       if (Array.isArray(enabledWidgets)) {
         localStorage.setItem('dashboardEnabledWidgets', JSON.stringify(enabledWidgets));
-        console.log(`✅ Widgets guardados correctamente: ${enabledWidgets.length} widgets`);
-        console.log('📊 Widgets:', enabledWidgets);
-      } else {
-        console.warn('⚠️ enabledWidgets no es un array, NO se guardó');
       }
 
       localStorage.setItem('dashboardAutoRefresh', JSON.stringify(autoRefresh));
-      console.log('✅ Auto-refresh guardado:', autoRefresh);
 
       setEditMode(false);
       setConfigDialogOpen(false);
-
-      console.log('✅ CONFIGURACIÓN GUARDADA EXITOSAMENTE');
     } catch (error) {
-      console.error('❌ Error al guardar configuración del dashboard:', error);
+      console.error('Error al guardar configuración del dashboard:', error);
     }
   };
 
@@ -625,8 +581,6 @@ export default function HomePage() {
         ? prev.filter((id) => id !== widgetId)
         : [...prev, widgetId];
 
-      console.log(`🔄 Widget ${widgetId} ${prev.includes(widgetId) ? 'desactivado' : 'activado'}`);
-      console.log(`📊 Total widgets activos: ${newWidgets.length}`);
 
       return newWidgets;
     });
@@ -1302,15 +1256,6 @@ export default function HomePage() {
         ) : (
           /* === DESKTOP UI === */
           <>
-            {console.log('🎨 Renderizando ResponsiveGridLayout:', {
-              layouts: {
-                lg: filteredLayouts.lg.length + ' items',
-                md: filteredLayouts.md.length + ' items',
-              },
-              width: containerWidth,
-              rowHeight: 100,
-              editMode,
-            })}
             <ResponsiveGridLayout
               key={`grid-${containerWidth}`}
               className="layout"
