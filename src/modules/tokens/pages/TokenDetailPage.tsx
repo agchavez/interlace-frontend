@@ -499,7 +499,7 @@ export const TokenDetailPage = () => {
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PersonIcon color="secondary" />
-                Beneficiario
+                Beneficiario {token.exit_pass_detail?.is_external && '(Persona Externa)'}
               </Typography>
               <Divider sx={{ my: 2 }} />
 
@@ -508,18 +508,28 @@ export const TokenDetailPage = () => {
                   <InfoItem
                     icon={<PersonIcon fontSize="small" />}
                     label="Nombre Completo"
-                    value={token.personnel?.full_name}
+                    value={token.personnel?.full_name ?? token.exit_pass_detail?.external_person?.name}
                     color="secondary"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <InfoItem
                     icon={<BadgeIcon fontSize="small" />}
-                    label="Código de Empleado"
-                    value={token.personnel?.employee_code}
+                    label={token.exit_pass_detail?.is_external ? 'Identificación' : 'Código de Empleado'}
+                    value={token.personnel?.employee_code ?? token.exit_pass_detail?.external_person?.identification}
                     color="secondary"
                   />
                 </Grid>
+                {token.exit_pass_detail?.is_external && token.exit_pass_detail?.external_person?.company && (
+                  <Grid item xs={12} sm={6}>
+                    <InfoItem
+                      icon={<BusinessIcon fontSize="small" />}
+                      label="Empresa"
+                      value={token.exit_pass_detail.external_person.company}
+                      color="secondary"
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={12} sm={6}>
                   <InfoItem
                     icon={<BusinessIcon fontSize="small" />}
