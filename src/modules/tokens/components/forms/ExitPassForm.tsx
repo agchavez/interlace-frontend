@@ -70,7 +70,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
         ...newItem,
         material: material.id,
         custom_description: material.name,
-        unit_value: material.unit_value,
+        unit_value: parseFloat(material.unit_value as any || 0),
         requires_return: material.requires_return,
       });
     } else {
@@ -233,7 +233,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                           <Box>
                             <Typography variant="body2">{opt.name}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {opt.code} | L {opt.unit_value.toFixed(2)}
+                              {opt.code} | L {parseFloat(opt.unit_value as any || 0).toFixed(2)}
                             </Typography>
                           </Box>
                         </Box>
@@ -401,8 +401,8 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                         <TableCell>{item.custom_description}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
                         <TableCell align="right">{item.weight_kg ? `${item.weight_kg} kg` : '-'}</TableCell>
-                        <TableCell align="right">L {item.unit_value.toFixed(2)}</TableCell>
-                        <TableCell align="right">L {(item.quantity * item.unit_value).toFixed(2)}</TableCell>
+                        <TableCell align="right">L {parseFloat(item.unit_value as any || 0).toFixed(2)}</TableCell>
+                        <TableCell align="right">L {(item.quantity * parseFloat(item.unit_value as any || 0)).toFixed(2)}</TableCell>
                         <TableCell align="center">
                           {item.requires_return ? (
                             <Chip label={item.return_date || 'Sí'} size="small" color="warning" />
