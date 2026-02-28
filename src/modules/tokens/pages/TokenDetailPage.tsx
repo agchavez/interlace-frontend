@@ -167,7 +167,7 @@ export const TokenDetailPage = () => {
 
   // Build pdfUrl - need id which might be undefined during loading
   const pdfUrl = id ? `${import.meta.env.VITE_JS_APP_API_URL}/api/tokens/${id}/download_pdf/` : '';
-  const receiptUrl = id ? `${import.meta.env.VITE_JS_APP_API_URL}/api/tokens/${id}/download_receipt/` : '';
+  const receiptUrl = id ? `${import.meta.env.VITE_JS_APP_API_URL}/api/tokens/${id}/print_receipt/` : '';
 
   // Fetch PDF with authentication - MUST be before any conditional returns
   const fetchPdf = useCallback(async () => {
@@ -342,25 +342,30 @@ export const TokenDetailPage = () => {
         const error = await response.json();
         throw new Error(error.error || 'Error al generar el recibo');
       }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      // El backend retorna HTML — lo inyectamos en un iframe y lo imprimimos
+      // El CSS @page { size: 80mm auto } del HTML controla el tamaño en la impresora térmica
+      const html = await response.text();
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.top = '-9999px';
       iframe.style.left = '-9999px';
-      iframe.style.width = '1px';
-      iframe.style.height = '1px';
+      iframe.style.width = '80mm';
+      iframe.style.height = '0';
       iframe.style.border = '0';
-      iframe.src = url;
       document.body.appendChild(iframe);
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(html);
+        iframeDoc.close();
+      }
       iframe.onload = () => {
         setTimeout(() => {
           iframe.contentWindow?.print();
           setTimeout(() => {
             document.body.removeChild(iframe);
-            URL.revokeObjectURL(url);
-          }, 1000);
-        }, 500);
+          }, 2000);
+        }, 300);
       };
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Error al generar el recibo');
