@@ -113,7 +113,7 @@ export const PersonnelCreatePage = () => {
   const [showForm, setShowForm] = useState(false);
 
   // Estados para usuario
-  const [createMode, setCreateMode] = useState<'personnel_only' | 'existing_user' | 'new_user'>('personnel_only');
+  const [createMode, setCreateMode] = useState<'personnel_only' | 'existing_user' | 'new_user' | 'bulk_upload'>('personnel_only');
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [newUserData, setNewUserData] = useState<any>(null);
 
@@ -121,7 +121,7 @@ export const PersonnelCreatePage = () => {
   const [createPersonnelWithUser, { isLoading: isLoadingWithUser }] = useCreatePersonnelWithUserMutation();
 
   // Handlers para el flujo de modales
-  const handleModeSelect = (mode: 'personnel_only' | 'existing_user' | 'new_user') => {
+  const handleModeSelect = (mode: 'personnel_only' | 'existing_user' | 'new_user' | 'bulk_upload') => {
     setCreateMode(mode);
     setShowModeSelector(false);
 
@@ -131,6 +131,8 @@ export const PersonnelCreatePage = () => {
       setShowExistingUserSelector(true);
     } else if (mode === 'new_user') {
       setShowNewUserRegistration(true);
+    } else if (mode === 'bulk_upload') {
+      navigate('/personnel/bulk-upload');
     }
   };
 

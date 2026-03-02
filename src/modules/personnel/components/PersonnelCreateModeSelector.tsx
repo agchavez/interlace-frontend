@@ -16,10 +16,11 @@ import {
 import PersonOffIcon from '@mui/icons-material/PersonOff';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 
-type CreateMode = 'personnel_only' | 'existing_user' | 'new_user';
+type CreateMode = 'personnel_only' | 'existing_user' | 'new_user' | 'bulk_upload';
 
 interface Props {
   open: boolean;
@@ -65,6 +66,14 @@ export const PersonnelCreateModeSelector: React.FC<Props> = ({ open, onClose, on
       color: theme.palette.primary.main,
       gradient: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
     },
+    {
+      mode: 'bulk_upload',
+      icon: <UploadFileIcon sx={{ fontSize: 80 }} />,
+      title: 'Carga Masiva',
+      description: 'Registrar múltiples empleados a la vez desde una plantilla Excel. Ideal para grupos grandes.',
+      color: theme.palette.warning.main,
+      gradient: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
+    },
   ];
 
   const handleSelect = (mode: CreateMode) => {
@@ -103,9 +112,9 @@ export const PersonnelCreateModeSelector: React.FC<Props> = ({ open, onClose, on
             </Box>
 
             {/* Mode Cards */}
-            <Grid container spacing={{ xs: 2, md: 4 }}>
+            <Grid container spacing={{ xs: 2, md: 3 }}>
               {modes.map((option, index) => (
-                <Grid item xs={12} md={4} key={option.mode}>
+                <Grid item xs={12} sm={6} md={3} key={option.mode}>
                   <Zoom in={open} timeout={500 + index * 200}>
                     <Card
                       elevation={0}

@@ -334,6 +334,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/personnel/bulk-upload",
+        permissions: [
+            "user.add_usermodel"
+        ]
+    },
+    {
         url: "/demo-v2",
         permissions: [
             "any"

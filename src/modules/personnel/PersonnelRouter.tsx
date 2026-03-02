@@ -12,6 +12,7 @@ import { PerformanceEvaluationCreatePage } from "./pages/PerformanceEvaluationCr
 import { MyProfilePage } from "./pages/MyProfilePage";
 import { MyProfileEditPage } from "./pages/MyProfileEditPage";
 import { PersonnelManagementPage } from "./pages/PersonnelManagementPage";
+import BulkUploadPage from "./pages/BulkUploadPage";
 
 function PersonnelRouter() {
   return (
@@ -33,6 +34,9 @@ function PersonnelRouter() {
 
       {/* Crear nuevo personal */}
       <Route element={<PersonnelCreatePage />} path="/create" />
+
+      {/* Carga masiva de personal */}
+      <Route element={<BulkUploadPage />} path="/bulk-upload" />
 
       {/* Editar personal */}
       <Route element={<PersonnelEditPage />} path="/edit/:id" />
