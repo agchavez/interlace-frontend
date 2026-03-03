@@ -422,7 +422,11 @@ export const TokenCreatePage = () => {
     try {
       const result = await createToken(payload).unwrap();
       toast.success('Token creado exitosamente');
-      navigate(`/tokens/detail/${result.id}`);
+      if (tokenType === TokenType.UNIFORM_DELIVERY) {
+        navigate(`/tokens/${result.id}/complete-delivery`);
+      } else {
+        navigate(`/tokens/detail/${result.id}`);
+      }
     } catch (error: unknown) {
       const err = error as { data?: { detail?: string } };
       toast.error(err?.data?.detail || 'Error al crear el token');

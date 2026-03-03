@@ -175,6 +175,8 @@ export interface EmergencyContact {
   is_primary: boolean;
 }
 
+export type CertificationStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'NOT_COMPLETED';
+
 export interface Certification {
   id: number;
   personnel: number;
@@ -201,6 +203,52 @@ export interface Certification {
   created_by_name?: string;
   created_at?: string;
   updated_at?: string;
+  // Flujo de progreso
+  status: CertificationStatus;
+  signature_url?: string | null;
+  completion_notes?: string;
+  non_completion_reason?: string;
+  completed_at?: string | null;
+  completed_by_name?: string | null;
+}
+
+export interface CertificationBulkRow {
+  fila: number;
+  employee_code: string;
+  certification_type_code: string;
+  certification_type_name: string;
+  issue_date: string | null;
+  expiration_date: string | null;
+  issuing_authority: string;
+  certification_number: string;
+  notes: string;
+}
+
+export interface CertificationBulkError {
+  fila: number;
+  datos: Partial<CertificationBulkRow>;
+  errores: { campo: string; mensaje: string }[];
+}
+
+export interface CertificationBulkPreviewResponse {
+  total: number;
+  valid: number;
+  errors: number;
+  valid_rows: CertificationBulkRow[];
+  error_rows: CertificationBulkError[];
+}
+
+export interface CertificationBulkConfirmResponse {
+  status: string;
+  created: number;
+  records: {
+    id: number;
+    employee_code: string;
+    employee_name: string;
+    certification_type: string;
+    certification_number: string;
+    status: CertificationStatus;
+  }[];
 }
 
 export interface CertificationType {
@@ -382,7 +430,7 @@ export interface CertificationFilterParams {
   search?: string;
   personnel?: number;
   certification_type?: number;
-  status?: 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'REVOKED';
+  status?: CertificationStatus;
   is_valid?: boolean;
   expiring_soon?: boolean;
   distributor_center?: number;

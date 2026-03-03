@@ -166,7 +166,7 @@ const SidebarV2: React.FC = () => {
         subItems: [
           { text: 'Dashboard', href: '/personnel/dashboard', id: 'dashboard' },
           { text: 'Listado', href: '/personnel', id: 'list' },
-          { text: 'Certificaciones', href: '/personnel/certifications', id: 'certifications' },
+          { text: 'Certificaciones y Entrenamientos', href: '/personnel/certifications', id: 'certifications' },
           { text: 'Desempeño', href: '/personnel/performance', id: 'performance' },
         ],
         id: 'personal',

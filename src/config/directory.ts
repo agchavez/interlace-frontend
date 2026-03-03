@@ -309,6 +309,19 @@ export const permisions = [
         ]
     },
     {
+        url: "/personnel/certifications/bulk-upload",
+        permissions: [
+            "personnel.add_certification"
+        ]
+    },
+    {
+        url: "/personnel/certifications/:id/complete",
+        reg: /\/personnel\/certifications\/\d+\/complete/,
+        permissions: [
+            "personnel.change_certification"
+        ]
+    },
+    {
         url: "/personnel/certifications/:id",
         reg: /\/personnel\/certifications\/\d+/,
         permissions: [

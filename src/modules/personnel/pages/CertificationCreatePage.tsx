@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Box,
   Container,
@@ -19,6 +19,8 @@ import {
   DialogContent,
   DialogActions,
   styled,
+  Paper,
+  Chip,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -32,7 +34,15 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import BusinessIcon from '@mui/icons-material/Business';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PersonIcon from '@mui/icons-material/Person';
-import { useCreateCertificationMutation, useGetPersonnelProfilesQuery } from '../services/personnelApi';
+import DrawIcon from '@mui/icons-material/Draw';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import SignatureCanvas from 'react-signature-canvas';
+import {
+  useCreateCertificationMutation,
+  useCompleteCertificationMutation,
+  useGetPersonnelProfilesQuery,
+} from '../services/personnelApi';
 import { toast } from 'sonner';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 import { FileUpload } from '../../ui/components/FileUpload';
@@ -40,25 +50,19 @@ import { format } from 'date-fns';
 import { CertificationTypeSelect } from '../components/CertificationTypeSelect';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialogContent-root': {
-    padding: theme.spacing(2),
-  },
-  '& .MuiDialogActions-root': {
-    padding: theme.spacing(1),
-  },
+  '& .MuiDialogContent-root': { padding: theme.spacing(2) },
+  '& .MuiDialogActions-root': { padding: theme.spacing(1) },
 }));
 
 const tabs = [
   { label: 'Información', icon: <VerifiedIcon /> },
   { label: 'Fechas', icon: <CalendarTodayIcon /> },
   { label: 'Documento', icon: <DescriptionIcon /> },
+  { label: 'Firma', icon: <DrawIcon /> },
 ];
 
 function a11yProps(index: number) {
-  return {
-    id: `certification-tab-${index}`,
-    'aria-controls': `certification-tabpanel-${index}`,
-  };
+  return { id: `certification-tab-${index}`, 'aria-controls': `certification-tabpanel-${index}` };
 }
 
 interface TabPanelProps {
@@ -67,9 +71,7 @@ interface TabPanelProps {
   value: number;
 }
 
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function CustomTabPanel({ children, value, index, ...other }: TabPanelProps) {
   return (
     <div
       role="tabpanel"
@@ -112,34 +114,30 @@ export const CertificationCreatePage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedCertType, setSelectedCertType] = useState<CertificationType | null>(null);
 
+  // Firma
+  const signatureRef = useRef<SignatureCanvas>(null);
+  const [signatureEmpty, setSignatureEmpty] = useState(true);
+  const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
+  const [completionNotes, setCompletionNotes] = useState('');
+
   const [createCertification, { isLoading }] = useCreateCertificationMutation();
+  const [completeCertification, { isLoading: completing }] = useCompleteCertificationMutation();
 
-  // Cargar catálogos
   const { data: personnelData } = useGetPersonnelProfilesQuery({ is_active: true, limit: 1000, offset: 0 });
-
   const personnelList = personnelData?.results || [];
 
-  // Precargar personnel si viene en la URL
   React.useEffect(() => {
     const personnelId = searchParams.get('personnel');
     if (personnelId && personnelList.length > 0) {
       const personnelIdNum = parseInt(personnelId, 10);
       const personnel = personnelList.find((p: any) => p.id === personnelIdNum);
-      if (personnel) {
-        setFormData(prev => ({ ...prev, personnel: personnelIdNum }));
-      }
+      if (personnel) setFormData((prev) => ({ ...prev, personnel: personnelIdNum }));
     }
   }, [searchParams, personnelList]);
 
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
-  };
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => setActiveTab(newValue);
+  const handleCancel = () => navigate('/personnel/certifications');
 
-  const handleCancel = () => {
-    navigate('/personnel/certifications');
-  };
-
-  // Validar si el formulario está completo
   const isFormValid = useMemo(() => {
     return !!(
       formData.personnel &&
@@ -152,13 +150,11 @@ export const CertificationCreatePage = () => {
 
   const validateAll = (): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.personnel) newErrors.personnel = 'Personal requerido';
     if (!formData.certification_type) newErrors.certification_type = 'Tipo de certificación requerido';
     if (!formData.issuing_authority) newErrors.issuing_authority = 'Autoridad emisora requerida';
-    if (!formData.issue_date) newErrors.issue_date = 'Fecha de emisión requerida';
-    if (!formData.expiration_date) newErrors.expiration_date = 'Fecha de vencimiento requerida';
-
+    if (!formData.issue_date) newErrors.issue_date = 'Fecha de inicio requerida';
+    if (!formData.expiration_date) newErrors.expiration_date = 'Fecha de fin requerida';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -172,14 +168,26 @@ export const CertificationCreatePage = () => {
   };
 
   const handleConfirmSubmit = async () => {
+    const willComplete = !signatureEmpty && signatureBlob;
+
     try {
-      await createCertification(formData as any).unwrap();
-      toast.success('Certificación creada exitosamente');
+      const result = await createCertification(formData as any).unwrap();
+
+      if (willComplete) {
+        const fd = new FormData();
+        fd.append('signature', signatureBlob!, 'signature.png');
+        if (completionNotes) fd.append('notes', completionNotes);
+        await completeCertification({ id: result.id, formData: fd }).unwrap();
+        toast.success('Certificación creada y completada exitosamente');
+      } else {
+        toast.success('Certificación creada en estado Pendiente');
+      }
+
       setShowConfirmModal(false);
       navigate('/personnel/certifications');
     } catch (error: any) {
-      console.error('Error al crear certificación:', error);
-      const errorMessage = error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear la certificación';
+      const errorMessage =
+        error?.data?.detail?.message || error?.data?.mensage || error?.data?.detail || 'Error al crear la certificación';
       toast.error(errorMessage);
       setShowConfirmModal(false);
     }
@@ -189,8 +197,24 @@ export const CertificationCreatePage = () => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
+  const handleClearSignature = () => {
+    signatureRef.current?.clear();
+    setSignatureEmpty(true);
+    setSignatureBlob(null);
+  };
+
+  const handleSignatureEnd = () => {
+    if (signatureRef.current && !signatureRef.current.isEmpty()) {
+      setSignatureEmpty(false);
+      signatureRef.current.getTrimmedCanvas().toBlob((blob) => {
+        if (blob) setSignatureBlob(blob);
+      }, 'image/png');
+    }
+  };
+
   const selectedPersonnel = personnelList.find((p: any) => p.id === formData.personnel);
   const isPersonnelPrecargado = !!searchParams.get('personnel');
+  const willComplete = !signatureEmpty && signatureBlob;
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
@@ -204,15 +228,8 @@ export const CertificationCreatePage = () => {
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
 
-          <Grid item xs={12} md={8} lg={9} xl={10}></Grid>
-          <Grid
-            item
-            xs={12}
-            md={4}
-            lg={3}
-            xl={2}
-            style={{ display: "flex", justifyContent: "flex-end" }}
-          >
+          <Grid item xs={12} md={8} lg={9} xl={10} />
+          <Grid item xs={12} md={4} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
               variant="outlined"
               color="secondary"
@@ -221,7 +238,7 @@ export const CertificationCreatePage = () => {
               onClick={handleCancel}
               startIcon={<ArrowBackIcon color="inherit" fontSize="small" />}
             >
-              <Typography variant="body2" component="span" fontWeight={400} color={"gray.700"}>
+              <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
                 Volver al Listado
               </Typography>
             </Button>
@@ -229,12 +246,12 @@ export const CertificationCreatePage = () => {
 
           {/* Tabs */}
           <Grid item xs={12}>
-            <Box sx={{ width: "100%" }}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Box sx={{ width: '100%' }}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs
                   value={activeTab}
                   onChange={handleTabChange}
-                  variant={isMobile ? "scrollable" : "fullWidth"}
+                  variant={isMobile ? 'scrollable' : 'fullWidth'}
                   scrollButtons="auto"
                   aria-label="certification form tabs"
                 >
@@ -250,7 +267,7 @@ export const CertificationCreatePage = () => {
                 </Tabs>
               </Box>
 
-              {/* Tab Panels */}
+              {/* Tab 0: Información */}
               <CustomTabPanel value={activeTab} index={0}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, py: 3 }}>
                   <Autocomplete
@@ -262,10 +279,10 @@ export const CertificationCreatePage = () => {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label={isPersonnelPrecargado ? "Personal (Precargado)" : "Personal"}
+                        label={isPersonnelPrecargado ? 'Personal (Precargado)' : 'Personal'}
                         required
                         error={!!errors.personnel}
-                        helperText={isPersonnelPrecargado ? "Este campo fue precargado automáticamente" : errors.personnel}
+                        helperText={isPersonnelPrecargado ? 'Este campo fue precargado automáticamente' : errors.personnel}
                         size="small"
                         InputProps={{
                           ...params.InputProps,
@@ -313,7 +330,7 @@ export const CertificationCreatePage = () => {
                   />
 
                   <TextField
-                    label="Autoridad Emisora"
+                    label="Instructor / Autoridad Emisora"
                     value={formData.issuing_authority || ''}
                     onChange={(e) => updateFormData({ issuing_authority: e.target.value })}
                     error={!!errors.issuing_authority}
@@ -333,10 +350,11 @@ export const CertificationCreatePage = () => {
                 </Box>
               </CustomTabPanel>
 
+              {/* Tab 1: Fechas */}
               <CustomTabPanel value={activeTab} index={1}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, py: 3 }}>
                   <DatePicker
-                    label="Fecha de Emisión *"
+                    label="Fecha de Inicio *"
                     value={formData.issue_date ? new Date(formData.issue_date) : null}
                     onChange={(newValue) => {
                       const dateStr = newValue ? newValue.toISOString().split('T')[0] : '';
@@ -360,7 +378,7 @@ export const CertificationCreatePage = () => {
                   />
 
                   <DatePicker
-                    label="Fecha de Vencimiento *"
+                    label="Fecha de Fin / Vencimiento *"
                     value={formData.expiration_date ? new Date(formData.expiration_date) : null}
                     onChange={(newValue) => {
                       const dateStr = newValue ? newValue.toISOString().split('T')[0] : '';
@@ -385,12 +403,13 @@ export const CertificationCreatePage = () => {
 
                   <Box sx={{ gridColumn: { xs: '1', md: '1 / -1' } }}>
                     <Alert severity="info" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                      Asegúrese de verificar las fechas de emisión y vencimiento de la certificación
+                      Si la certificación ya fue realizada, completa también la firma en el tab <strong>Firma</strong> para marcarla directamente como Completada.
                     </Alert>
                   </Box>
                 </Box>
               </CustomTabPanel>
 
+              {/* Tab 2: Documento */}
               <CustomTabPanel value={activeTab} index={2}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 3, py: 3 }}>
                   <FileUpload
@@ -415,6 +434,90 @@ export const CertificationCreatePage = () => {
                   />
                 </Box>
               </CustomTabPanel>
+
+              {/* Tab 3: Firma */}
+              <CustomTabPanel value={activeTab} index={3}>
+                <Box sx={{ py: 3 }}>
+                  <Alert
+                    severity={signatureEmpty ? 'info' : 'success'}
+                    icon={signatureEmpty ? <HourglassEmptyIcon /> : <CheckCircleIcon />}
+                    sx={{ mb: 3 }}
+                  >
+                    {signatureEmpty ? (
+                      <>
+                        <strong>Opcional:</strong> Si la certificación ya fue realizada, capture aquí la firma del participante.
+                        La certificación se guardará directamente como <strong>Completada</strong>.
+                        Si lo omite, quedará en estado <strong>Pendiente</strong>.
+                      </>
+                    ) : (
+                      <>
+                        Firma capturada — La certificación se guardará como <Chip label="Completada" color="success" size="small" sx={{ mx: 0.5 }} />.
+                      </>
+                    )}
+                  </Alert>
+
+                  <Paper
+                    variant="outlined"
+                    sx={{
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      borderColor: signatureEmpty ? theme.palette.divider : theme.palette.success.main,
+                      borderWidth: signatureEmpty ? 1 : 2,
+                      mb: 3,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        bgcolor: 'action.hover',
+                        px: 2,
+                        py: 1,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <DrawIcon fontSize="small" color="primary" />
+                        <Typography variant="body2" fontWeight={500}>
+                          Firma del participante {signatureEmpty ? '(opcional)' : '✓'}
+                        </Typography>
+                      </Box>
+                      <Button size="small" onClick={handleClearSignature} color="error" variant="text">
+                        Limpiar
+                      </Button>
+                    </Box>
+                    <Divider />
+                    <Box sx={{ cursor: 'crosshair', touchAction: 'none' }}>
+                      <SignatureCanvas
+                        ref={signatureRef}
+                        penColor={theme.palette.mode === 'dark' ? '#fff' : '#1a1a2e'}
+                        canvasProps={{
+                          width: isMobile ? 340 : 600,
+                          height: 180,
+                          style: {
+                            display: 'block',
+                            margin: '0 auto',
+                            background: theme.palette.mode === 'dark' ? '#1e1e2e' : '#fafafa',
+                          },
+                        }}
+                        onEnd={handleSignatureEnd}
+                      />
+                    </Box>
+                  </Paper>
+
+                  {!signatureEmpty && (
+                    <TextField
+                      label="Notas de completado (opcional)"
+                      multiline
+                      rows={3}
+                      fullWidth
+                      value={completionNotes}
+                      onChange={(e) => setCompletionNotes(e.target.value)}
+                      placeholder="Observaciones sobre la realización del entrenamiento..."
+                    />
+                  )}
+                </Box>
+              </CustomTabPanel>
             </Box>
           </Grid>
 
@@ -422,37 +525,37 @@ export const CertificationCreatePage = () => {
           <Grid item xs={12}>
             <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
           </Grid>
-          <Grid item xs={12} md={3} lg={3} xl={2} style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Grid item xs={12} md={3} lg={3} xl={2} style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button variant="outlined" color="secondary" size="medium" fullWidth onClick={handleCancel}>
-              <Typography variant="body2" component="span" fontWeight={400} color={"gray.700"}>
+              <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
                 Cancelar
               </Typography>
             </Button>
           </Grid>
-          <Grid item xs={12} md={3} lg={3} xl={6}></Grid>
-          <Grid item xs={12} md={6} lg={6} xl={4} style={{ display: "flex", justifyContent: "flex-end", gap: 16 }}>
+          <Grid item xs={12} md={3} lg={3} xl={6} />
+          <Grid item xs={12} md={6} lg={6} xl={4} style={{ display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
             <Button
               variant="contained"
-              color="primary"
+              color={willComplete ? 'success' : 'primary'}
               size="medium"
               fullWidth
               onClick={handleShowConfirmModal}
-              disabled={!isFormValid || isLoading}
-              endIcon={<SaveIcon color="inherit" fontSize="small" />}
+              disabled={!isFormValid || isLoading || completing}
+              endIcon={willComplete ? <CheckCircleIcon fontSize="small" /> : <SaveIcon fontSize="small" />}
             >
-              <Typography variant="body2" component="span" fontWeight={400} color={"gray.700"}>
-                Guardar Certificación
+              <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
+                {willComplete ? 'Guardar y Completar' : 'Guardar como Pendiente'}
               </Typography>
             </Button>
           </Grid>
-          <Grid item xs={12} sx={{ marginTop: 5 }}></Grid>
+          <Grid item xs={12} sx={{ marginTop: 5 }} />
         </Grid>
       </Container>
 
       {/* Modal de Confirmación */}
       <BootstrapDialog open={showConfirmModal} onClose={() => setShowConfirmModal(false)} fullWidth maxWidth="sm">
         <BootstrapDialogTitle id="confirm-dialog-title" onClose={() => setShowConfirmModal(false)}>
-          <Typography variant="h6" component="span" fontWeight={400} color={'#fff'}>
+          <Typography variant="h6" component="span" fontWeight={400} color="#fff">
             Confirmar Creación de Certificación
           </Typography>
         </BootstrapDialogTitle>
@@ -461,6 +564,17 @@ export const CertificationCreatePage = () => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
               Resumen de Información
             </Typography>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="text.secondary">Estado final:</Typography>
+              <Chip
+                label={willComplete ? 'Completada' : 'Pendiente'}
+                color={willComplete ? 'success' : 'default'}
+                icon={willComplete ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
+                size="small"
+                sx={{ mt: 0.5 }}
+              />
+            </Box>
 
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2" color="text.secondary">Personal:</Typography>
@@ -482,7 +596,7 @@ export const CertificationCreatePage = () => {
             )}
 
             <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">Autoridad Emisora:</Typography>
+              <Typography variant="body2" color="text.secondary">Instructor / Autoridad Emisora:</Typography>
               <Typography variant="body1" fontWeight={500}>{formData.issuing_authority}</Typography>
             </Box>
 
@@ -490,18 +604,24 @@ export const CertificationCreatePage = () => {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Fecha de Emisión:</Typography>
+                <Typography variant="body2" color="text.secondary">Fecha de Inicio:</Typography>
                 <Typography variant="body1" fontWeight={500}>
                   {formData.issue_date ? format(new Date(formData.issue_date), "dd 'de' MMMM 'de' yyyy", { locale: es }) : '-'}
                 </Typography>
               </Grid>
               <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">Fecha de Vencimiento:</Typography>
+                <Typography variant="body2" color="text.secondary">Fecha de Fin / Vencimiento:</Typography>
                 <Typography variant="body1" fontWeight={500}>
                   {formData.expiration_date ? format(new Date(formData.expiration_date), "dd 'de' MMMM 'de' yyyy", { locale: es }) : '-'}
                 </Typography>
               </Grid>
             </Grid>
+
+            {willComplete && (
+              <Alert severity="success" sx={{ mt: 2 }} icon={<CheckCircleIcon />}>
+                Se capturará la firma y la certificación quedará como <strong>Completada</strong>.
+              </Alert>
+            )}
 
             {formData.notes && (
               <Box sx={{ mt: 2 }}>
@@ -517,27 +637,29 @@ export const CertificationCreatePage = () => {
               </Box>
             )}
 
-            <Alert severity="info" sx={{ mt: 3 }}>
-              ¿Está seguro de que desea crear esta certificación?
-            </Alert>
+            {!willComplete && (
+              <Alert severity="info" sx={{ mt: 3 }}>
+                La certificación se guardará en estado <strong>Pendiente</strong>. Podrás completarla y firmarla desde el detalle.
+              </Alert>
+            )}
           </Box>
         </DialogContent>
         <DialogActions>
           <Button variant="outlined" color="secondary" size="medium" onClick={() => setShowConfirmModal(false)}>
-            <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
+            <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
               Cancelar
             </Typography>
           </Button>
           <Button
             variant="contained"
-            color="primary"
+            color={willComplete ? 'success' : 'primary'}
             size="medium"
             onClick={handleConfirmSubmit}
-            disabled={isLoading}
-            startIcon={isLoading ? <CircularProgress size={20} /> : <SaveIcon />}
+            disabled={isLoading || completing}
+            startIcon={isLoading || completing ? <CircularProgress size={20} /> : <SaveIcon />}
           >
-            <Typography variant="body2" component="span" fontWeight={400} color={'gray.700'}>
-              {isLoading ? 'Guardando...' : 'Confirmar y Guardar'}
+            <Typography variant="body2" component="span" fontWeight={400} color="gray.700">
+              {isLoading || completing ? 'Guardando...' : willComplete ? 'Confirmar y Completar' : 'Confirmar y Guardar'}
             </Typography>
           </Button>
         </DialogActions>

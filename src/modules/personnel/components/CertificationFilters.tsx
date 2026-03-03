@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { FC, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import type { CertificationFilterParams, Area, DistributorCenter } from "../../../interfaces/personnel";
+import type { CertificationFilterParams, CertificationStatus, Area, DistributorCenter } from "../../../interfaces/personnel";
 import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 
 const ITEM_HEIGHT = 48;
@@ -34,7 +34,7 @@ const MenuProps = {
 
 export interface FormFilterCertification {
   search: string;
-  status?: 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'REVOKED';
+  status?: CertificationStatus;
   personnel?: number;
   certification_type?: number;
   distributor_center?: number;
@@ -64,7 +64,7 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
     useForm<FormFilterCertification>({
       defaultValues: {
         search: filters.search || '',
-        status: filters.status as 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'REVOKED' | undefined,
+        status: filters.status,
         distributor_center: filters.distributor_center,
         area: filters.area,
         hierarchy_level: filters.hierarchy_level,
@@ -101,7 +101,7 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
   useEffect(() => {
     if (open) {
       setValue("search", filters.search || "");
-      setValue("status", filters.status as 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'REVOKED' | undefined);
+      setValue("status", filters.status);
       setValue("distributor_center", filters.distributor_center);
       setValue("area", filters.area);
       setValue("hierarchy_level", filters.hierarchy_level);
@@ -123,6 +123,13 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
     { value: 'MANAGEMENT', label: 'Gerencial' },
     { value: 'SECURITY', label: 'Seguridad' },
     { value: 'DRIVER', label: 'Conductor' },
+  ];
+
+  const statusOptions: { value: CertificationStatus; label: string }[] = [
+    { value: 'PENDING', label: 'Pendiente' },
+    { value: 'IN_PROGRESS', label: 'En Progreso' },
+    { value: 'COMPLETED', label: 'Completado' },
+    { value: 'NOT_COMPLETED', label: 'No Completó' },
   ];
 
   return (
@@ -147,7 +154,7 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
                   autoComplete="off"
                   size="small"
                   fullWidth
-                  placeholder="Buscar por empleado, certificación..."
+                  placeholder="Nombre, código de empleado, certificación..."
                   {...register("search")}
                 />
               </Grid>
@@ -284,7 +291,7 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
           {/* Estado */}
           <List>
             <ListItem disablePadding sx={{ pl: 2 }}>
-              <ListItemText primary={"Estado"} />
+              <ListItemText primary="Estado" />
             </ListItem>
             <ListItem disablePadding sx={{ pl: 2 }}>
               <FormGroup>
@@ -296,88 +303,27 @@ export const CertificationFilters: FC<CertificationFiltersProps> = ({
                     />
                   }
                   label={
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={200}
-                      lineHeight="2rem"
-                    >
+                    <Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem">
                       Todos
                     </Typography>
                   }
                 />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={watch("status") === 'ACTIVE'}
-                      onChange={() => setValue("status", 'ACTIVE')}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={200}
-                      lineHeight="2rem"
-                    >
-                      Vigentes
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={watch("status") === 'EXPIRING_SOON'}
-                      onChange={() => setValue("status", 'EXPIRING_SOON')}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={200}
-                      lineHeight="2rem"
-                    >
-                      Por Vencer
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={watch("status") === 'EXPIRED'}
-                      onChange={() => setValue("status", 'EXPIRED')}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={200}
-                      lineHeight="2rem"
-                    >
-                      Vencidas
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={watch("status") === 'REVOKED'}
-                      onChange={() => setValue("status", 'REVOKED')}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="body2"
-                      component="span"
-                      fontWeight={200}
-                      lineHeight="2rem"
-                    >
-                      Revocadas
-                    </Typography>
-                  }
-                />
+                {statusOptions.map(({ value, label }) => (
+                  <FormControlLabel
+                    key={value}
+                    control={
+                      <Checkbox
+                        checked={watch("status") === value}
+                        onChange={() => setValue("status", value)}
+                      />
+                    }
+                    label={
+                      <Typography variant="body2" component="span" fontWeight={200} lineHeight="2rem">
+                        {label}
+                      </Typography>
+                    }
+                  />
+                ))}
               </FormGroup>
             </ListItem>
           </List>

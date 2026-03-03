@@ -243,7 +243,7 @@ const items: SideBarMainItem[] = [
                 permissions: ["personnel.view"],
             },
             {
-                text: "Certificaciones",
+                text: "Certificaciones y Entrenamientos",
                 href: "/personnel/certifications",
                 id: "certifications",
                 permissions: ["personnel.certifications"],

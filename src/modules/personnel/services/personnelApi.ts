@@ -13,6 +13,9 @@ import type {
   Certification,
   CertificationListResponse,
   CertificationFilterParams,
+  CertificationBulkPreviewResponse,
+  CertificationBulkConfirmResponse,
+  CertificationBulkRow,
   MedicalRecord,
   MedicalRecordListResponse,
   PerformanceMetric,
@@ -284,6 +287,58 @@ export const personnelApi = createApi({
         { type: 'Certifications', id },
         { type: 'Certifications', id: 'LIST' },
       ],
+    }),
+
+    completeCertification: builder.mutation<Certification, { id: number; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `/certifications/${id}/complete/`,
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Certifications', id },
+        { type: 'Certifications', id: 'LIST' },
+      ],
+    }),
+
+    markCertificationInProgress: builder.mutation<Certification, number>({
+      query: (id) => ({
+        url: `/certifications/${id}/mark_in_progress/`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Certifications', id },
+        { type: 'Certifications', id: 'LIST' },
+      ],
+    }),
+
+    markCertificationNotCompleted: builder.mutation<Certification, { id: number; reason: string }>({
+      query: ({ id, reason }) => ({
+        url: `/certifications/${id}/mark_not_completed/`,
+        method: 'POST',
+        body: { reason },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Certifications', id },
+        { type: 'Certifications', id: 'LIST' },
+      ],
+    }),
+
+    previewCertificationBulk: builder.mutation<CertificationBulkPreviewResponse, FormData>({
+      query: (formData) => ({
+        url: '/certifications/bulk_upload_preview/',
+        method: 'POST',
+        body: formData,
+      }),
+    }),
+
+    confirmCertificationBulk: builder.mutation<CertificationBulkConfirmResponse, { rows: CertificationBulkRow[]; initial_status?: 'PENDING' | 'IN_PROGRESS' }>({
+      query: ({ rows, initial_status = 'PENDING' }) => ({
+        url: '/certifications/bulk_upload_confirm/',
+        method: 'POST',
+        body: { rows, initial_status },
+      }),
+      invalidatesTags: [{ type: 'Certifications', id: 'LIST' }],
     }),
 
     // ==========================================
@@ -636,6 +691,11 @@ export const {
   useCreateCertificationMutation,
   useRevokeCertificationMutation,
   useRenewCertificationMutation,
+  useCompleteCertificationMutation,
+  useMarkCertificationInProgressMutation,
+  useMarkCertificationNotCompletedMutation,
+  usePreviewCertificationBulkMutation,
+  useConfirmCertificationBulkMutation,
   // Medical Records
   useGetMedicalRecordsQuery,
   useCreateMedicalRecordMutation,

@@ -7,6 +7,8 @@ import { PersonnelDashboardPage } from "./pages/PersonnelDashboardPage";
 import { CertificationsPage } from "./pages/CertificationsPage";
 import { CertificationCreatePage } from "./pages/CertificationCreatePage";
 import { CertificationDetailPage } from "./pages/CertificationDetailPage";
+import { CertificationCompletePage } from "./pages/CertificationCompletePage";
+import CertificationBulkUploadPage from "./pages/CertificationBulkUploadPage";
 import { PerformanceTrackingPage } from "./pages/PerformanceTrackingPage";
 import { PerformanceEvaluationCreatePage } from "./pages/PerformanceEvaluationCreatePage";
 import { MyProfilePage } from "./pages/MyProfilePage";
@@ -44,9 +46,11 @@ function PersonnelRouter() {
       {/* Detalle de personal */}
       <Route element={<PersonnelDetailPage />} path="/detail/:id" />
 
-      {/* Certificaciones */}
+      {/* Certificaciones y Entrenamientos */}
       <Route element={<CertificationsPage />} path="/certifications" />
       <Route element={<CertificationCreatePage />} path="/certifications/create" />
+      <Route element={<CertificationBulkUploadPage />} path="/certifications/bulk-upload" />
+      <Route element={<CertificationCompletePage />} path="/certifications/:id/complete" />
       <Route element={<CertificationDetailPage />} path="/certifications/:id" />
 
       {/* Seguimiento de desempeño */}
