@@ -64,7 +64,7 @@ export const CertificationCompleteModal = ({ open, onClose, certificationId }: P
       const canvas = signatureRef.current?.getCanvas();
       if (!wrap || !canvas) return;
       const newW = wrap.clientWidth;
-      const newH = 200;
+      const newH = 320;
       if (canvas.width === newW && canvas.height === newH) return;
       const strokes = signatureRef.current?.toData() ?? [];
       canvas.width = newW;
@@ -118,7 +118,7 @@ export const CertificationCompleteModal = ({ open, onClose, certificationId }: P
     : '';
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <CheckCircleIcon color="success" />
         Capturar Firma
@@ -172,7 +172,7 @@ export const CertificationCompleteModal = ({ open, onClose, certificationId }: P
                 style: {
                   display: 'block',
                   width: '100%',
-                  height: '200px',
+                  height: '320px',
                   cursor: 'crosshair',
                   background: theme.palette.mode === 'dark' ? '#1e1e2e' : '#fafafa',
                 },

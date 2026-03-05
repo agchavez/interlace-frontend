@@ -361,7 +361,7 @@ export const CertificationsPage = () => {
       {
         field: 'actions',
         headerName: '',
-        width: 56,
+        width: 88,
         sortable: false,
         align: 'center',
         headerAlign: 'center',
@@ -369,11 +369,24 @@ export const CertificationsPage = () => {
           actionLoadingId === p.row.id ? (
             <CircularProgress size={18} thickness={5} />
           ) : (
-            <Tooltip title="Acciones">
-              <IconButton size="small" onClick={(e) => openMenu(e, p.row)}>
-                <MoreVertIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              {['PENDING', 'IN_PROGRESS', 'NOT_COMPLETED'].includes(p.row.status) && (
+                <Tooltip title="Capturar firma">
+                  <IconButton
+                    size="small"
+                    color="success"
+                    onClick={(e) => { e.stopPropagation(); setCompleteModalId(p.row.id); }}
+                  >
+                    <CheckCircleIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+              <Tooltip title="Acciones">
+                <IconButton size="small" onClick={(e) => openMenu(e, p.row)}>
+                  <MoreVertIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
           ),
       }
     );
