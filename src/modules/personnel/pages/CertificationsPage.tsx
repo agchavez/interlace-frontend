@@ -23,6 +23,7 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  InputAdornment,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams, GridPaginationModel } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
@@ -43,6 +44,8 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import GridOnIcon from '@mui/icons-material/GridOn';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -53,6 +56,7 @@ import {
 } from '../services/personnelApi';
 import type { CertificationFilterParams, CertificationStatus } from '../../../interfaces/personnel';
 import { CertificationFilters } from '../components/CertificationFilters';
+import { CertificationCompleteModal } from '../components/CertificationCompleteModal';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
 import { useAppSelector } from '../../../store';
 
@@ -100,6 +104,21 @@ export const CertificationsPage = () => {
   useEffect(() => {
     try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(filters)); } catch { /* noop */ }
   }, [filters]);
+
+  // ── Modal completar certificación ──────────────────────────────────────────
+  const [completeModalId, setCompleteModalId] = useState<number | null>(null);
+
+  // ── Buscador rápido ────────────────────────────────────────────────────────
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setFilters(f => ({ ...f, search: searchInput.trim() || undefined, offset: 0 }));
+      setPaginationModel(m => ({ ...m, page: 0 }));
+    }, 400);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchInput]);
 
   // ── Menú de acciones ───────────────────────────────────────────────────────
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
@@ -391,6 +410,12 @@ export const CertificationsPage = () => {
         distributorCenters={disctributionCenters}
       />
 
+      <CertificationCompleteModal
+        open={completeModalId !== null}
+        onClose={() => setCompleteModalId(null)}
+        certificationId={completeModalId}
+      />
+
       {/* ── Dialog No Completó ──────────────────────────────────────────────── */}
       <Dialog
         open={notCompletedOpen}
@@ -455,7 +480,7 @@ export const CertificationsPage = () => {
         )}
 
         {(menuRow.current?.status === 'PENDING' || menuRow.current?.status === 'IN_PROGRESS') && [
-          <MenuItem key="complete" onClick={() => { closeMenu(); navigate(`/personnel/certifications/${menuRow.current?.id}/complete`); }}>
+          <MenuItem key="complete" onClick={() => { closeMenu(); setCompleteModalId(menuRow.current?.id); }}>
             <ListItemIcon><CheckCircleIcon fontSize="small" color="success" /></ListItemIcon>
             Completar (capturar firma)
           </MenuItem>,
@@ -466,7 +491,7 @@ export const CertificationsPage = () => {
         ]}
 
         {menuRow.current?.status === 'NOT_COMPLETED' && (
-          <MenuItem onClick={() => { closeMenu(); navigate(`/personnel/certifications/${menuRow.current?.id}/complete`); }}>
+          <MenuItem onClick={() => { closeMenu(); setCompleteModalId(menuRow.current?.id); }}>
             <ListItemIcon><EditNoteIcon fontSize="small" color="warning" /></ListItemIcon>
             Completar de todas formas
           </MenuItem>
@@ -597,7 +622,7 @@ export const CertificationsPage = () => {
           <Grid item xs={12}>
             <Grid container spacing={1}>
               {filters.search && (
-                <ChipFilterCategory label="Buscar: " items={[{ label: filters.search, id: "search", deleteAction: () => clearFilter('search') }]} />
+                <ChipFilterCategory label="Buscar: " items={[{ label: filters.search, id: "search", deleteAction: () => { clearFilter('search'); setSearchInput(''); } }]} />
               )}
               {filters.area && areasData && (
                 <ChipFilterCategory label="Área: " items={[{ label: areasData.find(a => a.id === filters.area)?.name || '', id: "area", deleteAction: () => clearFilter('area') }]} />
@@ -614,9 +639,31 @@ export const CertificationsPage = () => {
             </Grid>
           </Grid>
 
-          {/* ── Filtro rápido por estado ────────────────────────────────────── */}
+          {/* ── Filtro rápido por estado + buscador ─────────────────────────── */}
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+              <TextField
+                size="small"
+                placeholder="Buscar empleado, certificación..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                sx={{ width: { xs: '100%', sm: 260 } }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchInput ? (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearchInput('')}>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : null,
+                }}
+              />
+              <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
               <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
                 Estado:
               </Typography>
