@@ -20,7 +20,10 @@ async function qrToDataUrl(text: string): Promise<string> {
 async function imageToDataUrl(url: string, token?: string): Promise<string | null> {
   try {
     const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    // Las URLs de Azure Blob Storage ya incluyen autenticación SAS en los parámetros de la URL.
+    // Enviar Authorization header causa un preflight CORS innecesario y puede fallar.
+    const isExternalStorage = url.includes('blob.core.windows.net');
+    if (token && !isExternalStorage) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(url, { headers });
     if (!res.ok) return null;
     const blob = await res.blob();
