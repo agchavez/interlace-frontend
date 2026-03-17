@@ -58,6 +58,9 @@ import {
   Print as PrintIcon,
   Download as DownloadIcon,
   Receipt as ReceiptIcon,
+  AttachMoney as MoneyIcon,
+  Work as WorkIcon,
+  CompareArrows as CompareIcon,
 } from '@mui/icons-material';
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
@@ -85,6 +88,16 @@ import {
   UniformItemType,
   UniformSizeLabels,
   UniformSize,
+  SubstitutionReasonLabels,
+  SubstitutionReason,
+  RateChangeReasonLabels,
+  RateChangeReason,
+  OvertimeTypeLabels,
+  OvertimeType,
+  OvertimeReasonLabels,
+  OvertimeReason,
+  ShiftChangeReasonLabels,
+  ShiftChangeReason,
 } from '../interfaces/token';
 import { useAppSelector } from '../../../store';
 import { ApprovalDialog } from '../components/ApprovalDialog';
@@ -805,7 +818,7 @@ export const TokenDetailPage = () => {
                     <Table size="small">
                       <TableHead>
                         <TableRow sx={{ bgcolor: 'grey.50' }}>
-                          <TableCell>Tipo</TableCell>
+                          <TableCell>Prenda / Material</TableCell>
                           <TableCell>Talla</TableCell>
                           <TableCell>Color</TableCell>
                           <TableCell align="right">Cantidad</TableCell>
@@ -814,7 +827,7 @@ export const TokenDetailPage = () => {
                       <TableBody>
                         {token.uniform_delivery_detail.items.map((item) => (
                           <TableRow key={item.id} hover>
-                            <TableCell>{UniformItemTypeLabels[item.item_type as UniformItemType]}</TableCell>
+                            <TableCell>{item.material_name || UniformItemTypeLabels[item.item_type as UniformItemType] || item.custom_description || '-'}</TableCell>
                             <TableCell>{UniformSizeLabels[item.size as UniformSize]}</TableCell>
                             <TableCell>{item.color || '-'}</TableCell>
                             <TableCell align="right">{item.quantity}</TableCell>
@@ -947,6 +960,471 @@ export const TokenDetailPage = () => {
                       )}
                     </Grid>
                   </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+          {/* Substitution Detail */}
+          {token.token_type === TokenType.SUBSTITUTION && token.substitution_detail && (
+            <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <SwapIcon color="secondary" />
+                  Detalles de Sustitución
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <InfoItem
+                      icon={<PersonIcon fontSize="small" />}
+                      label="Persona Sustituida"
+                      value={token.substitution_detail.substituted_personnel_name}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <InfoItem
+                      icon={<BadgeIcon fontSize="small" />}
+                      label="Código Empleado"
+                      value={token.substitution_detail.substituted_personnel_code}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<NotesIcon fontSize="small" />}
+                      label="Motivo"
+                      value={token.substitution_detail.reason_display || SubstitutionReasonLabels[token.substitution_detail.reason as SubstitutionReason]}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha Inicio"
+                      value={token.substitution_detail.start_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha Fin"
+                      value={token.substitution_detail.end_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  {token.substitution_detail.total_days > 0 && (
+                    <Grid item xs={6} sm={4}>
+                      <InfoItem
+                        icon={<CalendarIcon fontSize="small" />}
+                        label="Total de Días"
+                        value={token.substitution_detail.total_days}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                  {token.substitution_detail.specific_schedule && (
+                    <Grid item xs={12} sm={8}>
+                      <InfoItem
+                        icon={<ScheduleIcon fontSize="small" />}
+                        label="Horario Específico"
+                        value={token.substitution_detail.specific_schedule}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                  {token.substitution_detail.assumed_functions && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<WorkIcon fontSize="small" />}
+                        label="Funciones Asumidas"
+                        value={token.substitution_detail.assumed_functions}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                  {token.substitution_detail.reason_detail && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<NotesIcon fontSize="small" />}
+                        label="Detalle del Motivo"
+                        value={token.substitution_detail.reason_detail}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+
+                <Box sx={{ mt: 2 }}>
+                  <Chip
+                    label={token.substitution_detail.additional_compensation ? 'Con Compensación Adicional' : 'Sin Compensación Adicional'}
+                    color={token.substitution_detail.additional_compensation ? 'success' : 'default'}
+                    size="small"
+                  />
+                </Box>
+                {token.substitution_detail.compensation_notes && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {token.substitution_detail.compensation_notes}
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Rate Change Detail */}
+          {token.token_type === TokenType.RATE_CHANGE && token.rate_change_detail && (
+            <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <TrendingIcon color="secondary" />
+                  Detalles de Cambio de Tarifa
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<NotesIcon fontSize="small" />}
+                      label="Motivo"
+                      value={token.rate_change_detail.reason_display || RateChangeReasonLabels[token.rate_change_detail.reason as RateChangeReason]}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha Inicio"
+                      value={token.rate_change_detail.start_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha Fin"
+                      value={token.rate_change_detail.end_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">Tarifa Actual</Typography>
+                      <Typography variant="h6" fontWeight={700}>
+                        L. {token.rate_change_detail.current_rate?.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center', bgcolor: 'success.50' }}>
+                      <Typography variant="caption" color="text.secondary">Nueva Tarifa</Typography>
+                      <Typography variant="h6" fontWeight={700} color="success.main">
+                        L. {token.rate_change_detail.new_rate?.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">Diferencia</Typography>
+                      <Typography variant="h6" fontWeight={700} color={token.rate_change_detail.rate_difference >= 0 ? 'success.main' : 'error.main'}>
+                        {token.rate_change_detail.rate_difference >= 0 ? '+' : ''}
+                        {token.rate_change_detail.rate_percentage_change?.toFixed(1)}%
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  {token.rate_change_detail.additional_functions && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<WorkIcon fontSize="small" />}
+                        label="Funciones Adicionales"
+                        value={token.rate_change_detail.additional_functions}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                  {token.rate_change_detail.reason_detail && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<NotesIcon fontSize="small" />}
+                        label="Detalle del Motivo"
+                        value={token.rate_change_detail.reason_detail}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Overtime Detail */}
+          {token.token_type === TokenType.OVERTIME && token.overtime_detail && (
+            <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <OvertimeIcon color="secondary" />
+                  Detalles de Horas Extra
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<TimeIcon fontSize="small" />}
+                      label="Tipo de Hora Extra"
+                      value={token.overtime_detail.overtime_type_model_name || token.overtime_detail.overtime_type_display || OvertimeTypeLabels[token.overtime_detail.overtime_type as OvertimeType]}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<NotesIcon fontSize="small" />}
+                      label="Motivo"
+                      value={token.overtime_detail.reason_model_name || token.overtime_detail.reason_display || OvertimeReasonLabels[token.overtime_detail.reason as OvertimeReason]}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha"
+                      value={token.overtime_detail.overtime_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <InfoItem
+                      icon={<TimeIcon fontSize="small" />}
+                      label="Hora Inicio"
+                      value={token.overtime_detail.start_time}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <InfoItem
+                      icon={<TimeIcon fontSize="small" />}
+                      label="Hora Fin"
+                      value={token.overtime_detail.end_time}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <InfoItem
+                      icon={<TimeIcon fontSize="small" />}
+                      label="Total Horas"
+                      value={`${token.overtime_detail.total_hours}h`}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={3}>
+                    <InfoItem
+                      icon={<MoneyIcon fontSize="small" />}
+                      label="Multiplicador"
+                      value={`x${token.overtime_detail.pay_multiplier}`}
+                      color="secondary"
+                    />
+                  </Grid>
+                  {token.overtime_detail.estimated_pay > 0 && (
+                    <Grid item xs={12} sm={6}>
+                      <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center' }}>
+                        <Typography variant="caption" color="text.secondary">Pago Estimado</Typography>
+                        <Typography variant="h5" fontWeight={700} color="secondary.main">
+                          L. {token.overtime_detail.estimated_pay?.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
+                  {token.overtime_detail.assigned_task && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<WorkIcon fontSize="small" />}
+                        label="Tarea Asignada"
+                        value={token.overtime_detail.assigned_task}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                  {token.overtime_detail.reason_detail && (
+                    <Grid item xs={12}>
+                      <InfoItem
+                        icon={<NotesIcon fontSize="small" />}
+                        label="Detalle del Motivo"
+                        value={token.overtime_detail.reason_detail}
+                        color="secondary"
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+
+                {/* Completion info */}
+                {token.overtime_detail.was_completed !== null && (
+                  <>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                      Registro de Ejecución
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6} sm={3}>
+                        <Chip
+                          label={token.overtime_detail.was_completed ? 'Completado' : 'No Completado'}
+                          color={token.overtime_detail.was_completed ? 'success' : 'error'}
+                          size="small"
+                        />
+                      </Grid>
+                      {token.overtime_detail.actual_start_time && (
+                        <Grid item xs={6} sm={3}>
+                          <InfoItem
+                            icon={<TimeIcon fontSize="small" />}
+                            label="Hora Real Inicio"
+                            value={token.overtime_detail.actual_start_time}
+                            color="info"
+                          />
+                        </Grid>
+                      )}
+                      {token.overtime_detail.actual_end_time && (
+                        <Grid item xs={6} sm={3}>
+                          <InfoItem
+                            icon={<TimeIcon fontSize="small" />}
+                            label="Hora Real Fin"
+                            value={token.overtime_detail.actual_end_time}
+                            color="info"
+                          />
+                        </Grid>
+                      )}
+                      {token.overtime_detail.actual_hours !== null && (
+                        <Grid item xs={6} sm={3}>
+                          <InfoItem
+                            icon={<TimeIcon fontSize="small" />}
+                            label="Horas Reales"
+                            value={`${token.overtime_detail.actual_hours}h`}
+                            color="info"
+                          />
+                        </Grid>
+                      )}
+                      {token.overtime_detail.completion_notes && (
+                        <Grid item xs={12}>
+                          <InfoItem
+                            icon={<NotesIcon fontSize="small" />}
+                            label="Notas de Ejecución"
+                            value={token.overtime_detail.completion_notes}
+                            color="info"
+                          />
+                        </Grid>
+                      )}
+                    </Grid>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Shift Change Detail */}
+          {token.token_type === TokenType.SHIFT_CHANGE && token.shift_change_detail && (
+            <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ScheduleIcon color="secondary" />
+                  Detalles de Cambio de Turno
+                </Typography>
+                <Divider sx={{ my: 2 }} />
+
+                <Grid container spacing={2}>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<NotesIcon fontSize="small" />}
+                      label="Motivo"
+                      value={token.shift_change_detail.reason_display || ShiftChangeReasonLabels[token.shift_change_detail.reason as ShiftChangeReason]}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha de Cambio"
+                      value={token.shift_change_detail.change_date}
+                      color="secondary"
+                    />
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Chip
+                      label={token.shift_change_detail.is_permanent ? 'Permanente' : 'Temporal'}
+                      color={token.shift_change_detail.is_permanent ? 'primary' : 'default'}
+                      size="small"
+                      sx={{ mt: 1 }}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  <Grid item xs={12} sm={6}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>Turno Actual</Typography>
+                      <Typography variant="body1" fontWeight={600}>{token.shift_change_detail.current_shift_name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {token.shift_change_detail.current_shift_start} - {token.shift_change_detail.current_shift_end}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, bgcolor: 'primary.50' }}>
+                      <Typography variant="caption" color="text.secondary" fontWeight={600}>Nuevo Turno</Typography>
+                      <Typography variant="body1" fontWeight={600} color="primary.main">{token.shift_change_detail.new_shift_name}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {token.shift_change_detail.new_shift_start} - {token.shift_change_detail.new_shift_end}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+
+                {!token.shift_change_detail.is_permanent && token.shift_change_detail.end_date && (
+                  <Box sx={{ mt: 2 }}>
+                    <InfoItem
+                      icon={<CalendarIcon fontSize="small" />}
+                      label="Fecha de Fin"
+                      value={token.shift_change_detail.end_date}
+                      color="secondary"
+                    />
+                  </Box>
+                )}
+
+                {token.shift_change_detail.is_exchange && (
+                  <Box sx={{ mt: 2 }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="subtitle2" gutterBottom color="text.secondary">
+                      Intercambio de Turno
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {token.shift_change_detail.exchange_with_name && (
+                        <Grid item xs={12} sm={6}>
+                          <InfoItem
+                            icon={<CompareIcon fontSize="small" />}
+                            label="Intercambio con"
+                            value={token.shift_change_detail.exchange_with_name}
+                            color="secondary"
+                          />
+                        </Grid>
+                      )}
+                      <Grid item xs={12} sm={6}>
+                        <Chip
+                          label={token.shift_change_detail.exchange_confirmed ? 'Confirmado' : 'Pendiente de Confirmación'}
+                          color={token.shift_change_detail.exchange_confirmed ? 'success' : 'warning'}
+                          size="small"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {token.shift_change_detail.reason_detail && (
+                  <Box sx={{ mt: 2 }}>
+                    <InfoItem
+                      icon={<NotesIcon fontSize="small" />}
+                      label="Detalle del Motivo"
+                      value={token.shift_change_detail.reason_detail}
+                      color="secondary"
+                    />
+                  </Box>
                 )}
               </CardContent>
             </Card>
@@ -1222,7 +1700,7 @@ export const TokenDetailPage = () => {
                 {token.rejected_by && (
                   <Alert severity="error" sx={{ mt: 1 }}>
                     <Typography variant="body2" fontWeight={500}>
-                      Rechazado por {token.rejected_by.full_name}
+                      Cancelado por {token.rejected_by.full_name}
                     </Typography>
                     <Typography variant="caption">{token.rejection_reason}</Typography>
                   </Alert>

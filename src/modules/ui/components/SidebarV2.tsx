@@ -237,6 +237,8 @@ const SidebarV2: React.FC = () => {
           { text: 'Productos', href: '/maintenance/products', id: 'products' },
           { text: 'Materiales', href: '/tokens/materials', id: 'materials' },
           { text: 'Personas Externas', href: '/tokens/external-persons', id: 'external-persons' },
+          { text: 'Tipos de Hora Extra', href: '/maintenance/overtime-types', id: 'overtime-types' },
+          { text: 'Motivos de Hora Extra', href: '/maintenance/overtime-reasons', id: 'overtime-reasons' },
         ],
         id: 'mantenimiento',
       },

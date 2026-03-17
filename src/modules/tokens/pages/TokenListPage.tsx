@@ -8,6 +8,7 @@ import {
   Container,
   Grid,
   Card,
+  CardContent,
   Typography,
   Button,
   Box,
@@ -39,6 +40,12 @@ import {
   Edit as EditIcon,
   ContentCopy as CopyIcon,
   AssignmentTurnedIn as ValidateIcon,
+  Assignment as TotalIcon,
+  HourglassEmpty as HourglassIcon,
+  Block as CancelledIcon,
+  FileDownload as ExportIcon,
+  GridOn as GridOnIcon,
+  PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { useGetTokensQuery } from '../services/tokenApi';
@@ -48,22 +55,24 @@ import {
   TokenStatusLabels,
   TokenTypeLabels,
   TokenFilterParams,
+  ConsolidatedTokenStatusLabels,
+  ConsolidatedTokenStatus,
 } from '../interfaces/token';
 import { TokenFilters } from '../components/TokenFilters';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
 import { useAppSelector } from '../../../store';
 
-// Status colors and icons
-const statusConfig: Record<TokenStatus, { color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'; icon: React.ReactElement }> = {
-  [TokenStatus.DRAFT]: { color: 'default', icon: <EditIcon fontSize="small" /> },
-  [TokenStatus.PENDING_L1]: { color: 'warning', icon: <PendingIcon fontSize="small" /> },
-  [TokenStatus.PENDING_L2]: { color: 'warning', icon: <PendingIcon fontSize="small" /> },
-  [TokenStatus.PENDING_L3]: { color: 'warning', icon: <PendingIcon fontSize="small" /> },
-  [TokenStatus.APPROVED]: { color: 'success', icon: <ApprovedIcon fontSize="small" /> },
-  [TokenStatus.USED]: { color: 'info', icon: <UsedIcon fontSize="small" /> },
-  [TokenStatus.EXPIRED]: { color: 'default', icon: <ExpiredIcon fontSize="small" /> },
-  [TokenStatus.CANCELLED]: { color: 'default', icon: <RejectedIcon fontSize="small" /> },
-  [TokenStatus.REJECTED]: { color: 'error', icon: <RejectedIcon fontSize="small" /> },
+// Status colors and icons - alineados con las stat cards superiores
+const statusConfig: Record<TokenStatus, { icon: React.ReactElement; bg: string; textColor: string }> = {
+  [TokenStatus.DRAFT]: { icon: <EditIcon fontSize="small" />, bg: '#e0e0e0', textColor: '#424242' },
+  [TokenStatus.PENDING_L1]: { icon: <PendingIcon fontSize="small" />, bg: '#FFF9C4', textColor: '#F9A825' },
+  [TokenStatus.PENDING_L2]: { icon: <PendingIcon fontSize="small" />, bg: '#FFF9C4', textColor: '#F9A825' },
+  [TokenStatus.PENDING_L3]: { icon: <PendingIcon fontSize="small" />, bg: '#FFF9C4', textColor: '#F9A825' },
+  [TokenStatus.APPROVED]: { icon: <ApprovedIcon fontSize="small" />, bg: '#E8F5E9', textColor: '#2E7D32' },
+  [TokenStatus.USED]: { icon: <UsedIcon fontSize="small" />, bg: '#E3F2FD', textColor: '#1565C0' },
+  [TokenStatus.EXPIRED]: { icon: <ExpiredIcon fontSize="small" />, bg: '#e0e0e0', textColor: '#424242' },
+  [TokenStatus.CANCELLED]: { icon: <RejectedIcon fontSize="small" />, bg: '#FFEBEE', textColor: '#C62828' },
+  [TokenStatus.REJECTED]: { icon: <RejectedIcon fontSize="small" />, bg: '#FFEBEE', textColor: '#C62828' },
 };
 
 // Token type icons/colors
@@ -77,6 +86,82 @@ const typeColors: Record<TokenType, string> = {
   [TokenType.SHIFT_CHANGE]: '#00BCD4',
   [TokenType.UNIFORM_DELIVERY]: '#795548',
 };
+
+// Etiquetas cortas para la columna Estado
+const getShortStatusLabel = (status: TokenStatus): string => {
+  switch (status) {
+    case TokenStatus.PENDING_L1:
+    case TokenStatus.PENDING_L2:
+    case TokenStatus.PENDING_L3:
+      return 'Pendiente';
+    case TokenStatus.APPROVED:
+      return 'Abierto';
+    case TokenStatus.USED:
+      return 'Finalizado';
+    case TokenStatus.EXPIRED:
+      return 'Vencido';
+    case TokenStatus.CANCELLED:
+    case TokenStatus.REJECTED:
+      return 'Cerrado';
+    case TokenStatus.DRAFT:
+      return 'Borrador';
+    default:
+      return '';
+  }
+};
+
+// Observaciones por estado - indica quién debe aprobar
+const getObservacion = (status: TokenStatus): string => {
+  switch (status) {
+    case TokenStatus.DRAFT:
+      return 'En borrador';
+    case TokenStatus.PENDING_L1:
+      return 'Pendiente de Supervisor';
+    case TokenStatus.PENDING_L2:
+      return 'Pendiente de Jefe de Área';
+    case TokenStatus.PENDING_L3:
+      return 'Pendiente de Gerente';
+    case TokenStatus.APPROVED:
+      return 'Abierto';
+    case TokenStatus.USED:
+      return 'Finalizado';
+    case TokenStatus.EXPIRED:
+      return 'Vencido';
+    case TokenStatus.CANCELLED:
+    case TokenStatus.REJECTED:
+      return 'Cerrado';
+    default:
+      return '';
+  }
+};
+
+// Stat Card Component
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
+  <Card elevation={3} sx={{ height: '100%', transition: 'all 0.3s ease-in-out', '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 24px rgba(0,0,0,0.15)' } }}>
+    <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' }, fontWeight: 600 }}>
+            {title}
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700, color, fontSize: { xs: '1.5rem', sm: '2.125rem' }, mt: 0.5 }}>
+            {value}
+          </Typography>
+        </Box>
+        <Avatar sx={{ bgcolor: color, opacity: 0.9, width: { xs: 40, sm: 56 }, height: { xs: 40, sm: 56 } }}>
+          {icon}
+        </Avatar>
+      </Box>
+    </CardContent>
+  </Card>
+);
 
 export const TokenListPage = () => {
   const theme = useTheme();
@@ -102,7 +187,28 @@ export const TokenListPage = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
+  // Export states
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const authToken = useAppSelector(state => state.auth.token);
+
   const { data, isLoading, isFetching } = useGetTokensQuery(filters);
+
+  // Estadísticas calculadas desde los resultados
+  const stats = useMemo(() => {
+    if (!data?.results) return { total: 0, pending: 0, approved: 0, cancelled: 0 };
+    return {
+      total: data.count,
+      pending: data.results.filter((t: any) =>
+        [TokenStatus.PENDING_L1, TokenStatus.PENDING_L2, TokenStatus.PENDING_L3].includes(t.status)
+      ).length,
+      approved: data.results.filter((t: any) => t.status === TokenStatus.APPROVED).length,
+      cancelled: data.results.filter((t: any) =>
+        [TokenStatus.CANCELLED, TokenStatus.REJECTED].includes(t.status)
+      ).length,
+    };
+  }, [data]);
 
   const handlePaginationChange = (model: GridPaginationModel) => {
     setPaginationModel(model);
@@ -166,6 +272,71 @@ export const TokenListPage = () => {
     setFilters(newFilters);
   };
 
+  // Export handlers
+  const buildExportParams = () => {
+    const params = new URLSearchParams();
+    if (filters.search) params.set('search', filters.search);
+    if (filters.status) params.set('status', Array.isArray(filters.status) ? filters.status.join(',') : filters.status as string);
+    if (filters.token_type) params.set('token_type', Array.isArray(filters.token_type) ? filters.token_type.join(',') : filters.token_type as string);
+    if (filters.distributor_center) params.set('distributor_center', String(filters.distributor_center));
+    if (filters.ordering) params.set('ordering', filters.ordering);
+    return params.toString();
+  };
+
+  const handleExportExcel = async () => {
+    setExportingExcel(true);
+    setExportMenuAnchor(null);
+    try {
+      const queryStr = buildExportParams();
+      const url = `${import.meta.env.VITE_JS_APP_API_URL}/api/tokens/export_excel/?${queryStr}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Error al exportar');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `tokens-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error('Error exporting Excel:', err);
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
+  const handleExportPdf = async () => {
+    setExportingPdf(true);
+    setExportMenuAnchor(null);
+    try {
+      const queryStr = buildExportParams();
+      const url = `${import.meta.env.VITE_JS_APP_API_URL}/api/tokens/export_pdf/?${queryStr}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Error al exportar');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `tokens-${new Date().toISOString().slice(0, 10)}.pdf`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error('Error exporting PDF:', err);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
+  // Obtener la etiqueta del filtro de estado (consolidado o individual)
+  const getStatusFilterLabel = (status: string): string => {
+    if (status in ConsolidatedTokenStatusLabels) {
+      return ConsolidatedTokenStatusLabels[status as ConsolidatedTokenStatus];
+    }
+    return TokenStatusLabels[status as TokenStatus] || status;
+  };
+
   const columns: GridColDef[] = useMemo(() => {
     const baseColumns: GridColDef[] = [];
 
@@ -203,8 +374,13 @@ export const TokenListPage = () => {
                   <Chip
                     label={TokenStatusLabels[params.row.status as TokenStatus]}
                     size="small"
-                    color={statusConfig[params.row.status as TokenStatus]?.color}
-                    sx={{ fontSize: '0.65rem', height: 20 }}
+                    sx={{
+                      fontSize: '0.65rem',
+                      height: 20,
+                      bgcolor: statusConfig[params.row.status as TokenStatus]?.bg,
+                      color: statusConfig[params.row.status as TokenStatus]?.textColor,
+                      '& .MuiChip-icon': { color: statusConfig[params.row.status as TokenStatus]?.textColor },
+                    }}
                   />
                 </Box>
               </Box>
@@ -259,7 +435,7 @@ export const TokenListPage = () => {
           field: 'personnel_name',
           headerName: 'Beneficiario',
           flex: 1,
-          minWidth: 180,
+          minWidth: 140,
           renderCell: (params: GridRenderCellParams) => (
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -278,16 +454,20 @@ export const TokenListPage = () => {
     baseColumns.push({
       field: 'status',
       headerName: 'Estado',
-      width: isMobile ? 100 : 140,
+      width: isMobile ? 100 : 120,
       renderCell: (params: GridRenderCellParams) => (
         <Chip
           icon={statusConfig[params.value as TokenStatus]?.icon}
-          label={isMobile ? '' : TokenStatusLabels[params.value as TokenStatus]}
+          label={isMobile ? '' : getShortStatusLabel(params.value as TokenStatus)}
           size="small"
-          color={statusConfig[params.value as TokenStatus]?.color}
           sx={{
             fontSize: '0.75rem',
-            '& .MuiChip-icon': { marginLeft: isMobile ? '8px' : undefined }
+            bgcolor: statusConfig[params.value as TokenStatus]?.bg,
+            color: statusConfig[params.value as TokenStatus]?.textColor,
+            '& .MuiChip-icon': {
+              color: statusConfig[params.value as TokenStatus]?.textColor,
+              marginLeft: isMobile ? '8px' : undefined,
+            },
           }}
         />
       ),
@@ -314,36 +494,27 @@ export const TokenListPage = () => {
           ),
         },
         {
-          field: 'approval_progress',
-          headerName: 'Aprobación',
-          width: 120,
-          align: 'center',
-          headerAlign: 'center',
-          renderCell: (params: GridRenderCellParams) => (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box
+          field: 'observaciones',
+          headerName: 'Observaciones',
+          width: 200,
+          sortable: false,
+          renderCell: (params: GridRenderCellParams) => {
+            const status = params.row.status as TokenStatus;
+            const obs = getObservacion(status);
+            const config = statusConfig[status];
+            return (
+              <Typography
+                variant="body2"
                 sx={{
-                  width: 50,
-                  height: 6,
-                  bgcolor: 'grey.200',
-                  borderRadius: 3,
-                  overflow: 'hidden',
+                  fontWeight: 600,
+                  color: config?.textColor || 'text.secondary',
+                  fontSize: '0.8rem',
                 }}
               >
-                <Box
-                  sx={{
-                    width: `${params.value}%`,
-                    height: '100%',
-                    bgcolor: params.value === 100 ? 'success.main' : 'warning.main',
-                    borderRadius: 3,
-                  }}
-                />
-              </Box>
-              <Typography variant="caption" fontWeight={600}>
-                {params.value}%
+                {obs}
               </Typography>
-            </Box>
-          ),
+            );
+          },
         }
       );
     }
@@ -405,8 +576,31 @@ export const TokenListPage = () => {
             </Typography>
           </Grid>
 
+          {/* Stat Cards */}
+          <Grid item xs={6} sm={6} md={3}>
+            <StatCard title="Total" value={stats.total} icon={<TotalIcon />} color={theme.palette.primary.main} />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <StatCard title="Pendientes" value={stats.pending} icon={<HourglassIcon />} color="#F9A825" />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <StatCard title="Abiertos" value={stats.approved} icon={<ApprovedIcon />} color="#4caf50" />
+          </Grid>
+          <Grid item xs={6} sm={6} md={3}>
+            <StatCard title="Cerrados" value={stats.cancelled} icon={<CancelledIcon />} color="#f44336" />
+          </Grid>
+
           {/* Actions */}
           <Grid item xs={12} display="flex" justifyContent="flex-end" gap={1}>
+            <Button
+              variant="outlined"
+              endIcon={exportingExcel || exportingPdf ? <CircularProgress size={16} /> : <ExportIcon />}
+              onClick={(e) => setExportMenuAnchor(e.currentTarget)}
+              disabled={exportingExcel || exportingPdf}
+              size={isMobile ? 'small' : 'medium'}
+            >
+              {isMobile ? 'Exportar' : 'Exportar'}
+            </Button>
             <Button
               variant="outlined"
               color="secondary"
@@ -443,7 +637,7 @@ export const TokenListPage = () => {
                 <ChipFilterCategory
                   label="Estado: "
                   items={[{
-                    label: TokenStatusLabels[filters.status as TokenStatus],
+                    label: getStatusFilterLabel(filters.status as string),
                     id: 'status',
                     deleteAction: () => clearFilter('status'),
                   }]}
@@ -527,20 +721,6 @@ export const TokenListPage = () => {
               />
             </Card>
           </Grid>
-
-          {/* Stats Footer */}
-          {data && data.count > 0 && (
-            <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Chip
-                  label={`Total: ${data.count} tokens`}
-                  color="primary"
-                  variant="outlined"
-                  size={isMobile ? 'small' : 'medium'}
-                />
-              </Box>
-            </Grid>
-          )}
         </Grid>
       </Container>
 
@@ -595,6 +775,32 @@ export const TokenListPage = () => {
             <ListItemText>Validar Token</ListItemText>
           </MenuItem>
         )}
+      </Menu>
+
+      {/* Export Menu */}
+      <Menu
+        anchorEl={exportMenuAnchor}
+        open={Boolean(exportMenuAnchor)}
+        onClose={() => setExportMenuAnchor(null)}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        PaperProps={{
+          elevation: 3,
+          sx: { minWidth: 180, borderRadius: 2, mt: 1 },
+        }}
+      >
+        <MenuItem onClick={handleExportExcel} disabled={exportingExcel}>
+          <ListItemIcon>
+            {exportingExcel ? <CircularProgress size={18} /> : <GridOnIcon fontSize="small" color="success" />}
+          </ListItemIcon>
+          <ListItemText>Excel</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleExportPdf} disabled={exportingPdf}>
+          <ListItemIcon>
+            {exportingPdf ? <CircularProgress size={18} /> : <PictureAsPdfIcon fontSize="small" color="error" />}
+          </ListItemIcon>
+          <ListItemText>PDF</ListItemText>
+        </MenuItem>
       </Menu>
     </>
   );

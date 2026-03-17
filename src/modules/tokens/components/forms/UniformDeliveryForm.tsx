@@ -2,7 +2,8 @@ import { useState } from 'react';
 import {
   Box, Grid, TextField, Typography, IconButton, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, FormControl,
-  InputLabel, Select, MenuItem, FormControlLabel, Switch
+  InputLabel, Select, MenuItem, FormControlLabel, Switch, Autocomplete,
+  CircularProgress,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -15,8 +16,10 @@ import {
   UniformItemType,
   UniformItemTypeLabels,
   UniformSize,
-  UniformSizeLabels
+  UniformSizeLabels,
+  Material,
 } from '../../interfaces/token';
+import { useGetMaterialsQuery } from '../../services/tokenApi';
 
 interface UniformDeliveryFormProps {
   value: UniformDeliveryCreatePayload;
@@ -24,7 +27,6 @@ interface UniformDeliveryFormProps {
 }
 
 const emptyItem: UniformItemCreatePayload = {
-  item_type: UniformItemType.SHIRT,
   size: UniformSize.M,
   quantity: 1,
   requires_return: false,
@@ -32,16 +34,42 @@ const emptyItem: UniformItemCreatePayload = {
 
 export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProps) => {
   const [newItem, setNewItem] = useState<UniformItemCreatePayload>({ ...emptyItem });
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+
+  // Cargar materiales de la categoría UNIFORME
+  const { data: materialsData, isLoading: materialsLoading, isError: materialsError } = useGetMaterialsQuery({
+    category: 'UNIFORME',
+    limit: 100,
+  });
+  const materials = materialsData?.results || [];
+  // Usar dinámico siempre que la API responda exitosamente (aunque esté vacío), fallback solo si hay error
+  const useDynamic = !materialsError;
 
   const handleChange = (field: keyof UniformDeliveryCreatePayload, fieldValue: unknown) => {
     onChange({ ...value, [field]: fieldValue });
   };
 
+  const handleMaterialSelect = (material: Material | null) => {
+    setSelectedMaterial(material);
+    if (material) {
+      setNewItem({
+        ...newItem,
+        material: material.id,
+        custom_description: material.name,
+        requires_return: material.requires_return,
+      });
+    } else {
+      setNewItem({ ...emptyItem });
+    }
+  };
+
   const handleAddItem = () => {
-    if (newItem.item_type && newItem.quantity > 0) {
+    const hasSelection = useDynamic ? !!newItem.material : !!newItem.item_type;
+    if (hasSelection && newItem.quantity > 0) {
       const items = [...(value.items || []), { ...newItem }];
       handleChange('items', items);
       setNewItem({ ...emptyItem });
+      setSelectedMaterial(null);
     }
   };
 
@@ -65,15 +93,22 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
     UniformSize.SIZE_44, UniformSize.SIZE_45
   ];
 
-  const isFootwear = (type: UniformItemType) =>
+  const isFootwear = (type?: UniformItemType) =>
     type === UniformItemType.SHOES || type === UniformItemType.BOOTS;
 
-  const getSizeOptions = (itemType: UniformItemType) => {
+  const getSizeOptions = (itemType?: UniformItemType) => {
+    if (!itemType) return clothingSizes;
     if (isFootwear(itemType)) return shoeSizes;
     if (itemType === UniformItemType.BADGE || itemType === UniformItemType.OTHER) {
       return [UniformSize.NA];
     }
     return clothingSizes;
+  };
+
+  const getItemDisplayName = (item: UniformItemCreatePayload) => {
+    if (item.custom_description) return item.custom_description;
+    if (item.item_type) return UniformItemTypeLabels[item.item_type] || item.item_type;
+    return '-';
   };
 
   return (
@@ -84,17 +119,6 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
         </Typography>
 
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              size="small"
-              label="Centro de Distribución"
-              value={value.delivery_location || ''}
-              onChange={(e) => handleChange('delivery_location', e.target.value)}
-              placeholder="Ej: CD Tegucigalpa, CD San Pedro Sula..."
-            />
-          </Grid>
-
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -115,27 +139,53 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
 
             <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1, mb: 2 }}>
               <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} md={2}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Tipo</InputLabel>
-                    <Select
-                      value={newItem.item_type}
-                      label="Tipo"
-                      onChange={(e) => {
-                        const type = e.target.value as UniformItemType;
-                        const sizeOptions = getSizeOptions(type);
-                        setNewItem({
-                          ...newItem,
-                          item_type: type,
-                          size: sizeOptions[0]
-                        });
-                      }}
-                    >
-                      {Object.entries(UniformItemTypeLabels).map(([key, label]) => (
-                        <MenuItem key={key} value={key}>{label}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                <Grid item xs={12} md={3}>
+                  {useDynamic ? (
+                    <Autocomplete
+                      size="small"
+                      options={materials}
+                      getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                      value={selectedMaterial}
+                      onChange={(_, material) => handleMaterialSelect(material)}
+                      loading={materialsLoading}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Material"
+                          InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                              <>
+                                {materialsLoading ? <CircularProgress size={20} /> : null}
+                                {params.InputProps.endAdornment}
+                              </>
+                            ),
+                          }}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Tipo</InputLabel>
+                      <Select
+                        value={newItem.item_type || ''}
+                        label="Tipo"
+                        onChange={(e) => {
+                          const type = e.target.value as UniformItemType;
+                          const sizeOptions = getSizeOptions(type);
+                          setNewItem({
+                            ...newItem,
+                            item_type: type,
+                            size: sizeOptions[0]
+                          });
+                        }}
+                      >
+                        {Object.entries(UniformItemTypeLabels).map(([key, label]) => (
+                          <MenuItem key={key} value={key}>{label}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 </Grid>
                 <Grid item xs={12} md={2}>
                   <FormControl fullWidth size="small">
@@ -163,15 +213,6 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
                   />
                 </Grid>
                 <Grid item xs={6} md={2}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Color"
-                    value={newItem.color || ''}
-                    onChange={(e) => setNewItem({ ...newItem, color: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={6} md={2}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -183,10 +224,10 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
                     label="Retornable"
                   />
                 </Grid>
-                <Grid item xs={6} md={2}>
+                <Grid item xs={6} md={1}>
                   {newItem.requires_return && (
                     <DatePicker
-                      label="Fecha Retorno"
+                      label="Retorno"
                       value={newItem.return_date ? dayjs(newItem.return_date) : null}
                       onChange={(date) => setNewItem({ ...newItem, return_date: date?.format('YYYY-MM-DD') })}
                       slotProps={{ textField: { size: 'small', fullWidth: true } }}
@@ -211,9 +252,8 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>Tipo</TableCell>
+                      <TableCell>Prenda / Material</TableCell>
                       <TableCell>Talla</TableCell>
-                      <TableCell>Color</TableCell>
                       <TableCell align="right">Cantidad</TableCell>
                       <TableCell>Retornable</TableCell>
                       <TableCell>Fecha Retorno</TableCell>
@@ -223,9 +263,8 @@ export const UniformDeliveryForm = ({ value, onChange }: UniformDeliveryFormProp
                   <TableBody>
                     {(value.items || []).map((item, index) => (
                       <TableRow key={index}>
-                        <TableCell>{UniformItemTypeLabels[item.item_type]}</TableCell>
+                        <TableCell>{getItemDisplayName(item)}</TableCell>
                         <TableCell>{UniformSizeLabels[item.size]}</TableCell>
-                        <TableCell>{item.color || '-'}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
                         <TableCell>{item.requires_return ? 'Sí' : 'No'}</TableCell>
                         <TableCell>{item.return_date || '-'}</TableCell>

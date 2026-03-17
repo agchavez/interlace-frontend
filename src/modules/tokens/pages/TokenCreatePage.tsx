@@ -1018,6 +1018,31 @@ export const TokenCreatePage = () => {
           </Card>
         </Grid>
 
+        {/* Overtime Total Hours */}
+        {tokenType === TokenType.OVERTIME && overtimeData.start_time && overtimeData.end_time && (
+          <Grid item xs={12} md={6}>
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Total de Horas Extra
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PermitHourIcon color="info" />
+                  <Typography variant="h6" fontWeight={500}>
+                    {(() => {
+                      const start = dayjs(`2000-01-01 ${overtimeData.start_time}`);
+                      let end = dayjs(`2000-01-01 ${overtimeData.end_time}`);
+                      if (end.isBefore(start)) end = end.add(1, 'day');
+                      const hours = parseFloat((end.diff(start, 'minute') / 60).toFixed(2));
+                      return `${hours} hora${hours !== 1 ? 's' : ''}`;
+                    })()}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        )}
+
         {/* Info Alert */}
         <Grid item xs={12}>
           <Alert

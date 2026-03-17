@@ -159,14 +159,33 @@ export const TokenTypeLabels: Record<TokenType, string> = {
 
 export const TokenStatusLabels: Record<TokenStatus, string> = {
   [TokenStatus.DRAFT]: 'Borrador',
-  [TokenStatus.PENDING_L1]: 'Pendiente Nivel 1',
-  [TokenStatus.PENDING_L2]: 'Pendiente Nivel 2',
-  [TokenStatus.PENDING_L3]: 'Pendiente Nivel 3',
-  [TokenStatus.APPROVED]: 'Aprobado',
-  [TokenStatus.USED]: 'Utilizado',
-  [TokenStatus.EXPIRED]: 'Expirado',
-  [TokenStatus.CANCELLED]: 'Cancelado',
-  [TokenStatus.REJECTED]: 'Rechazado',
+  [TokenStatus.PENDING_L1]: 'Pendiente de aprobación',
+  [TokenStatus.PENDING_L2]: 'Pendiente de aprobación',
+  [TokenStatus.PENDING_L3]: 'Pendiente de aprobación',
+  [TokenStatus.APPROVED]: 'Abierto',
+  [TokenStatus.USED]: 'Finalizado',
+  [TokenStatus.EXPIRED]: 'Vencido',
+  [TokenStatus.CANCELLED]: 'Cerrado',
+  [TokenStatus.REJECTED]: 'Cerrado',
+};
+
+// Estados consolidados para filtros (agrupan estados internos)
+export enum ConsolidatedTokenStatus {
+  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  USED = 'USED',
+  EXPIRED = 'EXPIRED',
+  CANCELLED = 'CANCELLED',
+}
+
+export const ConsolidatedTokenStatusLabels: Record<ConsolidatedTokenStatus, string> = {
+  [ConsolidatedTokenStatus.DRAFT]: 'Borrador',
+  [ConsolidatedTokenStatus.PENDING]: 'Pendiente de aprobación',
+  [ConsolidatedTokenStatus.APPROVED]: 'Abierto',
+  [ConsolidatedTokenStatus.USED]: 'Finalizado',
+  [ConsolidatedTokenStatus.EXPIRED]: 'Vencido',
+  [ConsolidatedTokenStatus.CANCELLED]: 'Cerrado',
 };
 
 export const PermitHourReasonLabels: Record<PermitHourReason, string> = {
@@ -471,6 +490,9 @@ export interface ExitPassDetail {
 // Uniform Delivery Detail
 export interface UniformItem {
   id: number;
+  material: number | null;
+  material_name: string | null;
+  material_code: string | null;
   item_type: UniformItemType;
   item_type_display: string;
   custom_description: string;
@@ -533,13 +555,49 @@ export interface RateChangeDetail {
   rate_percentage_change: number;
 }
 
+// Overtime Type & Reason (catalog models)
+export interface OvertimeTypeItem {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  default_multiplier: number;
+  is_active: boolean;
+}
+
+export interface OvertimeReasonItem {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+}
+
+export interface OvertimeTypeListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: OvertimeTypeItem[];
+}
+
+export interface OvertimeReasonListResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: OvertimeReasonItem[];
+}
+
 // Overtime Detail
 export interface OvertimeDetail {
   id: number;
   overtime_type: OvertimeType;
   overtime_type_display: string;
+  overtime_type_model: number | null;
+  overtime_type_model_name: string | null;
   reason: OvertimeReason;
   reason_display: string;
+  reason_model: number | null;
+  reason_model_name: string | null;
   reason_detail: string;
   overtime_date: string;
   start_time: string;
@@ -731,7 +789,8 @@ export interface ExitPassCreatePayload {
 }
 
 export interface UniformItemCreatePayload {
-  item_type: UniformItemType;
+  material?: number;
+  item_type?: UniformItemType;
   custom_description?: string;
   size: UniformSize;
   color?: string;
@@ -770,8 +829,10 @@ export interface RateChangeCreatePayload {
 }
 
 export interface OvertimeCreatePayload {
-  overtime_type: OvertimeType;
-  reason: OvertimeReason;
+  overtime_type?: OvertimeType;
+  overtime_type_model?: number;
+  reason?: OvertimeReason;
+  reason_model?: number;
   reason_detail?: string;
   overtime_date: string;
   start_time: string;
@@ -832,7 +893,7 @@ export interface TokenFilterParams {
   offset?: number;
   search?: string;
   token_type?: TokenType | TokenType[];
-  status?: TokenStatus | TokenStatus[];
+  status?: TokenStatus | TokenStatus[] | ConsolidatedTokenStatus | string;
   personnel?: number;
   requested_by?: number;
   distributor_center?: number;
@@ -861,22 +922,4 @@ export interface ValidatePayload {
 }
 
 // ============ CATALOG TYPES ============
-
-export interface UnitOfMeasure {
-  id: number;
-  code: string;
-  name: string;
-  abbreviation: string;
-}
-
-export interface Material {
-  id: number;
-  code: string;
-  name: string;
-  description: string;
-  unit_of_measure: number;
-  unit_of_measure_name: string;
-  unit_value: number;
-  requires_return: boolean;
-  category: string;
-}
+// UnitOfMeasure and Material are defined above near line 370

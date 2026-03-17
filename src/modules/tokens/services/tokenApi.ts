@@ -22,6 +22,10 @@ import {
   UnitOfMeasure,
   UnitOfMeasureCreatePayload,
   UnitOfMeasureListResponse,
+  OvertimeTypeItem,
+  OvertimeTypeListResponse,
+  OvertimeReasonItem,
+  OvertimeReasonListResponse,
 } from '../interfaces/token';
 
 export const tokenApi = createApi({
@@ -36,7 +40,7 @@ export const tokenApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation', 'ExternalPersons', 'Materials', 'UnitsOfMeasure'],
+  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation', 'ExternalPersons', 'Materials', 'UnitsOfMeasure', 'OvertimeTypes', 'OvertimeReasons'],
   endpoints: (builder) => ({
     // List tokens with filters
     getTokens: builder.query<TokenListResponse, TokenFilterParams>({
@@ -414,6 +418,102 @@ export const tokenApi = createApi({
       }),
       invalidatesTags: [{ type: 'UnitsOfMeasure', id: 'LIST' }],
     }),
+
+    // ============ OVERTIME TYPES ============
+
+    getOvertimeTypes: builder.query<OvertimeTypeListResponse, { search?: string; limit?: number; offset?: number }>({
+      query: (params) => ({
+        url: '/overtime-types/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({
+                type: 'OvertimeTypes' as const,
+                id,
+              })),
+              { type: 'OvertimeTypes', id: 'LIST' },
+            ]
+          : [{ type: 'OvertimeTypes', id: 'LIST' }],
+    }),
+
+    createOvertimeType: builder.mutation<OvertimeTypeItem, Partial<OvertimeTypeItem>>({
+      query: (data) => ({
+        url: '/overtime-types/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'OvertimeTypes', id: 'LIST' }],
+    }),
+
+    updateOvertimeType: builder.mutation<OvertimeTypeItem, { id: number; data: Partial<OvertimeTypeItem> }>({
+      query: ({ id, data }) => ({
+        url: `/overtime-types/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'OvertimeTypes', id },
+        { type: 'OvertimeTypes', id: 'LIST' },
+      ],
+    }),
+
+    deleteOvertimeType: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/overtime-types/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'OvertimeTypes', id: 'LIST' }],
+    }),
+
+    // ============ OVERTIME REASONS ============
+
+    getOvertimeReasons: builder.query<OvertimeReasonListResponse, { search?: string; limit?: number; offset?: number }>({
+      query: (params) => ({
+        url: '/overtime-reasons/',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.results.map(({ id }) => ({
+                type: 'OvertimeReasons' as const,
+                id,
+              })),
+              { type: 'OvertimeReasons', id: 'LIST' },
+            ]
+          : [{ type: 'OvertimeReasons', id: 'LIST' }],
+    }),
+
+    createOvertimeReason: builder.mutation<OvertimeReasonItem, Partial<OvertimeReasonItem>>({
+      query: (data) => ({
+        url: '/overtime-reasons/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'OvertimeReasons', id: 'LIST' }],
+    }),
+
+    updateOvertimeReason: builder.mutation<OvertimeReasonItem, { id: number; data: Partial<OvertimeReasonItem> }>({
+      query: ({ id, data }) => ({
+        url: `/overtime-reasons/${id}/`,
+        method: 'PATCH',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'OvertimeReasons', id },
+        { type: 'OvertimeReasons', id: 'LIST' },
+      ],
+    }),
+
+    deleteOvertimeReason: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/overtime-reasons/${id}/`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'OvertimeReasons', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -454,4 +554,14 @@ export const {
   useCreateUnitOfMeasureMutation,
   useUpdateUnitOfMeasureMutation,
   useDeleteUnitOfMeasureMutation,
+  // Overtime Types
+  useGetOvertimeTypesQuery,
+  useCreateOvertimeTypeMutation,
+  useUpdateOvertimeTypeMutation,
+  useDeleteOvertimeTypeMutation,
+  // Overtime Reasons
+  useGetOvertimeReasonsQuery,
+  useCreateOvertimeReasonMutation,
+  useUpdateOvertimeReasonMutation,
+  useDeleteOvertimeReasonMutation,
 } = tokenApi;

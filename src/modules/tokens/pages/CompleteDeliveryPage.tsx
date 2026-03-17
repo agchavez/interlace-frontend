@@ -322,7 +322,7 @@ export const CompleteDeliveryPage = () => {
                         <TableBody>
                           {token.uniform_delivery_detail.items.map((item) => (
                             <TableRow key={item.id} hover>
-                              <TableCell>{UniformItemTypeLabels[item.item_type as UniformItemType]}</TableCell>
+                              <TableCell>{item.material_name || UniformItemTypeLabels[item.item_type as UniformItemType] || item.custom_description || '-'}</TableCell>
                               <TableCell>{UniformSizeLabels[item.size as UniformSize]}</TableCell>
                               <TableCell align="right">{item.quantity}</TableCell>
                             </TableRow>
@@ -600,7 +600,7 @@ export const CompleteDeliveryPage = () => {
               </Grid>
 
               <Alert severity="warning" sx={{ mt: 3, textAlign: 'left' }}>
-                Una vez confirmada la entrega, el token será marcado como <strong>Utilizado</strong> y no podrá modificarse.
+                Una vez confirmada la entrega, el token será marcado como <strong>Finalizado</strong> y no podrá modificarse.
               </Alert>
             </CardContent>
           </Card>

@@ -423,6 +423,19 @@ export const permisions = [
         permissions: [
             "maintenance.view_productmodel"
         ]
+    },
+    // Maintenance - Overtime Types & Reasons
+    {
+        url: "/maintenance/overtime-types",
+        permissions: [
+            "tokens.view_overtimetypemodel"
+        ]
+    },
+    {
+        url: "/maintenance/overtime-reasons",
+        permissions: [
+            "tokens.view_overtimereasonmodel"
+        ]
     }
 ]
 

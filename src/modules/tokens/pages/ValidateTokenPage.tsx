@@ -915,7 +915,7 @@ export const ValidateTokenPage = () => {
           {tokenData && (
             <Box>
               <Alert severity="info" sx={{ mb: 2 }}>
-                Está a punto de marcar este token como <strong>USADO</strong>.
+                Está a punto de marcar este token como <strong>FINALIZADO</strong>.
                 Esta acción no se puede deshacer.
               </Alert>
 

@@ -23,9 +23,8 @@ import { useForm, Controller } from "react-hook-form";
 import { StandardDrawerHeader } from "../../ui/components/StandardDrawerHeader";
 import {
   TokenType,
-  TokenStatus,
   TokenTypeLabels,
-  TokenStatusLabels,
+  ConsolidatedTokenStatusLabels,
   TokenFilterParams,
 } from "../interfaces/token";
 
@@ -89,7 +88,7 @@ export const TokenFilters: FC<TokenFiltersProps> = ({
     handleFilter({
       ...data,
       token_type: data.token_type as TokenType || undefined,
-      status: data.status as TokenStatus || undefined,
+      status: data.status || undefined,
       valid_from_after: dateFrom?.format('YYYY-MM-DD') || undefined,
       valid_from_before: dateTo?.format('YYYY-MM-DD') || undefined,
     });
@@ -205,7 +204,7 @@ export const TokenFilters: FC<TokenFiltersProps> = ({
                         <MenuItem value="">
                           <em>Todos</em>
                         </MenuItem>
-                        {Object.entries(TokenStatusLabels).map(([value, label]) => (
+                        {Object.entries(ConsolidatedTokenStatusLabels).map(([value, label]) => (
                           <MenuItem key={value} value={value}>
                             {label}
                           </MenuItem>

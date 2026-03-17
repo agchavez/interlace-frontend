@@ -4,6 +4,8 @@ import {Route, Routes, Navigate} from "react-router-dom";
 // import {PeriodListPage} from "./page/PeriodListPage.tsx";
 import {MetricTypesPage} from "./page/MetricTypesPage.tsx";
 import {ProductListPage} from "./page/ProductListPage.tsx";
+import {OvertimeTypesPage} from "./page/OvertimeTypesPage.tsx";
+import {OvertimeReasonsPage} from "./page/OvertimeReasonsPage.tsx";
 
 function MaintenanceRouter() {
     return (
@@ -26,6 +28,16 @@ function MaintenanceRouter() {
             <Route
                 element={<ProductListPage />}
                 path="/products"
+                />
+
+            <Route
+                element={<OvertimeTypesPage />}
+                path="/overtime-types"
+                />
+
+            <Route
+                element={<OvertimeReasonsPage />}
+                path="/overtime-reasons"
                 />
 
             <Route path="*" element={<Navigate to="/distributor-center" />} />
