@@ -26,6 +26,9 @@ import {
   OvertimeTypeListResponse,
   OvertimeReasonItem,
   OvertimeReasonListResponse,
+  BulkOvertimeCreatePayload,
+  BulkOvertimeResult,
+  ResolveEmployeeCodesResult,
 } from '../interfaces/token';
 
 export const tokenApi = createApi({
@@ -87,6 +90,29 @@ export const tokenApi = createApi({
         { type: 'PendingApprovals', id: 'LIST' },
         { type: 'MyTokens', id: 'LIST' },
       ],
+    }),
+
+    // Bulk create overtime tokens
+    bulkCreateOvertime: builder.mutation<BulkOvertimeResult, BulkOvertimeCreatePayload>({
+      query: (data) => ({
+        url: '/bulk_create_overtime/',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [
+        { type: 'Tokens', id: 'LIST' },
+        { type: 'PendingApprovals', id: 'LIST' },
+        { type: 'MyTokens', id: 'LIST' },
+      ],
+    }),
+
+    // Resolve employee codes (for Excel upload)
+    resolveEmployeeCodes: builder.mutation<ResolveEmployeeCodesResult, { employee_codes: string[] }>({
+      query: (data) => ({
+        url: '/resolve_employee_codes/',
+        method: 'POST',
+        body: data,
+      }),
     }),
 
     // Approve level 1 (supports FormData for signature/photo)
@@ -172,7 +198,7 @@ export const tokenApi = createApi({
     }),
 
     // Get tokens pending validation (for Security)
-    getPendingValidation: builder.query<TokenListItem[], void>({
+    getPendingValidation: builder.query<PublicTokenView[], void>({
       query: () => '/pending_validation/',
       providesTags: [{ type: 'PendingValidation', id: 'LIST' }],
     }),
@@ -521,6 +547,8 @@ export const {
   useGetTokensQuery,
   useGetTokenQuery,
   useCreateTokenMutation,
+  useBulkCreateOvertimeMutation,
+  useResolveEmployeeCodesMutation,
   useApproveLevel1Mutation,
   useApproveLevel2Mutation,
   useApproveLevel3Mutation,

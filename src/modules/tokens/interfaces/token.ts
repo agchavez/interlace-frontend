@@ -877,6 +877,53 @@ export interface TokenCreatePayload {
   shift_change_detail?: ShiftChangeCreatePayload;
 }
 
+// ============ BULK OVERTIME ============
+
+export interface BulkOvertimeCreatePayload {
+  personnel_ids: number[];
+  distributor_center: number;
+  valid_from: string;
+  valid_until: string;
+  requester_notes?: string;
+  overtime_detail: OvertimeCreatePayload;
+}
+
+export interface BulkOvertimeResultItem {
+  id: number;
+  display_number: string;
+  personnel_name: string;
+  personnel_code: string;
+  status: string;
+  status_display: string;
+}
+
+export interface BulkOvertimeResult {
+  created: BulkOvertimeResultItem[];
+  failed: Array<{
+    personnel_id: number;
+    employee_code: string;
+    name: string;
+    error: string;
+  }>;
+  total_requested: number;
+  total_created: number;
+  total_failed: number;
+}
+
+export interface ResolvedPersonnel {
+  id: number;
+  employee_code: string;
+  full_name: string;
+  position: string;
+  area_name: string;
+  hierarchy_level: string;
+}
+
+export interface ResolveEmployeeCodesResult {
+  resolved: ResolvedPersonnel[];
+  not_found: string[];
+}
+
 // ============ API RESPONSE TYPES ============
 
 export interface TokenListResponse {

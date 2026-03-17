@@ -322,7 +322,7 @@ export const ValidateTokenPage = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 3 }}>
+    <Container maxWidth="lg" sx={{ py: 3 }}>
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
@@ -540,21 +540,29 @@ export const ValidateTokenPage = () => {
                       <ListItemText
                         primary={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                            <Typography variant="body1" fontWeight={600}>
+                            <Typography variant="body2" fontWeight={600}>
                               {token.display_number}
                             </Typography>
                             <Chip
                               label={TokenTypeLabels[token.token_type as TokenType]}
                               size="small"
+                              color="secondary"
                               variant="outlined"
                               sx={{ height: 20, fontSize: '0.7rem' }}
                             />
                           </Box>
                         }
                         secondary={
-                          <Typography variant="body2" color="text.secondary" noWrap>
-                            {token.personnel_name} - {token.distributor_center_name}
-                          </Typography>
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {token.personnel_name} &middot; {token.distributor_center_name}
+                            </Typography>
+                            {token.detail_summary && (
+                              <Typography variant="caption" color="text.secondary" noWrap>
+                                {Object.entries(token.detail_summary).slice(0, 3).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                              </Typography>
+                            )}
+                          </Box>
                         }
                       />
                     </ListItemButton>
@@ -602,11 +610,6 @@ export const ValidateTokenPage = () => {
               sx={{
                 borderRadius: 2,
                 overflow: 'hidden',
-                borderTop: `4px solid ${
-                  canValidate
-                    ? theme.palette.success.main
-                    : theme.palette.warning.main
-                }`,
               }}
             >
               {/* Token Header */}
@@ -614,150 +617,119 @@ export const ValidateTokenPage = () => {
                 sx={{
                   bgcolor: theme.palette.secondary.main,
                   color: 'white',
-                  p: 3,
+                  px: 3,
+                  py: 2,
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: 2,
+                  gap: 1,
                 }}
               >
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>
-                    {tokenData.display_number}
-                  </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.9, mt: 0.5 }}>
-                    {TokenTypeLabels[tokenData.token_type as TokenType]}
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={700}>
+                      {tokenData.display_number}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.85 }}>
+                      {TokenTypeLabels[tokenData.token_type as TokenType]}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Chip
-                  label={TokenStatusLabels[tokenData.status as TokenStatus]}
-                  color={statusColors[tokenData.status as TokenStatus]}
-                  sx={{ fontWeight: 600, fontSize: '0.9rem' }}
-                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Chip
+                    label={TokenStatusLabels[tokenData.status as TokenStatus]}
+                    color={statusColors[tokenData.status as TokenStatus]}
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
               </Box>
 
               <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={3}>
-                  {/* Beneficiary Info */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  {/* Left column: Who + Details */}
+                  <Grid item xs={12} md={8}>
+                    {/* Beneficiary row */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                       <Avatar sx={{ bgcolor: 'primary.main' }}>
                         <PersonIcon />
                       </Avatar>
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Beneficiario
-                        </Typography>
-                        <Typography variant="body1" fontWeight={600}>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="subtitle1" fontWeight={600}>
                           {tokenData.personnel_name}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {tokenData.personnel_code}
+                          {tokenData.personnel_code} &middot; {tokenData.distributor_center_name}
+                          {tokenData.personnel_area && ` &middot; ${tokenData.personnel_area}`}
                         </Typography>
+                      </Box>
+                      {/* Validity inline */}
+                      <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, flexWrap: 'wrap' }}>
+                        <Chip size="small" variant="outlined" color={isTokenValid() ? 'success' : 'error'} icon={<ScheduleIcon />}
+                          label={`${new Date(tokenData.valid_from).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' })} — ${new Date(tokenData.valid_until).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' })}`}
+                        />
                       </Box>
                     </Box>
-                  </Grid>
-
-                  {/* Center Info */}
-                  <Grid item xs={12} md={6}>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: 'info.main' }}>
-                        <BusinessIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Centro de Distribución
-                        </Typography>
-                        <Typography variant="body1" fontWeight={600}>
-                          {tokenData.distributor_center_name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Área: {tokenData.personnel_area}
-                        </Typography>
-                      </Box>
+                    {/* Validity for mobile */}
+                    <Box sx={{ display: { xs: 'flex', sm: 'none' }, gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                      <Chip size="small" variant="outlined" color="success" label={`Desde: ${new Date(tokenData.valid_from).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' })}`} />
+                      <Chip size="small" variant="outlined" color="error" label={`Hasta: ${new Date(tokenData.valid_until).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' })}`} />
                     </Box>
-                  </Grid>
+                    {!isTokenValid() && tokenData.status === TokenStatus.APPROVED && (
+                      <Alert severity="warning" sx={{ mb: 2 }} variant="outlined">
+                        Este token está fuera del período de validez
+                      </Alert>
+                    )}
 
-                  {/* Validity Period */}
-                  <Grid item xs={12}>
-                    <Divider sx={{ my: 1 }} />
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mt: 2 }}>
-                      <Avatar sx={{ bgcolor: isTokenValid() ? 'success.main' : 'error.main' }}>
-                        <ScheduleIcon />
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Período de Validez
-                        </Typography>
-                        <Grid container spacing={2}>
-                          <Grid item xs={6}>
-                            <Typography variant="body2" color="text.secondary">
-                              Desde:
-                            </Typography>
-                            <Typography variant="body1" fontWeight={500}>
-                              {new Date(tokenData.valid_from).toLocaleString('es-HN', {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                              })}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography variant="body2" color="text.secondary">
-                              Hasta:
-                            </Typography>
-                            <Typography variant="body1" fontWeight={500}>
-                              {new Date(tokenData.valid_until).toLocaleString('es-HN', {
-                                dateStyle: 'medium',
-                                timeStyle: 'short',
-                              })}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                        {!isTokenValid() && tokenData.status === TokenStatus.APPROVED && (
-                          <Alert severity="warning" sx={{ mt: 2 }}>
-                            Este token está fuera del período de validez
-                          </Alert>
-                        )}
-                      </Box>
-                    </Box>
-                  </Grid>
-
-                  {/* Detail Summary */}
-                  {tokenData.detail_summary && Object.keys(tokenData.detail_summary).length > 0 && (
-                    <Grid item xs={12}>
-                      <Divider sx={{ my: 1 }} />
-                      <Typography variant="subtitle2" fontWeight={600} gutterBottom sx={{ mt: 2 }}>
-                        Detalles del Token
-                      </Typography>
-                      <Box
-                        sx={{
-                          bgcolor: 'grey.50',
-                          p: 2,
-                          borderRadius: 1,
-                          border: `1px solid ${theme.palette.divider}`,
-                        }}
-                      >
-                        <Grid container spacing={1}>
-                          {Object.entries(tokenData.detail_summary).map(([key, value]) => (
-                            <Grid item xs={12} sm={6} key={key}>
-                              <Typography variant="body2">
-                                <strong>{key}:</strong> {String(value)}
-                              </Typography>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </Grid>
-                  )}
-
-                  {/* QR Code Display */}
-                  <Grid item xs={12}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                    {/* Detail Summary - prominent */}
+                    {tokenData.detail_summary && Object.keys(tokenData.detail_summary).length > 0 && (
                       <Paper
                         elevation={0}
                         sx={{
-                          p: 2,
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          border: `1px solid ${theme.palette.divider}`,
+                        }}
+                      >
+                        <Box sx={{ bgcolor: theme.palette.secondary.main, px: 2, py: 1 }}>
+                          <Typography variant="subtitle2" fontWeight={600} color="white">
+                            {TokenTypeLabels[tokenData.token_type as TokenType]}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', p: 0 }}>
+                          {Object.entries(tokenData.detail_summary).map(([key, value], idx, arr) => (
+                            <Box
+                              key={key}
+                              sx={{
+                                flex: '1 1 auto',
+                                minWidth: { xs: '50%', sm: '33%' },
+                                px: 2,
+                                py: 1.5,
+                                borderRight: idx < arr.length - 1 ? `1px solid ${theme.palette.divider}` : 'none',
+                                borderBottom: `1px solid ${theme.palette.divider}`,
+                                '&:last-child': { borderRight: 'none' },
+                              }}
+                            >
+                              <Typography variant="caption" color="text.secondary" display="block" lineHeight={1.2}>
+                                {key}
+                              </Typography>
+                              <Typography variant="body1" fontWeight={700} sx={{ mt: 0.25 }}>
+                                {String(value)}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Paper>
+                    )}
+                  </Grid>
+
+                  {/* Right column: QR + action */}
+                  <Grid item xs={12} md={4}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.5,
                           bgcolor: 'white',
                           border: `1px solid ${theme.palette.divider}`,
                           borderRadius: 2,
@@ -765,12 +737,12 @@ export const ValidateTokenPage = () => {
                       >
                         <QRCodeSVG
                           value={`${import.meta.env.VITE_JS_FRONTEND_URL}/public/token/${tokenData.token_code}`}
-                          size={isMobile ? 120 : 150}
+                          size={isMobile ? 100 : 120}
                           level="H"
                           imageSettings={{
                             src: '/logo-qr.png',
-                            height: isMobile ? 28 : 32,
-                            width: isMobile ? 28 : 32,
+                            height: 24,
+                            width: 24,
                             excavate: true,
                           }}
                         />
@@ -779,7 +751,7 @@ export const ValidateTokenPage = () => {
                   </Grid>
                 </Grid>
 
-                <Divider sx={{ my: 3 }} />
+                <Divider sx={{ my: 2 }} />
 
                 {/* Validate Button */}
                 {!tokenRequiresUserValidation ? (

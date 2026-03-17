@@ -512,17 +512,17 @@ export const TokenDetailPage = () => {
       <Grid container spacing={3}>
         {/* Left Column */}
         <Grid item xs={12} md={8}>
-          {/* Beneficiary Info */}
+          {/* Beneficiary & Validity */}
           <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PersonIcon color="secondary" />
                 Beneficiario {token.exit_pass_detail?.is_external && '(Persona Externa)'}
               </Typography>
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 1.5 }} />
 
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={1.5}>
+                <Grid item xs={6} sm={4}>
                   <InfoItem
                     icon={<PersonIcon fontSize="small" />}
                     label="Nombre Completo"
@@ -530,7 +530,7 @@ export const TokenDetailPage = () => {
                     color="secondary"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6} sm={4}>
                   <InfoItem
                     icon={<BadgeIcon fontSize="small" />}
                     label={token.exit_pass_detail?.is_external ? 'Identificación' : 'Código de Empleado'}
@@ -539,7 +539,7 @@ export const TokenDetailPage = () => {
                   />
                 </Grid>
                 {token.exit_pass_detail?.is_external && token.exit_pass_detail?.external_person?.company && (
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={6} sm={4}>
                     <InfoItem
                       icon={<BusinessIcon fontSize="small" />}
                       label="Empresa"
@@ -548,7 +548,7 @@ export const TokenDetailPage = () => {
                     />
                   </Grid>
                 )}
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6} sm={4}>
                   <InfoItem
                     icon={<BusinessIcon fontSize="small" />}
                     label="Centro de Distribución"
@@ -556,7 +556,7 @@ export const TokenDetailPage = () => {
                     color="secondary"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6} sm={4}>
                   <InfoItem
                     icon={<PersonIcon fontSize="small" />}
                     label="Solicitado Por"
@@ -565,45 +565,30 @@ export const TokenDetailPage = () => {
                   />
                 </Grid>
               </Grid>
-            </CardContent>
-          </Card>
 
-          {/* Validity Period */}
-          <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ScheduleIcon color="secondary" />
-                Período de Validez
-              </Typography>
-              <Divider sx={{ my: 2 }} />
-
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, borderColor: 'success.light' }}>
-                    <Typography variant="caption" color="text.secondary">Válido Desde</Typography>
-                    <Typography variant="h6" fontWeight={600} color="success.main">
-                      {formatDate(token.valid_from)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(token.valid_from).toLocaleTimeString('es-HN', { timeStyle: 'short' })}
-                    </Typography>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, borderColor: 'error.light' }}>
-                    <Typography variant="caption" color="text.secondary">Válido Hasta</Typography>
-                    <Typography variant="h6" fontWeight={600} color="error.main">
-                      {formatDate(token.valid_until)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(token.valid_until).toLocaleTimeString('es-HN', { timeStyle: 'short' })}
-                    </Typography>
-                  </Paper>
-                </Grid>
-              </Grid>
+              {/* Validity Period - inline */}
+              <Divider sx={{ my: 1.5 }} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <ScheduleIcon fontSize="small" color="secondary" />
+                <Typography variant="subtitle2" fontWeight={600}>Período de Validez</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="success"
+                  label={`Desde: ${formatDate(token.valid_from)} ${new Date(token.valid_from).toLocaleTimeString('es-HN', { timeStyle: 'short' })}`}
+                />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="error"
+                  label={`Hasta: ${formatDate(token.valid_until)} ${new Date(token.valid_until).toLocaleTimeString('es-HN', { timeStyle: 'short' })}`}
+                />
+              </Box>
 
               {token.requester_notes && (
-                <Box sx={{ mt: 3 }}>
+                <Box sx={{ mt: 1.5 }}>
                   <InfoItem
                     icon={<NotesIcon fontSize="small" />}
                     label="Notas"
@@ -1160,159 +1145,157 @@ export const TokenDetailPage = () => {
 
           {/* Overtime Detail */}
           {token.token_type === TokenType.OVERTIME && token.overtime_detail && (
-            <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <OvertimeIcon color="secondary" />
-                  Detalles de Horas Extra
-                </Typography>
-                <Divider sx={{ my: 2 }} />
+            <Card elevation={2} sx={{ mb: 3, borderRadius: 2, overflow: 'hidden' }}>
+              {/* Header bar */}
+              <Box sx={{ bgcolor: 'secondary.main', color: 'white', px: 3, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <OvertimeIcon fontSize="small" />
+                  <Typography variant="subtitle1" fontWeight={600}>Horas Extra</Typography>
+                </Box>
+                <Chip
+                  label={`x${token.overtime_detail.pay_multiplier}`}
+                  size="small"
+                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 700 }}
+                />
+              </Box>
 
-                <Grid container spacing={2}>
-                  <Grid item xs={6} sm={4}>
-                    <InfoItem
-                      icon={<TimeIcon fontSize="small" />}
-                      label="Tipo de Hora Extra"
-                      value={token.overtime_detail.overtime_type_model_name || token.overtime_detail.overtime_type_display || OvertimeTypeLabels[token.overtime_detail.overtime_type as OvertimeType]}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <InfoItem
-                      icon={<NotesIcon fontSize="small" />}
-                      label="Motivo"
-                      value={token.overtime_detail.reason_model_name || token.overtime_detail.reason_display || OvertimeReasonLabels[token.overtime_detail.reason as OvertimeReason]}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <InfoItem
-                      icon={<CalendarIcon fontSize="small" />}
-                      label="Fecha"
-                      value={token.overtime_detail.overtime_date}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <InfoItem
-                      icon={<TimeIcon fontSize="small" />}
-                      label="Hora Inicio"
-                      value={token.overtime_detail.start_time}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <InfoItem
-                      icon={<TimeIcon fontSize="small" />}
-                      label="Hora Fin"
-                      value={token.overtime_detail.end_time}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <InfoItem
-                      icon={<TimeIcon fontSize="small" />}
-                      label="Total Horas"
-                      value={`${token.overtime_detail.total_hours}h`}
-                      color="secondary"
-                    />
-                  </Grid>
-                  <Grid item xs={6} sm={3}>
-                    <InfoItem
-                      icon={<MoneyIcon fontSize="small" />}
-                      label="Multiplicador"
-                      value={`x${token.overtime_detail.pay_multiplier}`}
-                      color="secondary"
-                    />
-                  </Grid>
-                  {token.overtime_detail.estimated_pay > 0 && (
-                    <Grid item xs={12} sm={6}>
-                      <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center' }}>
-                        <Typography variant="caption" color="text.secondary">Pago Estimado</Typography>
-                        <Typography variant="h5" fontWeight={700} color="secondary.main">
-                          L. {token.overtime_detail.estimated_pay?.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  )}
-                  {token.overtime_detail.assigned_task && (
-                    <Grid item xs={12}>
-                      <InfoItem
-                        icon={<WorkIcon fontSize="small" />}
-                        label="Tarea Asignada"
-                        value={token.overtime_detail.assigned_task}
-                        color="secondary"
-                      />
-                    </Grid>
-                  )}
-                  {token.overtime_detail.reason_detail && (
-                    <Grid item xs={12}>
-                      <InfoItem
-                        icon={<NotesIcon fontSize="small" />}
-                        label="Detalle del Motivo"
-                        value={token.overtime_detail.reason_detail}
-                        color="secondary"
-                      />
-                    </Grid>
-                  )}
-                </Grid>
+              <CardContent sx={{ p: 3 }}>
+                {/* Type & Reason chips */}
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2.5 }}>
+                  <Chip
+                    icon={<TimeIcon />}
+                    label={token.overtime_detail.overtime_type_model_name || token.overtime_detail.overtime_type_display || OvertimeTypeLabels[token.overtime_detail.overtime_type as OvertimeType]}
+                    color="secondary"
+                    variant="outlined"
+                  />
+                  <Chip
+                    icon={<NotesIcon />}
+                    label={token.overtime_detail.reason_model_name || token.overtime_detail.reason_display || OvertimeReasonLabels[token.overtime_detail.reason as OvertimeReason]}
+                    color="info"
+                    variant="outlined"
+                  />
+                </Box>
+
+                {/* Schedule bar */}
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: 'grey.50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: { xs: 1, sm: 2 },
+                    flexWrap: 'wrap',
+                    mb: 2,
+                  }}
+                >
+                  {/* Date */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <CalendarIcon fontSize="small" color="action" />
+                    <Typography variant="body2" fontWeight={600}>
+                      {new Date(token.overtime_detail.overtime_date + 'T00:00:00').toLocaleDateString('es-HN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+                    </Typography>
+                  </Box>
+
+                  <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+
+                  {/* Time range */}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <TimeIcon fontSize="small" color="action" />
+                    <Typography variant="body2">
+                      <Box component="span" fontWeight={600}>{token.overtime_detail.start_time?.slice(0, 5)}</Box>
+                      {' — '}
+                      <Box component="span" fontWeight={600}>{token.overtime_detail.end_time?.slice(0, 5)}</Box>
+                    </Typography>
+                  </Box>
+
+                  <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
+
+                  {/* Total hours */}
+                  <Chip
+                    label={`${token.overtime_detail.total_hours}h`}
+                    size="small"
+                    color="secondary"
+                    sx={{ fontWeight: 700 }}
+                  />
+                </Paper>
+
+                {/* Optional fields */}
+                {(token.overtime_detail.assigned_task || token.overtime_detail.reason_detail) && (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {token.overtime_detail.assigned_task && (
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <WorkIcon fontSize="small" color="action" sx={{ mt: 0.25 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Tarea Asignada</Typography>
+                          <Typography variant="body2">{token.overtime_detail.assigned_task}</Typography>
+                        </Box>
+                      </Box>
+                    )}
+                    {token.overtime_detail.reason_detail && (
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <NotesIcon fontSize="small" color="action" sx={{ mt: 0.25 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Detalle del Motivo</Typography>
+                          <Typography variant="body2">{token.overtime_detail.reason_detail}</Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+                )}
 
                 {/* Completion info */}
                 {token.overtime_detail.was_completed !== null && (
                   <>
                     <Divider sx={{ my: 2 }} />
-                    <Typography variant="subtitle2" gutterBottom color="text.secondary">
-                      Registro de Ejecución
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6} sm={3}>
-                        <Chip
-                          label={token.overtime_detail.was_completed ? 'Completado' : 'No Completado'}
-                          color={token.overtime_detail.was_completed ? 'success' : 'error'}
-                          size="small"
-                        />
-                      </Grid>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                      <Typography variant="subtitle2" color="text.secondary">Ejecución</Typography>
+                      <Chip
+                        label={token.overtime_detail.was_completed ? 'Completado' : 'No Completado'}
+                        color={token.overtime_detail.was_completed ? 'success' : 'error'}
+                        size="small"
+                      />
+                    </Box>
+                    <Paper
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: token.overtime_detail.was_completed ? 'success.50' : 'grey.50',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        flexWrap: 'wrap',
+                      }}
+                    >
                       {token.overtime_detail.actual_start_time && (
-                        <Grid item xs={6} sm={3}>
-                          <InfoItem
-                            icon={<TimeIcon fontSize="small" />}
-                            label="Hora Real Inicio"
-                            value={token.overtime_detail.actual_start_time}
-                            color="info"
-                          />
-                        </Grid>
-                      )}
-                      {token.overtime_detail.actual_end_time && (
-                        <Grid item xs={6} sm={3}>
-                          <InfoItem
-                            icon={<TimeIcon fontSize="small" />}
-                            label="Hora Real Fin"
-                            value={token.overtime_detail.actual_end_time}
-                            color="info"
-                          />
-                        </Grid>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <TimeIcon fontSize="small" color="action" />
+                          <Typography variant="body2">
+                            <Box component="span" fontWeight={600}>{token.overtime_detail.actual_start_time?.slice(0, 5)}</Box>
+                            {token.overtime_detail.actual_end_time && (
+                              <>
+                                {' — '}
+                                <Box component="span" fontWeight={600}>{token.overtime_detail.actual_end_time?.slice(0, 5)}</Box>
+                              </>
+                            )}
+                          </Typography>
+                        </Box>
                       )}
                       {token.overtime_detail.actual_hours !== null && (
-                        <Grid item xs={6} sm={3}>
-                          <InfoItem
-                            icon={<TimeIcon fontSize="small" />}
-                            label="Horas Reales"
-                            value={`${token.overtime_detail.actual_hours}h`}
-                            color="info"
-                          />
-                        </Grid>
+                        <Chip label={`${token.overtime_detail.actual_hours}h reales`} size="small" color="info" />
                       )}
-                      {token.overtime_detail.completion_notes && (
-                        <Grid item xs={12}>
-                          <InfoItem
-                            icon={<NotesIcon fontSize="small" />}
-                            label="Notas de Ejecución"
-                            value={token.overtime_detail.completion_notes}
-                            color="info"
-                          />
-                        </Grid>
-                      )}
-                    </Grid>
+                    </Paper>
+                    {token.overtime_detail.completion_notes && (
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1.5 }}>
+                        <NotesIcon fontSize="small" color="action" sx={{ mt: 0.25 }} />
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">Notas de Ejecución</Typography>
+                          <Typography variant="body2">{token.overtime_detail.completion_notes}</Typography>
+                        </Box>
+                      </Box>
+                    )}
                   </>
                 )}
               </CardContent>

@@ -57,7 +57,7 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
-import { useCreateTokenMutation } from '../services/tokenApi';
+import { useCreateTokenMutation, useBulkCreateOvertimeMutation } from '../services/tokenApi';
 import {
   TokenType,
   TokenTypeLabels,
@@ -70,6 +70,7 @@ import {
   RateChangeCreatePayload,
   OvertimeCreatePayload,
   ShiftChangeCreatePayload,
+  ResolvedPersonnel,
 } from '../interfaces/token';
 import {
   PermitHourForm,
@@ -83,6 +84,7 @@ import {
 } from '../components/forms';
 import { useAppSelector } from '../../../store';
 import { useGetEligibleForTokenQuery } from '../../personnel/services/personnelApi';
+import { BulkPersonnelSelector } from '../components/BulkPersonnelSelector';
 import { useGetExternalPersonsQuery, useCreateExternalPersonMutation } from '../services/tokenApi';
 import type { ExternalPersonCreatePayload } from '../interfaces/token';
 import type { PersonnelProfileList } from '../../../interfaces/personnel';
@@ -179,6 +181,11 @@ export const TokenCreatePage = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [tokenType, setTokenType] = useState<TokenType | ''>('');
   const [createToken, { isLoading }] = useCreateTokenMutation();
+  const [bulkCreateOvertime, { isLoading: isBulkLoading }] = useBulkCreateOvertimeMutation();
+
+  // Bulk mode state (OVERTIME)
+  const [bulkPersonnel, setBulkPersonnel] = useState<ResolvedPersonnel[]>([]);
+  const isBulkMode = tokenType === TokenType.OVERTIME;
 
   // State for external person (EXIT_PASS only)
   const [isExternalPerson, setIsExternalPerson] = useState(false);
@@ -342,6 +349,11 @@ export const TokenCreatePage = () => {
           toast.error('Seleccione una persona externa');
           return;
         }
+      } else if (isBulkMode) {
+        if (bulkPersonnel.length === 0) {
+          toast.error('Agregue al menos una persona');
+          return;
+        }
       } else {
         if (!baseData.personnel) {
           toast.error('Seleccione un beneficiario');
@@ -363,6 +375,34 @@ export const TokenCreatePage = () => {
       return;
     }
 
+    // BULK OVERTIME PATH
+    if (isBulkMode && bulkPersonnel.length > 0) {
+      try {
+        const result = await bulkCreateOvertime({
+          personnel_ids: bulkPersonnel.map((p) => p.id),
+          distributor_center: baseData.distributor_center,
+          valid_from: baseData.valid_from,
+          valid_until: baseData.valid_until,
+          requester_notes: baseData.requester_notes,
+          overtime_detail: overtimeData,
+        }).unwrap();
+
+        if (result.total_failed === 0) {
+          toast.success(`${result.total_created} token(s) creados exitosamente`);
+        } else if (result.total_created > 0) {
+          toast.warning(`${result.total_created} creados, ${result.total_failed} fallaron`);
+        } else {
+          toast.error('No se pudo crear ningún token');
+        }
+        navigate('/tokens');
+      } catch (error: unknown) {
+        const err = error as { data?: { detail?: string } };
+        toast.error(err?.data?.detail || 'Error al crear los tokens');
+      }
+      return;
+    }
+
+    // SINGLE TOKEN PATH
     // For EXIT_PASS with external person, personnel is not required
     const isExternalExitPass = tokenType === TokenType.EXIT_PASS && isExternalPerson;
     if (!isExternalExitPass && !baseData.personnel) {
@@ -595,8 +635,19 @@ export const TokenCreatePage = () => {
             </Grid>
           )}
 
-          {/* Personnel Selector (when not external) */}
-          {!isExternalPerson && (
+          {/* Bulk Personnel Selector (OVERTIME) */}
+          {isBulkMode && (
+            <Grid item xs={12}>
+              <BulkPersonnelSelector
+                selectedPersonnel={bulkPersonnel}
+                onPersonnelChange={setBulkPersonnel}
+                personnelList={personnelList}
+              />
+            </Grid>
+          )}
+
+          {/* Personnel Selector (single - when not external and not bulk) */}
+          {!isExternalPerson && !isBulkMode && (
             <Grid item xs={12} md={6}>
               <Autocomplete
                 options={personnelList}
@@ -918,7 +969,42 @@ export const TokenCreatePage = () => {
           </Grid>
         )}
 
-        {/* Beneficiary / External Person Card */}
+        {/* Beneficiary / External Person / Bulk Card */}
+        {isBulkMode && bulkPersonnel.length > 0 ? (
+          <Grid item xs={12}>
+            <Card variant="outlined">
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <PersonIcon color="primary" />
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {bulkPersonnel.length} Beneficiario(s)
+                  </Typography>
+                  <Chip label={`${bulkPersonnel.length} tokens`} size="small" color="secondary" />
+                </Box>
+                <Box sx={{ maxHeight: 200, overflow: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', borderBottom: '1px solid #eee', fontSize: '0.75rem', color: '#666' }}>Código</th>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', borderBottom: '1px solid #eee', fontSize: '0.75rem', color: '#666' }}>Nombre</th>
+                        <th style={{ textAlign: 'left', padding: '4px 8px', borderBottom: '1px solid #eee', fontSize: '0.75rem', color: '#666' }}>Puesto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bulkPersonnel.map((p) => (
+                        <tr key={p.id}>
+                          <td style={{ padding: '4px 8px', fontSize: '0.875rem', fontWeight: 600 }}>{p.employee_code}</td>
+                          <td style={{ padding: '4px 8px', fontSize: '0.875rem' }}>{p.full_name}</td>
+                          <td style={{ padding: '4px 8px', fontSize: '0.75rem', color: '#666' }}>{p.position || p.area_name || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ) : (
         <Grid item xs={12} md={6}>
           <Card variant="outlined">
             <CardContent>
@@ -990,6 +1076,7 @@ export const TokenCreatePage = () => {
             </CardContent>
           </Card>
         </Grid>
+        )}
 
         {/* Validity Period */}
         <Grid item xs={12} md={6}>
@@ -1033,8 +1120,10 @@ export const TokenCreatePage = () => {
                       const start = dayjs(`2000-01-01 ${overtimeData.start_time}`);
                       let end = dayjs(`2000-01-01 ${overtimeData.end_time}`);
                       if (end.isBefore(start)) end = end.add(1, 'day');
-                      const hours = parseFloat((end.diff(start, 'minute') / 60).toFixed(2));
-                      return `${hours} hora${hours !== 1 ? 's' : ''}`;
+                      const perPerson = parseFloat((end.diff(start, 'minute') / 60).toFixed(2));
+                      const people = isBulkMode ? Math.max(bulkPersonnel.length, 1) : 1;
+                      const total = parseFloat((perPerson * people).toFixed(2));
+                      return `${total} hora${total !== 1 ? 's' : ''}${people > 1 ? ` (${perPerson}h x ${people} personas)` : ''}`;
                     })()}
                   </Typography>
                 </Box>
@@ -1051,8 +1140,10 @@ export const TokenCreatePage = () => {
             sx={{ borderRadius: 2 }}
           >
             <Typography variant="body2">
-              Al confirmar, el token será creado y se generará un código QR único.
-              El token será enviado para aprobación según el flujo establecido.
+              {isBulkMode && bulkPersonnel.length > 1
+                ? `Se crearán ${bulkPersonnel.length} tokens de horas extra, uno por cada beneficiario. Cada token tendrá su propio código QR y flujo de aprobación.`
+                : 'Al confirmar, el token será creado y se generará un código QR único. El token será enviado para aprobación según el flujo establecido.'
+              }
             </Typography>
           </Alert>
         </Grid>
@@ -1150,7 +1241,8 @@ export const TokenCreatePage = () => {
                   size={isMobile ? 'medium' : 'large'}
                   disabled={
                     (activeStep === 0 && !tokenType) ||
-                    (activeStep === 1 && !isExternalPerson && !baseData.personnel) ||
+                    (activeStep === 1 && !isExternalPerson && !isBulkMode && !baseData.personnel) ||
+                    (activeStep === 1 && isBulkMode && bulkPersonnel.length === 0) ||
                     (activeStep === 1 && isExternalPerson && !selectedExternalPerson)
                   }
                   sx={{
@@ -1172,10 +1264,15 @@ export const TokenCreatePage = () => {
                   color="success"
                   startIcon={<SaveIcon />}
                   onClick={handleSubmit}
-                  disabled={isLoading}
+                  disabled={isLoading || isBulkLoading}
                   size={isMobile ? 'medium' : 'large'}
                 >
-                  {isLoading ? 'Creando...' : 'Crear Token'}
+                  {isLoading || isBulkLoading
+                    ? 'Creando...'
+                    : isBulkMode && bulkPersonnel.length > 1
+                      ? `Crear ${bulkPersonnel.length} Tokens`
+                      : 'Crear Token'
+                  }
                 </Button>
               )}
             </Box>
