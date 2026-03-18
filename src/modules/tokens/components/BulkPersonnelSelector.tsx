@@ -58,7 +58,7 @@ export const BulkPersonnelSelector = ({
     if (!newValue) return;
     // Prevent duplicates
     if (selectedPersonnel.some((p) => p.id === newValue.id)) {
-      toast.info('Esta persona ya está en la lista');
+      toast('Esta persona ya está en la lista');
       return;
     }
     onPersonnelChange([
@@ -130,7 +130,7 @@ export const BulkPersonnelSelector = ({
         toast.success(`${result.resolved.length} persona(s) cargadas`);
       }
       if (result.not_found.length > 0) {
-        toast.info(`${result.not_found.length} código(s) no encontrados`);
+        toast(`${result.not_found.length} código(s) no encontrados`);
       }
     } catch {
       toast.error('Error al procesar el archivo Excel');

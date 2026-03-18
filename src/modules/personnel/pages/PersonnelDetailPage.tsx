@@ -427,7 +427,7 @@ export const PersonnelDetailPage = () => {
                     <InfoItem icon={<PersonIcon />} label="Nombre" value={profile.full_name} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem icon={<EmailIcon />} label="Email" value={profile.email} />
+                    <InfoItem icon={<EmailIcon />} label="Email" value={profile.email || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<PhoneIcon />} label="Teléfono" value={profile.phone || 'No especificado'} />
@@ -468,13 +468,13 @@ export const PersonnelDetailPage = () => {
                     <InfoItem icon={<BusinessIcon />} label="Área" value={typeof profile.area === 'object' ? profile.area.name : profile.area_data?.name || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem icon={<WorkIcon />} label="Posición" value={profile.position} />
+                    <InfoItem icon={<WorkIcon />} label="Posición" value={profile.position || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem icon={<WorkIcon />} label="Tipo de Posición" value={profile.position_type_display} />
+                    <InfoItem icon={<WorkIcon />} label="Tipo de Posición" value={profile.position_type_display || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem icon={<TrendingUpIcon />} label="Nivel Jerárquico" value={profile.hierarchy_level_display} />
+                    <InfoItem icon={<TrendingUpIcon />} label="Nivel Jerárquico" value={profile.hierarchy_level_display || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_data?.name || 'No especificado'} />
@@ -506,7 +506,7 @@ export const PersonnelDetailPage = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
-                    <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display || profile.contract_type} />
+                    <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display || profile.contract_type || 'No especificado'} />
                   </Grid>
                   <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<TrendingUpIcon />} label="Antigüedad" value={`${profile.years_of_service} años`} />
