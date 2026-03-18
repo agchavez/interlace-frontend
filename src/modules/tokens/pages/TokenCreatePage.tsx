@@ -361,6 +361,18 @@ export const TokenCreatePage = () => {
         }
       }
     }
+    if (activeStep === 2) {
+      // Validate uniform delivery has items
+      if (tokenType === TokenType.UNIFORM_DELIVERY && (!uniformDeliveryData.items || uniformDeliveryData.items.length === 0)) {
+        toast.error('Agregue al menos un artículo para la entrega de uniforme');
+        return;
+      }
+      // Validate exit pass has items
+      if (tokenType === TokenType.EXIT_PASS && (!exitPassData.items || exitPassData.items.length === 0)) {
+        toast.error('Agregue al menos un artículo para el pase de salida');
+        return;
+      }
+    }
     setActiveStep((prev) => prev + 1);
   };
 
