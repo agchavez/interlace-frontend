@@ -50,27 +50,24 @@ const InfoItem: React.FC<{ icon: React.ReactNode; label: string; value: string |
   label,
   value,
 }) => (
-  <Box>
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 2,
-        py: 2.5,
-        px: 1,
-      }}
-    >
-      <Box sx={{ color: 'primary.main', mt: 0.5 }}>{icon}</Box>
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-          {label}
-        </Typography>
-        <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '1.05rem', wordBreak: 'break-word', color: 'text.primary' }}>
-          {value}
-        </Typography>
-      </Box>
+  <Box
+    sx={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 1.5,
+      py: 1.5,
+      px: 1,
+    }}
+  >
+    <Box sx={{ color: 'primary.main', mt: 0.3 }}>{icon}</Box>
+    <Box sx={{ flex: 1 }}>
+      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
+        {value}
+      </Typography>
     </Box>
-    <Divider />
   </Box>
 );
 
@@ -89,7 +86,7 @@ function CustomTabPanel(props: TabPanelProps) {
       {...other}
     >
       {value === index && (
-        <Box sx={{ py: 4 }}>
+        <Box sx={{ py: 2 }}>
           {children}
         </Box>
       )}
@@ -141,13 +138,13 @@ export const MyProfilePage = () => {
   const profile = data as PersonnelProfile;
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3, md: 4, lg: 5 }, width: '90%' }}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, width: { xs: '100%', md: '90%', lg: '85%' }, mx: 'auto' }}>
       {/* Header con Avatar y Info Principal */}
       <Paper
         elevation={3}
         sx={{
-          p: { xs: 3, sm: 4, md: 5 },
-          mb: 4,
+          p: { xs: 2, sm: 3 },
+          mb: 2,
           bgcolor: theme.palette.secondary.main,
           color: 'white',
           borderRadius: 2,
@@ -187,15 +184,15 @@ export const MyProfilePage = () => {
           )}
         </Box>
 
-        <Grid container spacing={4} alignItems="center">
+        <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} sm="auto">
             <Avatar
               src={profile.photo_url || undefined}
               alt={profile.full_name}
               sx={{
-                width: { xs: 100, sm: 120, md: 140 },
-                height: { xs: 100, sm: 120, md: 140 },
-                fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                width: { xs: 72, sm: 80, md: 90 },
+                height: { xs: 72, sm: 80, md: 90 },
+                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
                 mx: { xs: 'auto', sm: 0 },
                 bgcolor: 'rgba(255,255,255,0.2)',
                 border: '4px solid white',
@@ -281,19 +278,19 @@ export const MyProfilePage = () => {
         <CustomTabPanel value={activeTab} index={0}>
           <Box sx={{ px: { xs: 2, sm: 4 } }}>
             {/* Información Básica */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                 <BadgeIcon color="primary" />
                 Información Básica
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<BadgeIcon />} label="Código de Empleado" value={profile.employee_code} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<EmailIcon />} label="Email" value={profile.email} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<PhoneIcon />} label="Teléfono" value={profile.phone} />
                 </Grid>
                 {profile.authentication_methods && profile.authentication_methods.length > 0 && (
@@ -303,16 +300,15 @@ export const MyProfilePage = () => {
                         sx={{
                           display: 'flex',
                           alignItems: 'flex-start',
-                          gap: 2,
-                          py: 2.5,
-                          px: 1,
+                          gap: 1.5,
+                          py: 1,
                         }}
                       >
-                        <Box sx={{ color: 'primary.main', mt: 0.5 }}>
+                        <Box sx={{ color: 'primary.main', mt: 0.25 }}>
                           <LockIcon />
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
+                          <Typography variant="caption" color="text.secondary" display="block" lineHeight={1.2}>
                             Métodos de Autenticación
                           </Typography>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
@@ -339,7 +335,7 @@ export const MyProfilePage = () => {
                     </Box>
                   </Grid>
                 )}
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem
                     icon={<CakeIcon />}
                     label="Fecha de Nacimiento"
@@ -353,23 +349,23 @@ export const MyProfilePage = () => {
               </Grid>
             </Box>
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{ my: 2 }} />
 
             {/* Información Organizacional */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                 <BusinessIcon color="primary" />
                 Información Organizacional
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem
                     icon={<BusinessIcon />}
                     label="Centro de Distribución"
                     value={profile.primary_distributor_center_data?.name || 'No asignado'}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<WorkIcon />} label="Área" value={profile.area_data?.name || (typeof profile.area === 'object' ? profile.area.name : '') || ''} />
                 </Grid>
                 {(profile.department_data || profile.department) && (
@@ -381,7 +377,7 @@ export const MyProfilePage = () => {
                     />
                   </Grid>
                 )}
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<WorkIcon />} label="Tipo de Posición" value={profile.position_type_display} />
                 </Grid>
                 {profile.supervisor_data && (
@@ -396,16 +392,16 @@ export const MyProfilePage = () => {
               </Grid>
             </Box>
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{ my: 2 }} />
 
             {/* Información Laboral */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                 <CalendarTodayIcon color="primary" />
                 Información Laboral
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem
                     icon={<CalendarTodayIcon />}
                     label="Fecha de Ingreso"
@@ -416,13 +412,13 @@ export const MyProfilePage = () => {
                     })}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display || profile.contract_type} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<TrendingUpIcon />} label="Años de Servicio" value={profile.years_of_service} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem
                     icon={<BadgeIcon />}
                     label="Acceso al Sistema"
@@ -432,19 +428,19 @@ export const MyProfilePage = () => {
               </Grid>
             </Box>
 
-            <Divider sx={{ my: 4 }} />
+            <Divider sx={{ my: 2 }} />
 
             {/* Información de Contacto */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                 <HomeIcon color="primary" />
                 Información de Contacto
               </Typography>
-              <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<HomeIcon />} label="Dirección" value={profile.address} />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} md={4}>
                   <InfoItem icon={<HomeIcon />} label="Ciudad" value={profile.city} />
                 </Grid>
               </Grid>

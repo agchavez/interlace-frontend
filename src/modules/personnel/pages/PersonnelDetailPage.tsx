@@ -82,7 +82,7 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
       hidden={value !== index}
     >
       {value === index && (
-        <Box sx={{ py: 4 }}>
+        <Box sx={{ py: 2 }}>
           {children}
         </Box>
       )}
@@ -203,7 +203,7 @@ export const PersonnelDetailPage = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3, md: 4, lg: 5 }, width: !isMobile ? '80%' : '100%', mx: 'auto' }}>
+    <Box sx={{ p: { xs: 2, sm: 3 }, width: { xs: '100%', md: '90%', lg: '85%' }, mx: 'auto' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, flexWrap: 'wrap' }}>
         <IconButton
@@ -223,8 +223,8 @@ export const PersonnelDetailPage = () => {
         sx={{
           bgcolor: theme.palette.secondary.main,
           color: 'white',
-          p: { xs: 3, sm: 4, md: 5 },
-          mb: 4,
+          p: { xs: 2, sm: 3 },
+          mb: 2,
           borderRadius: 2,
         }}
       >
@@ -237,10 +237,10 @@ export const PersonnelDetailPage = () => {
                   src={profile.photo_url || undefined}
                   alt={profile.full_name}
                   sx={{
-                    width: { xs: 100, sm: 120, md: 140 },
-                    height: { xs: 100, sm: 120, md: 140 },
+                    width: { xs: 72, sm: 80, md: 90 },
+                    height: { xs: 72, sm: 80, md: 90 },
                     bgcolor: 'rgba(255,255,255,0.2)',
-                    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
                     fontWeight: 700,
                   }}
                 >
@@ -414,115 +414,105 @@ export const PersonnelDetailPage = () => {
           <TabPanel value={activeTab} index={0}>
             <Box sx={{ px: { xs: 2, sm: 4 } }}>
               {/* Información Básica */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                   <BadgeIcon color="secondary" />
                   Información Básica
                 </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<BadgeIcon />} label="Código" value={profile.employee_code} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<PersonIcon />} label="Nombre" value={profile.full_name} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<EmailIcon />} label="Email" value={profile.email} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<PhoneIcon />} label="Teléfono" value={profile.phone || 'No especificado'} />
                   </Grid>
-                  {profile.personal_id && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<BadgeIcon />} label="ID Nacional" value={profile.personal_id} />
-                    </Grid>
-                  )}
-                  {profile.birth_date && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem
-                        icon={<CalendarTodayIcon />}
-                        label="Fecha de Nacimiento"
-                        value={new Date(profile.birth_date).toLocaleDateString()}
-                      />
-                    </Grid>
-                  )}
-                  {profile.gender && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem
-                        icon={<PersonIcon />}
-                        label="Género"
-                        value={profile.gender === 'M' ? 'Masculino' : profile.gender === 'F' ? 'Femenino' : 'Otro'}
-                      />
-                    </Grid>
-                  )}
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoItem icon={<BadgeIcon />} label="ID Nacional" value={profile.personal_id || 'No especificado'} />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoItem
+                      icon={<CalendarTodayIcon />}
+                      label="Fecha de Nacimiento"
+                      value={profile.birth_date ? new Date(profile.birth_date).toLocaleDateString() : 'No especificado'}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoItem
+                      icon={<PersonIcon />}
+                      label="Género"
+                      value={profile.gender === 'M' ? 'Masculino' : profile.gender === 'F' ? 'Femenino' : profile.gender ? 'Otro' : 'No especificado'}
+                    />
+                  </Grid>
                 </Grid>
               </Box>
 
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 2 }} />
 
               {/* Información Organizacional */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                   <BusinessIcon color="secondary" />
                   Información Organizacional
                 </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<BusinessIcon />} label="Centro de Distribución" value={profile.primary_distributor_center_data?.name || 'No especificado'} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<BusinessIcon />} label="Área" value={typeof profile.area === 'object' ? profile.area.name : profile.area_data?.name || 'No especificado'} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<WorkIcon />} label="Posición" value={profile.position} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<WorkIcon />} label="Tipo de Posición" value={profile.position_type_display} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<TrendingUpIcon />} label="Nivel Jerárquico" value={profile.hierarchy_level_display} />
                   </Grid>
-                  {profile.department_data && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_data.name} />
-                    </Grid>
-                  )}
-                  {profile.supervisor_data && (
-                    <Grid item xs={12} sm={6}>
-                      <InfoItem
-                        icon={<PersonIcon />}
-                        label="Supervisor Inmediato"
-                        value={`${profile.supervisor_data.employee_code} - ${profile.supervisor_data.full_name}`}
-                      />
-                    </Grid>
-                  )}
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoItem icon={<BusinessIcon />} label="Departamento" value={profile.department_data?.name || 'No especificado'} />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <InfoItem
+                      icon={<PersonIcon />}
+                      label="Supervisor Inmediato"
+                      value={profile.supervisor_data ? `${profile.supervisor_data.employee_code} - ${profile.supervisor_data.full_name}` : 'No especificado'}
+                    />
+                  </Grid>
                 </Grid>
               </Box>
 
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 2 }} />
 
               {/* Información Laboral */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                   <WorkIcon color="secondary" />
                   Información Laboral
                 </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem
                       icon={<CalendarTodayIcon />}
                       label="Fecha de Contratación"
                       value={new Date(profile.hire_date).toLocaleDateString()}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<WorkIcon />} label="Tipo de Contrato" value={profile.contract_type_display || profile.contract_type} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<TrendingUpIcon />} label="Antigüedad" value={`${profile.years_of_service} años`} />
                   </Grid>
                   {profile.termination_date && (
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} md={4}>
                       <InfoItem
                         icon={<CalendarTodayIcon />}
                         label="Fecha de Terminación"
@@ -533,19 +523,19 @@ export const PersonnelDetailPage = () => {
                 </Grid>
               </Box>
 
-              <Divider sx={{ my: 4 }} />
+              <Divider sx={{ my: 2 }} />
 
               {/* Información de Contacto y Sistema */}
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="h6" sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                   <LocationOnIcon color="primary" />
                   Información de Contacto y Sistema
                 </Typography>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem icon={<LocationOnIcon />} label="Dirección" value={profile.address || 'No especificado'} />
                   </Grid>
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} md={4}>
                     <InfoItem
                       icon={<CheckCircleIcon />}
                       label="Acceso al Sistema"
@@ -1282,27 +1272,24 @@ interface InfoItemProps {
 
 const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value }) => {
   return (
-    <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: 2,
-          py: 2.5,
-          px: 1,
-        }}
-      >
-        <Box sx={{ color: 'secondary.main', mt: 0.5 }}>{icon}</Box>
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.5, display: 'block', textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 }}>
-            {label}
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 500, fontSize: '1.05rem', wordBreak: 'break-word', color: 'text.primary' }}>
-            {value}
-          </Typography>
-        </Box>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 1.5,
+        py: 1.5,
+        px: 1,
+      }}
+    >
+      <Box sx={{ color: 'secondary.main', mt: 0.3 }}>{icon}</Box>
+      <Box sx={{ flex: 1 }}>
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.25 }}>
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
+          {value}
+        </Typography>
       </Box>
-      <Divider />
     </Box>
   );
 };

@@ -390,7 +390,7 @@ export const TokenCreatePage = () => {
         if (result.total_failed === 0) {
           toast.success(`${result.total_created} token(s) creados exitosamente`);
         } else if (result.total_created > 0) {
-          toast.warning(`${result.total_created} creados, ${result.total_failed} fallaron`);
+          toast.info(`${result.total_created} creados, ${result.total_failed} fallaron`);
         } else {
           toast.error('No se pudo crear ningún token');
         }
