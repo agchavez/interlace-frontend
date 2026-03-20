@@ -26,6 +26,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onModeSelect: (mode: CreateMode) => void;
+  canCreateUser?: boolean;
 }
 
 interface ModeOption {
@@ -37,11 +38,11 @@ interface ModeOption {
   gradient: string;
 }
 
-export const PersonnelCreateModeSelector: React.FC<Props> = ({ open, onClose, onModeSelect }) => {
+export const PersonnelCreateModeSelector: React.FC<Props> = ({ open, onClose, onModeSelect, canCreateUser = false }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const modes: ModeOption[] = [
+  const allModes: ModeOption[] = [
     {
       mode: 'personnel_only',
       icon: <PersonOffIcon sx={{ fontSize: 80 }} />,
@@ -75,6 +76,12 @@ export const PersonnelCreateModeSelector: React.FC<Props> = ({ open, onClose, on
       gradient: `linear-gradient(135deg, ${theme.palette.warning.light} 0%, ${theme.palette.warning.main} 100%)`,
     },
   ];
+
+  // Filtrar modos que requieren permiso de crear usuarios
+  const userModes: CreateMode[] = ['existing_user', 'new_user', 'bulk_upload'];
+  const modes = canCreateUser
+    ? allModes
+    : allModes.filter((m) => !userModes.includes(m.mode));
 
   const handleSelect = (mode: CreateMode) => {
     onModeSelect(mode);

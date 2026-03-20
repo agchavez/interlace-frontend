@@ -327,7 +327,8 @@ export const BulkUploadPage: React.FC = () => {
               {[
                 'Llena desde la fila 4 en adelante (las filas 2 y 3 son ejemplos, bórralas)',
                 'No modifiques los nombres de las columnas (fila 1)',
-                'Consulta la hoja "Valores Válidos" para ver las opciones de cada campo',
+                'Los campos con valores fijos tienen listas desplegables — haz clic en la celda para seleccionar',
+                'Consulta la hoja "Valores Válidos" si necesitas ver todas las opciones disponibles',
                 'Fechas en formato DD/MM/YYYY (ej: 15/03/1995)',
                 'Los Codigo_Empleado deben ser únicos en el sistema',
                 'Para CON_USUARIO: Email_Sistema y Contraseña son obligatorios',

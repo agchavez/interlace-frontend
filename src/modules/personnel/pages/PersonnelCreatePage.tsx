@@ -41,6 +41,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { useCreatePersonnelProfileMutation, useCreatePersonnelWithUserMutation, useGetAreasQuery, useGetPersonnelProfilesQuery } from '../services/personnelApi';
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { toast } from 'sonner';
+import { usePermission } from '../../../hooks/usePermission';
 import type { PersonnelProfile, PersonnelFilterParams } from '../../../interfaces/personnel';
 import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
 import { DepartmentSelector } from '../components/DepartmentSelector';
@@ -97,6 +98,7 @@ function CustomTabPanel(props: TabPanelProps) {
 export const PersonnelCreatePage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const canCreateUser = usePermission('user.add_usermodel');
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const isFullHD = useMediaQuery(theme.breakpoints.up('xl'));
@@ -107,10 +109,11 @@ export const PersonnelCreatePage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Nuevo flujo: Estados para modales
-  const [showModeSelector, setShowModeSelector] = useState(true);
+  // Si no puede crear usuarios, ir directo al formulario de solo personal
+  const [showModeSelector, setShowModeSelector] = useState(canCreateUser);
   const [showExistingUserSelector, setShowExistingUserSelector] = useState(false);
   const [showNewUserRegistration, setShowNewUserRegistration] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(!canCreateUser);
 
   // Estados para usuario
   const [createMode, setCreateMode] = useState<'personnel_only' | 'existing_user' | 'new_user' | 'bulk_upload'>('personnel_only');
@@ -401,6 +404,7 @@ export const PersonnelCreatePage = () => {
         open={showModeSelector}
         onClose={handleCancelFlow}
         onModeSelect={handleModeSelect}
+        canCreateUser={canCreateUser}
       />
 
       <ExistingUserSelector
