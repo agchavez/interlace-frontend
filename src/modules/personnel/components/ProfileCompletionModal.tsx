@@ -123,7 +123,7 @@ export const ProfileCompletionModal: React.FC<Props> = ({ onComplete }) => {
       case 2: // Información Laboral
         return !!(formData.hire_date && formData.contract_type);
       case 3: // Información Personal
-        return !!(formData.personal_id && formData.birth_date && formData.gender && formData.phone && formData.address && formData.city);
+        return !!(formData.personal_id && formData.birth_date && formData.gender && formData.address && formData.city);
       default:
         return false;
     }

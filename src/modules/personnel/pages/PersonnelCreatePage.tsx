@@ -208,7 +208,6 @@ export const PersonnelCreatePage = () => {
       formData.personal_id &&
       formData.birth_date &&
       formData.gender &&
-      formData.phone &&
       formData.address &&
       formData.city
     );
@@ -241,7 +240,7 @@ export const PersonnelCreatePage = () => {
     }
     if (!formData.birth_date) newErrors.birth_date = 'Fecha de nacimiento requerida';
     if (!formData.gender) newErrors.gender = 'Género requerido';
-    if (!formData.phone) newErrors.phone = 'Teléfono requerido';
+    // Teléfono es opcional
     if (!formData.address) newErrors.address = 'Dirección requerida';
     if (!formData.city) newErrors.city = 'Ciudad requerida';
 
@@ -1242,13 +1241,12 @@ const PersonalInfoStep: React.FC<StepProps> = ({ data, errors, onChange }) => {
       />
 
       <TextField
-        label="Teléfono *"
+        label="Teléfono"
         type="tel"
         value={data.phone || ''}
         onChange={(e) => onChange({ phone: e.target.value })}
         error={!!errors.phone}
         helperText={errors.phone}
-        required
         fullWidth
         variant="outlined"
         size="small"

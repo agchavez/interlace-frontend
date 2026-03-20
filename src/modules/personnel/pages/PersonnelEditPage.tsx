@@ -187,7 +187,7 @@ export const PersonnelEditPage = () => {
     if (!formData.personal_id) newErrors.personal_id = 'Número de identidad requerido';
     if (!formData.birth_date) newErrors.birth_date = 'Fecha de nacimiento requerida';
     if (!formData.gender) newErrors.gender = 'Género requerido';
-    if (!formData.phone) newErrors.phone = 'Teléfono requerido';
+    // Teléfono es opcional
     if (!formData.address) newErrors.address = 'Dirección requerida';
     if (!formData.city) newErrors.city = 'Ciudad requerida';
 
@@ -713,7 +713,6 @@ export const PersonnelEditPage = () => {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     size="small"
                     label="Teléfono"
                     value={formData.phone || ''}

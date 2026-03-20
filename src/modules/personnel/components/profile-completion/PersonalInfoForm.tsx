@@ -117,7 +117,6 @@ export const PersonalInfoForm: React.FC<Props> = ({ data, onChange, errors, gend
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                required
                 label="Teléfono"
                 value={data.phone || ''}
                 onChange={(e) => handleChange('phone', e.target.value)}
