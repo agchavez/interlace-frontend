@@ -37,15 +37,7 @@ const MARITAL_STATUS_CHOICES = [
   { value: 'UNION', label: 'Unión libre' },
 ];
 
-const SHIRT_SIZE_CHOICES = [
-  { value: 'XS', label: 'Extra Small (XS)' },
-  { value: 'S', label: 'Small (S)' },
-  { value: 'M', label: 'Medium (M)' },
-  { value: 'L', label: 'Large (L)' },
-  { value: 'XL', label: 'Extra Large (XL)' },
-  { value: 'XXL', label: '2XL' },
-  { value: 'XXXL', label: '3XL' },
-];
+// Tallas: texto libre (máximo 10 caracteres)
 
 export const MyProfileEditPage = () => {
   const theme = useTheme();
@@ -346,23 +338,15 @@ export const MyProfileEditPage = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                select
                 size="small"
                 label="Talla de Camisa"
                 value={formData.shirt_size || ''}
                 onChange={(e) => handleChange('shirt_size', e.target.value)}
                 error={!!errors.shirt_size}
-                helperText={errors.shirt_size}
-              >
-                <MenuItem value="">
-                  <em>Seleccionar...</em>
-                </MenuItem>
-                {SHIRT_SIZE_CHOICES.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
+                helperText={errors.shirt_size || 'Ej: XS, S, M, L, XL'}
+                placeholder="M"
+                inputProps={{ maxLength: 10 }}
+              />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -374,6 +358,7 @@ export const MyProfileEditPage = () => {
                 error={!!errors.pants_size}
                 helperText={errors.pants_size || 'Ej: 32, 34, 36'}
                 placeholder="34"
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -386,6 +371,7 @@ export const MyProfileEditPage = () => {
                 error={!!errors.shoe_size}
                 helperText={errors.shoe_size || 'Ej: 9, 10, 11'}
                 placeholder="10"
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -398,6 +384,7 @@ export const MyProfileEditPage = () => {
                 error={!!errors.glove_size}
                 helperText={errors.glove_size || 'Ej: S, M, L'}
                 placeholder="M"
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
             <Grid item xs={12} md={4}>
@@ -410,6 +397,7 @@ export const MyProfileEditPage = () => {
                 error={!!errors.helmet_size}
                 helperText={errors.helmet_size || 'Ej: S, M, L'}
                 placeholder="M"
+                inputProps={{ maxLength: 10 }}
               />
             </Grid>
           </Grid>

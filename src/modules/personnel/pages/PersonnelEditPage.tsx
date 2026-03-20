@@ -757,23 +757,13 @@ export const PersonnelEditPage = () => {
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    select
                     size="small"
                     label="Talla de Camisa"
                     value={formData.shirt_size || ''}
                     onChange={(e) => handleChange('shirt_size', e.target.value)}
-                  >
-                    <MenuItem value="">
-                      <em>Seleccionar...</em>
-                    </MenuItem>
-                    <MenuItem value="XS">XS</MenuItem>
-                    <MenuItem value="S">S</MenuItem>
-                    <MenuItem value="M">M</MenuItem>
-                    <MenuItem value="L">L</MenuItem>
-                    <MenuItem value="XL">XL</MenuItem>
-                    <MenuItem value="XXL">XXL</MenuItem>
-                    <MenuItem value="XXXL">XXXL</MenuItem>
-                  </TextField>
+                    placeholder="Ej: M, L, XL"
+                    inputProps={{ maxLength: 10 }}
+                  />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <TextField
@@ -783,6 +773,7 @@ export const PersonnelEditPage = () => {
                     value={formData.pants_size || ''}
                     onChange={(e) => handleChange('pants_size', e.target.value)}
                     placeholder="Ej: 32, 34, 36"
+                    inputProps={{ maxLength: 10 }}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
@@ -793,6 +784,7 @@ export const PersonnelEditPage = () => {
                     value={formData.shoe_size || ''}
                     onChange={(e) => handleChange('shoe_size', e.target.value)}
                     placeholder="Ej: 9, 10, 11"
+                    inputProps={{ maxLength: 10 }}
                   />
                 </Grid>
               </Grid>
