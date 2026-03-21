@@ -121,6 +121,7 @@ export interface PersonnelProfileList {
   hire_date: string;
   is_active: boolean;
   has_system_access: boolean;
+  is_profile_complete: boolean;
   years_of_service: number;
   supervised_personnel_count: number;
   photo_url?: string | null;

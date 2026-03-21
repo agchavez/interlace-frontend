@@ -332,6 +332,22 @@ export const PersonnelListPage = () => {
 
     baseColumns.push(
       {
+        field: 'is_profile_complete',
+        headerName: 'Información',
+        width: isMobile ? 100 : 120,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params: GridRenderCellParams) => (
+          <Chip
+            label={params.value ? 'Completado' : 'Pendiente'}
+            size="small"
+            color={params.value ? 'success' : 'warning'}
+            variant={params.value ? 'filled' : 'outlined'}
+            sx={{ fontSize: '0.7rem', fontWeight: 600 }}
+          />
+        ),
+      },
+      {
         field: 'has_system_access',
         headerName: 'Acceso',
         width: isMobile ? 80 : 100,
