@@ -302,7 +302,7 @@ export const BulkUploadPage: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               {[
                 { color: '#1565C0', label: 'Tipo de Registro', items: ['Tipo_Registro* (SOLO_PERSONAL / CON_USUARIO)'] },
-                { color: '#1976D2', label: 'Datos Personales', items: ['Nombres*, Apellidos*, Codigo_Empleado*', 'Num_Identidad, Fecha_Nacimiento*, Genero* (M/F)', 'Estado_Civil, Telefono, Email_Contacto, Direccion, Ciudad'] },
+                { color: '#1976D2', label: 'Datos Personales', items: ['Apellidos*, Codigo_Empleado*', 'Nombres, Num_Identidad, Fecha_Nacimiento, Genero (M/F)', 'Estado_Civil, Telefono, Email_Contacto, Direccion, Ciudad'] },
                 { color: '#2E7D32', label: 'Datos Laborales', items: ['Fecha_Ingreso*, Tipo_Contrato*', 'Area*, Nivel_Jerarquico*', 'Puesto*, Tipo_Posicion*'] },
                 { color: '#6A1B9A', label: 'Tallas EPP (opcionales)', items: ['Talla_Camisa, Talla_Pantalon', 'Talla_Zapatos, Talla_Guantes, Talla_Casco'] },
                 { color: '#B71C1C', label: 'Acceso al Sistema (solo CON_USUARIO)', items: ['Email_Sistema*, Contrasena_Sistema*', 'Username_Sistema (auto si vacío)', 'Grupo_Sistema'] },
