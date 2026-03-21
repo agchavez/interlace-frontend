@@ -114,7 +114,7 @@ export const PersonnelListPage = () => {
 
   const handleEdit = () => {
     if (selectedRow) {
-      navigate(`/personnel/detail/${selectedRow.id}`);
+      navigate(`/personnel/edit/${selectedRow.id}`);
     }
     handleCloseMenu();
   };
