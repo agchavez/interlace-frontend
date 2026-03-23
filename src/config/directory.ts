@@ -436,6 +436,86 @@ export const permisions = [
         permissions: [
             "tokens.view_overtimereasonmodel"
         ]
+    },
+    // Truck Cycle (Ciclo del Camión)
+    {
+        url: "/truck-cycle",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/upload",
+        permissions: [
+            "truck_cycle.add_palletcomplexuploadmodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/pautas",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/pautas/:id",
+        reg: /\/truck-cycle\/pautas\/\d+/,
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/picking",
+        permissions: [
+            "truck_cycle.change_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/counting",
+        permissions: [
+            "truck_cycle.change_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/checkout",
+        permissions: [
+            "truck_cycle.change_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/reload-queue",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/workstation",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/kpi/config",
+        permissions: [
+            "truck_cycle.change_kpitargetmodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/kpi/report",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/trucks",
+        permissions: [
+            "truck_cycle.view_truckmodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/bays",
+        permissions: [
+            "truck_cycle.view_baymodel"
+        ]
     }
 ]
 

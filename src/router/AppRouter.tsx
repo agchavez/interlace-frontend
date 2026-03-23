@@ -29,6 +29,7 @@ const MaintenanceRouter = lazy(() => import('../modules/maintenance/MaintenanceR
 const PersonnelRouter = lazy(() => import('../modules/personnel/PersonnelRouter'));
 const TokenRouter = lazy(() => import('../modules/tokens/TokenRouter'));
 const PublicTokenPage = lazy(() => import('../modules/tokens/pages/PublicTokenPage').then(m => ({ default: m.PublicTokenPage })));
+const TruckCycleRouter = lazy(() => import('../modules/truck-cycle/TruckCycleRouter'));
 
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -166,6 +167,13 @@ export function AppRouter() {
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             TokenRouter
+                        } />
+                    </PrivateRoute>
+                } />
+                <Route path="/truck-cycle/*" element={
+                    <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                        <LazyLoading Children={
+                            TruckCycleRouter
                         } />
                     </PrivateRoute>
                 } />

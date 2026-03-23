@@ -40,6 +40,7 @@ import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
 import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -216,6 +217,24 @@ const SidebarV2: React.FC = () => {
       //   ],
       //   id: 'claim',
       // },
+      {
+        text: 'Ciclo del Camión',
+        icon: <LocalShippingIcon fontSize="small" />,
+        subItems: [
+          { text: 'Dashboard', href: '/truck-cycle', id: 'tc-dashboard' },
+          { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
+          { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
+          { text: 'Picking', href: '/truck-cycle/picking', id: 'tc-picking' },
+          { text: 'Conteo', href: '/truck-cycle/counting', id: 'tc-counting' },
+          { text: 'Checkout', href: '/truck-cycle/checkout', id: 'tc-checkout' },
+          { text: 'Cola de Recargas', href: '/truck-cycle/reload-queue', id: 'tc-reload' },
+          { text: 'Workstation', href: '/truck-cycle/workstation', id: 'tc-workstation' },
+          { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
+          { text: 'Camiones', href: '/truck-cycle/trucks', id: 'tc-trucks' },
+          { text: 'Bahías', href: '/truck-cycle/bays', id: 'tc-bays' },
+        ],
+        id: 'truck-cycle',
+      },
       {
         text: 'Tokens',
         icon: <ConfirmationNumberIcon fontSize="small" />,

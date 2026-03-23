@@ -16,6 +16,7 @@ import {claimApi} from "./claim/claimApi.ts";
 import {claimSlice} from "./claim/claimSlice.ts";
 import { personnelApi } from "../modules/personnel/services/personnelApi";
 import { tokenApi } from "../modules/tokens/services/tokenApi";
+import { truckCycleApi } from "../modules/truck-cycle/services/truckCycleApi";
 
 export const store = configureStore({
     reducer: {
@@ -42,6 +43,7 @@ export const store = configureStore({
         [claimSlice.name]: claimSlice.reducer,
         [personnelApi.reducerPath]: personnelApi.reducer,
         [tokenApi.reducerPath]: tokenApi.reducer,
+        [truckCycleApi.reducerPath]: truckCycleApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -60,6 +62,7 @@ export const store = configureStore({
         .concat(claimApi.middleware)
         .concat(personnelApi.middleware)
         .concat(tokenApi.middleware)
+        .concat(truckCycleApi.middleware)
     ,
     devTools: true
 })
