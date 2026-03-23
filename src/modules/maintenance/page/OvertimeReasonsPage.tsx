@@ -120,7 +120,7 @@ export const OvertimeReasonsPage = () => {
     try {
       const result: any = await deleteItem(id).unwrap();
       if (result?.detail) {
-        toast.info(result.detail);
+        toast.success(result.detail);
       } else {
         toast.success('Motivo de hora extra eliminado');
       }

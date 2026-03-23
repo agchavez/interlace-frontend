@@ -124,7 +124,7 @@ export const OvertimeTypesPage = () => {
     try {
       const result: any = await deleteItem(id).unwrap();
       if (result?.detail) {
-        toast.info(result.detail);
+        toast.success(result.detail);
       } else {
         toast.success('Tipo de hora extra eliminado');
       }
