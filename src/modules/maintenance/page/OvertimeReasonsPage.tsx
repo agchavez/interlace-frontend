@@ -41,14 +41,14 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 interface FormData {
-  code: string;
+  category: string;
   name: string;
   description: string;
   is_active: boolean;
 }
 
 const initialFormData: FormData = {
-  code: '',
+  category: '',
   name: '',
   description: '',
   is_active: true,
@@ -70,7 +70,7 @@ export const OvertimeReasonsPage = () => {
     if (item) {
       setEditingItem(item);
       setFormData({
-        code: item.code,
+        category: item.category || '',
         name: item.name,
         description: item.description || '',
         is_active: item.is_active,
@@ -93,7 +93,6 @@ export const OvertimeReasonsPage = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Nombre es requerido';
-    if (!formData.code.trim()) newErrors.code = 'Código es requerido';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -119,8 +118,12 @@ export const OvertimeReasonsPage = () => {
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Está seguro de eliminar este motivo de hora extra?')) return;
     try {
-      await deleteItem(id).unwrap();
-      toast.success('Motivo de hora extra eliminado');
+      const result: any = await deleteItem(id).unwrap();
+      if (result?.detail) {
+        toast.info(result.detail);
+      } else {
+        toast.success('Motivo de hora extra eliminado');
+      }
       refetch();
     } catch (error: any) {
       const errorMessage = error?.data?.detail?.message || error?.data?.detail || 'Error al eliminar';
@@ -129,7 +132,7 @@ export const OvertimeReasonsPage = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: 'code', headerName: 'Código', width: 180 },
+    { field: 'category', headerName: 'Categoría', width: 180 },
     { field: 'name', headerName: 'Nombre', flex: 1, minWidth: 250 },
     { field: 'description', headerName: 'Descripción', flex: 1, minWidth: 250 },
     {
@@ -195,14 +198,12 @@ export const OvertimeReasonsPage = () => {
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Código"
+                label="Categoría"
                 fullWidth
                 size="small"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
-                error={!!errors.code}
-                helperText={errors.code || 'Ej: PRODUCTION, EMERGENCY'}
-                required
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                helperText="Opcional - para agrupar motivos"
               />
             </Grid>
             <Grid item xs={12} sm={6}>

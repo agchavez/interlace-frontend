@@ -41,7 +41,7 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 interface FormData {
-  code: string;
+  category: string;
   name: string;
   description: string;
   default_multiplier: number;
@@ -49,7 +49,7 @@ interface FormData {
 }
 
 const initialFormData: FormData = {
-  code: '',
+  category: '',
   name: '',
   description: '',
   default_multiplier: 1.5,
@@ -72,7 +72,7 @@ export const OvertimeTypesPage = () => {
     if (item) {
       setEditingItem(item);
       setFormData({
-        code: item.code,
+        category: item.category || '',
         name: item.name,
         description: item.description || '',
         default_multiplier: item.default_multiplier,
@@ -96,7 +96,6 @@ export const OvertimeTypesPage = () => {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Nombre es requerido';
-    if (!formData.code.trim()) newErrors.code = 'Código es requerido';
     if (formData.default_multiplier <= 0) newErrors.default_multiplier = 'El multiplicador debe ser mayor a 0';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -123,8 +122,12 @@ export const OvertimeTypesPage = () => {
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Está seguro de eliminar este tipo de hora extra?')) return;
     try {
-      await deleteItem(id).unwrap();
-      toast.success('Tipo de hora extra eliminado');
+      const result: any = await deleteItem(id).unwrap();
+      if (result?.detail) {
+        toast.info(result.detail);
+      } else {
+        toast.success('Tipo de hora extra eliminado');
+      }
       refetch();
     } catch (error: any) {
       const errorMessage = error?.data?.detail?.message || error?.data?.detail || 'Error al eliminar';
@@ -133,7 +136,7 @@ export const OvertimeTypesPage = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: 'code', headerName: 'Código', width: 150 },
+    { field: 'category', headerName: 'Categoría', width: 150 },
     { field: 'name', headerName: 'Nombre', flex: 1, minWidth: 200 },
     { field: 'description', headerName: 'Descripción', flex: 1, minWidth: 200 },
     {
@@ -207,14 +210,12 @@ export const OvertimeTypesPage = () => {
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField
-                label="Código"
+                label="Categoría"
                 fullWidth
                 size="small"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
-                error={!!errors.code}
-                helperText={errors.code || 'Ej: REGULAR, HOLIDAY'}
-                required
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                helperText="Opcional - para agrupar tipos"
               />
             </Grid>
             <Grid item xs={12} sm={6}>

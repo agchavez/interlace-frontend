@@ -558,8 +558,8 @@ export interface RateChangeDetail {
 // Overtime Type & Reason (catalog models)
 export interface OvertimeTypeItem {
   id: number;
-  code: string;
   name: string;
+  category: string;
   description: string;
   default_multiplier: number;
   is_active: boolean;
@@ -567,8 +567,8 @@ export interface OvertimeTypeItem {
 
 export interface OvertimeReasonItem {
   id: number;
-  code: string;
   name: string;
+  category: string;
   description: string;
   is_active: boolean;
 }
