@@ -167,15 +167,6 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
           </Grid>
 
           <Grid item xs={12} md={6}>
-            <DatePicker
-              label="Fecha Esperada de Retorno (Opcional)"
-              value={value.expected_return_date ? dayjs(value.expected_return_date) : null}
-              onChange={(date) => handleChange('expected_return_date', date?.format('YYYY-MM-DD'))}
-              slotProps={{ textField: { fullWidth: true, size: 'small' } }}
-            />
-          </Grid>
-
-          <Grid item xs={12} md={6}>
             <TextField
               fullWidth
               size="small"

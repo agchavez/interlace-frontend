@@ -3,7 +3,7 @@
  * Tab 1: Búsqueda manual con Autocomplete
  * Tab 2: Carga desde Excel (columna Codigo_Empleado)
  */
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Box,
   Tabs,
@@ -42,16 +42,38 @@ interface BulkPersonnelSelectorProps {
   selectedPersonnel: ResolvedPersonnel[];
   onPersonnelChange: (personnel: ResolvedPersonnel[]) => void;
   personnelList: PersonnelProfileList[];
+  personnelLoading?: boolean;
+  onSearchChange?: (search: string) => void;
 }
 
 export const BulkPersonnelSelector = ({
   selectedPersonnel,
   onPersonnelChange,
   personnelList,
+  personnelLoading = false,
+  onSearchChange,
 }: BulkPersonnelSelectorProps) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [notFoundCodes, setNotFoundCodes] = useState<string[]>([]);
+  const [searchInput, setSearchInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleSearchInputChange = useCallback((input: string) => {
+    setSearchInput(input);
+    if (onSearchChange) {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        onSearchChange(input);
+      }, 350);
+    }
+  }, [onSearchChange]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
   const [resolveEmployeeCodes, { isLoading: resolving }] = useResolveEmployeeCodesMutation();
 
   const handleAddPerson = (_: unknown, newValue: PersonnelProfileList | null) => {
@@ -158,9 +180,15 @@ export const BulkPersonnelSelector = ({
           options={personnelList.filter(
             (p) => !selectedPersonnel.some((sp) => sp.id === p.id)
           )}
+          filterOptions={(x) => x}
+          loading={personnelLoading}
           getOptionLabel={(option) => `${option.full_name} - ${option.employee_code}`}
           value={null}
+          onInputChange={(_, input, reason) => {
+            if (reason === 'input') handleSearchInputChange(input);
+          }}
           onChange={handleAddPerson}
+          noOptionsText={searchInput.length < 2 ? 'Escriba para buscar...' : 'No se encontraron resultados'}
           renderOption={(props, option) => (
             <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
               <Box

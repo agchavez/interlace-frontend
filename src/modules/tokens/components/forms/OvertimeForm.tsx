@@ -155,32 +155,46 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
 
           {totalHours !== null && (
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'info.50', borderRadius: 1, border: '1px solid', borderColor: 'info.200' }}>
-                <AccessTimeIcon color="info" fontSize="small" />
-                <Typography variant="body2" color="text.secondary">
-                  Total de horas:
-                </Typography>
-                <Chip
-                  label={`${totalHours} hora${totalHours !== 1 ? 's' : ''}`}
-                  color="info"
-                  size="small"
-                  variant="filled"
-                />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'rgba(33, 150, 243, 0.04)',
+                  border: '1px solid',
+                  borderColor: 'rgba(33, 150, 243, 0.2)',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AccessTimeIcon color="info" fontSize="small" />
+                  <Typography variant="body2" color="text.secondary">
+                    Total de horas:
+                  </Typography>
+                  <Chip
+                    label={`${totalHours} hora${totalHours !== 1 ? 's' : ''}`}
+                    color="info"
+                    size="small"
+                    variant="filled"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Multiplicador:
+                  </Typography>
+                  <Chip
+                    label={`x${value.pay_multiplier ?? 1.5}`}
+                    size="small"
+                    variant="outlined"
+                    color="default"
+                    sx={{ fontWeight: 600 }}
+                  />
+                </Box>
               </Box>
             </Grid>
           )}
-
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              size="small"
-              label="Multiplicador de Pago"
-              type="number"
-              inputProps={{ step: 0.1, min: 1 }}
-              value={value.pay_multiplier ?? 1.5}
-              onChange={(e) => handleChange('pay_multiplier', parseFloat(e.target.value))}
-            />
-          </Grid>
 
           <Grid item xs={12}>
             <TextField

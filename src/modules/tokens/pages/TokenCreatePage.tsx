@@ -1,7 +1,7 @@
 /**
  * Página para crear un nuevo token - UI Mejorada con Cards
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -196,9 +196,27 @@ export const TokenCreatePage = () => {
   const [externalPersonForm, setExternalPersonForm] = useState<ExternalPersonCreatePayload>(initialExternalPersonForm);
   const [createExternalPerson, { isLoading: isCreatingExternalPerson }] = useCreateExternalPersonMutation();
 
-  // Personnel list for selectors (filtered by requester's hierarchy and token type)
-  const { data: eligiblePersonnel } = useGetEligibleForTokenQuery(
-    { token_type: tokenType || undefined },
+  // Personnel search with debounce (server-side)
+  const [personnelSearch, setPersonnelSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handlePersonnelSearchChange = useCallback((input: string) => {
+    setPersonnelSearch(input);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setDebouncedSearch(input);
+    }, 350);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const { data: eligiblePersonnel, isFetching: personnelLoading } = useGetEligibleForTokenQuery(
+    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25 },
     { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
   );
   const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
@@ -658,6 +676,8 @@ export const TokenCreatePage = () => {
                 selectedPersonnel={bulkPersonnel}
                 onPersonnelChange={setBulkPersonnel}
                 personnelList={personnelList}
+                personnelLoading={personnelLoading}
+                onSearchChange={handlePersonnelSearchChange}
               />
             </Grid>
           )}
@@ -670,10 +690,16 @@ export const TokenCreatePage = () => {
                 getOptionLabel={(option) =>
                   `${option.full_name} - ${option.employee_code}`
                 }
+                filterOptions={(x) => x}
+                loading={personnelLoading}
                 value={personnelList.find((p: PersonnelProfileList) => p.id === baseData.personnel) || null}
+                onInputChange={(_, input, reason) => {
+                  if (reason === 'input') handlePersonnelSearchChange(input);
+                }}
                 onChange={(_, newValue) =>
                   setBaseData({ ...baseData, personnel: newValue?.id || null })
                 }
+                noOptionsText={personnelSearch.length < 2 ? 'Escriba para buscar...' : 'No se encontraron resultados'}
                 renderOption={(props, option) => (
                   <Box component="li" {...props} sx={{ display: 'flex', gap: 2, py: 1 }}>
                     <Box
@@ -708,7 +734,7 @@ export const TokenCreatePage = () => {
                     size="small"
                     label="Beneficiario"
                     required
-                    placeholder="Buscar personal..."
+                    placeholder="Buscar por nombre o código..."
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: (
