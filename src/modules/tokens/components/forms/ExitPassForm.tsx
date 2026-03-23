@@ -2,14 +2,13 @@ import { useState, useMemo } from 'react';
 import {
   Box, Grid, TextField, Typography, IconButton, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, FormControlLabel,
-  Switch, InputAdornment, Autocomplete, ToggleButton, ToggleButtonGroup, Chip,
+  Switch, Autocomplete, ToggleButton, ToggleButtonGroup, Chip, MenuItem,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ScaleIcon from '@mui/icons-material/Scale';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import CategoryIcon from '@mui/icons-material/Category';
 import EditIcon from '@mui/icons-material/Edit';
@@ -29,19 +28,28 @@ interface ExitPassFormProps {
 
 type ItemType = 'material' | 'product' | 'custom';
 
-const emptyItem: ExitPassItemCreatePayload = {
+// Unidades disponibles para productos
+const PRODUCT_UNITS = ['Unidades', 'Cajas'];
+
+interface ItemWithUnit extends ExitPassItemCreatePayload {
+  unit_label?: string;
+}
+
+const emptyItem: ItemWithUnit = {
   custom_description: '',
   quantity: 1,
   unit_value: 0,
   weight_kg: undefined,
   requires_return: false,
+  unit_label: '',
 };
 
 export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
-  const [newItem, setNewItem] = useState<ExitPassItemCreatePayload>({ ...emptyItem });
+  const [newItem, setNewItem] = useState<ItemWithUnit>({ ...emptyItem });
   const [itemType, setItemType] = useState<ItemType>('material');
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [productUnit, setProductUnit] = useState<string>('Unidades');
 
   // Fetch materials and products
   const { data: materialsData } = useGetMaterialsQuery({ limit: 100 });
@@ -60,6 +68,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
       setSelectedMaterial(null);
       setSelectedProduct(null);
       setNewItem({ ...emptyItem });
+      setProductUnit('Unidades');
     }
   };
 
@@ -70,8 +79,9 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
         ...newItem,
         material: material.id,
         custom_description: material.name,
-        unit_value: parseFloat(material.unit_value as any || 0),
+        unit_value: 0,
         requires_return: material.requires_return,
+        unit_label: material.unit_of_measure_name || '',
       });
     } else {
       setNewItem({ ...emptyItem });
@@ -85,7 +95,8 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
         ...newItem,
         product: product.id,
         custom_description: product.name,
-        unit_value: 0, // Products don't have unit_value
+        unit_value: 0,
+        unit_label: productUnit,
       });
     } else {
       setNewItem({ ...emptyItem });
@@ -94,11 +105,19 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
 
   const handleAddItem = () => {
     if (newItem.custom_description && newItem.quantity > 0) {
-      const items = [...(value.items || []), { ...newItem }];
+      // Set the unit label based on item type
+      const itemToAdd = { ...newItem };
+      if (itemType === 'product') {
+        itemToAdd.unit_label = productUnit;
+      } else if (itemType === 'material' && selectedMaterial) {
+        itemToAdd.unit_label = selectedMaterial.unit_of_measure_name || '';
+      }
+      const items = [...(value.items || []), itemToAdd];
       handleChange('items', items);
       setNewItem({ ...emptyItem });
       setSelectedMaterial(null);
       setSelectedProduct(null);
+      setProductUnit('Unidades');
     }
   };
 
@@ -107,11 +126,6 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
     items.splice(index, 1);
     handleChange('items', items);
   };
-
-  const totalValue = (value.items || []).reduce(
-    (sum, item) => sum + (item.quantity * item.unit_value),
-    0
-  );
 
   const getItemTypeLabel = (item: ExitPassItemCreatePayload) => {
     if (item.material) return 'Material';
@@ -123,6 +137,16 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
     if (item.material) return 'primary';
     if (item.product) return 'secondary';
     return 'default';
+  };
+
+  // Get unit label for display in the table
+  const getItemUnitLabel = (item: ItemWithUnit): string => {
+    if (item.unit_label) return item.unit_label;
+    if (item.material) {
+      const mat = materials.find(m => m.id === item.material);
+      return mat?.unit_of_measure_name || '';
+    }
+    return '';
   };
 
   return (
@@ -233,7 +257,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                           <Box>
                             <Typography variant="body2">{opt.name}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {opt.code} | L {parseFloat(opt.unit_value as any || 0).toFixed(2)}
+                              {opt.code} | {opt.unit_of_measure_name}
                             </Typography>
                           </Box>
                         </Box>
@@ -252,32 +276,48 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
 
                 {/* Product Selector */}
                 {itemType === 'product' && (
-                  <Grid item xs={12} md={4}>
-                    <Autocomplete
-                      options={products}
-                      getOptionLabel={(opt) => `${opt.sap_code} - ${opt.name}`}
-                      value={selectedProduct}
-                      onChange={(_, val) => handleProductSelect(val)}
-                      renderOption={(props, opt) => (
-                        <Box component="li" {...props}>
-                          <Box>
-                            <Typography variant="body2">{opt.name}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {opt.sap_code} | {opt.brand}
-                            </Typography>
+                  <>
+                    <Grid item xs={12} md={4}>
+                      <Autocomplete
+                        options={products}
+                        getOptionLabel={(opt) => `${opt.sap_code} - ${opt.name}`}
+                        value={selectedProduct}
+                        onChange={(_, val) => handleProductSelect(val)}
+                        renderOption={(props, opt) => (
+                          <Box component="li" {...props}>
+                            <Box>
+                              <Typography variant="body2">{opt.name}</Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {opt.sap_code} | {opt.brand}
+                              </Typography>
+                            </Box>
                           </Box>
-                        </Box>
-                      )}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          size="small"
-                          label="Seleccionar Producto"
-                          placeholder="Buscar..."
-                        />
-                      )}
-                    />
-                  </Grid>
+                        )}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            size="small"
+                            label="Seleccionar Producto"
+                            placeholder="Buscar..."
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6} md={2}>
+                      <TextField
+                        select
+                        fullWidth
+                        size="small"
+                        label="Unidad"
+                        value={productUnit}
+                        onChange={(e) => setProductUnit(e.target.value)}
+                      >
+                        {PRODUCT_UNITS.map((unit) => (
+                          <MenuItem key={unit} value={unit}>{unit}</MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                  </>
                 )}
 
                 {/* Custom Description */}
@@ -294,44 +334,38 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                   </Grid>
                 )}
 
-                <Grid item xs={6} md={1.5}>
+                <Grid item xs={6} md={2}>
                   <TextField
                     fullWidth
                     size="small"
                     label="Cantidad"
                     type="number"
                     inputProps={{ min: 1 }}
-                    value={newItem.quantity}
-                    onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 1 })}
-                  />
-                </Grid>
-
-                <Grid item xs={6} md={1.5}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Peso (kg)"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0 }}
-                    value={newItem.weight_kg || ''}
-                    onChange={(e) => setNewItem({ ...newItem, weight_kg: parseFloat(e.target.value) || undefined })}
-                    InputProps={{
-                      endAdornment: <InputAdornment position="end"><ScaleIcon fontSize="small" /></InputAdornment>
+                    value={newItem.quantity || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setNewItem({ ...newItem, quantity: val === '' ? 0 : parseInt(val) });
+                    }}
+                    onBlur={() => {
+                      if (!newItem.quantity || newItem.quantity < 1) {
+                        setNewItem({ ...newItem, quantity: 1 });
+                      }
                     }}
                   />
                 </Grid>
 
-                <Grid item xs={6} md={1.5}>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    label="Valor Unit. (L)"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0 }}
-                    value={newItem.unit_value}
-                    onChange={(e) => setNewItem({ ...newItem, unit_value: parseFloat(e.target.value) || 0 })}
-                  />
-                </Grid>
+                {/* Show unit info for material */}
+                {itemType === 'material' && selectedMaterial && (
+                  <Grid item xs={6} md={1.5}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Unidad"
+                      value={selectedMaterial.unit_of_measure_name || ''}
+                      disabled
+                    />
+                  </Grid>
+                )}
 
                 <Grid item xs={6} md={1.5}>
                   <FormControlLabel
@@ -380,9 +414,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                       <TableCell>Tipo</TableCell>
                       <TableCell>Descripción</TableCell>
                       <TableCell align="right">Cantidad</TableCell>
-                      <TableCell align="right">Peso (kg)</TableCell>
-                      <TableCell align="right">Valor Unit.</TableCell>
-                      <TableCell align="right">Total</TableCell>
+                      <TableCell>Unidad</TableCell>
                       <TableCell align="center">Retornable</TableCell>
                       <TableCell></TableCell>
                     </TableRow>
@@ -400,9 +432,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                         </TableCell>
                         <TableCell>{item.custom_description}</TableCell>
                         <TableCell align="right">{item.quantity}</TableCell>
-                        <TableCell align="right">{item.weight_kg ? `${item.weight_kg} kg` : '-'}</TableCell>
-                        <TableCell align="right">L {parseFloat(item.unit_value as any || 0).toFixed(2)}</TableCell>
-                        <TableCell align="right">L {(item.quantity * parseFloat(item.unit_value as any || 0)).toFixed(2)}</TableCell>
+                        <TableCell>{getItemUnitLabel(item as ItemWithUnit)}</TableCell>
                         <TableCell align="center">
                           {item.requires_return ? (
                             <Chip label={item.return_date || 'Sí'} size="small" color="warning" />
@@ -415,20 +445,9 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
                         </TableCell>
                       </TableRow>
                     ))}
-                    <TableRow sx={{ bgcolor: 'grey.50' }}>
-                      <TableCell colSpan={5} align="right"><strong>Total</strong></TableCell>
-                      <TableCell align="right"><strong>L {totalValue.toFixed(2)}</strong></TableCell>
-                      <TableCell colSpan={2}></TableCell>
-                    </TableRow>
                   </TableBody>
                 </Table>
               </TableContainer>
-            )}
-
-            {totalValue > 20000 && (
-              <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
-                Nota: El valor total excede L 20,000, se requerirá aprobación de nivel 3.
-              </Typography>
             )}
           </Grid>
         </Grid>
