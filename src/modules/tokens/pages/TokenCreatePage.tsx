@@ -299,6 +299,10 @@ export const TokenCreatePage = () => {
       setIsExternalPerson(false);
       setSelectedExternalPerson(null);
     }
+    // Advance to next step automatically on selection
+    if (activeStep === 0) {
+      setActiveStep(1);
+    }
   };
 
   // Handle external person toggle (EXIT_PASS only)
