@@ -123,6 +123,8 @@ export const PersonnelEditPage = () => {
     return personnelData.results.filter(p => {
       // Exclude self
       if (p.id === Number(id)) return false;
+      // Include current supervisor so user can see and remove it
+      if (p.id === formData.immediate_supervisor) return true;
       // Only show people with higher hierarchy level
       const supervisorLevel = hierarchyOrder[p.hierarchy_level] || 0;
       return supervisorLevel > currentLevel;
@@ -139,7 +141,7 @@ export const PersonnelEditPage = () => {
         department: personnel.department_data?.id || null,
         primary_distributor_center: personnel.primary_distributor_center_data?.id || personnel.primary_distributor_center,
         distributor_centers: personnel.distributor_centers_data?.map(dc => dc.id) || [],
-        immediate_supervisor: personnel.supervisor_data?.id || null,
+        immediate_supervisor: personnel.supervisor_data?.id ?? null,
       });
     }
   }, [personnel]);
@@ -532,8 +534,9 @@ export const PersonnelEditPage = () => {
                   <Autocomplete
                     size="small"
                     value={supervisors.find(s => s.id === formData.immediate_supervisor) || null}
-                    onChange={(_, newValue) => handleChange('immediate_supervisor', newValue?.id || null)}
+                    onChange={(_, newValue) => handleChange('immediate_supervisor', newValue?.id ?? null)}
                     options={supervisors}
+                    clearText="Quitar supervisor"
                     getOptionLabel={(option) => `${option.employee_code} - ${option.full_name}`}
                     renderOption={(props, option) => (
                       <Box component="li" {...props}>
