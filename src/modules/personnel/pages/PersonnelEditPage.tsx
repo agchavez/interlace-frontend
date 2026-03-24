@@ -246,7 +246,9 @@ export const PersonnelEditPage = () => {
       if (error?.data) {
         // Si hay un mensaje de detail general
         if (error.data.detail) {
-          toast.error(error.data.detail);
+          const detail = error.data.detail;
+          const message = typeof detail === 'string' ? detail : detail?.mensage || detail?.message || JSON.stringify(detail);
+          toast.error(message);
         }
 
         // Procesar errores de campos individuales
@@ -288,7 +290,9 @@ export const PersonnelEditPage = () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           // Si no hay errores específicos, mostrar mensaje genérico
-          toast.error(error?.data?.detail || 'Error al actualizar el personal');
+          const fallbackDetail = error?.data?.detail;
+          const fallbackMsg = typeof fallbackDetail === 'string' ? fallbackDetail : fallbackDetail?.mensage || 'Error al actualizar el personal';
+          toast.error(fallbackMsg);
         }
       } else {
         toast.error('Error al actualizar el personal');

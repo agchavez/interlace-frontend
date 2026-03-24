@@ -163,7 +163,8 @@ export const MyProfileEditPage = () => {
           setErrors(newErrors);
           toast.error('Por favor corrige los errores en el formulario');
         } else {
-          toast.error(error.data.detail || 'Error al actualizar el perfil');
+          const detail = error.data.detail;
+          toast.error(typeof detail === 'string' ? detail : detail?.mensage || 'Error al actualizar el perfil');
         }
       } else {
         toast.error('Error al actualizar el perfil');
