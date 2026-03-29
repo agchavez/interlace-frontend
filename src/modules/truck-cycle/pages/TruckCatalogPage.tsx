@@ -3,13 +3,8 @@ import {
     Box,
     Typography,
     Button,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
+    Grid,
+    Card,
     CircularProgress,
     Alert,
     Dialog,
@@ -20,15 +15,36 @@ import {
     MenuItem,
     IconButton,
     Chip,
+    Avatar,
     Switch,
+    Menu,
+    ListItemIcon,
+    ListItemText,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    MoreVert as MoreVertIcon,
+} from '@mui/icons-material';
+import { styled } from '@mui/material';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogContent-root': { padding: theme.spacing(2) },
+    '& .MuiDialogActions-root': { padding: theme.spacing(1) },
+}));
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
     useGetTrucksQuery,
     useCreateTruckMutation,
     useUpdateTruckMutation,
     useDeleteTruckMutation,
 } from '../services/truckCycleApi';
+import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
+import { useAppSelector } from '../../../store';
 import type { Truck } from '../interfaces/truckCycle';
 
 interface TruckFormData {
@@ -48,14 +64,34 @@ const emptyForm: TruckFormData = {
 };
 
 export default function TruckCatalogPage() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const user = useAppSelector((state) => state.auth.user);
+    const cdName = user?.centro_distribucion_name || '';
+    const { data: dcData } = useGetDistributorCentersQuery({ limit: 100, offset: 0, search: '' });
+    const currentDc = dcData?.results?.find((d) => d.id === user?.centro_distribucion);
+    const flagCode = currentDc?.data_country?.flag?.toLowerCase();
+
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingTruck, setEditingTruck] = useState<Truck | null>(null);
     const [form, setForm] = useState<TruckFormData>(emptyForm);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [menuRow, setMenuRow] = useState<Truck | null>(null);
 
     const { data, isLoading, error } = useGetTrucksQuery();
     const [createTruck, { isLoading: creating }] = useCreateTruckMutation();
     const [updateTruck, { isLoading: updating }] = useUpdateTruckMutation();
     const [deleteTruck] = useDeleteTruckMutation();
+
+    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, row: Truck) => {
+        setAnchorEl(event.currentTarget);
+        setMenuRow(row);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+        setMenuRow(null);
+    };
 
     const handleOpenCreate = () => {
         setEditingTruck(null);
@@ -73,6 +109,7 @@ export default function TruckCatalogPage() {
             is_active: truck.is_active,
         });
         setDialogOpen(true);
+        handleCloseMenu();
     };
 
     const handleSave = async () => {
@@ -89,6 +126,7 @@ export default function TruckCatalogPage() {
     };
 
     const handleDelete = async (id: number) => {
+        handleCloseMenu();
         if (window.confirm('Desea eliminar este camion?')) {
             await deleteTruck(id);
         }
@@ -97,6 +135,68 @@ export default function TruckCatalogPage() {
     const handleToggleActive = async (truck: Truck) => {
         await updateTruck({ id: truck.id, data: { is_active: !truck.is_active } });
     };
+
+    const columns: GridColDef[] = [
+        { field: 'code', headerName: 'Código', flex: 1, minWidth: 100 },
+        { field: 'plate', headerName: 'Placa', flex: 1, minWidth: 100 },
+        {
+            field: 'distributor_center',
+            headerName: 'Centro de Distribución',
+            flex: 1.2,
+            minWidth: 180,
+            renderCell: () => (
+                <Chip
+                    label={cdName || '-'}
+                    size="small"
+                    variant="outlined"
+                    avatar={flagCode ? (
+                        <Avatar
+                            src={`https://flagcdn.com/w40/${flagCode}.png`}
+                            alt={cdName}
+                            sx={{ width: 20, height: 14 }}
+                        />
+                    ) : undefined}
+                />
+            ),
+        },
+        {
+            field: 'pallet_type',
+            headerName: 'Tipo Pallet',
+            flex: 1,
+            minWidth: 120,
+            renderCell: (params) => (
+                <Chip
+                    label={params.value === 'STANDARD' ? 'Estándar' : 'Medio'}
+                    size="small"
+                />
+            ),
+        },
+        { field: 'pallet_spaces', headerName: 'Espacios', type: 'number', flex: 0.7, minWidth: 90 },
+        {
+            field: 'is_active',
+            headerName: 'Activo',
+            flex: 0.7,
+            minWidth: 80,
+            renderCell: (params) => (
+                <Switch
+                    checked={params.value}
+                    onChange={() => handleToggleActive(params.row)}
+                    size="small"
+                />
+            ),
+        },
+        {
+            field: 'actions',
+            headerName: '',
+            width: 60,
+            sortable: false,
+            renderCell: (params) => (
+                <IconButton size="small" onClick={(e) => handleOpenMenu(e, params.row)}>
+                    <MoreVertIcon fontSize="small" />
+                </IconButton>
+            ),
+        },
+    ];
 
     if (error) {
         return (
@@ -109,117 +209,129 @@ export default function TruckCatalogPage() {
     return (
         <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5" fontWeight={600}>
-                    Catalogo de Camiones
-                </Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreate}>
-                    Agregar Camion
+                <Box>
+                    <Typography variant="h4" fontWeight={400}>
+                        Catálogo de Camiones
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Gestione los camiones disponibles para el ciclo de distribución del centro actual
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenCreate}
+                >
+                    Nuevo Camión
                 </Button>
             </Box>
 
-            {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                    <CircularProgress />
-                </Box>
-            ) : (
-                <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Codigo</TableCell>
-                                <TableCell>Placa</TableCell>
-                                <TableCell>Tipo Pallet</TableCell>
-                                <TableCell align="right">Espacios</TableCell>
-                                <TableCell>Activo</TableCell>
-                                <TableCell align="right">Acciones</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {data?.results.map((truck) => (
-                                <TableRow key={truck.id}>
-                                    <TableCell>{truck.code}</TableCell>
-                                    <TableCell>{truck.plate}</TableCell>
-                                    <TableCell>
-                                        <Chip
-                                            label={truck.pallet_type === 'STANDARD' ? 'Estandar' : 'Medio'}
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell align="right">{truck.pallet_spaces}</TableCell>
-                                    <TableCell>
-                                        <Switch
-                                            checked={truck.is_active}
-                                            onChange={() => handleToggleActive(truck)}
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        <IconButton size="small" onClick={() => handleOpenEdit(truck)}>
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton size="small" color="error" onClick={() => handleDelete(truck.id)}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {data?.results.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={6} align="center">
-                                        <Typography color="text.secondary" sx={{ py: 2 }}>
-                                            No hay camiones registrados.
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+            <Alert severity="info" sx={{ mb: 3 }}>
+                <strong>Centro de Distribución:</strong> Los camiones mostrados corresponden al centro de distribución activo. Cambie de centro para ver camiones de otra localidad.
+            </Alert>
+
+            <Card>
+                        <DataGrid
+                            rows={data?.results || []}
+                            columns={columns}
+                            loading={isLoading}
+                            pageSizeOptions={[10, 25, 50]}
+                            disableRowSelectionOnClick
+                            autoHeight
+                            sx={{
+                                border: 0,
+                                '& .MuiDataGrid-cell': { py: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } },
+                                '& .MuiDataGrid-columnHeaders': {
+                                    backgroundColor: 'rgba(0,0,0,0.02)',
+                                    fontWeight: 600,
+                                },
+                            }}
+                            slots={{
+                                noRowsOverlay: () => (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                        <Typography color="text.secondary">No se encontraron registros.</Typography>
+                                    </Box>
+                                ),
+                            }}
+                        />
+                    </Card>
+
+            {/* Actions Menu */}
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
+                PaperProps={{ elevation: 3, sx: { minWidth: 200, borderRadius: 2, mt: 1 } }}
+            >
+                <MenuItem onClick={() => menuRow && handleOpenEdit(menuRow)}>
+                    <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+                    <ListItemText>Editar</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => menuRow && handleDelete(menuRow.id)}>
+                    <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                    <ListItemText>Eliminar</ListItemText>
+                </MenuItem>
+            </Menu>
 
             {/* Create/Edit Dialog */}
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>{editingTruck ? 'Editar Camion' : 'Nuevo Camion'}</DialogTitle>
+            <BootstrapDialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+                <BootstrapDialogTitle id="truck-dialog" onClose={() => setDialogOpen(false)}>
+                    {editingTruck ? 'Editar Camión' : 'Nuevo Camión'}
+                </BootstrapDialogTitle>
                 <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                        <TextField
-                            label="Codigo"
-                            size="small"
-                            fullWidth
-                            value={form.code}
-                            onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-                        />
-                        <TextField
-                            label="Placa"
-                            size="small"
-                            fullWidth
-                            value={form.plate}
-                            onChange={(e) => setForm((f) => ({ ...f, plate: e.target.value }))}
-                        />
-                        <TextField
-                            select
-                            label="Tipo de Pallet"
-                            size="small"
-                            fullWidth
-                            value={form.pallet_type}
-                            onChange={(e) =>
-                                setForm((f) => ({ ...f, pallet_type: e.target.value as 'STANDARD' | 'HALF' }))
-                            }
-                        >
-                            <MenuItem value="STANDARD">Estandar</MenuItem>
-                            <MenuItem value="HALF">Medio</MenuItem>
-                        </TextField>
-                        <TextField
-                            label="Espacios de Pallet"
-                            size="small"
-                            fullWidth
-                            type="number"
-                            value={form.pallet_spaces}
-                            onChange={(e) =>
-                                setForm((f) => ({ ...f, pallet_spaces: parseInt(e.target.value, 10) || 0 }))
-                            }
-                        />
-                    </Box>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Código"
+                                size="small"
+                                fullWidth
+                                value={form.code}
+                                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                                helperText="Ej: C-101, C-102"
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Placa"
+                                size="small"
+                                fullWidth
+                                value={form.plate}
+                                onChange={(e) => setForm((f) => ({ ...f, plate: e.target.value }))}
+                                helperText="Ej: PBR-4521"
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                select
+                                label="Tipo de Pallet"
+                                size="small"
+                                fullWidth
+                                value={form.pallet_type}
+                                onChange={(e) =>
+                                    setForm((f) => ({ ...f, pallet_type: e.target.value as 'STANDARD' | 'HALF' }))
+                                }
+                                helperText="Tipo de pallet que transporta"
+                            >
+                                <MenuItem value="STANDARD">Estándar</MenuItem>
+                                <MenuItem value="HALF">Medio</MenuItem>
+                            </TextField>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Espacios de Pallet"
+                                size="small"
+                                fullWidth
+                                type="number"
+                                value={form.pallet_spaces}
+                                onChange={(e) =>
+                                    setForm((f) => ({ ...f, pallet_spaces: parseInt(e.target.value, 10) || 0 }))
+                                }
+                                helperText="Cantidad de pallets que caben"
+                            />
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDialogOpen(false)}>Cancelar</Button>
@@ -228,10 +340,10 @@ export default function TruckCatalogPage() {
                         onClick={handleSave}
                         disabled={creating || updating}
                     >
-                        {creating || updating ? <CircularProgress size={20} /> : 'Guardar'}
+                        {editingTruck ? 'Actualizar' : 'Crear'}
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </BootstrapDialog>
         </Box>
     );
 }

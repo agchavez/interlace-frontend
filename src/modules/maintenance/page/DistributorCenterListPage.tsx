@@ -1,14 +1,18 @@
 // DistributorCenterListPage.tsx
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-    Container,
     Typography,
-    Divider,
     Button,
     IconButton,
     Chip,
-    Box, Avatar, Grid,
+    Box,
+    Avatar,
+    Card,
+    Alert,
+    TextField,
+    InputAdornment,
 } from "@mui/material";
 import {
     DataGrid,
@@ -19,6 +23,7 @@ import {
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
 import { DistributorCenter } from "../../../interfaces/maintenance";
 import {
     useDeleteDistributorCenterMutation,
@@ -27,9 +32,9 @@ import {
 import {DistributorCenterDialog} from "../components/DistributorCenterDialog.tsx";
 import {toast} from "sonner";
 import {tableBase} from "../../ui";
-import {CustomSearch} from "../../ui/components/CustomSearch.tsx";
 
 export function DistributorCenterListPage() {
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
         pageSize: 10,
@@ -64,12 +69,12 @@ export function DistributorCenterListPage() {
     };
 
     async function handleDelete(id: number) {
-        if (!confirm("Are you sure to delete this distribution center?")) return;
+        if (!confirm("¿Está seguro de eliminar este centro de distribución?")) return;
         try {
             await deleteDC(id).unwrap();
-            toast.success("Deleted successfully");
+            toast.success("Eliminado exitosamente");
         } catch (err) {
-            toast.error("Error deleting");
+            toast.error("Error al eliminar");
         }
     }
 
@@ -81,8 +86,29 @@ export function DistributorCenterListPage() {
         {
             field: "name",
             headerName: "Nombre",
-            flex: 1,
-            minWidth: 150,
+            flex: 1.2,
+            minWidth: 200,
+            renderCell: (params: GridRenderCellParams<DistributorCenter>) => {
+                const row = params.row;
+                const flagCode = row.data_country?.flag?.toLowerCase();
+                return (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar
+                            src={flagCode ? `https://flagcdn.com/w80/${flagCode}.png` : undefined}
+                            alt={row.data_country?.name || ''}
+                            sx={{ width: 32, height: 32 }}
+                        >
+                            {!flagCode && (row.name?.[0] || '?')}
+                        </Avatar>
+                        <Box>
+                            <Typography variant="body2" fontWeight={600}>{row.name}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {row.location_distributor_center_code || ''}
+                            </Typography>
+                        </Box>
+                    </Box>
+                );
+            },
         },
         {
             field: "direction",
@@ -92,14 +118,14 @@ export function DistributorCenterListPage() {
         },
         {
             field: "location_distributor_center_code",
-            headerName: "Codigo localidad",
-            flex: 1,
-            minWidth: 200,
+            headerName: "Código Localidad",
+            flex: 0.8,
+            minWidth: 150,
         },
         {
             field: "data_country",
-            headerName: "Country",
-            flex: 1,
+            headerName: "País",
+            flex: 0.8,
             minWidth: 150,
             renderCell: (params: GridRenderCellParams<DistributorCenter>) => {
                 const row = params.row;
@@ -108,20 +134,12 @@ export function DistributorCenterListPage() {
                     <Chip
                         sx={{ cursor: "default" }}
                         label={row.data_country.name}
-                        size={"small"}
+                        size="small"
                         avatar={
-                            // <Box
-                            //     component="img"
-                            //     src={`https://flagcdn.com/w20/${row.data_country.flag.toLowerCase()}.png`}
-                            //     srcSet={`https://flagcdn.com/w40/${row.data_country.flag.toLowerCase()}.png 2x`}
-                            //     alt=""
-                            //     sx={{ width: 20, height: 14, ml: 1 }}
-                            // />
                             <Avatar
                                 src={`https://flagcdn.com/w80/${row.data_country.flag.toLowerCase()}.png`}
                                 alt={row.data_country.flag}
-                                sizes={"small"}
-                                />
+                            />
                         }
                     />
                 );
@@ -129,17 +147,17 @@ export function DistributorCenterListPage() {
         },
         {
             field: "actions",
-            headerName: "Actions",
+            headerName: "Acciones",
             width: 100,
             sortable: false,
             renderCell: (params) => {
                 const row = params.row;
                 return (
                     <Box>
-                        <IconButton size="small" onClick={() => handleOpenEdit(row)}>
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleOpenEdit(row); }}>
                             <EditTwoToneIcon fontSize="small" />
                         </IconButton>
-                        <IconButton size="small" onClick={() => handleDelete(row.id)}>
+                        <IconButton size="small" color="error" onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }}>
                             <DeleteTwoToneIcon fontSize="small" />
                         </IconButton>
                     </Box>
@@ -153,33 +171,48 @@ export function DistributorCenterListPage() {
     const rows = data?.results || [];
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 2 }}>
-            <Typography variant="h5" mb={1}>
-                Distributor Centers
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-            {/* Search bar */}
-            <Grid item xs={12} md={10}>
-                <CustomSearch
-                    placeholder="Buscar..."
+        <Box sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Box>
+                    <Typography variant="h4" fontWeight={400}>
+                        Centros de Distribución
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Gestione los centros de distribución, sus turnos, camiones y bahías
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenCreate}
+                >
+                    Nuevo Centro
+                </Button>
+            </Box>
+
+            <Alert severity="info" sx={{ mb: 3 }}>
+                <strong>Centros de Distribución:</strong> Cada centro tiene sus propios camiones, bahías y turnos configurados. Haga clic en una fila para ver el detalle completo.
+            </Alert>
+
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <TextField
+                    placeholder="Buscar por nombre o código..."
+                    variant="outlined"
+                    size="small"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onClick={() => console.log('click')}
+                    sx={{ width: 350 }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon color="action" />
+                            </InputAdornment>
+                        ),
+                    }}
                 />
-            </Grid>
-                <Grid item xs={12} md={2}>
-                    <Button
-                        startIcon={<AddIcon />}
-                        fullWidth
-                        variant={"outlined"}
-                        onClick={()=>handleOpenCreate()}
-                        >
-                        Agregar
-                    </Button>
-                </Grid>
+            </Box>
 
-            <div style={{ height: 500, width: "100%" }}>
+            <Card>
                 <DataGrid
                     {...tableBase}
                     rows={rows}
@@ -189,12 +222,17 @@ export function DistributorCenterListPage() {
                     paginationMode="server"
                     paginationModel={paginationModel}
                     onPaginationModelChange={setPaginationModel}
-                    pageSizeOptions={[5, 10, 20]}
+                    pageSizeOptions={[10, 25, 50]}
                     getRowId={(row) => row.id}
-                    onCellDoubleClick={(params) => handleOpenEdit(params.row as DistributorCenter)}
+                    disableRowSelectionOnClick
+                    onRowClick={(params) => navigate(`/maintenance/distributor-center/${params.row.id}`)}
+                    sx={{
+                        cursor: 'pointer',
+                        border: 0,
+                    }}
                 />
-            </div>
-        </Grid>
+            </Card>
+
             {/* Dialog para crear/editar */}
             {openDialog && (
                 <DistributorCenterDialog
@@ -203,6 +241,6 @@ export function DistributorCenterListPage() {
                     initialData={selectedDC}
                 />
             )}
-        </Container>
+        </Box>
     );
 }

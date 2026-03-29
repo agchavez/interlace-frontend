@@ -1,24 +1,24 @@
 import { useRef, useState } from 'react';
 import {
     Box,
+    Container,
     Typography,
     Button,
     Alert,
     CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
+    Card,
+    CardContent,
     Chip,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
 import {
     CloudUpload as UploadIcon,
     Download as DownloadIcon,
     CheckCircle as ConfirmIcon,
+    InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
     usePreviewUploadMutation,
     useConfirmUploadMutation,
@@ -27,6 +27,9 @@ import {
 import type { UploadPreviewResponse } from '../interfaces/truckCycle';
 
 export default function UploadPalletPage() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<UploadPreviewResponse | null>(null);
     const [fileName, setFileName] = useState('');
@@ -79,51 +82,81 @@ export default function UploadPalletPage() {
         }
     };
 
+    const previewColumns: GridColDef[] = [
+        { field: 'transport_number', headerName: 'Transporte', flex: 1, minWidth: 120 },
+        { field: 'trip_number', headerName: 'Viaje', flex: 0.6, minWidth: 80 },
+        { field: 'truck_plate', headerName: 'Placa', flex: 0.8, minWidth: 100 },
+        {
+            field: 'route_codes',
+            headerName: 'Rutas',
+            flex: 1.2,
+            minWidth: 150,
+            renderCell: (params) => (
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', py: 0.5 }}>
+                    {params.value?.map((r: string) => (
+                        <Chip key={r} label={r} size="small" />
+                    ))}
+                </Box>
+            ),
+        },
+        { field: 'total_boxes', headerName: 'Cajas', flex: 0.6, minWidth: 80, align: 'right', headerAlign: 'right' },
+        { field: 'total_skus', headerName: 'SKUs', flex: 0.6, minWidth: 80, align: 'right', headerAlign: 'right' },
+    ];
+
     return (
-        <Box sx={{ p: 3 }}>
+        <Container maxWidth="xl" sx={{ mt: 2 }}>
             <Typography variant="h5" fontWeight={600} sx={{ mb: 3 }}>
                 Carga de Pautas
             </Typography>
 
-            {/* Actions */}
-            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <Button
-                    variant="outlined"
-                    startIcon={<DownloadIcon />}
-                    onClick={handleDownloadTemplate}
-                >
-                    Descargar Plantilla
-                </Button>
+            {/* Upload Area */}
+            <Card variant="outlined" sx={{ mb: 3 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                    <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, alignItems: isMobile ? 'stretch' : 'center' }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<DownloadIcon />}
+                            onClick={handleDownloadTemplate}
+                            fullWidth={isMobile}
+                        >
+                            Descargar Plantilla
+                        </Button>
 
-                <Button
-                    variant="contained"
-                    startIcon={<UploadIcon />}
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={previewing}
-                >
-                    {previewing ? 'Procesando...' : 'Subir Archivo'}
-                </Button>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls"
-                    hidden
-                    onChange={handleFileSelect}
-                />
-            </Box>
+                        <Button
+                            variant="contained"
+                            startIcon={<UploadIcon />}
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={previewing}
+                            fullWidth={isMobile}
+                        >
+                            {previewing ? 'Procesando...' : 'Subir Archivo'}
+                        </Button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".xlsx,.xls"
+                            hidden
+                            onChange={handleFileSelect}
+                        />
 
-            {fileName && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Archivo: {fileName}
-                </Typography>
-            )}
+                        {fileName && (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <FileIcon fontSize="small" color="action" />
+                                <Typography variant="body2" color="text.secondary">
+                                    {fileName}
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
 
-            {previewing && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <CircularProgress size={20} />
-                    <Typography>Procesando archivo...</Typography>
-                </Box>
-            )}
+                    {previewing && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+                            <CircularProgress size={20} />
+                            <Typography>Procesando archivo...</Typography>
+                        </Box>
+                    )}
+                </CardContent>
+            </Card>
 
             {previewError && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -139,9 +172,9 @@ export default function UploadPalletPage() {
 
             {/* Preview results */}
             {preview && !confirmed && (
-                <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                        <Typography variant="h6">
+                <>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                        <Typography variant="h6" fontWeight={600}>
                             Vista Previa ({preview.row_count} filas)
                         </Typography>
                         {preview.errors.length === 0 && (
@@ -179,38 +212,30 @@ export default function UploadPalletPage() {
                         </Alert>
                     )}
 
-                    <TableContainer component={Paper} variant="outlined">
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Transporte</TableCell>
-                                    <TableCell>Viaje</TableCell>
-                                    <TableCell>Placa</TableCell>
-                                    <TableCell>Rutas</TableCell>
-                                    <TableCell align="right">Cajas</TableCell>
-                                    <TableCell align="right">SKUs</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {preview.pautas_preview.map((p, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell>{p.transport_number}</TableCell>
-                                        <TableCell>{p.trip_number}</TableCell>
-                                        <TableCell>{p.truck_plate}</TableCell>
-                                        <TableCell>
-                                            {p.route_codes.map((r) => (
-                                                <Chip key={r} label={r} size="small" sx={{ mr: 0.5 }} />
-                                            ))}
-                                        </TableCell>
-                                        <TableCell align="right">{p.total_boxes}</TableCell>
-                                        <TableCell align="right">{p.total_skus}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
+                    <Card variant="outlined">
+                        <DataGrid
+                            rows={preview.pautas_preview.map((p, i) => ({ id: i, ...p }))}
+                            columns={previewColumns}
+                            autoHeight
+                            disableRowSelectionOnClick
+                            pageSizeOptions={[10, 25, 50]}
+                            initialState={{
+                                pagination: { paginationModel: { pageSize: 10 } },
+                            }}
+                            getRowHeight={() => 'auto'}
+                            sx={{
+                                border: 'none',
+                                '& .MuiDataGrid-columnHeaders': {
+                                    backgroundColor: theme.palette.action.hover,
+                                },
+                                '& .MuiDataGrid-cell': {
+                                    py: 1,
+                                },
+                            }}
+                        />
+                    </Card>
+                </>
             )}
-        </Box>
+        </Container>
     );
 }

@@ -216,8 +216,14 @@ export interface PautaDetail extends PautaListItem {
     pallet_tickets: PalletTicket[];
 }
 
+export interface WorkstationStatusGroup {
+    label: string;
+    count: number;
+    pautas: PautaListItem[];
+}
+
 export interface WorkstationData {
-    [status: string]: PautaListItem[];
+    [status: string]: WorkstationStatusGroup;
 }
 
 export interface KPISummary {

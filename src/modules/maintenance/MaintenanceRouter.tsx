@@ -1,24 +1,36 @@
-// import {DistributorCenterListPage} from "./page/DistributorCenterListPage.tsx";
+import {DistributorCenterListPage} from "./page/DistributorCenterListPage.tsx";
+import {DistributorCenterDetailPage} from "./page/DistributorCenterDetailPage.tsx";
 
 import {Route, Routes, Navigate} from "react-router-dom";
-// import {PeriodListPage} from "./page/PeriodListPage.tsx";
 import {MetricTypesPage} from "./page/MetricTypesPage.tsx";
 import {ProductListPage} from "./page/ProductListPage.tsx";
 import {OvertimeTypesPage} from "./page/OvertimeTypesPage.tsx";
 import {OvertimeReasonsPage} from "./page/OvertimeReasonsPage.tsx";
+import TruckCatalogPage from "../truck-cycle/pages/TruckCatalogPage.tsx";
+import BayManagementPage from "../truck-cycle/pages/BayManagementPage.tsx";
 
 function MaintenanceRouter() {
     return (
         <Routes>
-            {/* <Route
+            <Route
                 element={<DistributorCenterListPage />}
                 path="/distributor-center"
-                /> */}
+                />
 
-            {/* <Route
-                element={<PeriodListPage />}
-                path="/period-center"
-                /> */}
+            <Route
+                element={<DistributorCenterDetailPage />}
+                path="/distributor-center/:id"
+                />
+
+            <Route
+                element={<TruckCatalogPage />}
+                path="/trucks"
+                />
+
+            <Route
+                element={<BayManagementPage />}
+                path="/bays"
+                />
 
             <Route
                 element={<MetricTypesPage />}
@@ -40,7 +52,7 @@ function MaintenanceRouter() {
                 path="/overtime-reasons"
                 />
 
-            <Route path="*" element={<Navigate to="/distributor-center" />} />
+            <Route path="*" element={<Navigate to="/maintenance/distributor-center" />} />
 
         </Routes>
     );

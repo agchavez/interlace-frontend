@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   Box,
   Card,
-  Container,
+  Alert,
   Typography,
   Button,
   Dialog,
@@ -14,7 +14,6 @@ import {
   Switch,
   FormControlLabel,
   Grid,
-  Divider,
   styled,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -163,18 +162,26 @@ export const OvertimeReasonsPage = () => {
   ];
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" fontWeight={400}>
-          Motivos de Horas Extra
-        </Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={400}>
+            Motivos de Horas Extra
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Configure los motivos por los cuales se pueden solicitar horas extra
+          </Typography>
+        </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
           Nuevo Motivo
         </Button>
       </Box>
-      <Divider sx={{ mb: 3 }} />
 
-      <Card variant="outlined">
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <strong>Motivos:</strong> Los motivos definidos aquí estarán disponibles al crear tokens de horas extra. Solo los motivos activos serán visibles.
+      </Alert>
+
+      <Card>
         <DataGrid
           {...tableBase}
           rows={items}
@@ -248,6 +255,6 @@ export const OvertimeReasonsPage = () => {
           </Button>
         </DialogActions>
       </BootstrapDialog>
-    </Container>
+    </Box>
   );
 };

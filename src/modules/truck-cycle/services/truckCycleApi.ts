@@ -253,6 +253,14 @@ export const truckCycleApi = createApi({
             }),
             invalidatesTags: ['PalletTickets'],
         }),
+        generatePalletTickets: builder.mutation<{ message: string; ticket_ids: number[]; pauta_id: number }, { pauta_id: number }>({
+            query: (data) => ({
+                url: '/truck-cycle-pallet-ticket/generate_for_pauta/',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['PalletTickets', 'Pautas'],
+        }),
     }),
 });
 
@@ -308,4 +316,5 @@ export const {
     // Pallet Tickets
     useGetPalletTicketsQuery,
     useScanPalletTicketMutation,
+    useGeneratePalletTicketsMutation,
 } = truckCycleApi;

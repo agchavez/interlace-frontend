@@ -3,13 +3,10 @@ import {
     Box,
     Typography,
     Button,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
+    Grid,
+    Card,
+    Chip,
+    Avatar,
     CircularProgress,
     Alert,
     Dialog,
@@ -19,14 +16,35 @@ import {
     TextField,
     IconButton,
     Switch,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import {
+    Add as AddIcon,
+    Edit as EditIcon,
+    Delete as DeleteIcon,
+    MoreVert as MoreVertIcon,
+} from '@mui/icons-material';
+import { styled } from '@mui/material';
+import BootstrapDialogTitle from '../../ui/components/BootstrapDialogTitle';
+
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogContent-root': { padding: theme.spacing(2) },
+    '& .MuiDialogActions-root': { padding: theme.spacing(1) },
+}));
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
     useGetBaysQuery,
     useCreateBayMutation,
     useUpdateBayMutation,
     useDeleteBayMutation,
 } from '../services/truckCycleApi';
+import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
+import { useAppSelector } from '../../../store';
 import type { Bay } from '../interfaces/truckCycle';
 
 interface BayFormData {
@@ -42,14 +60,34 @@ const emptyForm: BayFormData = {
 };
 
 export default function BayManagementPage() {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const user = useAppSelector((state) => state.auth.user);
+    const cdName = user?.centro_distribucion_name || '';
+    const { data: dcData } = useGetDistributorCentersQuery({ limit: 100, offset: 0, search: '' });
+    const currentDc = dcData?.results?.find((d) => d.id === user?.centro_distribucion);
+    const flagCode = currentDc?.data_country?.flag?.toLowerCase();
+
     const [dialogOpen, setDialogOpen] = useState(false);
     const [editingBay, setEditingBay] = useState<Bay | null>(null);
     const [form, setForm] = useState<BayFormData>(emptyForm);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+    const [menuRow, setMenuRow] = useState<Bay | null>(null);
 
     const { data, isLoading, error } = useGetBaysQuery();
     const [createBay, { isLoading: creating }] = useCreateBayMutation();
     const [updateBay, { isLoading: updating }] = useUpdateBayMutation();
     const [deleteBay] = useDeleteBayMutation();
+
+    const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, row: Bay) => {
+        setAnchorEl(event.currentTarget);
+        setMenuRow(row);
+    };
+
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+        setMenuRow(null);
+    };
 
     const handleOpenCreate = () => {
         setEditingBay(null);
@@ -65,6 +103,7 @@ export default function BayManagementPage() {
             is_active: bay.is_active,
         });
         setDialogOpen(true);
+        handleCloseMenu();
     };
 
     const handleSave = async () => {
@@ -81,6 +120,7 @@ export default function BayManagementPage() {
     };
 
     const handleDelete = async (id: number) => {
+        handleCloseMenu();
         if (window.confirm('Desea eliminar esta bahia?')) {
             await deleteBay(id);
         }
@@ -90,10 +130,59 @@ export default function BayManagementPage() {
         await updateBay({ id: bay.id, data: { is_active: !bay.is_active } });
     };
 
+    const columns: GridColDef[] = [
+        { field: 'code', headerName: 'Código', flex: 1, minWidth: 100 },
+        { field: 'name', headerName: 'Nombre', flex: 1.5, minWidth: 150 },
+        {
+            field: 'distributor_center',
+            headerName: 'Centro de Distribución',
+            flex: 1.2,
+            minWidth: 180,
+            renderCell: () => (
+                <Chip
+                    label={cdName || '-'}
+                    size="small"
+                    variant="outlined"
+                    avatar={flagCode ? (
+                        <Avatar
+                            src={`https://flagcdn.com/w40/${flagCode}.png`}
+                            alt={cdName}
+                            sx={{ width: 20, height: 14 }}
+                        />
+                    ) : undefined}
+                />
+            ),
+        },
+        {
+            field: 'is_active',
+            headerName: 'Activo',
+            flex: 0.7,
+            minWidth: 80,
+            renderCell: (params) => (
+                <Switch
+                    checked={params.value}
+                    onChange={() => handleToggleActive(params.row)}
+                    size="small"
+                />
+            ),
+        },
+        {
+            field: 'actions',
+            headerName: '',
+            width: 60,
+            sortable: false,
+            renderCell: (params) => (
+                <IconButton size="small" onClick={(e) => handleOpenMenu(e, params.row)}>
+                    <MoreVertIcon fontSize="small" />
+                </IconButton>
+            ),
+        },
+    ];
+
     if (error) {
         return (
             <Box sx={{ p: 3 }}>
-                <Alert severity="error">Error al cargar bahias.</Alert>
+                <Alert severity="error">Error al cargar bahías.</Alert>
             </Box>
         );
     }
@@ -101,87 +190,100 @@ export default function BayManagementPage() {
     return (
         <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h5" fontWeight={600}>
-                    Gestion de Bahias
-                </Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreate}>
-                    Agregar Bahia
+                <Box>
+                    <Typography variant="h4" fontWeight={400}>
+                        Gestión de Bahías
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        Administre las bahías de carga disponibles en el centro de distribución
+                    </Typography>
+                </Box>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleOpenCreate}
+                >
+                    Nueva Bahía
                 </Button>
             </Box>
 
-            {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                    <CircularProgress />
-                </Box>
-            ) : (
-                <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Codigo</TableCell>
-                                <TableCell>Nombre</TableCell>
-                                <TableCell>Activo</TableCell>
-                                <TableCell>Fecha Creacion</TableCell>
-                                <TableCell align="right">Acciones</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {data?.results.map((bay) => (
-                                <TableRow key={bay.id}>
-                                    <TableCell>{bay.code}</TableCell>
-                                    <TableCell>{bay.name}</TableCell>
-                                    <TableCell>
-                                        <Switch
-                                            checked={bay.is_active}
-                                            onChange={() => handleToggleActive(bay)}
-                                            size="small"
-                                        />
-                                    </TableCell>
-                                    <TableCell>{new Date(bay.created_at).toLocaleDateString()}</TableCell>
-                                    <TableCell align="right">
-                                        <IconButton size="small" onClick={() => handleOpenEdit(bay)}>
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
-                                        <IconButton size="small" color="error" onClick={() => handleDelete(bay.id)}>
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                            {data?.results.length === 0 && (
-                                <TableRow>
-                                    <TableCell colSpan={5} align="center">
-                                        <Typography color="text.secondary" sx={{ py: 2 }}>
-                                            No hay bahias registradas.
-                                        </Typography>
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            )}
+            <Alert severity="info" sx={{ mb: 3 }}>
+                <strong>Centro de Distribución:</strong> Las bahías mostradas corresponden al centro de distribución activo. Cada bahía se asigna a una pauta durante el proceso de carga.
+            </Alert>
+
+            <Card>
+                        <DataGrid
+                            rows={data?.results || []}
+                            columns={columns}
+                            loading={isLoading}
+                            pageSizeOptions={[10, 25, 50]}
+                            disableRowSelectionOnClick
+                            autoHeight
+                            sx={{
+                                border: 0,
+                                '& .MuiDataGrid-cell': { py: 1, fontSize: { xs: '0.8rem', sm: '0.875rem' } },
+                                '& .MuiDataGrid-columnHeaders': {
+                                    backgroundColor: 'rgba(0,0,0,0.02)',
+                                    fontWeight: 600,
+                                },
+                            }}
+                            slots={{
+                                noRowsOverlay: () => (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                        <Typography color="text.secondary">No se encontraron registros.</Typography>
+                                    </Box>
+                                ),
+                            }}
+                        />
+                    </Card>
+
+            {/* Actions Menu */}
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
+                PaperProps={{ elevation: 3, sx: { minWidth: 200, borderRadius: 2, mt: 1 } }}
+            >
+                <MenuItem onClick={() => menuRow && handleOpenEdit(menuRow)}>
+                    <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+                    <ListItemText>Editar</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => menuRow && handleDelete(menuRow.id)}>
+                    <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
+                    <ListItemText>Eliminar</ListItemText>
+                </MenuItem>
+            </Menu>
 
             {/* Create/Edit Dialog */}
-            <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-                <DialogTitle>{editingBay ? 'Editar Bahia' : 'Nueva Bahia'}</DialogTitle>
+            <BootstrapDialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+                <BootstrapDialogTitle id="bay-dialog" onClose={() => setDialogOpen(false)}>
+                    {editingBay ? 'Editar Bahía' : 'Nueva Bahía'}
+                </BootstrapDialogTitle>
                 <DialogContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-                        <TextField
-                            label="Codigo"
-                            size="small"
-                            fullWidth
-                            value={form.code}
-                            onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-                        />
-                        <TextField
-                            label="Nombre"
-                            size="small"
-                            fullWidth
-                            value={form.name}
-                            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                        />
-                    </Box>
+                    <Grid container spacing={2} sx={{ mt: 1 }}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Código"
+                                size="small"
+                                fullWidth
+                                value={form.code}
+                                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                                helperText="Ej: B-01, B-02"
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField
+                                label="Nombre"
+                                size="small"
+                                fullWidth
+                                value={form.name}
+                                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                                helperText="Nombre descriptivo de la bahía"
+                                required
+                            />
+                        </Grid>
+                    </Grid>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDialogOpen(false)}>Cancelar</Button>
@@ -190,10 +292,10 @@ export default function BayManagementPage() {
                         onClick={handleSave}
                         disabled={creating || updating}
                     >
-                        {creating || updating ? <CircularProgress size={20} /> : 'Guardar'}
+                        {editingBay ? 'Actualizar' : 'Crear'}
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </BootstrapDialog>
         </Box>
     );
 }

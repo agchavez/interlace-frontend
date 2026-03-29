@@ -10,9 +10,6 @@ import ReloadQueuePage from './pages/ReloadQueuePage';
 import WorkstationPage from './pages/WorkstationPage';
 import KPIConfigPage from './pages/KPIConfigPage';
 import KPIReportPage from './pages/KPIReportPage';
-import TruckCatalogPage from './pages/TruckCatalogPage';
-import BayManagementPage from './pages/BayManagementPage';
-
 function TruckCycleRouter() {
   return (
     <Routes>
@@ -27,8 +24,8 @@ function TruckCycleRouter() {
       <Route path="/workstation" element={<WorkstationPage />} />
       <Route path="/kpi/config" element={<KPIConfigPage />} />
       <Route path="/kpi/report" element={<KPIReportPage />} />
-      <Route path="/trucks" element={<TruckCatalogPage />} />
-      <Route path="/bays" element={<BayManagementPage />} />
+      <Route path="/trucks" element={<Navigate to="/maintenance/trucks" replace />} />
+      <Route path="/bays" element={<Navigate to="/maintenance/bays" replace />} />
       <Route path="*" element={<Navigate to="/truck-cycle" />} />
     </Routes>
   );

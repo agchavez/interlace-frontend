@@ -516,6 +516,25 @@ export const permisions = [
         permissions: [
             "truck_cycle.view_baymodel"
         ]
+    },
+    {
+        url: "/maintenance/distributor-center/:id",
+        reg: /\/maintenance\/distributor-center\/\d+/,
+        permissions: [
+            "maintenance.view_distributorcenter"
+        ]
+    },
+    {
+        url: "/maintenance/trucks",
+        permissions: [
+            "truck_cycle.view_truckmodel"
+        ]
+    },
+    {
+        url: "/maintenance/bays",
+        permissions: [
+            "truck_cycle.view_baymodel"
+        ]
     }
 ]
 
