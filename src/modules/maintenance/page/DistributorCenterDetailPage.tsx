@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    Container,
     Typography,
     Box,
     Card,
@@ -105,20 +104,20 @@ export function DistributorCenterDetailPage() {
 
     if (isLoading) {
         return (
-            <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
+            <Box sx={{ p: 3, textAlign: 'center' }}>
                 <CircularProgress />
-            </Container>
+            </Box>
         );
     }
 
     if (error || !dc) {
         return (
-            <Container maxWidth="lg" sx={{ py: 4 }}>
+            <Box sx={{ p: 3 }}>
                 <Alert severity="error">No se pudo cargar el centro de distribución.</Alert>
                 <Button startIcon={<BackIcon />} onClick={() => navigate('/maintenance/distributor-center')} sx={{ mt: 2 }}>
                     Volver
                 </Button>
-            </Container>
+            </Box>
         );
     }
 
@@ -262,7 +261,7 @@ export function DistributorCenterDetailPage() {
     });
 
     return (
-        <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Box sx={{ p: 3 }}>
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                 <IconButton onClick={() => navigate('/maintenance/distributor-center')} sx={{ bgcolor: 'grey.100' }}>
@@ -471,6 +470,6 @@ export function DistributorCenterDetailPage() {
                     <Button variant="contained" onClick={handleSaveBay}>{editingBay ? 'Guardar' : 'Crear'}</Button>
                 </DialogActions>
             </Dialog>
-        </Container>
+        </Box>
     );
 }
