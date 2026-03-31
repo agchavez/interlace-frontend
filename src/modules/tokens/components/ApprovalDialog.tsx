@@ -97,6 +97,7 @@ export const ApprovalDialog = ({
   };
 
   const levelLabels: Record<number, string> = {
+    0: 'Aprobación masiva',
     1: 'Supervisor',
     2: 'Jefe de Área',
     3: 'Gerente CD',
@@ -124,8 +125,12 @@ export const ApprovalDialog = ({
 
       <DialogContent sx={{ pt: 2 }}>
         <Alert severity="info" sx={{ mb: 2 }}>
-          Está a punto de aprobar el token <strong>{tokenDisplayNumber}</strong> como{' '}
-          <strong>{levelLabels[approvalLevel]}</strong> (Nivel {approvalLevel}).
+          {approvalLevel > 0 ? (
+            <>Está a punto de aprobar el token <strong>{tokenDisplayNumber}</strong> como{' '}
+            <strong>{levelLabels[approvalLevel]}</strong> (Nivel {approvalLevel}).</>
+          ) : (
+            <>Está a punto de aprobar <strong>{tokenDisplayNumber}</strong>. Se aplicará la aprobación correspondiente a cada token según su nivel actual.</>
+          )}
         </Alert>
 
         <TextField
