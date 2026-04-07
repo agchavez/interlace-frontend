@@ -216,7 +216,7 @@ export const TokenCreatePage = () => {
   }, []);
 
   const { data: eligiblePersonnel, isFetching: personnelLoading } = useGetEligibleForTokenQuery(
-    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25, distributor_center: baseData.distributor_center || undefined },
+    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25, distributor_center: user?.centro_distribucion || undefined },
     { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
   );
   const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
