@@ -611,6 +611,20 @@ export interface OvertimeDetail {
   actual_hours: number | null;
   completion_notes: string;
   estimated_pay: number;
+  is_variable_rate: boolean;
+  segments: OvertimeSegmentDetail[];
+}
+
+export interface OvertimeSegmentDetail {
+  id: number;
+  start_time: string;
+  end_time: string;
+  hours: number;
+  pay_multiplier: number;
+  overtime_type_model: number | null;
+  overtime_type_model_name: string | null;
+  sequence: number;
+  estimated_pay: number;
 }
 
 // Shift Change Detail
