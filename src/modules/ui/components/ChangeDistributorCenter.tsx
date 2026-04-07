@@ -25,35 +25,41 @@ export const ChangeDistributorCenter = () => {
         Cambiar Centro de Distribución
         </BootstrapDialogTitle>
       <List sx={{ p: 0, m: 0 }}>
-        {user?.distributions_centers && user?.distributions_centers.length > 1 && user?.distributions_centers.map((cd) => {
-          const dc = disctributionCenters.find((d) => d.id === cd)
-          return(
-            <ListItem disableGutters key={cd}>
-              <ListItemButton onClick={() => handleListItemClick(cd)}>
-                <ListItemAvatar>
-                    <Avatar
-                        variant="rounded"
-                        alt={dc?.country_code || "hn"}
-                        src={dc?.country_code ? 
-                              `https://flagcdn.com/h240/${dc?.country_code.toLowerCase()}.png`:
-                              `https://flagcdn.com/h240/hn.png`}
-                        sx={{ width: 35, height: 35 }}
-                    />
-                </ListItemAvatar>
-                <ListItemText primary={disctributionCenters.find((d) => d.id === cd)?.name} />
-              </ListItemButton>
-            </ListItem>
-          )
-        })}
-         <ListItem disableGutters alignItems='center' key='no_cd' sx={{ padding: 2 }}>
-          {
-             user?.distributions_centers && user?.distributions_centers.length <= 1 && (
-              <Alert severity="error" sx={{ width: '100%' }}>
-                No tiene más centros de distribución asociados
-              </Alert>
+        {user?.distributions_centers && user?.distributions_centers
+          .filter((cd) => disctributionCenters.some((d) => d.id === cd))
+          .map((cd) => {
+            const dc = disctributionCenters.find((d) => d.id === cd)
+            const isActive = user.centro_distribucion === cd
+            return(
+              <ListItem disableGutters key={cd}>
+                <ListItemButton onClick={() => handleListItemClick(cd)} selected={isActive}>
+                  <ListItemAvatar>
+                      <Avatar
+                          variant="rounded"
+                          alt={dc?.country_code || "hn"}
+                          src={dc?.country_code ?
+                                `https://flagcdn.com/h240/${dc?.country_code.toLowerCase()}.png`:
+                                `https://flagcdn.com/h240/hn.png`}
+                          sx={{ width: 35, height: 35 }}
+                      />
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={dc?.name}
+                    secondary={isActive ? 'Activo' : undefined}
+                  />
+                </ListItemButton>
+              </ListItem>
             )
-          }
-        </ListItem>
+          })
+        }
+        {user?.distributions_centers &&
+          user.distributions_centers.filter((cd) => disctributionCenters.some((d) => d.id === cd)).length <= 1 && (
+          <ListItem disableGutters alignItems='center' key='no_cd' sx={{ padding: 2 }}>
+            <Alert severity="info" sx={{ width: '100%' }}>
+              No tiene más centros de distribución disponibles
+            </Alert>
+          </ListItem>
+        )}
       </List>
     </Dialog>
 

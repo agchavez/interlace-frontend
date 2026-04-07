@@ -1152,11 +1152,14 @@ export const TokenDetailPage = () => {
                   <OvertimeIcon fontSize="small" />
                   <Typography variant="subtitle1" fontWeight={600}>Horas Extra</Typography>
                 </Box>
-                <Chip
-                  label={`x${token.overtime_detail.pay_multiplier}`}
-                  size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 700 }}
-                />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {token.overtime_detail.is_variable_rate && (
+                    <Chip label="Tasa Variable" size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 600 }} />
+                  )}
+                  {!token.overtime_detail.is_variable_rate && (
+                    <Chip label={`x${token.overtime_detail.pay_multiplier}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 700 }} />
+                  )}
+                </Box>
               </Box>
 
               <CardContent sx={{ p: 3 }}>
@@ -1176,31 +1179,18 @@ export const TokenDetailPage = () => {
                   />
                 </Box>
 
-                {/* Schedule bar */}
+                {/* Date bar */}
                 <Paper
                   variant="outlined"
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: 'grey.50',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: { xs: 1, sm: 2 },
-                    flexWrap: 'wrap',
-                    mb: 2,
-                  }}
+                  sx={{ p: 2, borderRadius: 2, bgcolor: 'grey.50', display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 }, flexWrap: 'wrap', mb: 2 }}
                 >
-                  {/* Date */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                     <CalendarIcon fontSize="small" color="action" />
                     <Typography variant="body2" fontWeight={600}>
                       {new Date(token.overtime_detail.overtime_date + 'T00:00:00').toLocaleDateString('es-HN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     </Typography>
                   </Box>
-
                   <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
-
-                  {/* Time range */}
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                     <TimeIcon fontSize="small" color="action" />
                     <Typography variant="body2">
@@ -1209,17 +1199,33 @@ export const TokenDetailPage = () => {
                       <Box component="span" fontWeight={600}>{token.overtime_detail.end_time?.slice(0, 5)}</Box>
                     </Typography>
                   </Box>
-
                   <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', sm: 'block' } }} />
-
-                  {/* Total hours */}
-                  <Chip
-                    label={`${token.overtime_detail.total_hours}h`}
-                    size="small"
-                    color="secondary"
-                    sx={{ fontWeight: 700 }}
-                  />
+                  <Chip label={`${token.overtime_detail.total_hours}h`} size="small" color="secondary" sx={{ fontWeight: 700 }} />
                 </Paper>
+
+                {/* Variable rate segments */}
+                {token.overtime_detail.segments && token.overtime_detail.segments.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Tramos de Pago
+                    </Typography>
+                    {token.overtime_detail.segments.map((seg: any, idx: number) => (
+                      <Paper key={idx} variant="outlined" sx={{ p: 1.5, mb: 1, borderRadius: 1.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                        {seg.overtime_type_model_name && (
+                          <Chip label={seg.overtime_type_model_name} size="small" color="secondary" variant="filled" sx={{ fontWeight: 600 }} />
+                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <TimeIcon fontSize="small" color="action" />
+                          <Typography variant="body2" fontWeight={600}>
+                            {seg.start_time?.slice(0, 5)} — {seg.end_time?.slice(0, 5)}
+                          </Typography>
+                        </Box>
+                        <Chip label={`${seg.hours}h`} size="small" variant="outlined" />
+                        <Chip label={`x${seg.pay_multiplier}`} size="small" sx={{ fontWeight: 700, bgcolor: 'rgba(25,118,210,0.1)', color: 'primary.main' }} />
+                      </Paper>
+                    ))}
+                  </Box>
+                )}
 
                 {/* Optional fields */}
                 {(token.overtime_detail.assigned_task || token.overtime_detail.reason_detail) && (

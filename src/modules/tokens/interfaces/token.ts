@@ -828,6 +828,14 @@ export interface RateChangeCreatePayload {
   additional_functions?: string;
 }
 
+export interface OvertimeSegmentPayload {
+  start_time: string;
+  end_time: string;
+  pay_multiplier: number;
+  overtime_type_model?: number;
+  sequence?: number;
+}
+
 export interface OvertimeCreatePayload {
   overtime_type?: OvertimeType;
   overtime_type_model?: number;
@@ -839,6 +847,7 @@ export interface OvertimeCreatePayload {
   end_time: string;
   pay_multiplier?: number;
   assigned_task?: string;
+  segments?: OvertimeSegmentPayload[];
 }
 
 export interface ShiftChangeCreatePayload {

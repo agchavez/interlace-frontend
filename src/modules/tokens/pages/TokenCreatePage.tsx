@@ -85,7 +85,7 @@ import {
 import { useAppSelector } from '../../../store';
 import { useGetEligibleForTokenQuery } from '../../personnel/services/personnelApi';
 import { BulkPersonnelSelector } from '../components/BulkPersonnelSelector';
-import { useGetExternalPersonsQuery, useCreateExternalPersonMutation } from '../services/tokenApi';
+import { useGetExternalPersonsQuery, useCreateExternalPersonMutation, useGetOvertimeTypesQuery } from '../services/tokenApi';
 import type { ExternalPersonCreatePayload } from '../interfaces/token';
 import type { PersonnelProfileList } from '../../../interfaces/personnel';
 import type { ExternalPerson } from '../interfaces/token';
@@ -226,6 +226,11 @@ export const TokenCreatePage = () => {
     { is_active: true, limit: 100 },
     { skip: tokenType !== TokenType.EXIT_PASS || !isExternalPerson }
   );
+  const { data: overtimeTypesData } = useGetOvertimeTypesQuery(
+    { limit: 100 },
+    { skip: tokenType !== TokenType.OVERTIME }
+  );
+  const overtimeTypesList = overtimeTypesData?.results?.filter((t: any) => t.is_active) || [];
   const externalPersonsList: ExternalPersonOption[] = useMemo(
     () => (externalPersonsData?.results || []) as ExternalPersonOption[],
     [externalPersonsData]
@@ -393,6 +398,39 @@ export const TokenCreatePage = () => {
       if (tokenType === TokenType.EXIT_PASS && (!exitPassData.items || exitPassData.items.length === 0)) {
         toast.error('Agregue al menos un artículo para el pase de salida');
         return;
+      }
+      // Validate overtime fields
+      if (tokenType === TokenType.OVERTIME) {
+        if (!overtimeData.overtime_date) {
+          toast.error('Seleccione la fecha de horas extra');
+          return;
+        }
+        if (!overtimeData.start_time || !overtimeData.end_time) {
+          toast.error('Indique la hora de inicio y fin');
+          return;
+        }
+        if (!overtimeData.overtime_type_model && !overtimeData.overtime_type) {
+          toast.error('Seleccione el tipo de hora extra');
+          return;
+        }
+        if (!overtimeData.reason_model && !overtimeData.reason) {
+          toast.error('Seleccione el motivo');
+          return;
+        }
+        // Validate segments if variable rate
+        if (overtimeData.segments && overtimeData.segments.length > 0) {
+          for (let i = 0; i < overtimeData.segments.length; i++) {
+            const seg = overtimeData.segments[i];
+            if (!seg.overtime_type_model) {
+              toast.error(`Seleccione el tipo de hora extra del tramo ${i + 1}`);
+              return;
+            }
+            if (!seg.start_time || !seg.end_time) {
+              toast.error(`Complete el horario del tramo ${i + 1}`);
+              return;
+            }
+          }
+        }
       }
     }
     setActiveStep((prev) => prev + 1);
@@ -1147,28 +1185,113 @@ export const TokenCreatePage = () => {
           </Card>
         </Grid>
 
-        {/* Overtime Total Hours */}
+        {/* Overtime Details */}
         {tokenType === TokenType.OVERTIME && overtimeData.start_time && overtimeData.end_time && (
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <Card variant="outlined">
               <CardContent>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Total de Horas Extra
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <PermitHourIcon color="info" />
-                  <Typography variant="h6" fontWeight={500}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    Resumen de Horas Extra
+                  </Typography>
+                </Box>
+
+                {/* Date & Time range */}
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+                  {overtimeData.overtime_date && (
+                    <Chip label={`Fecha: ${dayjs(overtimeData.overtime_date).format('DD/MM/YYYY')}`} size="small" variant="outlined" />
+                  )}
+                  <Chip label={`${overtimeData.start_time} — ${overtimeData.end_time}`} size="small" variant="outlined" color="info" />
+                </Box>
+
+                {/* Segments or single rate */}
+                {overtimeData.segments && overtimeData.segments.length > 0 ? (
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      Tramos de pago (tasa variable)
+                    </Typography>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr>
+                          <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '2px solid #1976d2', fontSize: '0.75rem', color: '#666' }}>Tipo</th>
+                          <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '2px solid #1976d2', fontSize: '0.75rem', color: '#666' }}>Horario</th>
+                          <th style={{ textAlign: 'right', padding: '6px 8px', borderBottom: '2px solid #1976d2', fontSize: '0.75rem', color: '#666' }}>Horas</th>
+                          <th style={{ textAlign: 'right', padding: '6px 8px', borderBottom: '2px solid #1976d2', fontSize: '0.75rem', color: '#666' }}>Multiplicador</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {overtimeData.segments.map((seg, idx) => {
+                          const segStart = dayjs(`2000-01-01 ${seg.start_time}`);
+                          let segEnd = dayjs(`2000-01-01 ${seg.end_time}`);
+                          if (segEnd.isBefore(segStart)) segEnd = segEnd.add(1, 'day');
+                          const segHours = parseFloat((segEnd.diff(segStart, 'minute') / 60).toFixed(2));
+                          const segType = overtimeTypesList.find((t: any) => t.id === seg.overtime_type_model);
+                          return (
+                            <tr key={idx} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                              <td style={{ padding: '6px 8px', fontSize: '0.875rem', fontWeight: 600 }}>
+                                {segType?.name || '-'}
+                              </td>
+                              <td style={{ padding: '6px 8px', fontSize: '0.875rem' }}>
+                                {seg.start_time} — {seg.end_time}
+                              </td>
+                              <td style={{ padding: '6px 8px', fontSize: '0.875rem', textAlign: 'right' }}>
+                                {segHours}h
+                              </td>
+                              <td style={{ padding: '6px 8px', fontSize: '0.875rem', textAlign: 'right', fontWeight: 600, color: '#1976d2' }}>
+                                x{seg.pay_multiplier}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {(() => {
+                      const singleType = overtimeTypesList.find((t: any) => t.id === overtimeData.overtime_type_model);
+                      return singleType ? (
+                        <Chip label={`${singleType.name} x${singleType.default_multiplier}`} size="small" color="secondary" />
+                      ) : (
+                        <Chip label={`Multiplicador: x${overtimeData.pay_multiplier ?? 1.5}`} size="small" color="secondary" />
+                      );
+                    })()}
+                  </Box>
+                )}
+
+                {/* Total */}
+                <Box sx={{ mt: 2, p: 1.5, bgcolor: 'rgba(33, 150, 243, 0.04)', borderRadius: 1, border: '1px solid rgba(33, 150, 243, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Total por persona:
+                  </Typography>
+                  <Typography variant="h6" fontWeight={700} color="info.main">
                     {(() => {
                       const start = dayjs(`2000-01-01 ${overtimeData.start_time}`);
                       let end = dayjs(`2000-01-01 ${overtimeData.end_time}`);
                       if (end.isBefore(start)) end = end.add(1, 'day');
                       const perPerson = parseFloat((end.diff(start, 'minute') / 60).toFixed(2));
-                      const people = isBulkMode ? Math.max(bulkPersonnel.length, 1) : 1;
-                      const total = parseFloat((perPerson * people).toFixed(2));
-                      return `${total} hora${total !== 1 ? 's' : ''}${people > 1 ? ` (${perPerson}h x ${people} personas)` : ''}`;
+                      return `${perPerson} hora${perPerson !== 1 ? 's' : ''}`;
                     })()}
                   </Typography>
                 </Box>
+                {isBulkMode && bulkPersonnel.length > 1 && (
+                  <Box sx={{ mt: 1, p: 1.5, bgcolor: 'rgba(156, 39, 176, 0.04)', borderRadius: 1, border: '1px solid rgba(156, 39, 176, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Total general ({bulkPersonnel.length} personas):
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700} color="secondary.main">
+                      {(() => {
+                        const start = dayjs(`2000-01-01 ${overtimeData.start_time}`);
+                        let end = dayjs(`2000-01-01 ${overtimeData.end_time}`);
+                        if (end.isBefore(start)) end = end.add(1, 'day');
+                        const perPerson = parseFloat((end.diff(start, 'minute') / 60).toFixed(2));
+                        const total = parseFloat((perPerson * bulkPersonnel.length).toFixed(2));
+                        return `${total} horas`;
+                      })()}
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           </Grid>
