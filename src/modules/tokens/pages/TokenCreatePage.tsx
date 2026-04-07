@@ -216,7 +216,7 @@ export const TokenCreatePage = () => {
   }, []);
 
   const { data: eligiblePersonnel, isFetching: personnelLoading } = useGetEligibleForTokenQuery(
-    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25 },
+    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25, distributor_center: baseData.distributor_center || undefined },
     { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
   );
   const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
@@ -920,9 +920,10 @@ export const TokenCreatePage = () => {
                 id="distributor-center"
                 value={baseData.distributor_center || ''}
                 label="Centro de Distribución"
-                onChange={(e) =>
-                  setBaseData({ ...baseData, distributor_center: e.target.value as number })
-                }
+                onChange={(e) => {
+                  setBaseData({ ...baseData, distributor_center: e.target.value as number, personnel: null });
+                  setBulkPersonnel([]);
+                }}
                 startAdornment={<BusinessIcon sx={{ color: 'action.active', mr: 1 }} />}
               >
                 {disctributionCenters.map((center) => (

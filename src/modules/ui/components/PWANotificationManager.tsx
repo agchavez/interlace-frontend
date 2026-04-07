@@ -4,32 +4,29 @@ import PushNotificationPrompt from './PushNotificationPrompt';
 import PWAInstallPrompt from './PWAInstallPrompt';
 import { getNotificationPermission } from '../../../utils/pushNotifications';
 
+const DISMISS_KEY = 'push_notification_prompt_dismissed';
+
 /**
  * Componente que maneja los prompts de PWA (instalación y notificaciones)
  * - Muestra el prompt de instalación automáticamente
- * - Muestra el prompt de notificaciones después del login
+ * - Muestra el prompt de notificaciones después del login (solo 1 vez hasta que el usuario lo permita)
  */
 export default function PWANotificationManager() {
   const { token, isAuthenticated, status } = useAppSelector((state) => state.auth);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
-  // Ref para rastrear si ya se mostró el prompt en esta sesión
   const hasShownPromptRef = useRef(false);
-
-  // Ref para el estado de autenticación anterior
   const wasAuthenticatedRef = useRef(false);
 
   useEffect(() => {
-    // Detectar cuando el usuario se acaba de loguear
     const justLoggedIn = !wasAuthenticatedRef.current && isAuthenticated && status === 'authenticated';
 
     if (justLoggedIn && !hasShownPromptRef.current && token) {
-      // Verificar si el usuario ya tiene permisos de notificación
       const permission = getNotificationPermission();
+      const dismissed = localStorage.getItem(DISMISS_KEY);
 
-      // Solo mostrar si no ha otorgado ni denegado el permiso antes
-      if (permission === 'default') {
-        // Esperar 2 segundos después del login para mostrar el prompt
+      // Solo mostrar si: permiso es 'default' Y no fue descartado antes
+      if (permission === 'default' && !dismissed) {
         const timer = setTimeout(() => {
           setShowNotificationPrompt(true);
           hasShownPromptRef.current = true;
@@ -37,34 +34,32 @@ export default function PWANotificationManager() {
 
         return () => clearTimeout(timer);
       } else {
-        // Ya tiene permisos (granted o denied), marcar como mostrado
         hasShownPromptRef.current = true;
       }
     }
 
-    // Actualizar el ref del estado anterior
     wasAuthenticatedRef.current = isAuthenticated;
-
   }, [isAuthenticated, status, token]);
 
   const handleCloseNotificationPrompt = () => {
     setShowNotificationPrompt(false);
+    // Guardar en localStorage que el usuario descartó el prompt
+    localStorage.setItem(DISMISS_KEY, new Date().toISOString());
   };
 
   const handlePermissionGranted = () => {
-    console.log('✅ Usuario activó las notificaciones push');
+    // Si aceptó, limpiar el dismiss para que no quede marcado
+    localStorage.removeItem(DISMISS_KEY);
   };
 
   const handlePermissionDenied = () => {
-    console.log('❌ Usuario denegó las notificaciones push');
+    localStorage.setItem(DISMISS_KEY, new Date().toISOString());
   };
 
   return (
     <>
-      {/* Prompt de Instalación PWA - se muestra automáticamente */}
       <PWAInstallPrompt autoShow={true} delay={5000} />
 
-      {/* Prompt de Notificaciones - se muestra después del login */}
       {isAuthenticated && token && (
         <PushNotificationPrompt
           open={showNotificationPrompt}

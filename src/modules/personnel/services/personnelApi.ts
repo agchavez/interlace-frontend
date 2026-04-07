@@ -181,7 +181,7 @@ export const personnelApi = createApi({
     }),
 
     // Get personnel eligible for token creation (filtered by requester's hierarchy)
-    getEligibleForToken: builder.query<PersonnelProfileList[], { token_type?: string; search?: string; limit?: number }>({
+    getEligibleForToken: builder.query<PersonnelProfileList[], { token_type?: string; search?: string; limit?: number; distributor_center?: number }>({
       query: (params) => ({
         url: '/profiles/eligible_for_token/',
         method: 'GET',
