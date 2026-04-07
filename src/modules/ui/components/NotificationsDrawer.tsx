@@ -28,7 +28,7 @@ import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import {Notificacion} from "../../../interfaces/auth";
 import { StandardDrawerHeader } from './StandardDrawerHeader';
-import { useMarkNotificationAsReadMutation } from '../../../store/auth/notificationApi';
+import { useMarkNotificationAsReadMutation, useMarkAllNotificationsAsReadMutation } from '../../../store/auth/notificationApi';
 import { useAppSelector } from '../../../store/store';
 import {
     subscribeToPushNotifications,
@@ -60,6 +60,7 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [markAsRead] = useMarkNotificationAsReadMutation();
+    const [markAllAsRead, { isLoading: markingAll }] = useMarkAllNotificationsAsReadMutation();
     const { token } = useAppSelector((state) => state.auth);
 
     const [pushPermission, setPushPermission] = useState<NotificationPermission>('default');
@@ -343,6 +344,25 @@ const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ open, onClose
                     icon={<NotificationsIcon />}
                     onClose={onClose}
                 />
+                {unreadCount > 0 && (
+                    <Box sx={{ px: 2, py: 1, display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            size="small"
+                            onClick={async () => {
+                                try {
+                                    await markAllAsRead().unwrap();
+                                    toast.success('Todas las notificaciones marcadas como leídas');
+                                } catch {
+                                    toast.error('Error al marcar notificaciones');
+                                }
+                            }}
+                            disabled={markingAll}
+                            sx={{ textTransform: 'none', fontSize: '0.75rem' }}
+                        >
+                            {markingAll ? 'Marcando...' : 'Marcar todas como leídas'}
+                        </Button>
+                    </Box>
+                )}
                 <Divider />
                 <Box
                     sx={{
