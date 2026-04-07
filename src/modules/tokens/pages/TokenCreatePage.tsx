@@ -405,22 +405,15 @@ export const TokenCreatePage = () => {
           toast.error('Seleccione la fecha de horas extra');
           return;
         }
-        if (!overtimeData.start_time || !overtimeData.end_time) {
-          toast.error('Indique la hora de inicio y fin');
-          return;
-        }
-        if (!overtimeData.overtime_type_model && !overtimeData.overtime_type) {
-          toast.error('Seleccione el tipo de hora extra');
-          return;
-        }
         if (!overtimeData.reason_model && !overtimeData.reason) {
           toast.error('Seleccione el motivo');
           return;
         }
-        // Validate segments if variable rate
-        if (overtimeData.segments && overtimeData.segments.length > 0) {
-          for (let i = 0; i < overtimeData.segments.length; i++) {
-            const seg = overtimeData.segments[i];
+        const isVariable = overtimeData.segments && overtimeData.segments.length > 0;
+        if (isVariable) {
+          // Variable rate: validate each segment
+          for (let i = 0; i < overtimeData.segments!.length; i++) {
+            const seg = overtimeData.segments![i];
             if (!seg.overtime_type_model) {
               toast.error(`Seleccione el tipo de hora extra del tramo ${i + 1}`);
               return;
@@ -429,6 +422,16 @@ export const TokenCreatePage = () => {
               toast.error(`Complete el horario del tramo ${i + 1}`);
               return;
             }
+          }
+        } else {
+          // Single rate: validate main fields
+          if (!overtimeData.start_time || !overtimeData.end_time) {
+            toast.error('Indique la hora de inicio y fin');
+            return;
+          }
+          if (!overtimeData.overtime_type_model && !overtimeData.overtime_type) {
+            toast.error('Seleccione el tipo de hora extra');
+            return;
           }
         }
       }

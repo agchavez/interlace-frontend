@@ -154,10 +154,10 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
           <Grid item xs={12} md={6}>
             {useDynamicReasons ? (
               <FormControl fullWidth size="small" disabled={reasonsLoading} required>
-                <InputLabel>Motivo *</InputLabel>
+                <InputLabel>Motivo</InputLabel>
                 <Select
                   value={value.reason_model || ''}
-                  label="Motivo *"
+                  label="Motivo"
                   onChange={(e) => handleChange('reason_model', e.target.value)}
                   endAdornment={reasonsLoading ? <CircularProgress size={20} sx={{ mr: 2 }} /> : null}
                 >
@@ -181,7 +181,7 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
           {/* Date */}
           <Grid item xs={12} md={6}>
             <DatePicker
-              label="Fecha *"
+              label="Fecha"
               value={value.overtime_date ? dayjs(value.overtime_date) : null}
               onChange={(date) => handleChange('overtime_date', date?.format('YYYY-MM-DD') || '')}
               slotProps={{
@@ -209,10 +209,10 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
               <Grid item xs={12} md={4}>
                 {useDynamic ? (
                   <FormControl fullWidth size="small" disabled={typesLoading} required>
-                    <InputLabel>Tipo de Hora Extra *</InputLabel>
+                    <InputLabel>Tipo de Hora Extra</InputLabel>
                     <Select
                       value={value.overtime_type_model || ''}
-                      label="Tipo de Hora Extra *"
+                      label="Tipo de Hora Extra"
                       onChange={(e) => handleTypeChange(e.target.value as number)}
                       endAdornment={typesLoading ? <CircularProgress size={20} sx={{ mr: 2 }} /> : null}
                     >
@@ -237,7 +237,7 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
 
               <Grid item xs={12} md={3}>
                 <TimePicker
-                  label="Hora Inicio *"
+                  label="Hora Inicio"
                   value={value.start_time ? dayjs(`2000-01-01 ${value.start_time}`) : null}
                   onChange={(time) => handleChange('start_time', time?.format('HH:mm'))}
                   slotProps={{ textField: { fullWidth: true, size: 'small', required: true } }}
@@ -245,7 +245,7 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
               </Grid>
               <Grid item xs={12} md={3}>
                 <TimePicker
-                  label="Hora Fin *"
+                  label="Hora Fin"
                   value={value.end_time ? dayjs(`2000-01-01 ${value.end_time}`) : null}
                   onChange={(time) => handleChange('end_time', time?.format('HH:mm'))}
                   slotProps={{ textField: { fullWidth: true, size: 'small', required: true } }}
@@ -285,10 +285,10 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
                       {/* Type (required per segment) */}
                       <Grid item xs={12} sm={4}>
                         <FormControl fullWidth size="small" required error={!seg.overtime_type_model}>
-                          <InputLabel>Tipo *</InputLabel>
+                          <InputLabel>Tipo</InputLabel>
                           <Select
                             value={seg.overtime_type_model || ''}
-                            label="Tipo *"
+                            label="Tipo"
                             onChange={(e) => updateSegment(idx, 'overtime_type_model', e.target.value)}
                           >
                             {overtimeTypes.map((type) => (
@@ -301,7 +301,7 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
                       </Grid>
                       <Grid item xs={6} sm={2.5}>
                         <TimePicker
-                          label="Inicio *"
+                          label="Inicio"
                           value={seg.start_time ? dayjs(`2000-01-01 ${seg.start_time}`) : null}
                           onChange={(time) => updateSegment(idx, 'start_time', time?.format('HH:mm') || '')}
                           slotProps={{ textField: { fullWidth: true, size: 'small' } }}
@@ -309,7 +309,7 @@ export const OvertimeForm = ({ value, onChange }: OvertimeFormProps) => {
                       </Grid>
                       <Grid item xs={6} sm={2.5}>
                         <TimePicker
-                          label="Fin *"
+                          label="Fin"
                           value={seg.end_time ? dayjs(`2000-01-01 ${seg.end_time}`) : null}
                           onChange={(time) => updateSegment(idx, 'end_time', time?.format('HH:mm') || '')}
                           slotProps={{ textField: { fullWidth: true, size: 'small' } }}
