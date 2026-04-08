@@ -215,12 +215,6 @@ export const TokenCreatePage = () => {
     };
   }, []);
 
-  const { data: eligiblePersonnel, isFetching: personnelLoading } = useGetEligibleForTokenQuery(
-    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25, distributor_center: user?.centro_distribucion || undefined },
-    { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
-  );
-  const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
-
   // External persons list (for EXIT_PASS with is_external=true)
   const { data: externalPersonsData, refetch: refetchExternalPersons } = useGetExternalPersonsQuery(
     { is_active: true, limit: 100 },
@@ -250,6 +244,13 @@ export const TokenCreatePage = () => {
     valid_until: dayjs().add(1, 'day').format('YYYY-MM-DDTHH:mm'),
     requester_notes: '',
   });
+
+  // Personnel eligible for token (filtered by selected CD)
+  const { data: eligiblePersonnel, isFetching: personnelLoading } = useGetEligibleForTokenQuery(
+    { token_type: tokenType || undefined, search: debouncedSearch || undefined, limit: 25, distributor_center: baseData.distributor_center || undefined },
+    { skip: !tokenType || (tokenType === TokenType.EXIT_PASS && isExternalPerson) }
+  );
+  const personnelList: PersonnelProfileList[] = useMemo(() => eligiblePersonnel || [], [eligiblePersonnel]);
 
   // Form data for each type
   const [permitHourData, setPermitHourData] = useState<PermitHourCreatePayload>({
