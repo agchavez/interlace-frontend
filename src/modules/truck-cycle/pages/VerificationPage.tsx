@@ -102,9 +102,10 @@ export default function VerificationPage() {
 
     // Phase: 'VERIFICATION' (counting), 'CHECKOUT' (security), 'CHECKOUT_OPS' (operations), 'RETURN' (devolución), 'AUDIT' (auditoría)
     const rawPhase = searchParams.get('phase') || 'VERIFICATION';
-    const phase = (['CHECKOUT', 'CHECKOUT_OPS', 'RETURN', 'AUDIT'].includes(rawPhase) ? rawPhase : 'VERIFICATION') as 'VERIFICATION' | 'CHECKOUT' | 'CHECKOUT_OPS' | 'RETURN' | 'AUDIT';
-    const isCheckout = phase === 'CHECKOUT';
-    const isCheckoutOps = phase === 'CHECKOUT_OPS';
+    const isCheckoutOps = rawPhase === 'CHECKOUT_OPS';
+    // For inconsistency storage, CHECKOUT_OPS uses 'CHECKOUT' phase
+    const phase = (isCheckoutOps ? 'CHECKOUT' : ['CHECKOUT', 'RETURN', 'AUDIT'].includes(rawPhase) ? rawPhase : 'VERIFICATION') as 'VERIFICATION' | 'CHECKOUT' | 'RETURN' | 'AUDIT';
+    const isCheckout = phase === 'CHECKOUT' && !isCheckoutOps;
     const isAudit = phase === 'AUDIT';
     const isReturn = phase === 'RETURN';
     const needsValidator = isCheckout || isCheckoutOps;
@@ -507,7 +508,6 @@ export default function VerificationPage() {
                                 color="success"
                                 onDelete={() => { setSelectedProduct(null); setForm((p) => ({ ...p, material_code: '', product_name: '' })); }}
                                 sx={{ maxWidth: { xs: 150, sm: 250 }, overflow: 'hidden' }}
-                                sx={{ maxWidth: 300 }}
                             />
                         )}
                     </Box>
@@ -704,7 +704,7 @@ export default function VerificationPage() {
                                                 color={TYPE_COLOR[inc.inconsistency_type] ?? 'default'}
                                             />
                                             <Chip
-                                                label={inc.phase === 'VERIFICATION' ? 'Conteo' : inc.phase === 'CHECKOUT' ? 'Checkout' : inc.phase === 'CHECKOUT_OPS' ? 'Operaciones' : inc.phase === 'RETURN' ? 'Devolución' : inc.phase === 'AUDIT' ? 'Auditoría' : inc.phase}
+                                                label={inc.phase === 'VERIFICATION' ? 'Conteo' : inc.phase === 'CHECKOUT' ? 'Checkout' : inc.phase === 'RETURN' ? 'Devolución' : inc.phase === 'AUDIT' ? 'Auditoría' : inc.phase}
                                                 size="small"
                                                 variant="outlined"
                                                 sx={{ fontSize: '0.65rem' }}
