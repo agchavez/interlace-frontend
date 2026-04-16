@@ -154,17 +154,18 @@
 
 // Nuevo contenedor para V2
 .ui__container__v2 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 60px; // Altura del navbar
-  margin-left: 260px; // Ancho del sidebar abierto
+  margin-top: 60px;
+  margin-left: 260px;
+  width: calc(100% - 260px);
+  min-height: calc(100vh - 60px);
+  overflow-x: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // Cuando el sidebar está colapsado
 .ui__container__v2.collapsed {
-  margin-left: 68px; // Ancho del sidebar colapsado
+  margin-left: 68px;
+  width: calc(100% - 68px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

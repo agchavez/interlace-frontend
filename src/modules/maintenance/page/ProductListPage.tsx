@@ -4,7 +4,6 @@
  */
 import { useState, useMemo } from 'react';
 import {
-  Container,
   Grid,
   Card,
   Typography,
@@ -258,7 +257,7 @@ export const ProductListPage = () => {
   ], []);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Box sx={{ p: 3 }}>
       <Grid container spacing={3}>
         {/* Header */}
         <Grid item xs={12}>
@@ -499,6 +498,6 @@ export const ProductListPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };

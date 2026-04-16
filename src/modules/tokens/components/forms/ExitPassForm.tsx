@@ -105,6 +105,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
 
   const handleAddItem = () => {
     if (newItem.custom_description && newItem.quantity > 0) {
+      // Set the unit label based on item type
       const itemToAdd = { ...newItem };
       if (itemType === 'product') {
         itemToAdd.unit_label = productUnit;
@@ -138,6 +139,7 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
     return 'default';
   };
 
+  // Get unit label for display in the table
   const getItemUnitLabel = (item: ItemWithUnit): string => {
     if (item.unit_label) return item.unit_label;
     if (item.material) {
@@ -163,6 +165,15 @@ export const ExitPassForm = ({ value, onChange }: ExitPassFormProps) => {
               required
               value={value.destination || ''}
               onChange={(e) => handleChange('destination', e.target.value)}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <DatePicker
+              label="Fecha Esperada de Retorno (Opcional)"
+              value={value.expected_return_date ? dayjs(value.expected_return_date) : null}
+              onChange={(date) => handleChange('expected_return_date', date?.format('YYYY-MM-DD'))}
+              slotProps={{ textField: { fullWidth: true, size: 'small' } }}
             />
           </Grid>
 

@@ -40,6 +40,7 @@ import EngineeringTwoToneIcon from '@mui/icons-material/EngineeringTwoTone';
 import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -217,6 +218,23 @@ const SidebarV2: React.FC = () => {
       //   id: 'claim',
       // },
       {
+        text: 'Ciclo del Camión',
+        icon: <LocalShippingIcon fontSize="small" />,
+        subItems: [
+          { text: 'Dashboard', href: '/truck-cycle', id: 'tc-dashboard' },
+          { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
+          { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
+          { text: 'Operaciones del Día', href: '/truck-cycle/operations', id: 'tc-operations' },
+          { text: 'Picking', href: '/truck-cycle/picking', id: 'tc-picking' },
+          { text: 'Conteo', href: '/truck-cycle/counting', id: 'tc-counting' },
+          { text: 'Checkout', href: '/truck-cycle/checkout', id: 'tc-checkout' },
+          { text: 'Cola de Recargas', href: '/truck-cycle/reload-queue', id: 'tc-reload' },
+          { text: 'Workstation', href: '/truck-cycle/workstation', id: 'tc-workstation' },
+          { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
+        ],
+        id: 'truck-cycle',
+      },
+      {
         text: 'Tokens',
         icon: <ConfirmationNumberIcon fontSize="small" />,
         subItems: [
@@ -231,8 +249,9 @@ const SidebarV2: React.FC = () => {
         text: 'Mantenimiento',
         icon: <EngineeringTwoToneIcon fontSize="small" />,
         subItems: [
-          // { text: 'Centros de Distribución', href: '/maintenance/distributor-center', id: 'cd' },
-          // { text: 'Periodos', href: '/maintenance/period-center', id: 'period-center' },
+          { text: 'Centros de Distribución', href: '/maintenance/distributor-center', id: 'cd' },
+          { text: 'Camiones', href: '/maintenance/trucks', id: 'mt-trucks' },
+          { text: 'Bahías', href: '/maintenance/bays', id: 'mt-bays' },
           { text: 'Métricas de Desempeño', href: '/maintenance/metric-types', id: 'metric-types' },
           { text: 'Productos', href: '/maintenance/products', id: 'products' },
           { text: 'Materiales', href: '/tokens/materials', id: 'materials' },

@@ -4,7 +4,6 @@
  */
 import { useState, useMemo } from 'react';
 import {
-  Container,
   Grid,
   Card,
   Typography,
@@ -12,7 +11,6 @@ import {
   Box,
   Chip,
   IconButton,
-  Divider,
   TextField,
   Dialog,
   DialogContent,
@@ -271,24 +269,32 @@ export const ExternalPersonListPage = () => {
   ], []);
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h5">Personas Externas</Typography>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={400}>
+            Personas Externas
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            Gestione el catálogo de proveedores y visitantes que pueden recibir pases de salida
+          </Typography>
+        </Box>
         <Button
           variant="contained"
-          size="small"
           startIcon={<AddIcon />}
           onClick={handleOpenCreate}
-          color="warning"
         >
           Nueva Persona
         </Button>
       </Box>
-      <Divider sx={{ mb: 2 }} />
+
+      <Alert severity="info" sx={{ mb: 3 }}>
+        <strong>Personas Externas:</strong> Las personas registradas aquí estarán disponibles al crear tokens de pase de salida. Solo las personas activas serán visibles.
+      </Alert>
 
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <TextField
-          placeholder="Buscar por nombre, empresa o identificacion..."
+          placeholder="Buscar por nombre, empresa o identificación..."
           variant="outlined"
           size="small"
           value={search}
@@ -304,7 +310,7 @@ export const ExternalPersonListPage = () => {
         />
       </Box>
 
-      <Card variant="outlined">
+      <Card>
             <DataGrid
               rows={externalPersons}
               columns={columns}
@@ -498,6 +504,6 @@ export const ExternalPersonListPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Box>
   );
 };
