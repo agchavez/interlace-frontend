@@ -235,7 +235,7 @@ export default function WorkstationPage() {
                                                         {p.transport_number}
                                                     </Typography>
                                                     <Typography sx={{ color: '#f59e0b', fontSize: { xs: '0.55rem', md: '0.65rem' }, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                                                        {elapsedLabel(p.created_at)}
+                                                        {elapsedLabel(p.last_status_change ?? p.created_at)}
                                                     </Typography>
                                                 </Box>
                                                 <Typography sx={{ color: '#94a3b8', fontSize: { xs: '0.6rem', md: '0.7rem' } }}>
@@ -289,7 +289,7 @@ export default function WorkstationPage() {
                                 </Typography>
                             </Box>
                             <Typography sx={{ color: '#94a3b8', fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
-                                {p.truck_plate} &middot; Espera: {elapsedLabel(p.created_at)}
+                                {p.truck_plate} &middot; Espera: {elapsedLabel(p.last_status_change ?? p.created_at)}
                             </Typography>
                         </Box>
                     )) : (

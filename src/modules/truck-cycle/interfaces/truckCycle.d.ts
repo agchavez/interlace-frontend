@@ -104,6 +104,9 @@ export interface PautaListItem {
     truck_plate: string;
     truck_code: string;
     created_at: string;
+    last_status_change: string | null;
+    assigned_to: { name: string; role: string } | null;
+    bay_code: string | null;
 }
 
 export interface PautaProductDetail {

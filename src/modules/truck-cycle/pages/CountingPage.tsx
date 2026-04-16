@@ -29,6 +29,7 @@ import {
     MoreVert as MoreVertIcon,
     PersonAdd as AssignIcon,
     CheckCircle as CompleteIcon,
+    FactCheck as VerifyIcon,
     AddCircle as AddIcon,
     PhotoCamera as PhotoIcon,
     HourglassEmpty as PendingIcon,
@@ -36,15 +37,16 @@ import {
     Assignment as TotalIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
 import {
     useGetPautasQuery,
-    useGetPautaQuery,
     useAssignCounterMutation,
     useCompleteCountMutation,
     useCreateInconsistencyMutation,
     useUploadPhotoMutation,
 } from '../services/truckCycleApi';
+import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
 import { useGetPersonnelProfilesQuery } from '../../../modules/personnel/services/personnelApi';
 import type { PautaStatus, PautaListItem, Inconsistency } from '../interfaces/truckCycle';
 import type { PersonnelProfileList } from '../../../interfaces/personnel';
@@ -162,6 +164,7 @@ const COUNTING_STATUSES = 'PENDING_COUNT,COUNTING,COUNTED';
 export default function CountingPage() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const navigate = useNavigate();
 
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
         page: 0,
@@ -205,9 +208,13 @@ export default function CountingPage() {
         limit: 50,
     }, { skip: !assignDialogOpen });
 
-    // Load pauta detail for product autocomplete in inconsistency dialog
-    const { data: incPautaDetail } = useGetPautaQuery(incPauta?.id ?? 0, { skip: !incDialogOpen || !incPauta });
-    const pautaProducts = incPautaDetail?.product_details ?? [];
+    // Load products from maintenance for inconsistency autocomplete
+    const [productSearch, setProductSearch] = useState('');
+    const { data: productData } = useGetProductQuery(
+        { search: productSearch || undefined, limit: 50, offset: 0 },
+        { skip: !incDialogOpen },
+    );
+    const productOptions = productData?.results ?? [];
 
     // Mutations
     const [assignCounter, { isLoading: assigning }] = useAssignCounterMutation();
@@ -381,7 +388,7 @@ export default function CountingPage() {
                         <Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <PautaStatusBadge status={params.row.status as PautaStatus} />
                             {params.row.status === 'COUNTING' && (
-                                <CountingTimer createdAt={params.row.created_at} />
+                                <CountingTimer createdAt={params.row.last_status_change ?? params.row.created_at} />
                             )}
                         </Box>
                     </Box>
@@ -397,15 +404,14 @@ export default function CountingPage() {
                 {
                     field: 'trip_number',
                     headerName: 'Viaje',
-                    width: 100,
+                    width: 80,
                 },
                 {
                     field: 'truck_code',
                     headerName: 'Camion',
-                    flex: 1,
-                    minWidth: 160,
+                    width: 130,
                     renderCell: (params: GridRenderCellParams) => (
-                        <Typography variant="body2">
+                        <Typography variant="body2" noWrap>
                             {params.row.truck_code} - {params.row.truck_plate}
                         </Typography>
                     ),
@@ -413,9 +419,25 @@ export default function CountingPage() {
                 {
                     field: 'total_boxes',
                     headerName: 'Cajas',
-                    width: 100,
+                    width: 80,
                     align: 'right',
                     headerAlign: 'right',
+                },
+                {
+                    field: 'assigned_to',
+                    headerName: 'Asignado',
+                    flex: 1,
+                    minWidth: 140,
+                    renderCell: (params: GridRenderCellParams) => {
+                        const assigned = params.row.assigned_to;
+                        if (!assigned) return <Typography variant="body2" color="text.disabled">—</Typography>;
+                        return (
+                            <Box>
+                                <Typography variant="body2" fontWeight={500} noWrap>{assigned.name}</Typography>
+                                <Typography variant="caption" color="text.secondary" noWrap>{assigned.role}</Typography>
+                            </Box>
+                        );
+                    },
                 },
                 {
                     field: 'status',
@@ -425,7 +447,7 @@ export default function CountingPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PautaStatusBadge status={params.value as PautaStatus} />
                             {params.value === 'COUNTING' && (
-                                <CountingTimer createdAt={params.row.created_at} />
+                                <CountingTimer createdAt={params.row.last_status_change ?? params.row.created_at} />
                             )}
                         </Box>
                     ),
@@ -433,27 +455,46 @@ export default function CountingPage() {
             );
         }
 
-        // Actions column
+        // Action button column
         cols.push({
             field: 'actions',
-            headerName: '',
-            width: 60,
+            headerName: 'Acción',
+            width: isMobile ? 100 : 180,
             sortable: false,
             align: 'center',
             headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => (
-                <IconButton
-                    size="small"
-                    onClick={(e) => handleOpenMenu(e, params.row)}
-                    sx={{ '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.1)' } }}
-                >
-                    <MoreVertIcon fontSize="small" />
-                </IconButton>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {params.row.status === 'PENDING_COUNT' && (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            startIcon={!isMobile ? <AssignIcon /> : undefined}
+                            onClick={(e) => { e.stopPropagation(); handleOpenAssignDialog(params.row); }}
+                            sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
+                        >
+                            {isMobile ? <AssignIcon fontSize="small" /> : 'Asignar'}
+                        </Button>
+                    )}
+                    {(params.row.status === 'COUNTING' || params.row.status === 'COUNTED') && (
+                        <Button
+                            size="small"
+                            variant={params.row.status === 'COUNTING' ? 'contained' : 'outlined'}
+                            color="info"
+                            startIcon={!isMobile ? <VerifyIcon /> : undefined}
+                            onClick={(e) => { e.stopPropagation(); navigate(`/truck-cycle/verify/${params.row.id}`); }}
+                            sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
+                        >
+                            {isMobile ? <VerifyIcon fontSize="small" /> : 'Verificar'}
+                        </Button>
+                    )}
+                </Box>
             ),
         });
 
         return cols;
-    }, [isMobile, handleOpenMenu]);
+    }, [isMobile, handleOpenMenu, completing]);
 
     if (error) {
         return (
@@ -579,25 +620,6 @@ export default function CountingPage() {
                     },
                 }}
             >
-                {selectedRow?.status === 'PENDING_COUNT' && (
-                    <MenuItem onClick={() => selectedRow && handleOpenAssignDialog(selectedRow)}>
-                        <ListItemIcon>
-                            <AssignIcon fontSize="small" color="primary" />
-                        </ListItemIcon>
-                        <ListItemText>Asignar Contador</ListItemText>
-                    </MenuItem>
-                )}
-                {selectedRow?.status === 'COUNTING' && (
-                    <MenuItem
-                        onClick={() => selectedRow && handleCompleteCount(selectedRow.id)}
-                        disabled={completing}
-                    >
-                        <ListItemIcon>
-                            <CompleteIcon fontSize="small" sx={{ color: 'success.main' }} />
-                        </ListItemIcon>
-                        <ListItemText>Completar Conteo</ListItemText>
-                    </MenuItem>
-                )}
                 {(selectedRow?.status === 'COUNTING' || selectedRow?.status === 'COUNTED') && (
                     <MenuItem onClick={() => selectedRow && handleOpenIncDialog(selectedRow)}>
                         <ListItemIcon>
@@ -714,21 +736,23 @@ export default function CountingPage() {
                     <Autocomplete
                         fullWidth
                         size="small"
-                        options={pautaProducts}
-                        getOptionLabel={(opt) => `${opt.material_code} - ${opt.product_name}`}
+                        options={productOptions}
+                        getOptionLabel={(opt) => `${opt.sap_code} - ${opt.name}`}
+                        onInputChange={(_e, value) => setProductSearch(value)}
                         onChange={(_e, val) => {
                             if (val) {
                                 setIncForm((prev) => ({
                                     ...prev,
-                                    material_code: val.material_code,
-                                    product_name: val.product_name,
-                                    expected_quantity: String(val.total_boxes),
+                                    material_code: val.sap_code,
+                                    product_name: val.name,
                                 }));
                             }
                         }}
+                        filterOptions={(x) => x}
                         renderInput={(params) => (
-                            <TextField {...params} label="Producto *" placeholder="Buscar producto de la pauta..." />
+                            <TextField {...params} label="Producto *" placeholder="Buscar producto..." />
                         )}
+                        noOptionsText={productSearch ? 'Sin resultados' : 'Escriba para buscar'}
                         sx={{ mb: 2 }}
                     />
                     <Grid container spacing={2} sx={{ mb: 2 }}>

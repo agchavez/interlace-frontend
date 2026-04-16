@@ -224,6 +224,7 @@ const SidebarV2: React.FC = () => {
           { text: 'Dashboard', href: '/truck-cycle', id: 'tc-dashboard' },
           { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
           { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
+          { text: 'Operaciones del Día', href: '/truck-cycle/operations', id: 'tc-operations' },
           { text: 'Picking', href: '/truck-cycle/picking', id: 'tc-picking' },
           { text: 'Conteo', href: '/truck-cycle/counting', id: 'tc-counting' },
           { text: 'Checkout', href: '/truck-cycle/checkout', id: 'tc-checkout' },

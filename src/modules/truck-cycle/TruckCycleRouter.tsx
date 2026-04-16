@@ -10,6 +10,8 @@ import ReloadQueuePage from './pages/ReloadQueuePage';
 import WorkstationPage from './pages/WorkstationPage';
 import KPIConfigPage from './pages/KPIConfigPage';
 import KPIReportPage from './pages/KPIReportPage';
+import OperationsPage from './pages/OperationsPage';
+import VerificationPage from './pages/VerificationPage';
 function TruckCycleRouter() {
   return (
     <Routes>
@@ -17,8 +19,10 @@ function TruckCycleRouter() {
       <Route path="/upload" element={<UploadPalletPage />} />
       <Route path="/pautas" element={<PautaListPage />} />
       <Route path="/pautas/:id" element={<PautaDetailPage />} />
+      <Route path="/operations" element={<OperationsPage />} />
       <Route path="/picking" element={<PickingPage />} />
       <Route path="/counting" element={<CountingPage />} />
+      <Route path="/verify/:id" element={<VerificationPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/reload-queue" element={<ReloadQueuePage />} />
       <Route path="/workstation" element={<WorkstationPage />} />

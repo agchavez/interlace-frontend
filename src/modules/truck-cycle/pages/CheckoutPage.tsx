@@ -51,13 +51,13 @@ import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from 
 import PautaStatusBadge from '../components/PautaStatusBadge';
 import {
     useGetPautasQuery,
-    useGetPautaQuery,
     useCheckoutSecurityMutation,
     useCheckoutOpsMutation,
     useDispatchPautaMutation,
     useStartAuditMutation,
     useCreateInconsistencyMutation,
 } from '../services/truckCycleApi';
+import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
 import { useGetPersonnelProfilesQuery } from '../../../modules/personnel/services/personnelApi';
 import type { PautaStatus, PautaListItem, Inconsistency } from '../interfaces/truckCycle';
 import type { PersonnelProfileList } from '../../../interfaces/personnel';
@@ -160,9 +160,13 @@ export default function CheckoutPage() {
         limit: 50,
     }, { skip: !dialogOpen });
 
-    // Load pauta products for inconsistency autocomplete
-    const { data: dialogPautaDetail } = useGetPautaQuery(dialogPauta?.id ?? 0, { skip: !dialogOpen || !dialogPauta });
-    const pautaProducts = dialogPautaDetail?.product_details ?? [];
+    // Load products from maintenance for inconsistency autocomplete
+    const [productSearch, setProductSearch] = useState('');
+    const { data: productData } = useGetProductQuery(
+        { search: productSearch || undefined, limit: 50, offset: 0 },
+        { skip: !dialogOpen },
+    );
+    const productOptions = productData?.results ?? [];
 
     // Mutations
     const [checkoutSecurity, { isLoading: isSecurityLoading }] = useCheckoutSecurityMutation();
@@ -290,7 +294,7 @@ export default function CheckoutPage() {
                 <Tooltip title="Checkout Seguridad">
                     <Button size="small" variant="outlined" color="primary"
                         startIcon={!isMobile ? <SecurityIcon /> : undefined}
-                        onClick={(e) => { e.stopPropagation(); openDialog(row, 'security'); }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/truck-cycle/verify/${row.id}?phase=CHECKOUT`); }}
                         sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
                     >
                         {isMobile ? <SecurityIcon fontSize="small" /> : 'Seguridad'}
@@ -303,7 +307,7 @@ export default function CheckoutPage() {
                 <Tooltip title="Checkout Operaciones">
                     <Button size="small" variant="contained" color="secondary"
                         startIcon={!isMobile ? <EngineeringIcon /> : undefined}
-                        onClick={(e) => { e.stopPropagation(); openDialog(row, 'ops'); }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/truck-cycle/verify/${row.id}?phase=CHECKOUT_OPS`); }}
                         sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
                     >
                         {isMobile ? <EngineeringIcon fontSize="small" /> : 'Operaciones'}
@@ -358,12 +362,25 @@ export default function CheckoutPage() {
                 { field: 'transport_number', headerName: 'Transporte', width: 110 },
                 { field: 'trip_number', headerName: 'Viaje', width: 80 },
                 {
-                    field: 'truck_code', headerName: 'Camión', flex: 1, minWidth: 150,
+                    field: 'truck_code', headerName: 'Camión', width: 130,
                     renderCell: (params: GridRenderCellParams) => (
                         <Typography variant="body2" noWrap>{params.row.truck_code || '?'} - {params.row.truck_plate}</Typography>
                     ),
                 },
                 { field: 'total_boxes', headerName: 'Cajas', width: 80, align: 'right', headerAlign: 'right' },
+                {
+                    field: 'assigned_to', headerName: 'Validador', flex: 1, minWidth: 130,
+                    renderCell: (params: GridRenderCellParams) => {
+                        const assigned = params.row.assigned_to;
+                        if (!assigned) return <Typography variant="body2" color="text.disabled">—</Typography>;
+                        return (
+                            <Box>
+                                <Typography variant="body2" fontWeight={500} noWrap>{assigned.name}</Typography>
+                                <Typography variant="caption" color="text.secondary" noWrap>{assigned.role}</Typography>
+                            </Box>
+                        );
+                    },
+                },
                 {
                     field: 'status', headerName: 'Estado', width: 160,
                     renderCell: (params: GridRenderCellParams) => <PautaStatusBadge status={params.value as PautaStatus} />,
@@ -606,19 +623,20 @@ export default function CheckoutPage() {
                                         <Grid item xs={12} sm={5}>
                                             <Autocomplete
                                                 size="small"
-                                                options={pautaProducts}
-                                                getOptionLabel={(opt) => `${opt.material_code} - ${opt.product_name}`}
+                                                options={productOptions}
+                                                getOptionLabel={(opt) => `${opt.sap_code} - ${opt.name}`}
+                                                onInputChange={(_e, value) => setProductSearch(value)}
                                                 onChange={(_e, val) => {
                                                     if (val) {
-                                                        updateInconsistencyRow(idx, 'material_code', val.material_code);
-                                                        updateInconsistencyRow(idx, 'product_name', val.product_name);
-                                                        updateInconsistencyRow(idx, 'expected_quantity', String(val.total_boxes));
+                                                        updateInconsistencyRow(idx, 'material_code', val.sap_code);
+                                                        updateInconsistencyRow(idx, 'product_name', val.name);
                                                     }
                                                 }}
+                                                filterOptions={(x) => x}
                                                 renderInput={(params) => (
                                                     <TextField {...params} label="Producto" placeholder="Buscar..." />
                                                 )}
-                                                noOptionsText="Sin productos"
+                                                noOptionsText={productSearch ? 'Sin resultados' : 'Escriba para buscar'}
                                             />
                                         </Grid>
                                         <Grid item xs={4} sm={1.5}>

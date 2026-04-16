@@ -260,7 +260,7 @@ export default function PickingPage() {
                         <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, alignItems: 'center' }}>
                             <PautaStatusBadge status={params.row.status as PautaStatus} />
                             {params.row.status === 'PICKING_IN_PROGRESS' && (
-                                <PickingTimer createdAt={params.row.created_at} />
+                                <PickingTimer createdAt={params.row.last_status_change ?? params.row.created_at} />
                             )}
                         </Box>
                     </Box>
@@ -273,8 +273,7 @@ export default function PickingPage() {
                 {
                     field: 'truck_code',
                     headerName: 'Camión',
-                    flex: 1,
-                    minWidth: 160,
+                    width: 130,
                     renderCell: (params: GridRenderCellParams) => (
                         <Typography variant="body2" noWrap>
                             {params.row.truck_code || '?'} - {params.row.truck_plate}
@@ -283,14 +282,31 @@ export default function PickingPage() {
                 },
                 { field: 'total_boxes', headerName: 'Cajas', width: 90, align: 'right', headerAlign: 'right' },
                 {
+                    field: 'assigned_to',
+                    headerName: 'Asignado',
+                    flex: 1,
+                    minWidth: 140,
+                    renderCell: (params: GridRenderCellParams) => {
+                        const assigned = params.row.assigned_to;
+                        if (!assigned) return <Typography variant="body2" color="text.disabled">—</Typography>;
+                        return (
+                            <Box>
+                                <Typography variant="body2" fontWeight={500} noWrap>{assigned.name}</Typography>
+                                <Typography variant="caption" color="text.secondary" noWrap>{assigned.role}</Typography>
+                            </Box>
+                        );
+                    },
+                },
+                {
                     field: 'status',
                     headerName: 'Estado',
-                    width: 200,
+                    width: 250,
+                    minWidth: 180,
                     renderCell: (params: GridRenderCellParams) => (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <PautaStatusBadge status={params.value as PautaStatus} />
                             {params.value === 'PICKING_IN_PROGRESS' && (
-                                <PickingTimer createdAt={params.row.created_at} />
+                                <PickingTimer createdAt={params.row.last_status_change ?? params.row.created_at} />
                             )}
                         </Box>
                     ),

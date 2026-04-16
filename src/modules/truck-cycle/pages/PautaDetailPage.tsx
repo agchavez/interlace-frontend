@@ -12,10 +12,6 @@ import {
     Tabs,
     Tab,
     Chip,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
     Avatar,
     useTheme,
     useMediaQuery,
@@ -26,15 +22,10 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Tooltip,
 } from '@mui/material';
 import {
     ArrowBack as BackIcon,
     LocalShipping as TruckIcon,
-    Inventory as BoxIcon,
-    Category as SkuIcon,
-    ViewInAr as PalletIcon,
-    Circle as CircleIcon,
     QrCode2 as QrIcon,
     ContentCopy as CopyIcon,
     PictureAsPdf as PdfIcon,
@@ -49,8 +40,22 @@ import {
     CheckCircle as CheckIcon,
     Cancel as CancelIcon,
     Download as DownloadIcon,
+    PlayArrow as PlayIcon,
+    AssignmentTurnedIn as AssignmentIcon,
+    Warehouse as WarehouseIcon,
+    FactCheck as FactCheckIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import {
+    Timeline,
+    TimelineItem,
+    TimelineSeparator,
+    TimelineConnector,
+    TimelineContent,
+    TimelineDot,
+    TimelineOppositeContent,
+    timelineOppositeContentClasses,
+} from '@mui/lab';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
@@ -63,6 +68,8 @@ import {
     useCompleteCountMutation,
     useDispatchPautaMutation,
     useClosePautaMutation,
+    useStartAuditMutation,
+    useGeneratePalletTicketsMutation,
 } from '../services/truckCycleApi';
 import { useAppSelector } from '../../../store';
 import type { PautaStatus } from '../interfaces/truckCycle';
@@ -91,6 +98,18 @@ const InfoItem = ({
         </Box>
     </Box>
 );
+
+const getTimelineIcon = (eventType: string): { icon: React.ReactNode; color: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info' | 'grey' } => {
+    const type = eventType.toUpperCase();
+    if (type.includes('INICIO') || type.includes('START')) return { icon: <PlayIcon fontSize="small" />, color: 'primary' };
+    if (type.includes('FIN') || type.includes('COMPLETE') || type.includes('DONE')) return { icon: <CheckIcon fontSize="small" />, color: 'success' };
+    if (type.includes('ANDEN') || type.includes('BAY') || type.includes('BAHIA')) return { icon: <WarehouseIcon fontSize="small" />, color: 'info' };
+    if (type.includes('CONTEO') || type.includes('COUNT')) return { icon: <FactCheckIcon fontSize="small" />, color: 'warning' };
+    if (type.includes('DESPACHO') || type.includes('DISPATCH')) return { icon: <TruckIcon fontSize="small" />, color: 'success' };
+    if (type.includes('CANCEL')) return { icon: <CancelIcon fontSize="small" />, color: 'error' };
+    if (type.includes('ASIGN') || type.includes('ASSIGN')) return { icon: <AssignmentIcon fontSize="small" />, color: 'secondary' };
+    return { icon: <DateIcon fontSize="small" />, color: 'grey' };
+};
 
 const INCONSISTENCY_TYPE_COLORS: Record<string, 'error' | 'warning' | 'info' | 'default'> = {
     FALTANTE: 'error',
@@ -121,6 +140,8 @@ export default function PautaDetailPage() {
     const [completeCount, { isLoading: completingCount }] = useCompleteCountMutation();
     const [dispatchPauta, { isLoading: dispatching }] = useDispatchPautaMutation();
     const [closePauta, { isLoading: closing }] = useClosePautaMutation();
+    const [startAudit, { isLoading: startingAudit }] = useStartAuditMutation();
+    const [generateTickets, { isLoading: generatingTickets }] = useGeneratePalletTicketsMutation();
 
     const pdfUrl = id ? `${import.meta.env.VITE_JS_APP_API_URL}/api/truck-cycle-pauta/${id}/download_pdf/` : '';
     const qrUrl = `${window.location.origin}/truck-cycle/pautas/${id}`;
@@ -187,10 +208,16 @@ export default function PautaDetailPage() {
             color: 'success',
         },
         COUNTING: {
-            label: 'Completar Conteo',
-            action: () => completeCount(pauta.id),
-            loading: completingCount,
-            color: 'success',
+            label: 'Verificar',
+            action: () => navigate(`/truck-cycle/verify/${pauta.id}`),
+            loading: false,
+            color: 'primary',
+        },
+        COUNTED: {
+            label: 'Checkout Seguridad',
+            action: () => navigate(`/truck-cycle/verify/${pauta.id}?phase=CHECKOUT`),
+            loading: false,
+            color: 'primary',
         },
         CHECKOUT_OPS: {
             label: 'Despachar',
@@ -198,7 +225,19 @@ export default function PautaDetailPage() {
             loading: dispatching,
             color: 'warning',
         },
+        IN_AUDIT: {
+            label: 'Completar Auditoría',
+            action: () => navigate(`/truck-cycle/verify/${pauta.id}?phase=AUDIT`),
+            loading: false,
+            color: 'warning',
+        },
         RETURN_PROCESSED: {
+            label: 'Cerrar Pauta',
+            action: () => closePauta(pauta.id),
+            loading: closing,
+            color: 'error',
+        },
+        AUDIT_COMPLETE: {
             label: 'Cerrar Pauta',
             action: () => closePauta(pauta.id),
             loading: closing,
@@ -233,16 +272,6 @@ export default function PautaDetailPage() {
         if (!date) return '-';
         return new Date(date).toLocaleString('es-HN', { dateStyle: 'medium', timeStyle: 'short' });
     };
-
-    // Product Details columns
-    const productColumns: GridColDef[] = [
-        { field: 'material_code', headerName: 'Código', flex: 0.8, minWidth: 120 },
-        { field: 'product_name', headerName: 'Producto', flex: 1.2, minWidth: 180 },
-        { field: 'category', headerName: 'Categoría', flex: 0.8, minWidth: 120 },
-        { field: 'total_boxes', headerName: 'Cajas', flex: 0.5, minWidth: 80, align: 'right', headerAlign: 'right' },
-        { field: 'full_pallets', headerName: 'Pallets', flex: 0.5, minWidth: 80, align: 'right', headerAlign: 'right' },
-        { field: 'fraction', headerName: 'Fracción', flex: 0.5, minWidth: 80, align: 'right', headerAlign: 'right' },
-    ];
 
     const assignmentColumns: GridColDef[] = [
         { field: 'role_display', headerName: 'Rol', flex: 1, minWidth: 120 },
@@ -499,77 +528,149 @@ export default function PautaDetailPage() {
                                 '& .MuiTab-root': { fontWeight: 600, textTransform: 'none' },
                             }}
                         >
-                            <Tab label="Productos" />
                             <Tab label="Línea de Tiempo" />
                             <Tab label="Asignaciones" />
                             <Tab label={`Inconsistencias (${pauta.inconsistencies.length})`} />
                             <Tab label={`Fotos (${pauta.photos.length})`} />
                         </Tabs>
 
-                        {/* Products Tab */}
-                        {tabIndex === 0 && (
-                            <DataGrid
-                                rows={pauta.product_details}
-                                columns={productColumns}
-                                autoHeight
-                                disableRowSelectionOnClick
-                                pageSizeOptions={[10, 25, 50]}
-                                initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                                localeText={{ noRowsLabel: 'Sin productos.' }}
-                                sx={dataGridSx}
-                            />
-                        )}
-
                         {/* Timeline Tab */}
-                        {tabIndex === 1 && (
-                            <>
+                        {tabIndex === 0 && (() => {
+                            // Build lookup: event_type → timestamp for duration calculations
+                            const tsByType: Record<string, string> = {};
+                            for (const ts of pauta.timestamps) {
+                                tsByType[ts.event_type] = ts.timestamp;
+                            }
+
+                            // Duration pairs: end event → start event, label
+                            const DURATION_PAIRS: Record<string, { start: string; label: string; chipColor: 'primary' | 'success' | 'info' | 'warning' }> = {
+                                T1_PICKING_END: { start: 'T0_PICKING_START', label: 'Picking', chipColor: 'primary' },
+                                T4_LOADING_END: { start: 'T2_BAY_ASSIGNED', label: 'Carga', chipColor: 'info' },
+                                T6_COUNT_END: { start: 'T5_COUNT_START', label: 'Conteo', chipColor: 'warning' },
+                                T8_CHECKOUT_OPS: { start: 'T7_CHECKOUT_SECURITY', label: 'Checkout', chipColor: 'success' },
+                            };
+
+                            const formatDuration = (startTs: string, endTs: string) => {
+                                const diff = Math.max(0, new Date(endTs).getTime() - new Date(startTs).getTime());
+                                const h = Math.floor(diff / 3_600_000);
+                                const m = Math.floor((diff % 3_600_000) / 60_000);
+                                const s = Math.floor((diff % 60_000) / 1_000);
+                                if (h > 0) return `${h}h ${m}m ${s}s`;
+                                if (m > 0) return `${m}m ${s}s`;
+                                return `${s}s`;
+                            };
+
+                            // Map event types to the relevant assignment role
+                            const EVENT_ROLE_MAP: Record<string, string> = {
+                                T0_PICKING_START: 'PICKER',
+                                T1_PICKING_END: 'PICKER',
+                                T5_COUNT_START: 'COUNTER',
+                                T6_COUNT_END: 'COUNTER',
+                                T2_BAY_ASSIGNED: 'YARD_DRIVER',
+                                T7_CHECKOUT_SECURITY: 'SECURITY',
+                                T8_CHECKOUT_OPS: 'OPERATIONS',
+                            };
+
+                            // Build role → personnel name from assignments
+                            const rolePersonnel: Record<string, string> = {};
+                            for (const a of pauta.assignments) {
+                                rolePersonnel[a.role] = a.personnel_name;
+                            }
+
+                            return (
+                            <Box sx={{ p: { xs: 1, sm: 2 } }}>
                                 {pauta.timestamps.length === 0 ? (
                                     <Box sx={{ p: 3, textAlign: 'center' }}>
                                         <Typography color="text.secondary">Sin eventos registrados.</Typography>
                                     </Box>
                                 ) : (
-                                    <List sx={{ p: 0 }}>
-                                        {pauta.timestamps.map((ts, index) => (
-                                            <ListItem
-                                                key={ts.id}
-                                                divider={index < pauta.timestamps.length - 1}
-                                                sx={{
-                                                    py: 2,
-                                                    px: { xs: 2, sm: 3 },
-                                                    '&:hover': { backgroundColor: theme.palette.action.hover },
-                                                }}
-                                            >
-                                                <ListItemIcon sx={{ minWidth: 40 }}>
-                                                    <CircleIcon sx={{ fontSize: 12, color: theme.palette.primary.main }} />
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={
-                                                        <Typography fontWeight={600} variant="body1">
+                                    <Timeline
+                                        sx={{
+                                            p: 0,
+                                            [`& .${timelineOppositeContentClasses.root}`]: {
+                                                flex: { xs: 0, sm: 0.3 },
+                                            },
+                                        }}
+                                    >
+                                        {pauta.timestamps.map((ts, index) => {
+                                            const { icon, color } = getTimelineIcon(ts.event_type_display);
+                                            const isLast = index === pauta.timestamps.length - 1;
+
+                                            // Duration chip for end events
+                                            const durationInfo = DURATION_PAIRS[ts.event_type];
+                                            const startTs = durationInfo ? tsByType[durationInfo.start] : null;
+                                            const durationLabel = durationInfo && startTs
+                                                ? `${durationInfo.label}: ${formatDuration(startTs, ts.timestamp)}`
+                                                : null;
+
+                                            // Assigned personnel for this event
+                                            const role = EVENT_ROLE_MAP[ts.event_type];
+                                            const assignedName = role ? rolePersonnel[role] : null;
+
+                                            return (
+                                                <TimelineItem key={ts.id}>
+                                                    <TimelineOppositeContent
+                                                        sx={{
+                                                            display: { xs: 'none', sm: 'block' },
+                                                            pt: 2,
+                                                            typography: 'body2',
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    >
+                                                        {formatDateTime(ts.timestamp)}
+                                                    </TimelineOppositeContent>
+                                                    <TimelineSeparator>
+                                                        <TimelineDot color={color} variant={isLast ? 'filled' : 'outlined'}>
+                                                            {icon}
+                                                        </TimelineDot>
+                                                        {!isLast && <TimelineConnector />}
+                                                    </TimelineSeparator>
+                                                    <TimelineContent sx={{ pt: 1.5, pb: 3 }}>
+                                                        <Typography variant="body1" fontWeight={600}>
                                                             {ts.event_type_display}
                                                         </Typography>
-                                                    }
-                                                    secondary={
-                                                        <Box sx={{ mt: 0.5 }}>
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {formatDateTime(ts.timestamp)} - {ts.recorded_by_name}
+                                                        <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'block', sm: 'none' }, mt: 0.25 }}>
+                                                            {formatDateTime(ts.timestamp)}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+                                                            {ts.recorded_by_name}
+                                                        </Typography>
+                                                        {assignedName && (
+                                                            <Chip
+                                                                icon={<PersonIcon sx={{ fontSize: 16 }} />}
+                                                                label={assignedName}
+                                                                size="small"
+                                                                variant="outlined"
+                                                                color="secondary"
+                                                                sx={{ mt: 0.75, fontWeight: 500 }}
+                                                            />
+                                                        )}
+                                                        {durationLabel && (
+                                                            <Chip
+                                                                icon={<SpeedIcon sx={{ fontSize: 16 }} />}
+                                                                label={durationLabel}
+                                                                size="small"
+                                                                color={durationInfo!.chipColor}
+                                                                sx={{ mt: 0.75, ml: assignedName ? 0.75 : 0, fontWeight: 600, fontFamily: 'monospace' }}
+                                                            />
+                                                        )}
+                                                        {ts.notes && (
+                                                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+                                                                {ts.notes}
                                                             </Typography>
-                                                            {ts.notes && (
-                                                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
-                                                                    {ts.notes}
-                                                                </Typography>
-                                                            )}
-                                                        </Box>
-                                                    }
-                                                />
-                                            </ListItem>
-                                        ))}
-                                    </List>
+                                                        )}
+                                                    </TimelineContent>
+                                                </TimelineItem>
+                                            );
+                                        })}
+                                    </Timeline>
                                 )}
-                            </>
-                        )}
+                            </Box>
+                            );
+                        })()}
 
                         {/* Assignments Tab */}
-                        {tabIndex === 2 && (
+                        {tabIndex === 1 && (
                             <DataGrid
                                 rows={pauta.assignments}
                                 columns={assignmentColumns}
@@ -583,7 +684,7 @@ export default function PautaDetailPage() {
                         )}
 
                         {/* Inconsistencies Tab */}
-                        {tabIndex === 3 && (
+                        {tabIndex === 2 && (
                             <DataGrid
                                 rows={pauta.inconsistencies}
                                 columns={inconsistencyColumns}
@@ -597,7 +698,7 @@ export default function PautaDetailPage() {
                         )}
 
                         {/* Photos Tab */}
-                        {tabIndex === 4 && (
+                        {tabIndex === 3 && (
                             <Box sx={{ p: 2 }}>
                                 {pauta.photos.length === 0 ? (
                                     <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -695,6 +796,49 @@ export default function PautaDetailPage() {
                                         </Button>
                                     </>
                                 )}
+
+                                {/* Enviar a Auditoría */}
+                                {['COUNTED', 'RETURN_PROCESSED'].includes(pauta.status) && (
+                                    <>
+                                        <Divider />
+                                        <Button
+                                            variant="outlined"
+                                            color="warning"
+                                            size="small"
+                                            onClick={() => startAudit(pauta.id)}
+                                            disabled={startingAudit}
+                                            startIcon={startingAudit ? <CircularProgress size={16} /> : undefined}
+                                            fullWidth
+                                        >
+                                            Enviar a Auditoría
+                                        </Button>
+                                    </>
+                                )}
+
+                                {/* Generar Pallet Tickets */}
+                                {!['PENDING_PICKING', 'PICKING_ASSIGNED', 'CLOSED', 'CANCELLED'].includes(pauta.status) && (
+                                    <>
+                                        <Divider />
+                                        <Button
+                                            variant="outlined"
+                                            color="info"
+                                            size="small"
+                                            onClick={async () => {
+                                                try {
+                                                    await generateTickets({ pauta_id: pauta.id }).unwrap();
+                                                    toast.success('Tickets de pallet generados');
+                                                } catch {
+                                                    toast.error('Error al generar tickets');
+                                                }
+                                            }}
+                                            disabled={generatingTickets}
+                                            startIcon={generatingTickets ? <CircularProgress size={16} /> : <QrIcon />}
+                                            fullWidth
+                                        >
+                                            Generar Pallet Tickets
+                                        </Button>
+                                    </>
+                                )}
                             </Box>
                         </CardContent>
                     </Card>
@@ -755,7 +899,7 @@ export default function PautaDetailPage() {
                                         </Typography>
                                         <Typography variant="body2" fontWeight={500}>
                                             {pauta.checkout_validation.security_validated
-                                                ? `${pauta.checkout_validation.security_validator_name} - ${formatDateTime(pauta.checkout_validation.security_validated_at)}`
+                                                ? `${pauta.checkout_validation.security_validator_name || 'Sin asignar'} - ${formatDateTime(pauta.checkout_validation.security_validated_at)}`
                                                 : 'Pendiente'}
                                         </Typography>
                                     </Box>
@@ -774,7 +918,7 @@ export default function PautaDetailPage() {
                                         </Typography>
                                         <Typography variant="body2" fontWeight={500}>
                                             {pauta.checkout_validation.ops_validated
-                                                ? `${pauta.checkout_validation.ops_validator_name} - ${formatDateTime(pauta.checkout_validation.ops_validated_at)}`
+                                                ? `${pauta.checkout_validation.ops_validator_name || 'Sin asignar'} - ${formatDateTime(pauta.checkout_validation.ops_validated_at)}`
                                                 : 'Pendiente'}
                                         </Typography>
                                     </Box>

@@ -404,6 +404,13 @@ export const permisions = [
             "any"
         ]
     },
+    {
+        url: "/public/arrival/:truckCode",
+        reg: /\/public\/arrival\/[^/]+/,
+        permissions: [
+            "any"
+        ]
+    },
     // Token Catalogs / Maintenance
     {
         url: "/tokens/materials",
@@ -464,6 +471,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/truck-cycle/operations",
+        permissions: [
+            "truck_cycle.change_pautamodel"
+        ]
+    },
+    {
         url: "/truck-cycle/picking",
         permissions: [
             "truck_cycle.change_pautamodel"
@@ -471,6 +484,13 @@ export const permisions = [
     },
     {
         url: "/truck-cycle/counting",
+        permissions: [
+            "truck_cycle.change_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/verify/:id",
+        reg: /\/truck-cycle\/verify\/\d+/,
         permissions: [
             "truck_cycle.change_pautamodel"
         ]

@@ -226,6 +226,10 @@ export const truckCycleApi = createApi({
             query: (data) => ({ url: '/truck-cycle-inconsistency/', method: 'POST', body: data }),
             invalidatesTags: ['Inconsistencies', 'Pautas'],
         }),
+        deleteInconsistency: builder.mutation<void, number>({
+            query: (id) => ({ url: `/truck-cycle-inconsistency/${id}/`, method: 'DELETE' }),
+            invalidatesTags: ['Inconsistencies', 'Pautas'],
+        }),
 
         // ==================== PHOTOS ====================
         uploadPhoto: builder.mutation<PautaPhoto, FormData>({
@@ -283,6 +287,7 @@ export const {
     // Uploads
     useGetUploadsQuery,
     useDownloadTemplateQuery,
+    useLazyDownloadTemplateQuery,
     usePreviewUploadMutation,
     useConfirmUploadMutation,
     // Pautas
@@ -310,6 +315,7 @@ export const {
     // Inconsistencies
     useGetInconsistenciesQuery,
     useCreateInconsistencyMutation,
+    useDeleteInconsistencyMutation,
     // Photos
     useUploadPhotoMutation,
     useGetPhotosQuery,

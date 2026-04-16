@@ -36,6 +36,7 @@ import {
     Queue as QueueIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
 import {
     useGetReloadQueueQuery,
@@ -131,6 +132,7 @@ export default function ReloadQueuePage() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const now = useElapsedTick();
+    const navigate = useNavigate();
 
     // Data queries
     const {
@@ -224,20 +226,7 @@ export default function ReloadQueuePage() {
     };
 
     const handleProcessReturn = (pauta: PautaListItem) => {
-        handleCloseQueueMenu();
-        openConfirm(
-            'Procesar Retorno',
-            `Procesar el retorno de Transporte ${pauta.transport_number} (Viaje ${pauta.trip_number})?`,
-            async () => {
-                closeConfirm();
-                setActionError(null);
-                try {
-                    await processReturn(pauta.id).unwrap();
-                } catch {
-                    setActionError(`Error al procesar retorno de Transporte ${pauta.transport_number}.`);
-                }
-            },
-        );
+        navigate(`/truck-cycle/verify/${pauta.id}?phase=RETURN`);
     };
 
     const handleClose = (pauta: PautaListItem) => {
@@ -268,81 +257,94 @@ export default function ReloadQueuePage() {
                 flex: 1,
                 minWidth: 220,
                 sortable: false,
-                renderCell: (params: GridRenderCellParams) => (
-                    <Box sx={{ py: 0.5 }}>
-                        <Typography variant="body2" fontWeight={600}>
-                            T-{params.row.transport_number} / V-{params.row.trip_number}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {params.row.truck_code} - {params.row.truck_plate}
-                        </Typography>
-                        <Box sx={{ mt: 0.5 }}>
-                            <PautaStatusBadge status={params.row.status as PautaStatus} />
+                renderCell: (params: GridRenderCellParams) => {
+                    const dispatchTime = params.row.last_status_change ?? params.row.created_at;
+                    const elapsed = Math.max(0, now - new Date(dispatchTime).getTime());
+                    return (
+                        <Box sx={{ py: 0.5 }}>
+                            <Typography variant="body2" fontWeight={600}>
+                                T-{params.row.transport_number} / V-{params.row.trip_number}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {params.row.truck_code} - {params.row.truck_plate}
+                            </Typography>
+                            <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                                <Chip
+                                    icon={<LocalShippingIcon sx={{ fontSize: 14 }} />}
+                                    label={formatElapsed(elapsed)}
+                                    size="small"
+                                    color="success"
+                                    variant="outlined"
+                                    sx={{ fontFamily: 'monospace', fontWeight: 600 }}
+                                />
+                            </Box>
                         </Box>
-                    </Box>
-                ),
+                    );
+                },
             });
         } else {
             cols.push(
-                {
-                    field: 'transport_number',
-                    headerName: 'Transporte',
-                    width: 120,
-                },
-                {
-                    field: 'trip_number',
-                    headerName: 'Viaje',
-                    width: 100,
-                },
+                { field: 'transport_number', headerName: 'Transporte', width: 120 },
+                { field: 'trip_number', headerName: 'Viaje', width: 80 },
                 {
                     field: 'truck_code',
-                    headerName: 'Camion',
-                    flex: 1,
-                    minWidth: 160,
+                    headerName: 'Camión',
+                    width: 140,
                     renderCell: (params: GridRenderCellParams) => (
-                        <Typography variant="body2">
+                        <Typography variant="body2" noWrap>
                             {params.row.truck_code} - {params.row.truck_plate}
                         </Typography>
                     ),
                 },
+                { field: 'total_boxes', headerName: 'Cajas', width: 80, align: 'right', headerAlign: 'right' },
                 {
-                    field: 'total_boxes',
-                    headerName: 'Cajas',
-                    width: 100,
-                    align: 'right',
-                    headerAlign: 'right',
-                },
-                {
-                    field: 'status',
-                    headerName: 'Estado',
-                    width: 140,
-                    renderCell: (params: GridRenderCellParams) => (
-                        <PautaStatusBadge status={params.value as PautaStatus} />
-                    ),
+                    field: 'en_ruta',
+                    headerName: 'Tiempo en Ruta',
+                    width: 150,
+                    sortable: false,
+                    renderCell: (params: GridRenderCellParams) => {
+                        const dispatchTime = params.row.last_status_change ?? params.row.created_at;
+                        const elapsed = Math.max(0, now - new Date(dispatchTime).getTime());
+                        return (
+                            <Chip
+                                icon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
+                                label={formatElapsed(elapsed)}
+                                size="small"
+                                color={elapsed > 8 * 3_600_000 ? 'warning' : 'success'}
+                                variant="outlined"
+                                sx={{ fontFamily: 'monospace', fontWeight: 600 }}
+                            />
+                        );
+                    },
                 },
             );
         }
 
+        // Botón directo "Registrar Llegada"
         cols.push({
             field: 'actions',
-            headerName: '',
-            width: 60,
+            headerName: 'Acción',
+            width: isMobile ? 55 : 160,
             sortable: false,
             align: 'center',
             headerAlign: 'center',
             renderCell: (params: GridRenderCellParams) => (
-                <IconButton
+                <Button
                     size="small"
-                    onClick={(e) => handleOpenMenu(e, params.row)}
-                    sx={{ '&:hover': { bgcolor: 'rgba(25, 118, 210, 0.1)' } }}
+                    variant="contained"
+                    color="primary"
+                    startIcon={!isMobile ? <LoginIcon /> : undefined}
+                    onClick={(e) => { e.stopPropagation(); handleArrival(params.row); }}
+                    disabled={arrivaling}
+                    sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
                 >
-                    <MoreVertIcon fontSize="small" />
-                </IconButton>
+                    {isMobile ? <LoginIcon fontSize="small" /> : 'Registrar Llegada'}
+                </Button>
             ),
         });
 
         return cols;
-    }, [isMobile, handleOpenMenu]);
+    }, [isMobile, now, arrivaling]);
 
     const isLoading = loadingQueue || loadingDispatched;
     const hasError = errorQueue || errorDispatched;
@@ -414,89 +416,79 @@ export default function ReloadQueuePage() {
                             <Chip label={dispatchedItems.length} size="small" color="success" variant="outlined" />
                         </Box>
 
-                        <Card variant="outlined">
-                            <DataGrid
-                                rows={dispatchedItems}
-                                columns={dispatchedColumns}
-                                disableRowSelectionOnClick
-                                autoHeight
-                                rowHeight={isMobile ? 80 : 52}
-                                pageSizeOptions={[10, 25, 50]}
-                                initialState={{
-                                    pagination: { paginationModel: { page: 0, pageSize: 10 } },
-                                }}
-                                sx={{
-                                    border: 0,
-                                    '& .MuiDataGrid-cell': {
-                                        fontSize: isMobile ? '0.8125rem' : '0.875rem',
-                                        py: isMobile ? 1.5 : 1,
-                                    },
-                                    '& .MuiDataGrid-columnHeaders': {
-                                        backgroundColor:
-                                            theme.palette.mode === 'dark'
-                                                ? 'rgba(255,255,255,0.05)'
-                                                : 'rgba(0,0,0,0.02)',
-                                        fontSize: isMobile ? '0.8125rem' : '0.875rem',
-                                        fontWeight: 600,
-                                    },
-                                    '& .MuiDataGrid-footerContainer': {
-                                        borderTop: `1px solid ${theme.palette.divider}`,
-                                    },
-                                }}
-                                slots={{
-                                    noRowsOverlay: () => (
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                height: '100%',
-                                            }}
-                                        >
-                                            <Typography variant="body2" color="text.secondary">
-                                                No hay camiones despachados en ruta.
-                                            </Typography>
-                                        </Box>
-                                    ),
-                                }}
-                            />
-                        </Card>
+                        {dispatchedItems.length === 0 ? (
+                            <Card variant="outlined">
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 4 }}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        No hay camiones despachados en ruta.
+                                    </Typography>
+                                </Box>
+                            </Card>
+                        ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                {dispatchedItems.map((pauta) => {
+                                    const dispatchTime = new Date(pauta.last_status_change ?? pauta.created_at).getTime();
+                                    const elapsed = Math.max(0, now - dispatchTime);
+                                    return (
+                                        <Card key={pauta.id} variant="outlined" sx={{ borderLeft: '5px solid', borderLeftColor: 'success.main' }}>
+                                            <CardContent sx={{ pb: '12px !important' }}>
+                                                <Grid container spacing={2} alignItems="center">
+                                                    <Grid item xs>
+                                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 1 }}>
+                                                            <Box>
+                                                                <Typography variant="subtitle1" fontWeight={600}>
+                                                                    T-{pauta.transport_number} / V-{pauta.trip_number}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    {pauta.truck_code} - {pauta.truck_plate} · {pauta.total_boxes} cajas
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary">
+                                                                    Despachado: {new Date(pauta.last_status_change ?? pauta.created_at).toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit' })}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Box sx={{ textAlign: 'right' }}>
+                                                                <PautaStatusBadge status={pauta.status as PautaStatus} />
+                                                                <Typography
+                                                                    variant="body2"
+                                                                    fontWeight={600}
+                                                                    sx={{
+                                                                        mt: 0.5,
+                                                                        display: 'flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'flex-end',
+                                                                        gap: 0.5,
+                                                                        fontFamily: 'monospace',
+                                                                        color: elapsed > 8 * 3_600_000 ? 'warning.main' : 'success.main',
+                                                                    }}
+                                                                >
+                                                                    <LocalShippingIcon fontSize="small" />
+                                                                    {formatElapsed(elapsed)}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm="auto">
+                                                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                            <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                color="primary"
+                                                                startIcon={<LoginIcon />}
+                                                                onClick={() => handleArrival(pauta)}
+                                                                disabled={arrivaling}
+                                                            >
+                                                                Registrar Llegada
+                                                            </Button>
+                                                        </Box>
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </Box>
+                        )}
                     </Box>
-
-                    {/* Dispatched Action Menu */}
-                    <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={handleCloseMenu}
-                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                        PaperProps={{
-                            elevation: 3,
-                            sx: {
-                                minWidth: 200,
-                                borderRadius: 2,
-                                mt: 1,
-                                '& .MuiMenuItem-root': {
-                                    px: 2,
-                                    py: 1.5,
-                                    borderRadius: 1,
-                                    mx: 1,
-                                    my: 0.5,
-                                    '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' },
-                                },
-                            },
-                        }}
-                    >
-                        <MenuItem
-                            onClick={() => selectedRow && handleArrival(selectedRow)}
-                            disabled={arrivaling}
-                        >
-                            <ListItemIcon>
-                                <LoginIcon fontSize="small" color="primary" />
-                            </ListItemIcon>
-                            <ListItemText>Registrar Llegada</ListItemText>
-                        </MenuItem>
-                    </Menu>
 
                     <Divider sx={{ mb: 4 }} />
 
@@ -521,7 +513,7 @@ export default function ReloadQueuePage() {
                         ) : (
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                                 {queueItems.map((pauta, index) => {
-                                    const arrivalTs = new Date(pauta.created_at).getTime();
+                                    const arrivalTs = new Date(pauta.last_status_change ?? pauta.created_at).getTime();
                                     const elapsed = Math.max(0, now - arrivalTs);
 
                                     return (
@@ -579,7 +571,7 @@ export default function ReloadQueuePage() {
                                                                 </Typography>
                                                                 <Typography variant="body2" color="text.secondary">
                                                                     Llegada:{' '}
-                                                                    {new Date(pauta.created_at).toLocaleTimeString(
+                                                                    {new Date(pauta.last_status_change ?? pauta.created_at).toLocaleTimeString(
                                                                         'es-HN',
                                                                         {
                                                                             hour: '2-digit',
@@ -625,23 +617,27 @@ export default function ReloadQueuePage() {
 
                                                     {/* Actions */}
                                                     <Grid item xs={12} sm="auto">
-                                                        <Box
-                                                            sx={{
-                                                                display: 'flex',
-                                                                justifyContent: { xs: 'flex-end', sm: 'flex-end' },
-                                                            }}
-                                                        >
-                                                            <IconButton
+                                                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                                                            <Button
                                                                 size="small"
-                                                                onClick={(e) => handleOpenQueueMenu(e, pauta)}
-                                                                sx={{
-                                                                    '&:hover': {
-                                                                        bgcolor: 'rgba(25, 118, 210, 0.1)',
-                                                                    },
-                                                                }}
+                                                                variant="outlined"
+                                                                color="warning"
+                                                                startIcon={<AssignmentReturnIcon />}
+                                                                onClick={() => handleProcessReturn(pauta)}
+                                                                disabled={returning}
                                                             >
-                                                                <MoreVertIcon fontSize="small" />
-                                                            </IconButton>
+                                                                {isMobile ? 'Retorno' : 'Procesar Retorno'}
+                                                            </Button>
+                                                            <Button
+                                                                size="small"
+                                                                variant="contained"
+                                                                color="error"
+                                                                startIcon={<CheckCircleIcon />}
+                                                                onClick={() => handleClose(pauta)}
+                                                                disabled={closing}
+                                                            >
+                                                                Cerrar
+                                                            </Button>
                                                         </Box>
                                                     </Grid>
                                                 </Grid>
@@ -653,49 +649,6 @@ export default function ReloadQueuePage() {
                         )}
                     </Box>
 
-                    {/* Queue Action Menu */}
-                    <Menu
-                        anchorEl={queueAnchorEl}
-                        open={Boolean(queueAnchorEl)}
-                        onClose={handleCloseQueueMenu}
-                        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-                        PaperProps={{
-                            elevation: 3,
-                            sx: {
-                                minWidth: 200,
-                                borderRadius: 2,
-                                mt: 1,
-                                '& .MuiMenuItem-root': {
-                                    px: 2,
-                                    py: 1.5,
-                                    borderRadius: 1,
-                                    mx: 1,
-                                    my: 0.5,
-                                    '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' },
-                                },
-                            },
-                        }}
-                    >
-                        <MenuItem
-                            onClick={() => selectedQueueRow && handleProcessReturn(selectedQueueRow)}
-                            disabled={returning}
-                        >
-                            <ListItemIcon>
-                                <AssignmentReturnIcon fontSize="small" color="warning" />
-                            </ListItemIcon>
-                            <ListItemText>Procesar Retorno</ListItemText>
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => selectedQueueRow && handleClose(selectedQueueRow)}
-                            disabled={closing}
-                        >
-                            <ListItemIcon>
-                                <CheckCircleIcon fontSize="small" color="error" />
-                            </ListItemIcon>
-                            <ListItemText>Cerrar</ListItemText>
-                        </MenuItem>
-                    </Menu>
                 </>
             )}
 
