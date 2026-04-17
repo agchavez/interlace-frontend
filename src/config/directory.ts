@@ -477,6 +477,13 @@ export const permisions = [
         ]
     },
     {
+        url: "/truck-cycle/pallet-print/:id",
+        reg: /\/truck-cycle\/pallet-print\/\d+/,
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
         url: "/truck-cycle/picking",
         permissions: [
             "truck_cycle.change_pautamodel"

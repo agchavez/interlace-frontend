@@ -815,28 +815,41 @@ export default function PautaDetailPage() {
                                     </>
                                 )}
 
-                                {/* Generar Pallet Tickets */}
+                                {/* Pallet Tickets */}
                                 {!['PENDING_PICKING', 'PICKING_ASSIGNED', 'CLOSED', 'CANCELLED'].includes(pauta.status) && (
                                     <>
                                         <Divider />
-                                        <Button
-                                            variant="outlined"
-                                            color="info"
-                                            size="small"
-                                            onClick={async () => {
-                                                try {
-                                                    await generateTickets({ pauta_id: pauta.id }).unwrap();
-                                                    toast.success('Tickets de pallet generados');
-                                                } catch {
-                                                    toast.error('Error al generar tickets');
-                                                }
-                                            }}
-                                            disabled={generatingTickets}
-                                            startIcon={generatingTickets ? <CircularProgress size={16} /> : <QrIcon />}
-                                            fullWidth
-                                        >
-                                            Generar Pallet Tickets
-                                        </Button>
+                                        {pauta.pallet_tickets.length > 0 ? (
+                                            <Button
+                                                variant="outlined"
+                                                color="info"
+                                                size="small"
+                                                onClick={() => navigate(`/truck-cycle/pallet-print/${pauta.id}`)}
+                                                startIcon={<QrIcon />}
+                                                fullWidth
+                                            >
+                                                Imprimir Tickets ({pauta.pallet_tickets.length})
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="outlined"
+                                                color="info"
+                                                size="small"
+                                                onClick={async () => {
+                                                    try {
+                                                        await generateTickets({ pauta_id: pauta.id }).unwrap();
+                                                        toast.success('Tickets generados');
+                                                    } catch {
+                                                        toast.error('Error al generar tickets');
+                                                    }
+                                                }}
+                                                disabled={generatingTickets}
+                                                startIcon={generatingTickets ? <CircularProgress size={16} /> : <QrIcon />}
+                                                fullWidth
+                                            >
+                                                Generar Pallet Tickets
+                                            </Button>
+                                        )}
                                     </>
                                 )}
                             </Box>

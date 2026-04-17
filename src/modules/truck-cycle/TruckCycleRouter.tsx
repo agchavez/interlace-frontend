@@ -12,6 +12,7 @@ import KPIConfigPage from './pages/KPIConfigPage';
 import KPIReportPage from './pages/KPIReportPage';
 import OperationsPage from './pages/OperationsPage';
 import VerificationPage from './pages/VerificationPage';
+import PalletPrintPage from './pages/PalletPrintPage';
 function TruckCycleRouter() {
   return (
     <Routes>
@@ -23,6 +24,7 @@ function TruckCycleRouter() {
       <Route path="/picking" element={<PickingPage />} />
       <Route path="/counting" element={<CountingPage />} />
       <Route path="/verify/:id" element={<VerificationPage />} />
+      <Route path="/pallet-print/:id" element={<PalletPrintPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/reload-queue" element={<ReloadQueuePage />} />
       <Route path="/workstation" element={<WorkstationPage />} />
