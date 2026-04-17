@@ -56,10 +56,12 @@ import {
     TimelineOppositeContent,
     timelineOppositeContentClasses,
 } from '@mui/lab';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import PalletPrintContent from '../components/PalletPrintContent';
+import PrintComponent from '../../../utils/componentPrinter';
 import {
     useGetPautaQuery,
     useStartPickingMutation,
@@ -142,6 +144,7 @@ export default function PautaDetailPage() {
     const [closePauta, { isLoading: closing }] = useClosePautaMutation();
     const [startAudit, { isLoading: startingAudit }] = useStartAuditMutation();
     const [generateTickets, { isLoading: generatingTickets }] = useGeneratePalletTicketsMutation();
+    const [willPrintTickets, setWillPrintTickets] = useState(false);
 
     const pdfUrl = id ? `${import.meta.env.VITE_JS_APP_API_URL}/api/truck-cycle-pauta/${id}/download_pdf/` : '';
     const qrUrl = `${window.location.origin}/truck-cycle/pautas/${id}`;
@@ -246,6 +249,35 @@ export default function PautaDetailPage() {
     };
 
     const currentAction = actionButtons[pauta.status];
+
+    // Pallet Print
+    const palletPrintComponent = pauta ? (
+        <PalletPrintContent
+            pauta={{
+                transport_number: pauta.transport_number,
+                trip_number: pauta.trip_number,
+                truck_code: pauta.truck_code,
+                truck_plate: pauta.truck_plate,
+                route_code: pauta.route_code,
+                total_boxes: pauta.total_boxes,
+                total_pallets: pauta.total_pallets,
+            }}
+            tickets={pauta.pallet_tickets}
+        />
+    ) : null;
+
+    const palletPrint = PrintComponent({
+        pageOrientation: 'landscape',
+        component: palletPrintComponent,
+        margin: '5mm',
+    });
+
+    useEffect(() => {
+        if (willPrintTickets && pauta && pauta.pallet_tickets.length > 0) {
+            palletPrint.print();
+            setWillPrintTickets(false);
+        }
+    }, [willPrintTickets, pauta?.pallet_tickets.length]);
 
     const handleCopyCode = () => {
         navigator.clipboard.writeText(pauta.transport_number);
@@ -819,37 +851,30 @@ export default function PautaDetailPage() {
                                 {!['PENDING_PICKING', 'PICKING_ASSIGNED', 'CLOSED', 'CANCELLED'].includes(pauta.status) && (
                                     <>
                                         <Divider />
-                                        {pauta.pallet_tickets.length > 0 ? (
-                                            <Button
-                                                variant="outlined"
-                                                color="info"
-                                                size="small"
-                                                onClick={() => navigate(`/truck-cycle/pallet-print/${pauta.id}`)}
-                                                startIcon={<QrIcon />}
-                                                fullWidth
-                                            >
-                                                Imprimir Tickets ({pauta.pallet_tickets.length})
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="outlined"
-                                                color="info"
-                                                size="small"
-                                                onClick={async () => {
+                                        <Button
+                                            variant="outlined"
+                                            color="info"
+                                            size="small"
+                                            onClick={async () => {
+                                                if (pauta.pallet_tickets.length === 0) {
                                                     try {
                                                         await generateTickets({ pauta_id: pauta.id }).unwrap();
                                                         toast.success('Tickets generados');
                                                     } catch {
                                                         toast.error('Error al generar tickets');
+                                                        return;
                                                     }
-                                                }}
-                                                disabled={generatingTickets}
-                                                startIcon={generatingTickets ? <CircularProgress size={16} /> : <QrIcon />}
-                                                fullWidth
-                                            >
-                                                Generar Pallet Tickets
-                                            </Button>
-                                        )}
+                                                }
+                                                setWillPrintTickets(true);
+                                            }}
+                                            disabled={generatingTickets}
+                                            startIcon={generatingTickets ? <CircularProgress size={16} /> : <QrIcon />}
+                                            fullWidth
+                                        >
+                                            {pauta.pallet_tickets.length > 0
+                                                ? `Imprimir Tickets (${pauta.pallet_tickets.length})`
+                                                : 'Generar Pallet Tickets'}
+                                        </Button>
                                     </>
                                 )}
                             </Box>
@@ -1046,6 +1071,9 @@ export default function PautaDetailPage() {
                     )}
                 </DialogActions>
             </Dialog>
+
+            {/* Pallet Print (hidden, for react-to-print) */}
+            {palletPrint.component}
         </Container>
     );
 }
