@@ -39,6 +39,8 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import DateRangeButton from '../components/DateRangeButton';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
 import {
     useGetPautasQuery,
     useAssignCounterMutation,
@@ -170,6 +172,7 @@ export default function CountingPage() {
         page: 0,
         pageSize: 25,
     });
+    const dateFilter = useDateRangeFilter('today');
 
     // Menu state
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -198,6 +201,8 @@ export default function CountingPage() {
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: COUNTING_STATUSES,
+        operational_date_after: dateFilter.dateAfter,
+        operational_date_before: dateFilter.dateBefore,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -506,9 +511,12 @@ export default function CountingPage() {
 
     return (
         <Container maxWidth="xl" sx={{ mt: 2 }}>
-            <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600} sx={{ mb: 3 }}>
-                Conteo / Verificacion
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
+                    Conteo / Verificación
+                </Typography>
+                <DateRangeButton {...dateFilter} />
+            </Box>
 
             {/* Stat Cards */}
             <Grid container spacing={2} sx={{ mb: 3 }}>

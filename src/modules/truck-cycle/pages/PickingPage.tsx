@@ -34,6 +34,8 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import DateRangeButton from '../components/DateRangeButton';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
 import {
     useGetPautasQuery,
     useAssignPickerMutation,
@@ -114,6 +116,7 @@ export default function PickingPage() {
     const navigate = useNavigate();
 
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
+    const dateFilter = useDateRangeFilter('today');
 
     // Dialog state for assigning picker
     const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -124,6 +127,8 @@ export default function PickingPage() {
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: PICKING_STATUSES,
+        operational_date_after: dateFilter.dateAfter,
+        operational_date_before: dateFilter.dateBefore,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -354,9 +359,12 @@ export default function PickingPage() {
 
     return (
         <Container maxWidth="xl" sx={{ mt: 2 }}>
-            <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600} sx={{ mb: 3 }}>
-                Picking
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
+                    Picking
+                </Typography>
+                <DateRangeButton {...dateFilter} />
+            </Box>
 
             {/* Stat Cards */}
             <Grid container spacing={2} sx={{ mb: 3 }}>

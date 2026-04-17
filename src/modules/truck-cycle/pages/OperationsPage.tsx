@@ -1,4 +1,6 @@
 import { useState, useReducer, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
+import DateRangeButton from '../components/DateRangeButton';
 import {
     Box,
     Container,
@@ -8,6 +10,9 @@ import {
     Typography,
     Avatar,
     Chip,
+    Menu,
+    MenuItem,
+    ListItemText,
     IconButton,
     Dialog,
     DialogTitle,
@@ -43,6 +48,7 @@ import {
     Send as DispatchIcon,
     Inventory as BoxIcon,
     Policy as AuditIcon,
+    FilterList as FilterIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
@@ -184,11 +190,13 @@ export default function OperationsPage() {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
 
-    const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+    // Date filter
+    const dateFilter = useDateRangeFilter('today');
+    const { dateAfter, dateBefore } = dateFilter;
 
     // ── Data ────────────────────────────────────────────────────────────────
     const { data, isLoading, isFetching, error } = useGetPautasQuery(
-        { status: ACTIVE_STATUSES, operational_date_after: today, operational_date_before: today, limit: 200 },
+        { status: ACTIVE_STATUSES, operational_date_after: dateAfter, operational_date_before: dateBefore, limit: 200 },
         { pollingInterval: 10_000 },
     );
 
@@ -493,13 +501,16 @@ export default function OperationsPage() {
     return (
         <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
             {/* Header */}
-            <Box sx={{ mb: 3 }}>
-                <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
-                    Operaciones del Día
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                    {new Date().toLocaleDateString('es-HN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Box>
+                    <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
+                        Operaciones del Día
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {new Date().toLocaleDateString('es-HN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </Typography>
+                </Box>
+                <DateRangeButton {...dateFilter} />
             </Box>
 
             {/* Stats */}

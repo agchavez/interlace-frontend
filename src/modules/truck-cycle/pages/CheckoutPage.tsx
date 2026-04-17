@@ -49,6 +49,8 @@ import {
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import DateRangeButton from '../components/DateRangeButton';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
 import {
     useGetPautasQuery,
     useCheckoutSecurityMutation,
@@ -132,6 +134,7 @@ export default function CheckoutPage() {
     const navigate = useNavigate();
 
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
+    const dateFilter = useDateRangeFilter('today');
 
     // Menu state
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -140,6 +143,8 @@ export default function CheckoutPage() {
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: CHECKOUT_STATUSES,
+        operational_date_after: dateFilter.dateAfter,
+        operational_date_before: dateFilter.dateBefore,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -431,12 +436,17 @@ export default function CheckoutPage() {
 
     return (
         <Container maxWidth="xl" sx={{ mt: 2 }}>
-            <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600} sx={{ mb: 1 }}>
-                Checkout - Doble Validación
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                Validación de seguridad y operaciones antes del despacho
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                <Box>
+                    <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
+                        Checkout - Doble Validación
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Validación de seguridad y operaciones antes del despacho
+                    </Typography>
+                </Box>
+                <DateRangeButton {...dateFilter} />
+            </Box>
 
             {/* Stat Cards */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
