@@ -37,6 +37,8 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { toast } from 'sonner';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import DateRangeButton from '../components/DateRangeButton';
+import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
 import { PautaFilters } from '../components/PautaFilters';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
 import { useGetPautasQuery } from '../services/truckCycleApi';
@@ -96,6 +98,7 @@ export default function PautaListPage() {
     const [openFilter, setOpenFilter] = useState(false);
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
     const [filters, setFilters] = useState<PautaFilterParams>({});
+    const dateFilter = useDateRangeFilter('today');
 
     // Export
     const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
@@ -108,6 +111,8 @@ export default function PautaListPage() {
 
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         ...filters,
+        operational_date_after: filters.operational_date_after || dateFilter.dateAfter,
+        operational_date_before: filters.operational_date_before || dateFilter.dateBefore,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -366,14 +371,17 @@ export default function PautaListPage() {
                 <Grid container spacing={2}>
                     {/* Header */}
                     <Grid item xs={12}>
-                        <Typography
-                            variant={isMobile ? 'h6' : 'h4'}
-                            component="h1"
-                            fontWeight={400}
-                            sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
-                        >
-                            Listado de Pautas
-                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography
+                                variant={isMobile ? 'h6' : 'h4'}
+                                component="h1"
+                                fontWeight={400}
+                                sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' } }}
+                            >
+                                Listado de Pautas
+                            </Typography>
+                            <DateRangeButton {...dateFilter} />
+                        </Box>
                         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
                     </Grid>
 
