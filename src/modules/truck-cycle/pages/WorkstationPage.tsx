@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { format } from 'date-fns';
 import { Box, Typography, Grid, Chip, Divider, LinearProgress, IconButton, Tooltip } from '@mui/material';
 import {
     LocalShipping as TruckIcon,
@@ -69,7 +70,7 @@ function elapsedLabel(from: string | null | undefined) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 export default function WorkstationPage() {
     const clock = useClock();
-    const operationalDate = new Date().toISOString().split('T')[0];
+    const operationalDate = format(new Date(), 'yyyy-MM-dd');
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const { data: workstation, isLoading } = useGetWorkstationQuery(undefined, { pollingInterval: 10000 });
