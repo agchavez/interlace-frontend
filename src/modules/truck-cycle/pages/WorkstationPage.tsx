@@ -15,6 +15,7 @@ import {
     useGetReloadQueueQuery,
     useGetKPISummaryQuery,
 } from '../services/truckCycleApi';
+import { useTruckCycleSocket } from '../hooks/useTruckCycleSocket';
 import type { PautaStatus, PautaListItem } from '../interfaces/truckCycle';
 
 // ─── Status config ───────────────────────────────────────────────────────────
@@ -73,9 +74,11 @@ export default function WorkstationPage() {
     const operationalDate = format(new Date(), 'yyyy-MM-dd');
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    const { data: workstation, isLoading } = useGetWorkstationQuery(undefined, { pollingInterval: 10000 });
-    const { data: reloadQueue } = useGetReloadQueueQuery(undefined, { pollingInterval: 10000 });
-    const { data: kpi } = useGetKPISummaryQuery({ operational_date: operationalDate }, { pollingInterval: 10000 });
+    // WebSocket para actualizaciones instantáneas + polling como fallback
+    useTruckCycleSocket();
+    const { data: workstation, isLoading } = useGetWorkstationQuery(undefined, { pollingInterval: 30_000 });
+    const { data: reloadQueue } = useGetReloadQueueQuery(undefined, { pollingInterval: 30_000 });
+    const { data: kpi } = useGetKPISummaryQuery({ operational_date: operationalDate }, { pollingInterval: 30_000 });
 
     const toggleFullscreen = useCallback(() => {
         if (!document.fullscreenElement) {

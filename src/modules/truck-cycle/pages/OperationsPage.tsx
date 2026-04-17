@@ -53,6 +53,7 @@ import {
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
+import { useTruckCycleSocket } from '../hooks/useTruckCycleSocket';
 import {
     useGetPautasQuery,
     useGetBaysQuery,
@@ -192,12 +193,13 @@ export default function OperationsPage() {
 
     // Date filter
     const dateFilter = useDateRangeFilter('today');
+    useTruckCycleSocket();
     const { dateAfter, dateBefore } = dateFilter;
 
     // ── Data ────────────────────────────────────────────────────────────────
     const { data, isLoading, isFetching, error } = useGetPautasQuery(
         { status: ACTIVE_STATUSES, operational_date_after: dateAfter, operational_date_before: dateBefore, limit: 200 },
-        { pollingInterval: 10_000 },
+        { pollingInterval: 30_000 },
     );
 
     const phases = useMemo(() => {
