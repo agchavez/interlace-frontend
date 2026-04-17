@@ -76,6 +76,9 @@ export const changeDistributionCenter = (
             });
             dispatch(setDistributionCenters({ distributionCenter, name: resp.data.centro_distribucion_name }));
             dispatch(setOpenChangeDistributionCenter(false));
+            // Invalidar caches de truck_cycle al cambiar CD
+            const { truckCycleApi } = await import('../../modules/truck-cycle/services/truckCycleApi');
+            dispatch(truckCycleApi.util.invalidateTags(['Trucks', 'Bays', 'KPITargets', 'Pautas', 'Uploads']));
         } catch (error) {
             errorApiHandler(error, "No se pudo cambiar el centro de distribución");
         }
