@@ -166,6 +166,35 @@ export default function PautaDetailPage() {
         }
     }, [pdfUrl, authToken]);
 
+    // Pallet Print — hooks must be before any early return
+    const palletPrintComponent = pauta ? (
+        <PalletPrintContent
+            pauta={{
+                transport_number: pauta.transport_number,
+                trip_number: pauta.trip_number,
+                truck_code: pauta.truck_code,
+                truck_plate: pauta.truck_plate,
+                route_code: pauta.route_code,
+                total_boxes: pauta.total_boxes,
+                total_pallets: pauta.total_pallets,
+            }}
+            tickets={pauta.pallet_tickets}
+        />
+    ) : null;
+
+    const palletPrint = PrintComponent({
+        pageOrientation: 'landscape',
+        component: palletPrintComponent,
+        margin: '5mm',
+    });
+
+    useEffect(() => {
+        if (willPrintTickets && pauta && pauta.pallet_tickets.length > 0) {
+            palletPrint.print();
+            setWillPrintTickets(false);
+        }
+    }, [willPrintTickets, pauta?.pallet_tickets.length]);
+
     if (isLoading) {
         return (
             <Container maxWidth="lg" sx={{ py: 4, textAlign: 'center' }}>
@@ -249,35 +278,6 @@ export default function PautaDetailPage() {
     };
 
     const currentAction = actionButtons[pauta.status];
-
-    // Pallet Print
-    const palletPrintComponent = pauta ? (
-        <PalletPrintContent
-            pauta={{
-                transport_number: pauta.transport_number,
-                trip_number: pauta.trip_number,
-                truck_code: pauta.truck_code,
-                truck_plate: pauta.truck_plate,
-                route_code: pauta.route_code,
-                total_boxes: pauta.total_boxes,
-                total_pallets: pauta.total_pallets,
-            }}
-            tickets={pauta.pallet_tickets}
-        />
-    ) : null;
-
-    const palletPrint = PrintComponent({
-        pageOrientation: 'landscape',
-        component: palletPrintComponent,
-        margin: '5mm',
-    });
-
-    useEffect(() => {
-        if (willPrintTickets && pauta && pauta.pallet_tickets.length > 0) {
-            palletPrint.print();
-            setWillPrintTickets(false);
-        }
-    }, [willPrintTickets, pauta?.pallet_tickets.length]);
 
     const handleCopyCode = () => {
         navigator.clipboard.writeText(pauta.transport_number);
