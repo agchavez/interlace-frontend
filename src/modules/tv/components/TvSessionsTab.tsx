@@ -71,6 +71,9 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
     const [editing, setEditing] = useState<TvSessionAdmin | null>(null);
     const [form, setForm] = useState({ dashboard: 'WORKSTATION', label: '' });
 
+    // Diálogo de confirmación de revocación — reemplaza el confirm() nativo.
+    const [revokeTarget, setRevokeTarget] = useState<TvSessionAdmin | null>(null);
+
     // Diálogo para vincular una TV introduciendo el code manualmente (sin QR).
     const [pairOpen, setPairOpen] = useState(false);
     const [pairForm, setPairForm] = useState({ code: '', dashboard: TV_DASHBOARDS[0]?.value || 'WORKSTATION', label: '', ttl_days: 7 });
@@ -100,13 +103,19 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
         }
     };
 
-    const handleRevoke = async (s: TvSessionAdmin) => {
-        if (!confirm(`¿Revocar acceso de "${s.label || s.code}"? La TV volverá a la pantalla de vinculación.`)) return;
+    const handleRevoke = (s: TvSessionAdmin) => {
+        // Abre el diálogo custom; el revoke real se dispara en confirmRevoke.
+        setRevokeTarget(s);
+    };
+
+    const confirmRevoke = async () => {
+        if (!revokeTarget) return;
         try {
-            await revoke(s.code).unwrap();
-            toast.success('TV revocada.');
+            await revoke(revokeTarget.code).unwrap();
+            toast.success('TV desvinculada.');
+            setRevokeTarget(null);
         } catch (err: any) {
-            toast.error(err?.data?.error || 'No se pudo revocar.');
+            toast.error(err?.data?.error || 'No se pudo desvincular.');
         }
     };
 
@@ -148,39 +157,64 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
     };
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1, flexWrap: 'wrap' }}>
-                <Typography variant="h6" fontWeight={700} sx={{ flex: 1 }}>
+        <Box sx={{ p: { xs: 1.5, sm: 3 } }}>
+            {/* Título + toggle revocadas */}
+            <Box sx={{
+                display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                mb: 1.5, gap: 1, flexWrap: 'wrap',
+            }}>
+                <Typography variant="h6" fontWeight={700} sx={{ flex: 1, minWidth: 0 }}>
                     TVs conectadas · {distributorCenterName}
                 </Typography>
                 <FormControlLabel
                     control={<Switch size="small" checked={includeInactive} onChange={(e) => setIncludeInactive(e.target.checked)} />}
                     label={<Typography variant="caption">Ver revocadas / expiradas</Typography>}
+                    sx={{ mr: 0 }}
                 />
+            </Box>
+
+            {/* Fila de acciones: en mobile full-width, en desktop inline a la derecha */}
+            <Box sx={{
+                display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', alignItems: 'center',
+            }}>
                 <Tooltip title="Refrescar">
                     <IconButton size="small" onClick={() => refetch()}>
                         <RefreshIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
+                <Box sx={{ flex: 1 }} />
                 <Button
                     variant="outlined" size="small"
                     startIcon={<QrIcon />}
                     onClick={openTvInNewTab}
+                    sx={{
+                        textTransform: 'none', fontWeight: 600, borderRadius: 2,
+                        flex: { xs: 1, sm: 'none' },
+                        minWidth: { xs: 0, sm: 'auto' },
+                    }}
                 >
-                    Abrir pantalla de QR
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Abrir pantalla de QR</Box>
+                    <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>QR</Box>
                 </Button>
                 <Button
                     variant="contained" size="small"
                     startIcon={<TvIcon />}
                     onClick={handlePairNew}
+                    sx={{
+                        textTransform: 'none', fontWeight: 600, borderRadius: 2,
+                        flex: { xs: 1, sm: 'none' },
+                        minWidth: { xs: 0, sm: 'auto' },
+                    }}
                 >
-                    Vincular nueva TV
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>Vincular nueva TV</Box>
+                    <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>Vincular</Box>
                 </Button>
             </Box>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2, display: { xs: 'none', sm: 'block' } }}>
                 Cada TV se identifica con un token opaco. Puedes cambiarle el dashboard en caliente
-                o revocarla en cualquier momento — la pantalla volverá sola a la pantalla de vinculación.
+                o desvincularla en cualquier momento — la pantalla volverá sola a la pantalla de vinculación.
             </Typography>
 
             {isLoading && (
@@ -194,67 +228,116 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
             )}
 
             {active.length > 0 && (
-                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: inactive.length ? 3 : 0 }}>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Etiqueta</TableCell>
-                                <TableCell>Código</TableCell>
-                                <TableCell>Dashboard</TableCell>
-                                <TableCell>Estado</TableCell>
-                                <TableCell>Última señal</TableCell>
-                                <TableCell>Expira</TableCell>
-                                <TableCell align="right">Acciones</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {active.map((s) => {
-                                const online = isOnline(s);
-                                const dash = TV_DASHBOARDS.find((d) => d.value === s.dashboard);
-                                return (
-                                    <TableRow key={s.id} hover>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <TvIcon fontSize="small" color="action" />
-                                                <Typography fontWeight={600}>{s.label || '(sin etiqueta)'}</Typography>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{s.code}</Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip size="small" label={dash?.label || s.dashboard} />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Chip
-                                                size="small"
-                                                icon={online ? <OnIcon sx={{ fontSize: 12 }} /> : <OffIcon sx={{ fontSize: 12 }} />}
-                                                label={online ? 'En línea' : 'Sin señal'}
-                                                color={online ? 'success' : 'default'}
-                                                variant={online ? 'filled' : 'outlined'}
-                                                sx={{ '& .MuiChip-icon': { ml: 0.5 } }}
-                                            />
-                                        </TableCell>
-                                        <TableCell><Typography variant="caption">{relativeTime(s.last_seen_at)}</Typography></TableCell>
-                                        <TableCell><Typography variant="caption">{new Date(s.expires_at).toLocaleDateString('es-HN')}</Typography></TableCell>
-                                        <TableCell align="right">
-                                            <Tooltip title="Cambiar dashboard / etiqueta">
-                                                <IconButton size="small" onClick={() => openEdit(s)}>
-                                                    <EditIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Revocar acceso">
-                                                <IconButton size="small" onClick={() => handleRevoke(s)} disabled={revoking} sx={{ color: 'error.main' }}>
-                                                    <RevokeIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                <>
+                    {/* Desktop: Table */}
+                    <TableContainer component={Paper} variant="outlined"
+                        sx={{ borderRadius: 2, mb: inactive.length ? 3 : 0, display: { xs: 'none', md: 'block' } }}
+                    >
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Etiqueta</TableCell>
+                                    <TableCell>Código</TableCell>
+                                    <TableCell>Dashboard</TableCell>
+                                    <TableCell>Estado</TableCell>
+                                    <TableCell>Última señal</TableCell>
+                                    <TableCell>Expira</TableCell>
+                                    <TableCell align="right">Acciones</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {active.map((s) => {
+                                    const online = isOnline(s);
+                                    const dash = TV_DASHBOARDS.find((d) => d.value === s.dashboard);
+                                    return (
+                                        <TableRow key={s.id} hover>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                    <TvIcon fontSize="small" color="action" />
+                                                    <Typography fontWeight={600}>{s.label || '(sin etiqueta)'}</Typography>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{s.code}</Typography>
+                                            </TableCell>
+                                            <TableCell><Chip size="small" label={dash?.label || s.dashboard} /></TableCell>
+                                            <TableCell>
+                                                <Chip
+                                                    size="small"
+                                                    icon={online ? <OnIcon sx={{ fontSize: 12 }} /> : <OffIcon sx={{ fontSize: 12 }} />}
+                                                    label={online ? 'En línea' : 'Sin señal'}
+                                                    color={online ? 'success' : 'default'}
+                                                    variant={online ? 'filled' : 'outlined'}
+                                                />
+                                            </TableCell>
+                                            <TableCell><Typography variant="caption">{relativeTime(s.last_seen_at)}</Typography></TableCell>
+                                            <TableCell><Typography variant="caption">{new Date(s.expires_at).toLocaleDateString('es-HN')}</Typography></TableCell>
+                                            <TableCell align="right">
+                                                <Tooltip title="Cambiar dashboard / etiqueta">
+                                                    <IconButton size="small" onClick={() => openEdit(s)}>
+                                                        <EditIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Desvincular">
+                                                    <IconButton size="small" onClick={() => handleRevoke(s)} disabled={revoking} sx={{ color: 'error.main' }}>
+                                                        <RevokeIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    {/* Mobile: cards */}
+                    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1, mb: inactive.length ? 3 : 0 }}>
+                        {active.map((s) => {
+                            const online = isOnline(s);
+                            const dash = TV_DASHBOARDS.find((d) => d.value === s.dashboard);
+                            return (
+                                <Paper key={s.id} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                                        <TvIcon color="action" />
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography fontWeight={700} noWrap>{s.label || '(sin etiqueta)'}</Typography>
+                                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary' }}>
+                                                {s.code}
+                                            </Typography>
+                                        </Box>
+                                        <Chip
+                                            size="small"
+                                            icon={online ? <OnIcon sx={{ fontSize: 12 }} /> : <OffIcon sx={{ fontSize: 12 }} />}
+                                            label={online ? 'En línea' : 'Sin señal'}
+                                            color={online ? 'success' : 'default'}
+                                            variant={online ? 'filled' : 'outlined'}
+                                        />
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                                        <Chip size="small" label={dash?.label || s.dashboard} variant="outlined" />
+                                        <Typography variant="caption" color="text.secondary">
+                                            Última señal: {relativeTime(s.last_seen_at)}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            Expira: {new Date(s.expires_at).toLocaleDateString('es-HN')}
+                                        </Typography>
+                                        <Box>
+                                            <IconButton size="small" onClick={() => openEdit(s)}>
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                            <IconButton size="small" onClick={() => handleRevoke(s)} disabled={revoking} sx={{ color: 'error.main' }}>
+                                                <RevokeIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            );
+                        })}
+                    </Box>
+                </>
             )}
 
             {includeInactive && inactive.length > 0 && (
@@ -262,7 +345,8 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                     <Divider sx={{ my: 2 }}>
                         <Typography variant="caption" color="text.secondary">Historial</Typography>
                     </Divider>
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, opacity: 0.75 }}>
+                    {/* Desktop table */}
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, opacity: 0.8, display: { xs: 'none', md: 'block' } }}>
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
@@ -289,6 +373,29 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                             </TableBody>
                         </Table>
                     </TableContainer>
+
+                    {/* Mobile: cards del historial */}
+                    <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1, opacity: 0.8 }}>
+                        {inactive.map((s) => {
+                            const chip = STATUS_CHIP[s.status];
+                            return (
+                                <Paper key={s.id} variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                        <Typography fontWeight={700} noWrap sx={{ flex: 1 }}>
+                                            {s.label || '(sin etiqueta)'}
+                                        </Typography>
+                                        <Chip size="small" label={chip?.label || s.status} color={chip?.color || 'default'} />
+                                    </Box>
+                                    <Typography sx={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'text.secondary', mb: 0.5 }}>
+                                        {s.code}
+                                    </Typography>
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                        Última señal: {relativeTime(s.last_seen_at)} · Por: {s.paired_by_name || '—'}
+                                    </Typography>
+                                </Paper>
+                            );
+                        })}
+                    </Box>
                 </>
             )}
 
@@ -356,6 +463,56 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                     <Button onClick={() => setPairOpen(false)} disabled={pairing}>Cancelar</Button>
                     <Button variant="contained" onClick={handlePairSubmit} disabled={pairing || !pairForm.code.trim()}>
                         {pairing ? <CircularProgress size={18} color="inherit" /> : 'Vincular'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirmación de desvinculación — reemplaza el confirm() nativo del navegador. */}
+            <Dialog
+                open={!!revokeTarget}
+                onClose={() => !revoking && setRevokeTarget(null)}
+                maxWidth="xs" fullWidth
+                PaperProps={{ sx: { borderRadius: 3 } }}
+            >
+                <DialogTitle sx={{ pb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <RevokeIcon color="error" />
+                        <Typography variant="h6" fontWeight={800} component="span">
+                            Desvincular TV
+                        </Typography>
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        ¿Desvincular la TV <b>{revokeTarget?.label || '(sin etiqueta)'}</b>?
+                    </Typography>
+                    <Box sx={{ p: 1.5, bgcolor: (t) => alpha(t.palette.warning.main, 0.1), borderRadius: 1.5, border: (t) => `1px solid ${alpha(t.palette.warning.main, 0.3)}` }}>
+                        <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, color: 'warning.dark' }}>
+                            Qué pasa al desvincular:
+                        </Typography>
+                        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', mt: 0.5 }}>
+                            • El token de la TV queda revocado.<br />
+                            • La pantalla vuelve sola a la vista de código QR.<br />
+                            • Puedes volver a vincular la misma TV con un código nuevo.
+                        </Typography>
+                    </Box>
+                    {revokeTarget?.code && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5, fontFamily: 'monospace' }}>
+                            Código: {revokeTarget.code}
+                        </Typography>
+                    )}
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 2 }}>
+                    <Button onClick={() => setRevokeTarget(null)} disabled={revoking}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="contained" color="error"
+                        onClick={confirmRevoke}
+                        disabled={revoking}
+                        startIcon={revoking ? <CircularProgress size={16} color="inherit" /> : <RevokeIcon />}
+                    >
+                        Desvincular
                     </Button>
                 </DialogActions>
             </Dialog>

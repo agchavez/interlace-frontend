@@ -114,23 +114,21 @@ const InfoPanel = ({ icon, label, value, accent, monospace }: {
     </Box>
 );
 
-// Stat chip que va dentro del hero del CD — blanco translúcido sobre el gradiente.
+// Stat chip compacto dentro del hero del CD — blanco translúcido sobre el gradiente.
 const HeroStat = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: number | string }) => (
     <Box sx={{
         bgcolor: 'rgba(255,255,255,0.15)',
-        backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.25)',
-        borderRadius: 2,
-        px: 2, py: 1.25,
-        display: 'flex', alignItems: 'center', gap: 1.5,
-        minWidth: 130,
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderRadius: 1.5,
+        px: 1.25, py: 0.75,
+        display: 'flex', alignItems: 'center', gap: 0.75,
     }}>
         <Box sx={{ opacity: 0.9, display: 'flex' }}>{icon}</Box>
         <Box sx={{ lineHeight: 1 }}>
-            <Typography sx={{ fontSize: '0.7rem', opacity: 0.85, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '0.6rem', opacity: 0.85, letterSpacing: 0.5, textTransform: 'uppercase', fontWeight: 600 }}>
                 {label}
             </Typography>
-            <Typography sx={{ fontSize: '1.4rem', fontWeight: 800, fontFeatureSettings: '"tnum"', lineHeight: 1.1 }}>
+            <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, fontFeatureSettings: '"tnum"', lineHeight: 1.1 }}>
                 {value}
             </Typography>
         </Box>
@@ -429,51 +427,49 @@ export function DistributorCenterDetailPage() {
 
     return (
         <Box sx={{ p: { xs: 1.5, sm: 3 } }}>
-            {/* Hero: degradado azul con data del CD + stat chips */}
+            {/* Hero compacto — una sola fila con back + bandera + título + stats */}
             <Box sx={{
                 background: (t) => `linear-gradient(135deg, ${t.palette.primary.main} 0%, ${t.palette.primary.dark} 100%)`,
                 color: '#fff',
-                borderRadius: 3,
-                p: { xs: 2, sm: 3 },
-                mb: 3,
-                display: 'flex', flexDirection: { xs: 'column', sm: 'row' },
-                alignItems: { xs: 'flex-start', sm: 'center' },
-                gap: { xs: 2, sm: 3 },
-                boxShadow: '0 4px 14px rgba(25, 118, 210, 0.25)',
+                borderRadius: 2,
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 1, sm: 1.25 },
+                mb: 2,
+                display: 'flex', alignItems: 'center',
+                gap: { xs: 1, sm: 1.5 },
+                boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)',
             }}>
                 <IconButton
+                    size="small"
                     onClick={() => navigate('/maintenance/distributor-center')}
-                    sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' } }}
+                    sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', '&:hover': { bgcolor: 'rgba(255,255,255,0.25)' }, flexShrink: 0 }}
                 >
-                    <BackIcon />
+                    <BackIcon fontSize="small" />
                 </IconButton>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
-                    {/* Fallback: si no hay FK a Country, usamos country_code del DC directo. */}
-                    {(() => {
-                        const code = (dc.data_country?.flag || dc.country_code || '').toLowerCase();
-                        if (!code) return null;
-                        return (
-                            <Box
-                                component="img"
-                                src={`https://flagcdn.com/w80/${code}.png`}
-                                alt={dc.data_country?.name || dc.country_code || ''}
-                                sx={{ width: 44, height: 30, borderRadius: 0.75, boxShadow: '0 2px 6px rgba(0,0,0,0.2)' }}
-                            />
-                        );
-                    })()}
-                    <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="h4" fontWeight={800} sx={{ letterSpacing: '-0.02em', lineHeight: 1.1 }} noWrap>
-                            {dc.name}
-                        </Typography>
-                        <Typography variant="body2" sx={{ opacity: 0.85, mt: 0.5 }}>
-                            {dc.location_distributor_center_code} · {dc.direction}
-                        </Typography>
-                    </Box>
+                {(() => {
+                    const code = (dc.data_country?.flag || dc.country_code || '').toLowerCase();
+                    if (!code) return null;
+                    return (
+                        <Box
+                            component="img"
+                            src={`https://flagcdn.com/w80/${code}.png`}
+                            alt={dc.data_country?.name || dc.country_code || ''}
+                            sx={{ width: 28, height: 20, borderRadius: 0.5, boxShadow: '0 2px 4px rgba(0,0,0,0.2)', flexShrink: 0 }}
+                        />
+                    );
+                })()}
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography fontWeight={800} sx={{ lineHeight: 1.1, fontSize: { xs: '1rem', sm: '1.15rem' } }} noWrap>
+                        {dc.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ opacity: 0.85, fontSize: { xs: '0.65rem', sm: '0.75rem' } }} noWrap>
+                        {dc.location_distributor_center_code} · {dc.direction}
+                    </Typography>
                 </Box>
-                {/* Stat chips inline */}
-                <Box sx={{ display: 'flex', gap: 1.25, flexWrap: 'wrap', alignSelf: { xs: 'flex-start', sm: 'stretch' } }}>
-                    <HeroStat icon={<TruckIcon />} label="Camiones" value={trucks.filter((t) => t.is_active).length} />
-                    <HeroStat icon={<BayIcon />} label="Bahías" value={bays.filter((b) => b.is_active).length} />
+                {/* Stats inline en desktop, ocultas en mobile para ahorrar espacio */}
+                <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1, flexShrink: 0 }}>
+                    <HeroStat icon={<TruckIcon fontSize="small" />} label="Camiones" value={trucks.filter((t) => t.is_active).length} />
+                    <HeroStat icon={<BayIcon fontSize="small" />} label="Bahías" value={bays.filter((b) => b.is_active).length} />
                 </Box>
             </Box>
 
@@ -631,23 +627,83 @@ export function DistributorCenterDetailPage() {
 
                 {/* Trucks tab */}
                 {tabIndex === 2 && (
-                    <Box sx={{ p: 2 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                            <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={() => handleOpenTruckDialog()}>
+                    <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                {trucks.length} camión{trucks.length === 1 ? '' : 'es'} · {trucks.filter((t) => t.is_active).length} activo{trucks.filter((t) => t.is_active).length === 1 ? '' : 's'}
+                            </Typography>
+                            <Button
+                                startIcon={<AddIcon />} variant="contained" size="small"
+                                onClick={() => handleOpenTruckDialog()}
+                                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                            >
                                 Agregar Camión
                             </Button>
                         </Box>
-                        <DataGrid
-                            rows={trucks}
-                            columns={truckColumns}
-                            autoHeight
-                            disableRowSelectionOnClick
-                            pageSizeOptions={[10, 25]}
-                            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                            loading={loadingTrucks}
-                            localeText={{ noRowsLabel: 'Sin camiones.' }}
-                            sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover } }}
-                        />
+
+                        {loadingTrucks ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box>
+                        ) : trucks.length === 0 ? (
+                            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
+                                <TruckIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 0.5 }} />
+                                <Typography color="text.secondary">Sin camiones configurados.</Typography>
+                            </Paper>
+                        ) : (
+                            <>
+                                {/* Desktop: DataGrid */}
+                                <Card variant="outlined" sx={{ display: { xs: 'none', md: 'block' }, borderRadius: 2 }}>
+                                    <DataGrid
+                                        rows={trucks}
+                                        columns={truckColumns}
+                                        autoHeight
+                                        hideFooter
+                                        disableRowSelectionOnClick
+                                        sx={{
+                                            border: 0,
+                                            '& .MuiDataGrid-cell': { fontSize: '0.875rem', py: 1 },
+                                            '& .MuiDataGrid-columnHeaders': {
+                                                backgroundColor: theme.palette.action.hover,
+                                                fontWeight: 600,
+                                            },
+                                        }}
+                                    />
+                                </Card>
+
+                                {/* Mobile: cards en grid */}
+                                <Grid container spacing={1} sx={{ display: { xs: 'flex', md: 'none' } }}>
+                                    {trucks.map((truck) => (
+                                        <Grid item xs={12} sm={6} key={truck.id}>
+                                            <Paper variant="outlined" sx={{
+                                                p: 1.5, borderRadius: 2,
+                                                opacity: truck.is_active ? 1 : 0.55,
+                                                borderColor: truck.is_active ? 'primary.main' : 'divider',
+                                            }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                                    <Chip label={truck.code} size="small" color="primary"
+                                                        sx={{ fontWeight: 700, fontFamily: 'monospace' }} />
+                                                    <Typography variant="body2" fontFamily="monospace" fontWeight={600} sx={{ ml: 0.5 }}>
+                                                        {truck.plate}
+                                                    </Typography>
+                                                    <Switch size="small" checked={truck.is_active}
+                                                        onChange={() => handleToggleTruck(truck)} sx={{ ml: 'auto' }} />
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                                                    {truck.pallet_type === 'HALF' ? 'Media tarima' : 'Estándar'} · {truck.pallet_spaces} espacios
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25 }}>
+                                                    <IconButton size="small" onClick={() => handleOpenTruckDialog(truck)} sx={{ p: 0.5 }}>
+                                                        <EditIcon sx={{ fontSize: '1rem' }} />
+                                                    </IconButton>
+                                                    <IconButton size="small" color="error" onClick={() => handleDeleteTruck(truck.id)} sx={{ p: 0.5 }}>
+                                                        <DeleteIcon sx={{ fontSize: '1rem' }} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </>
+                        )}
                     </Box>
                 )}
 
@@ -695,51 +751,102 @@ export function DistributorCenterDetailPage() {
                                 <Typography color="text.secondary">Sin bahías configuradas.</Typography>
                             </Paper>
                         ) : (
-                            <Grid container spacing={{ xs: 1, sm: 1.5 }}>
-                                {bays.map((bay) => (
-                                    <Grid item xs={6} sm={4} md={3} lg={2.4} key={bay.id}>
-                                        <Paper variant="outlined" sx={{
-                                            p: { xs: 1.25, sm: 1.5 },
-                                            borderRadius: 2,
-                                            display: 'flex', flexDirection: 'column', gap: 0.5,
+                            <>
+                                {/* Mobile: grid 2-col compact cards */}
+                                <Grid
+                                    container
+                                    spacing={1}
+                                    sx={{ display: { xs: 'flex', md: 'none' } }}
+                                >
+                                    {bays.map((bay) => (
+                                        <Grid item xs={6} sm={4} key={bay.id}>
+                                            <Paper variant="outlined" sx={{
+                                                p: 1.25,
+                                                borderRadius: 2,
+                                                display: 'flex', flexDirection: 'column', gap: 0.5,
+                                                opacity: bay.is_active ? 1 : 0.55,
+                                                borderColor: bay.is_active ? 'primary.main' : 'divider',
+                                                borderWidth: bay.is_active ? 1.5 : 1,
+                                            }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                                                    <Chip label={bay.code} size="small" color="primary"
+                                                        sx={{ fontWeight: 700, fontFamily: 'monospace' }} />
+                                                    <Switch size="small" checked={bay.is_active}
+                                                        onChange={() => handleToggleBay(bay)} sx={{ ml: 'auto' }} />
+                                                </Box>
+                                                <Typography variant="body2" fontWeight={600}
+                                                    sx={{ fontSize: '0.8rem', minHeight: '1.3em' }} noWrap>
+                                                    {bay.name}
+                                                </Typography>
+                                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25, mt: 'auto' }}>
+                                                    <IconButton size="small" onClick={() => handleOpenBayDialog(bay)} sx={{ p: 0.5 }}>
+                                                        <EditIcon sx={{ fontSize: '1rem' }} />
+                                                    </IconButton>
+                                                    <IconButton size="small" color="error" onClick={() => handleDeleteBay(bay.id)} sx={{ p: 0.5 }}>
+                                                        <DeleteIcon sx={{ fontSize: '1rem' }} />
+                                                    </IconButton>
+                                                </Box>
+                                            </Paper>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+
+                                {/* Desktop: list rows, una bahía por línea */}
+                                <Paper
+                                    variant="outlined"
+                                    sx={{
+                                        display: { xs: 'none', md: 'block' },
+                                        borderRadius: 2, overflow: 'hidden',
+                                    }}
+                                >
+                                    {/* Header */}
+                                    <Box sx={{
+                                        display: 'grid',
+                                        gridTemplateColumns: '100px 1fr 100px 120px',
+                                        alignItems: 'center',
+                                        px: 2, py: 1,
+                                        bgcolor: 'action.hover',
+                                        borderBottom: 1, borderColor: 'divider',
+                                    }}>
+                                        <Typography variant="caption" fontWeight={700} color="text.secondary">CÓDIGO</Typography>
+                                        <Typography variant="caption" fontWeight={700} color="text.secondary">NOMBRE</Typography>
+                                        <Typography variant="caption" fontWeight={700} color="text.secondary" textAlign="center">ACTIVA</Typography>
+                                        <Typography variant="caption" fontWeight={700} color="text.secondary" textAlign="right">ACCIONES</Typography>
+                                    </Box>
+                                    {bays.map((bay, i) => (
+                                        <Box key={bay.id} sx={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '100px 1fr 100px 120px',
+                                            alignItems: 'center',
+                                            px: 2, py: 1.25,
+                                            borderBottom: i < bays.length - 1 ? 1 : 0,
+                                            borderColor: 'divider',
                                             opacity: bay.is_active ? 1 : 0.55,
-                                            borderColor: bay.is_active ? 'primary.main' : 'divider',
-                                            borderWidth: bay.is_active ? 1.5 : 1,
+                                            transition: 'background-color .15s ease',
+                                            '&:hover': { bgcolor: 'action.hover' },
                                         }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                                                <Chip
-                                                    label={bay.code}
-                                                    size="small"
-                                                    color="primary"
-                                                    sx={{ fontWeight: 700, fontFamily: 'monospace', maxWidth: '100%' }}
-                                                />
-                                                <Switch
-                                                    size="small"
-                                                    checked={bay.is_active}
-                                                    onChange={() => handleToggleBay(bay)}
-                                                    sx={{ ml: 'auto' }}
-                                                />
+                                            <Chip
+                                                label={bay.code}
+                                                size="small"
+                                                color="primary"
+                                                sx={{ fontWeight: 700, fontFamily: 'monospace', width: 'fit-content' }}
+                                            />
+                                            <Typography variant="body2" fontWeight={600} noWrap>{bay.name}</Typography>
+                                            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                                                <Switch size="small" checked={bay.is_active} onChange={() => handleToggleBay(bay)} />
                                             </Box>
-                                            <Typography
-                                                variant="body2"
-                                                fontWeight={600}
-                                                sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' }, minHeight: '1.3em' }}
-                                                noWrap
-                                            >
-                                                {bay.name}
-                                            </Typography>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25, mt: 'auto' }}>
-                                                <IconButton size="small" onClick={() => handleOpenBayDialog(bay)} sx={{ p: 0.5 }}>
-                                                    <EditIcon sx={{ fontSize: '1rem' }} />
+                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
+                                                <IconButton size="small" onClick={() => handleOpenBayDialog(bay)}>
+                                                    <EditIcon fontSize="small" />
                                                 </IconButton>
-                                                <IconButton size="small" color="error" onClick={() => handleDeleteBay(bay.id)} sx={{ p: 0.5 }}>
-                                                    <DeleteIcon sx={{ fontSize: '1rem' }} />
+                                                <IconButton size="small" color="error" onClick={() => handleDeleteBay(bay.id)}>
+                                                    <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                             </Box>
-                                        </Paper>
-                                    </Grid>
-                                ))}
-                            </Grid>
+                                        </Box>
+                                    ))}
+                                </Paper>
+                            </>
                         )}
                     </Box>
                 )}
