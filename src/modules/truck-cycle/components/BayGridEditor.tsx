@@ -152,6 +152,41 @@ export default function BayGridEditor({
 
     const cellMap = useMemo(() => buildMap(localBays), [localBays]);
 
+    // Selección por tap — funciona tanto en mobile (touch) como en desktop.
+    // Si hay una bahía seleccionada, tocar otro slot la mueve ahí (o intercambia).
+    const [selectedBayId, setSelectedBayId] = useState<number | null>(null);
+
+    const moveOrSwap = useCallback((bayId: number, targetRow: number, targetCol: number) => {
+        setLocalBays((prev) => {
+            const moving = prev.find((b) => b.id === bayId);
+            if (!moving) return prev;
+            if (moving.row === targetRow && moving.column === targetCol) return prev;
+
+            const occupant = prev.find((b) => b.row === targetRow && b.column === targetCol && b.id !== bayId);
+            return prev.map((b) => {
+                if (b.id === bayId) return { ...b, row: targetRow, column: targetCol };
+                if (occupant && b.id === occupant.id) return { ...b, row: moving.row, column: moving.column };
+                return b;
+            });
+        });
+    }, []);
+
+    const handleSlotTap = useCallback((bay: Bay | null, r: number, c: number) => {
+        if (selectedBayId == null) {
+            // Primer tap: selecciona si el slot tiene bahía.
+            if (bay) setSelectedBayId(bay.id);
+            return;
+        }
+        if (bay && bay.id === selectedBayId) {
+            // Tap sobre la misma bahía → deseleccionar.
+            setSelectedBayId(null);
+            return;
+        }
+        // Tap en otro slot → mover/intercambiar.
+        moveOrSwap(selectedBayId, r, c);
+        setSelectedBayId(null);
+    }, [selectedBayId, moveOrSwap]);
+
     const pendingChanges = useMemo(() => {
         const original = new Map(bays.map((b) => [b.id, b] as const));
         const changes: Array<{ id: number; row: number; column: number }> = [];
@@ -181,20 +216,8 @@ export default function BayGridEditor({
         const bayId = dragBayId;
         setDragBayId(null);
         if (bayId == null) return;
-
-        setLocalBays((prev) => {
-            const moving = prev.find((b) => b.id === bayId);
-            if (!moving) return prev;
-            if (moving.row === targetRow && moving.column === targetCol) return prev;
-
-            const occupant = prev.find((b) => b.row === targetRow && b.column === targetCol && b.id !== bayId);
-            return prev.map((b) => {
-                if (b.id === bayId) return { ...b, row: targetRow, column: targetCol };
-                if (occupant && b.id === occupant.id) return { ...b, row: moving.row, column: moving.column };
-                return b;
-            });
-        });
-    }, [dragBayId]);
+        moveOrSwap(bayId, targetRow, targetCol);
+    }, [dragBayId, moveOrSwap]);
 
     const handleReset = () => setLocalBays(bays.map((b) => ({ ...b })));
 
@@ -207,35 +230,43 @@ export default function BayGridEditor({
     const truckRotation = rotationForDock(dockPosition);
 
     const renderSlot = (bay: Bay | null, r: number, c: number) => {
-        const isDropTarget = dragBayId != null;
+        const isDropTarget = dragBayId != null || selectedBayId != null;
         const isBeingDragged = bay && dragBayId === bay.id;
+        const isSelected = bay && selectedBayId === bay.id;
+        // En touch, los empty slots destacan cuando hay una bahía seleccionada.
+        const isCandidateTarget = selectedBayId != null && !isSelected;
 
         return (
             <Box
                 key={`${r}-${c}`}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop(r, c)}
+                onClick={() => handleSlotTap(bay, r, c)}
                 sx={{
                     position: 'relative',
                     minHeight: isHorizontal ? 100 : 240,
                     minWidth: isHorizontal ? 240 : 100,
                     display: 'flex',
                     flexDirection: 'column',
+                    cursor: bay || selectedBayId != null ? 'pointer' : 'default',
                     bgcolor: bay
                         ? bay.is_active
                             ? isDropTarget ? SLOT_BG_DROP : SLOT_BG
                             : SLOT_BG_INACTIVE
-                        : alpha('#000', 0.03),
+                        : isCandidateTarget ? alpha('#66bb6a', 0.12) : alpha('#000', 0.03),
+                    outline: isSelected ? `3px solid ${theme.palette.primary.main}` : undefined,
+                    outlineOffset: isSelected ? -3 : undefined,
                     // Líneas de parqueo amarillas perpendiculares al muelle
                     borderTop: dockPosition === 'top' ? `4px solid ${DOCK_BG}` : isHorizontal && bay ? `3px solid ${PARKING_LINE}` : undefined,
                     borderBottom: dockPosition === 'bottom' ? `4px solid ${DOCK_BG}` : isHorizontal && bay ? `3px solid ${PARKING_LINE}` : undefined,
                     borderLeft: dockPosition === 'left' ? `4px solid ${DOCK_BG}` : !isHorizontal && bay ? `3px solid ${PARKING_LINE}` : undefined,
                     borderRight: dockPosition === 'right' ? `4px solid ${DOCK_BG}` : !isHorizontal && bay ? `3px solid ${PARKING_LINE}` : undefined,
-                    border: !bay ? `2px dashed ${alpha('#000', 0.2)}` : undefined,
+                    border: !bay ? `2px dashed ${isCandidateTarget ? alpha('#22c55e', 0.6) : alpha('#000', 0.2)}` : undefined,
                     borderRadius: 1,
                     overflow: 'hidden',
                     opacity: isBeingDragged ? 0.4 : 1,
                     transition: 'all 0.15s ease',
+                    touchAction: 'manipulation',
                 }}
             >
                 {bay ? (
@@ -413,7 +444,9 @@ export default function BayGridEditor({
                         Editor de Layout
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                        Arrastre desde el código de la bahía para reordenar. Suelte sobre otro slot para intercambiar.
+                        {selectedBayId != null
+                            ? 'Toca otro slot para mover/intercambiar. Toca la misma para cancelar.'
+                            : 'Arrastra (PC) o toca una bahía (móvil) para seleccionarla.'}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
