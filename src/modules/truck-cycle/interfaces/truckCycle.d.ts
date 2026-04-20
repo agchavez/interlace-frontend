@@ -113,7 +113,12 @@ export interface PautaListItem {
     truck_code: string;
     created_at: string;
     last_status_change: string | null;
+    status_started_at?: string | null;
     assigned_to: { name: string; role: string } | null;
+    roles?: Record<string, { name: string; role_display: string; since: string | null }>;
+    inconsistencies_count?: number;
+    photos_count?: number;
+    assembled_fractions?: number;
     bay_code: string | null;
     bay_id: number | null;
 }

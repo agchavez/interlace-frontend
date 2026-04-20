@@ -27,6 +27,7 @@ import {
     VisibilityOffOutlined,
     PersonOutlineRounded,
     LockOutlined,
+    Tv as TvIcon,
 } from "@mui/icons-material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
@@ -340,7 +341,24 @@ export default function SignInCard() {
             <Box sx={{ mt: 5 }}>
                 <Divider sx={{ mb: 2.5, borderColor: '#e2e8f0' }} />
                 <Typography sx={{ fontFamily: 'Inter', fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center' }}>
-                    © {new Date().getFullYear()} Interlace
+                    © {new Date().getFullYear()} Interlace ·{' '}
+                    <Box
+                        component="span"
+                        onClick={() => navigate('/tv')}
+                        sx={{
+                            cursor: 'pointer',
+                            color: '#94a3b8',
+                            textDecoration: 'none',
+                            borderBottom: '1px dotted #cbd5e1',
+                            pb: '1px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.4,
+                            '&:hover': { color: '#1565c0', borderBottomColor: '#1565c0' },
+                        }}
+                    >
+                        <TvIcon sx={{ fontSize: '0.85rem' }} /> Modo TV
+                    </Box>
                 </Typography>
             </Box>
 

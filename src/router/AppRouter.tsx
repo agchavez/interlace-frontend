@@ -35,6 +35,7 @@ const PublicTokenPage = lazy(() => import('../modules/tokens/pages/PublicTokenPa
 const TruckCycleRouter = lazy(() => import('../modules/truck-cycle/TruckCycleRouter'));
 const WorkRouter = lazy(() => import('../modules/work/WorkRouter'));
 const PublicArrivalPage = lazy(() => import('../modules/truck-cycle/pages/PublicArrivalPage'));
+const TvRouter = lazy(() => import('../modules/tv/TvRouter'));
 
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -109,11 +110,15 @@ export function AppRouter() {
         <div className={status === 'authenticated' ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}${location.pathname.startsWith('/work') ? ' work-mode' : ''}` : 'ui__container__auth'}>
             <Routes>
                 <Route path="/auth/*" element={
-                    <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
-                        <LazyLoading Children={
-                            AuthRouter
-                        } />
-                    </PrivateRoute>
+                    // Si ya estás autenticado y el enlace trae ?next=..., te mandamos
+                    // directo a ese destino en vez de al dashboard — así el flujo
+                    // "scan QR → login" desde el teléfono cae correctamente en
+                    // /tv/pair/:code aunque la sesión del teléfono ya exista.
+                    status === 'authenticated' && next
+                        ? <Navigate to={next} replace />
+                        : <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
+                            <LazyLoading Children={AuthRouter} />
+                        </PrivateRoute>
                 } />
                 {/* Ruta pública para tokens - sin autenticación */}
                 <Route path="/public/token/:uuid" element={
@@ -122,6 +127,10 @@ export function AppRouter() {
                 {/* Ruta pública para registro de llegada de camiones */}
                 <Route path="/public/arrival/:truckCode" element={
                     <LazyLoading Children={PublicArrivalPage} />
+                } />
+                {/* Módulo TV — /tv y /tv/dashboard/* son públicos, /tv/pair/:code usa auth internamente. */}
+                <Route path="/tv/*" element={
+                    <LazyLoading Children={TvRouter} />
                 } />
                 <Route path="/user/*" element={
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>

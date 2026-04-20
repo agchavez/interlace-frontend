@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Box, Typography, Grid, Chip, Divider, LinearProgress, IconButton, Tooltip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, Typography, Grid, Chip, Divider, LinearProgress, IconButton, Tooltip, ButtonBase } from '@mui/material';
 import { todayInHonduras, HN_TIMEZONE } from '../../../utils/timezone';
 import {
     LocalShipping as TruckIcon,
@@ -71,6 +72,7 @@ function elapsedLabel(from: string | null | undefined) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 export default function WorkstationPage() {
     const clock = useClock();
+    const navigate = useNavigate();
     // Fecha operativa anclada a Honduras — independiente del TZ del cliente.
     const operationalDate = useMemo(() => todayInHonduras(), []);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -206,12 +208,18 @@ export default function WorkstationPage() {
                         {statusColumns.map(({ status, label, color, pautas }) => (
                             <Grid item xs={6} sm={4} md={3} lg={2} key={status} sx={{ display: 'flex' }}>
                                 <Box sx={{ bgcolor: '#1e293b', borderRadius: 2, overflow: 'hidden', width: '100%', display: 'flex', flexDirection: 'column' }}>
-                                    {/* Header */}
-                                    <Box sx={{
-                                        bgcolor: color,
-                                        px: 1.5, py: { xs: 0.5, md: 0.75 },
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    }}>
+                                    {/* Header clickeable — abre el detalle del status. */}
+                                    <ButtonBase
+                                        onClick={() => navigate(`/truck-cycle/workstation/status/${status}`)}
+                                        sx={{
+                                            bgcolor: color,
+                                            px: 1.5, py: { xs: 0.5, md: 0.75 },
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            width: '100%',
+                                            transition: 'filter .15s ease',
+                                            '&:hover': { filter: 'brightness(1.15)' },
+                                        }}
+                                    >
                                         <Typography variant="caption" fontWeight={700} sx={{ color: '#fff', fontSize: { xs: '0.65rem', md: '0.75rem' } }}>
                                             {label}
                                         </Typography>
@@ -219,8 +227,8 @@ export default function WorkstationPage() {
                                             height: 20, bgcolor: 'rgba(0,0,0,0.3)', color: '#fff',
                                             fontWeight: 700, fontSize: '0.7rem', minWidth: 28,
                                         }} />
-                                    </Box>
-                                    {/* Cards */}
+                                    </ButtonBase>
+                                    {/* Cards — cada una navega a la pauta detail. */}
                                     <Box sx={{
                                         p: 0.75,
                                         flex: 1, overflow: 'auto',
@@ -228,13 +236,18 @@ export default function WorkstationPage() {
                                         '&::-webkit-scrollbar-thumb': { bgcolor: color, borderRadius: 2 },
                                     }}>
                                         {pautas.map((p) => (
-                                            <Box key={p.id} sx={{
-                                                bgcolor: 'rgba(255,255,255,0.04)',
-                                                borderRadius: 1,
-                                                px: 1, py: 0.5, mb: 0.5,
-                                                borderLeft: `3px solid ${color}`,
-                                                '&:hover': { bgcolor: 'rgba(255,255,255,0.08)' },
-                                            }}>
+                                            <ButtonBase
+                                                key={p.id}
+                                                onClick={() => navigate(`/truck-cycle/pautas/${p.id}`)}
+                                                sx={{
+                                                    display: 'block', textAlign: 'left', width: '100%',
+                                                    bgcolor: 'rgba(255,255,255,0.04)',
+                                                    borderRadius: 1,
+                                                    px: 1, py: 0.5, mb: 0.5,
+                                                    borderLeft: `3px solid ${color}`,
+                                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
+                                                }}
+                                            >
                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <Typography fontWeight={700} sx={{ color: '#f1f5f9', fontSize: { xs: '0.75rem', md: '0.85rem' }, lineHeight: 1.3 }}>
                                                         {p.transport_number}
@@ -246,7 +259,7 @@ export default function WorkstationPage() {
                                                 <Typography sx={{ color: '#94a3b8', fontSize: { xs: '0.6rem', md: '0.7rem' } }}>
                                                     {p.truck_plate} &middot; {p.total_boxes} cajas
                                                 </Typography>
-                                            </Box>
+                                            </ButtonBase>
                                         ))}
                                     </Box>
                                 </Box>

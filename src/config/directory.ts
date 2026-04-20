@@ -411,6 +411,25 @@ export const permisions = [
             "any"
         ]
     },
+    // TV module — /tv (QR entry) y /tv/dashboard/* son públicos; /tv/pair/:code requiere auth.
+    {
+        url: "/tv",
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/",
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/dashboard/:dashboard",
+        reg: /\/tv\/dashboard\/[^/]+\/?$/,
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/pair/:code",
+        reg: /\/tv\/pair\/[A-Z0-9\-]{3,16}\/?$/,
+        permissions: ["any"],
+    },
     // Token Catalogs / Maintenance
     {
         url: "/tokens/materials",
@@ -510,6 +529,13 @@ export const permisions = [
     },
     {
         url: "/truck-cycle/workstation",
+        permissions: [
+            "truck_cycle.view_pautamodel"
+        ]
+    },
+    {
+        url: "/truck-cycle/workstation/status/:status",
+        reg: /\/truck-cycle\/workstation\/status\/[A-Z_]+\/?$/,
         permissions: [
             "truck_cycle.view_pautamodel"
         ]

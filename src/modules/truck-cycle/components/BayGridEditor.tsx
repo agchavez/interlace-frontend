@@ -328,7 +328,7 @@ export default function BayGridEditor({
         >
             <DockIcon sx={{ fontSize: '1.2rem', transform: isHorizontal ? 'rotate(90deg)' : 'none' }} />
             <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>
-                Muelle
+                PATIO DE MANIOBRAS
             </Typography>
         </Box>
     );
@@ -430,7 +430,7 @@ export default function BayGridEditor({
             {onDockPositionChange && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, flexWrap: 'wrap' }}>
                     <Typography variant="caption" fontWeight={600}>
-                        Muelle en:
+                        PATIO DE MANIOBRAS en:
                     </Typography>
                     <ToggleButtonGroup
                         size="small"

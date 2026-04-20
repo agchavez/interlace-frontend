@@ -268,9 +268,19 @@ export const maintenanceApi = createApi({
   }),
 });
 
+export interface DCShift {
+  id: number;
+  distributor_center: number;
+  day_of_week: 'MON' | 'TUE' | 'WED' | 'THU' | 'FRI' | 'SAT' | 'SUN';
+  shift_name: string;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}
+
 export const distributorCenterApi = createApi({
   reducerPath: "distributorCenterApi",
-  tagTypes: ['dc'],
+  tagTypes: ['dc', 'dc-shift'],
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_JS_APP_API_URL + "/api",
     prepareHeaders: (headers, { getState }) => {
@@ -342,6 +352,26 @@ export const distributorCenterApi = createApi({
         params: { limit, offset, search },
       }),
     }),
+
+    // ───── DC Shifts (turnos del CD) ─────
+    getDcShifts: builder.query<BaseApiResponse<DCShift>, { distributor_center?: number; limit?: number; offset?: number }>({
+      query: (params) => ({ url: 'dc-shift/', params }),
+      providesTags: (result) => result
+        ? [...result.results.map(({ id }) => ({ type: 'dc-shift' as const, id })), { type: 'dc-shift' as const, id: 'LIST' }]
+        : [{ type: 'dc-shift' as const, id: 'LIST' }],
+    }),
+    createDcShift: builder.mutation<DCShift, Partial<DCShift>>({
+      query: (body) => ({ url: 'dc-shift/', method: 'POST', body }),
+      invalidatesTags: [{ type: 'dc-shift', id: 'LIST' }, { type: 'dc', id: 'LIST' }],
+    }),
+    updateDcShift: builder.mutation<DCShift, { id: number; data: Partial<DCShift> }>({
+      query: ({ id, data }) => ({ url: `dc-shift/${id}/`, method: 'PATCH', body: data }),
+      invalidatesTags: (_r, _e, { id }) => [{ type: 'dc-shift', id }, { type: 'dc-shift', id: 'LIST' }, { type: 'dc', id: 'LIST' }],
+    }),
+    deleteDcShift: builder.mutation<void, number>({
+      query: (id) => ({ url: `dc-shift/${id}/`, method: 'DELETE' }),
+      invalidatesTags: (_r, _e, id) => [{ type: 'dc-shift', id }, { type: 'dc-shift', id: 'LIST' }, { type: 'dc', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -353,6 +383,12 @@ export const {
 
   // Para países
   useGetCountriesQuery,
+
+  // Turnos
+  useGetDcShiftsQuery,
+  useCreateDcShiftMutation,
+  useUpdateDcShiftMutation,
+  useDeleteDcShiftMutation,
 } = distributorCenterApi;
 
 export const {

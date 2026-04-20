@@ -136,7 +136,7 @@ export default function BayGridPicker({
         >
             <DockIcon sx={{ fontSize: '1.2rem', transform: isHorizontal ? 'rotate(90deg)' : 'none' }} />
             <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>
-                Muelle
+                PATIO DE MANIOBRAS
             </Typography>
         </Box>
     );
