@@ -653,15 +653,24 @@ export function DistributorCenterDetailPage() {
 
                 {/* Bays tab */}
                 {tabIndex === 3 && (
-                    <Box sx={{ p: 2 }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                            <Button startIcon={<AddIcon />} variant="outlined" size="small" onClick={() => handleOpenBayDialog()}>
+                    <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                                {bays.length} bahía{bays.length === 1 ? '' : 's'} · {bays.filter((b) => b.is_active).length} activa{bays.filter((b) => b.is_active).length === 1 ? '' : 's'}
+                            </Typography>
+                            <Button
+                                startIcon={<AddIcon />}
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleOpenBayDialog()}
+                                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                            >
                                 Agregar Bahía
                             </Button>
                         </Box>
 
                         {/* Layout editor */}
-                        <Box sx={{ mb: 3 }}>
+                        <Box sx={{ mb: 3, overflowX: 'auto' }}>
                             {loadingBays ? (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                                     <CircularProgress size={24} />
@@ -677,17 +686,61 @@ export function DistributorCenterDetailPage() {
                             )}
                         </Box>
 
-                        <DataGrid
-                            rows={bays}
-                            columns={bayColumns}
-                            autoHeight
-                            disableRowSelectionOnClick
-                            pageSizeOptions={[10, 25]}
-                            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-                            loading={loadingBays}
-                            localeText={{ noRowsLabel: 'Sin bahías.' }}
-                            sx={{ border: 'none', '& .MuiDataGrid-columnHeaders': { backgroundColor: theme.palette.action.hover } }}
-                        />
+                        {/* Lista en grid de cards — responsive, aprovecha espacio en mobile */}
+                        {loadingBays ? (
+                            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress size={24} /></Box>
+                        ) : bays.length === 0 ? (
+                            <Paper variant="outlined" sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
+                                <BayIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 0.5 }} />
+                                <Typography color="text.secondary">Sin bahías configuradas.</Typography>
+                            </Paper>
+                        ) : (
+                            <Grid container spacing={{ xs: 1, sm: 1.5 }}>
+                                {bays.map((bay) => (
+                                    <Grid item xs={6} sm={4} md={3} lg={2.4} key={bay.id}>
+                                        <Paper variant="outlined" sx={{
+                                            p: { xs: 1.25, sm: 1.5 },
+                                            borderRadius: 2,
+                                            display: 'flex', flexDirection: 'column', gap: 0.5,
+                                            opacity: bay.is_active ? 1 : 0.55,
+                                            borderColor: bay.is_active ? 'primary.main' : 'divider',
+                                            borderWidth: bay.is_active ? 1.5 : 1,
+                                        }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                                                <Chip
+                                                    label={bay.code}
+                                                    size="small"
+                                                    color="primary"
+                                                    sx={{ fontWeight: 700, fontFamily: 'monospace', maxWidth: '100%' }}
+                                                />
+                                                <Switch
+                                                    size="small"
+                                                    checked={bay.is_active}
+                                                    onChange={() => handleToggleBay(bay)}
+                                                    sx={{ ml: 'auto' }}
+                                                />
+                                            </Box>
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight={600}
+                                                sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' }, minHeight: '1.3em' }}
+                                                noWrap
+                                            >
+                                                {bay.name}
+                                            </Typography>
+                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.25, mt: 'auto' }}>
+                                                <IconButton size="small" onClick={() => handleOpenBayDialog(bay)} sx={{ p: 0.5 }}>
+                                                    <EditIcon sx={{ fontSize: '1rem' }} />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => handleDeleteBay(bay.id)} sx={{ p: 0.5 }}>
+                                                    <DeleteIcon sx={{ fontSize: '1rem' }} />
+                                                </IconButton>
+                                            </Box>
+                                        </Paper>
+                                    </Grid>
+                                ))}
+                            </Grid>
+                        )}
                     </Box>
                 )}
 

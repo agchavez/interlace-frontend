@@ -67,9 +67,9 @@ export default function TvPairPage() {
                 dashboard, label, ttl_days: ttl,
             }).unwrap();
             setPaired(true);
-            setSnack({ open: true, msg: '¡Pareada! La TV ya debe cargar el dashboard.', severity: 'success' });
+            setSnack({ open: true, msg: '¡Vinculada! La TV ya debe cargar el dashboard.', severity: 'success' });
         } catch (err: any) {
-            setSnack({ open: true, msg: err?.data?.error || 'Error al parear.', severity: 'error' });
+            setSnack({ open: true, msg: err?.data?.error || 'Error al vincular.', severity: 'error' });
         }
     };
 
@@ -94,7 +94,7 @@ export default function TvPairPage() {
             <Container maxWidth="sm" sx={{ py: 8, textAlign: 'center' }}>
                 <DoneIcon sx={{ fontSize: 72, color: 'success.main', mb: 2 }} />
                 <Typography variant="h5" fontWeight={800} gutterBottom>
-                    TV pareada correctamente
+                    TV vinculada correctamente
                 </Typography>
                 <Typography color="text.secondary">
                     La pantalla ya está mostrando el dashboard. Puedes cerrar esta ventana.
@@ -108,7 +108,7 @@ export default function TvPairPage() {
             <Box sx={{ textAlign: 'center', mb: 3 }}>
                 <TvIcon sx={{ fontSize: 56, color: 'primary.main', mb: 1 }} />
                 <Typography variant="h5" fontWeight={800}>
-                    Parear TV
+                    Vincular TV
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                     Código <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 700, letterSpacing: 2 }}>{code}</Box>
@@ -122,7 +122,7 @@ export default function TvPairPage() {
             )}
             {isAlreadyPaired && (
                 <Alert severity="info" sx={{ mb: 2 }}>
-                    Esta TV ya fue pareada por alguien más.
+                    Esta TV ya fue vinculada por alguien más.
                 </Alert>
             )}
 
@@ -174,7 +174,7 @@ export default function TvPairPage() {
                         fullWidth variant="contained" size="large"
                         onClick={handleSubmit} disabled={pairing || !dc}
                     >
-                        {pairing ? <CircularProgress size={22} color="inherit" /> : 'Parear esta TV'}
+                        {pairing ? <CircularProgress size={22} color="inherit" /> : 'Vincular esta TV'}
                     </Button>
                 </Paper>
             )}

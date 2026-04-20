@@ -102,15 +102,11 @@ export default function BayGridEditor({
     const [autoAdjusted, setAutoAdjusted] = useState<boolean>(() => autoLayout(bays).adjusted);
     const [dragBayId, setDragBayId] = useState<number | null>(null);
 
-    const [syncedFrom, setSyncedFrom] = useState<Bay[]>(bays);
-    if (syncedFrom !== bays) {
-        setSyncedFrom(bays);
-        const out = autoLayout(bays);
-        setLocalBays(out.bays);
-        setAutoAdjusted(out.adjusted);
-    }
-
-    const inferredDims = useMemo(() => {
+    // Dimensiones TOTALES del grid — inicializadas desde las bahías existentes,
+    // pero luego solo cambian cuando el usuario presiona + / − fila/columna.
+    // Si se trackearan como delta sobre inferredDims, arrastrar una bahía a la
+    // derecha incrementaría inferredDims y sumaría una columna extra no pedida.
+    const initialDims = useMemo(() => {
         let maxRow = 0;
         let maxCol = 0;
         for (const b of localBays) {
@@ -118,12 +114,41 @@ export default function BayGridEditor({
             if (b.column > maxCol) maxCol = b.column;
         }
         return { rows: maxRow + 1, cols: maxCol + 1 };
-    }, [localBays]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    const [rows, setRows] = useState<number>(Math.max(1, initialDims.rows));
+    const [cols, setCols] = useState<number>(Math.max(1, initialDims.cols));
 
-    const [extraRows, setExtraRows] = useState(0);
-    const [extraCols, setExtraCols] = useState(0);
-    const rows = Math.max(1, inferredDims.rows + extraRows);
-    const cols = Math.max(1, inferredDims.cols + extraCols);
+    // Sincronización cuando cambia la prop `bays` (p.ej. tras guardar).
+    const [syncedFrom, setSyncedFrom] = useState<Bay[]>(bays);
+    if (syncedFrom !== bays) {
+        setSyncedFrom(bays);
+        const out = autoLayout(bays);
+        setLocalBays(out.bays);
+        setAutoAdjusted(out.adjusted);
+        // Recalcula dimensiones iniciales de la nueva data.
+        let maxRow = 0, maxCol = 0;
+        for (const b of out.bays) {
+            if (b.row > maxRow) maxRow = b.row;
+            if (b.column > maxCol) maxCol = b.column;
+        }
+        setRows(Math.max(1, maxRow + 1));
+        setCols(Math.max(1, maxCol + 1));
+    }
+
+    // Al arrastrar podría exponerse que una bahía quede fuera del grid actual.
+    // Para evitarlo, si una bahía vive fuera de `rows`/`cols` crecemos el grid
+    // para que siga visible — pero nunca lo encogemos automáticamente.
+    const visibleRows = useMemo(() => {
+        let max = rows;
+        for (const b of localBays) if (b.row + 1 > max) max = b.row + 1;
+        return max;
+    }, [rows, localBays]);
+    const visibleCols = useMemo(() => {
+        let max = cols;
+        for (const b of localBays) if (b.column + 1 > max) max = b.column + 1;
+        return max;
+    }, [cols, localBays]);
 
     const cellMap = useMemo(() => buildMap(localBays), [localBays]);
 
@@ -394,32 +419,41 @@ export default function BayGridEditor({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Tooltip title="Quitar columna">
                         <span>
-                            <IconButton size="small" onClick={() => setExtraCols((n) => Math.max(-inferredDims.cols + 1, n - 1))}>
+                            <IconButton
+                                size="small"
+                                onClick={() => setCols((n) => Math.max(1, n - 1))}
+                                // No permitir encoger si hay bahías usando la última columna.
+                                disabled={localBays.some((b) => b.column >= cols - 1) || cols <= 1}
+                            >
                                 <RemoveIcon fontSize="small" />
                             </IconButton>
                         </span>
                     </Tooltip>
                     <Typography variant="caption" sx={{ minWidth: 40, textAlign: 'center' }}>
-                        {cols} col
+                        {visibleCols} col
                     </Typography>
                     <Tooltip title="Agregar columna">
-                        <IconButton size="small" onClick={() => setExtraCols((n) => n + 1)}>
+                        <IconButton size="small" onClick={() => setCols((n) => n + 1)}>
                             <AddIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     <Box sx={{ width: 8 }} />
                     <Tooltip title="Quitar fila">
                         <span>
-                            <IconButton size="small" onClick={() => setExtraRows((n) => Math.max(-inferredDims.rows + 1, n - 1))}>
+                            <IconButton
+                                size="small"
+                                onClick={() => setRows((n) => Math.max(1, n - 1))}
+                                disabled={localBays.some((b) => b.row >= rows - 1) || rows <= 1}
+                            >
                                 <RemoveIcon fontSize="small" />
                             </IconButton>
                         </span>
                     </Tooltip>
                     <Typography variant="caption" sx={{ minWidth: 40, textAlign: 'center' }}>
-                        {rows} filas
+                        {visibleRows} filas
                     </Typography>
                     <Tooltip title="Agregar fila">
-                        <IconButton size="small" onClick={() => setExtraRows((n) => n + 1)}>
+                        <IconButton size="small" onClick={() => setRows((n) => n + 1)}>
                             <AddIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
@@ -487,15 +521,15 @@ export default function BayGridEditor({
                     <Box
                         sx={{
                             display: 'grid',
-                            gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+                            gridTemplateColumns: `repeat(${visibleCols}, minmax(0, 1fr))`,
                             gap: 1.25,
                             flex: 1,
                             minHeight: 160,
                         }}
                     >
-                        {Array.from({ length: rows * cols }).map((_, idx) => {
-                            const r = Math.floor(idx / cols);
-                            const c = idx % cols;
+                        {Array.from({ length: visibleRows * visibleCols }).map((_, idx) => {
+                            const r = Math.floor(idx / visibleCols);
+                            const c = idx % visibleCols;
                             return renderSlot(cellMap.get(`${r}-${c}`) || null, r, c);
                         })}
                     </Box>

@@ -123,7 +123,7 @@ export default function TvWorkstationPage() {
         } catch { /* ignore */ }
     }, [lastMessage, navigate, refetch]);
 
-    // Si el token fue rechazado por el servidor, volver al pareo.
+    // Si el token fue rechazado por el servidor, volver a la vinculación.
     useEffect(() => {
         if (!error) return;
         const status = (error as any)?.status;
@@ -152,8 +152,8 @@ export default function TvWorkstationPage() {
         return (
             <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: '#0f172a', color: '#e2e8f0', p: 4 }}>
                 <Box sx={{ textAlign: 'center' }}>
-                    <Alert severity="warning" sx={{ mb: 2 }}>Esta TV no está pareada.</Alert>
-                    <Button variant="contained" onClick={() => navigate('/tv')}>Ir al pareo</Button>
+                    <Alert severity="warning" sx={{ mb: 2 }}>Esta TV no está vinculada.</Alert>
+                    <Button variant="contained" onClick={() => navigate('/tv')}>Ir a la vinculación</Button>
                 </Box>
             </Box>
         );

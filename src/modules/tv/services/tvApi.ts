@@ -67,7 +67,7 @@ export const tvApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${API_URL}/api`,
         prepareHeaders: (headers, { getState, endpoint }) => {
-            // Endpoints TV-token usan X-TV-Token; los de pareo JWT del usuario.
+            // Endpoints TV-token usan X-TV-Token; los de vinculación JWT del usuario.
             const tvEndpoints = new Set([
                 'getTvWorkstation',
                 'heartbeat',

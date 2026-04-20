@@ -128,9 +128,9 @@ export function DistributorCenterListPage() {
                     </Typography>
                 </Card>
             ) : (
-                <Grid container spacing={2}>
+                <Grid container spacing={{ xs: 1.25, sm: 2 }}>
                     {rows.map((dc) => (
-                        <Grid item xs={12} sm={6} lg={4} key={dc.id}>
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={dc.id}>
                             <DcCard
                                 dc={dc}
                                 onOpen={() => navigate(`/maintenance/distributor-center/${dc.id}`)}
@@ -198,50 +198,53 @@ function DcCard({ dc, onOpen, onEdit, onDelete }: {
             <Box sx={{
                 background: (t) => `linear-gradient(135deg, ${t.palette.primary.main} 0%, ${t.palette.primary.dark} 100%)`,
                 color: '#fff',
-                px: 2, py: 1.5,
-                display: 'flex', alignItems: 'center', gap: 1.5,
+                px: { xs: 1.25, sm: 2 }, py: { xs: 1, sm: 1.5 },
+                display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 },
             }}>
                 {flagCode && (
                     <Box
                         component="img"
                         src={`https://flagcdn.com/w80/${flagCode}.png`}
                         alt={countryName}
-                        sx={{ width: 36, height: 24, borderRadius: 0.5, boxShadow: '0 2px 4px rgba(0,0,0,0.25)', flexShrink: 0 }}
+                        sx={{ width: { xs: 28, sm: 36 }, height: { xs: 20, sm: 24 }, borderRadius: 0.5, boxShadow: '0 2px 4px rgba(0,0,0,0.25)', flexShrink: 0 }}
                     />
                 )}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: '0.65rem', opacity: 0.85, letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600 }}>
+                    <Typography sx={{ fontSize: { xs: '0.6rem', sm: '0.65rem' }, opacity: 0.85, letterSpacing: 1, textTransform: 'uppercase', fontWeight: 600 }}>
                         {dc.location_distributor_center_code || 'CD'}
                     </Typography>
-                    <Typography variant="h6" fontWeight={800} noWrap sx={{ lineHeight: 1.1 }}>
+                    <Typography fontWeight={800} noWrap sx={{ lineHeight: 1.1, fontSize: { xs: '0.95rem', sm: '1.15rem' } }}>
                         {dc.name}
                     </Typography>
                 </Box>
-                <ArrowIcon sx={{ fontSize: 16, opacity: 0.8 }} />
+                <ArrowIcon sx={{ fontSize: { xs: 14, sm: 16 }, opacity: 0.8 }} />
             </Box>
 
             {/* Body: info + acciones */}
-            <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{
+                px: { xs: 1.25, sm: 2 }, py: { xs: 1, sm: 1.5 },
+                display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.5 },
+            }}>
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, color: 'text.secondary' }}>
-                        <LocationIcon sx={{ fontSize: '1rem' }} />
-                        <Typography variant="body2" noWrap>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+                        <LocationIcon sx={{ fontSize: { xs: '0.85rem', sm: '1rem' } }} />
+                        <Typography variant="caption" noWrap sx={{ fontSize: { xs: '0.7rem', sm: '0.8rem' } }}>
                             {dc.direction || 'Sin dirección'}
                         </Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, fontSize: { xs: '0.65rem', sm: '0.75rem' } }}>
                         {countryName || 'País no definido'}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 0.25 }} onClick={(e) => e.stopPropagation()}>
                     <Tooltip title="Editar" placement="top">
-                        <IconButton size="small" onClick={onEdit}>
-                            <EditTwoToneIcon fontSize="small" />
+                        <IconButton size="small" onClick={onEdit} sx={{ p: { xs: 0.5, sm: 0.75 } }}>
+                            <EditTwoToneIcon sx={{ fontSize: { xs: '1rem', sm: '1.15rem' } }} />
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Eliminar" placement="top">
-                        <IconButton size="small" color="error" onClick={onDelete}>
-                            <DeleteTwoToneIcon fontSize="small" />
+                        <IconButton size="small" color="error" onClick={onDelete} sx={{ p: { xs: 0.5, sm: 0.75 } }}>
+                            <DeleteTwoToneIcon sx={{ fontSize: { xs: '1rem', sm: '1.15rem' } }} />
                         </IconButton>
                     </Tooltip>
                 </Box>

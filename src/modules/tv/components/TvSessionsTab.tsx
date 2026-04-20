@@ -71,7 +71,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
     const [editing, setEditing] = useState<TvSessionAdmin | null>(null);
     const [form, setForm] = useState({ dashboard: 'WORKSTATION', label: '' });
 
-    // Diálogo para parear una TV introduciendo el code manualmente (sin QR).
+    // Diálogo para vincular una TV introduciendo el code manualmente (sin QR).
     const [pairOpen, setPairOpen] = useState(false);
     const [pairForm, setPairForm] = useState({ code: '', dashboard: TV_DASHBOARDS[0]?.value || 'WORKSTATION', label: '', ttl_days: 7 });
     const [pair, { isLoading: pairing }] = usePairTvSessionMutation();
@@ -101,7 +101,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
     };
 
     const handleRevoke = async (s: TvSessionAdmin) => {
-        if (!confirm(`¿Revocar acceso de "${s.label || s.code}"? La TV volverá a la pantalla de pareo.`)) return;
+        if (!confirm(`¿Revocar acceso de "${s.label || s.code}"? La TV volverá a la pantalla de vinculación.`)) return;
         try {
             await revoke(s.code).unwrap();
             toast.success('TV revocada.');
@@ -140,10 +140,10 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                 label: pairForm.label,
                 ttl_days: pairForm.ttl_days,
             }).unwrap();
-            toast.success('TV pareada. La pantalla se actualizará sola.');
+            toast.success('TV vinculada. La pantalla se actualizará sola.');
             setPairOpen(false);
         } catch (err: any) {
-            toast.error(err?.data?.error || 'No se pudo parear — verifica el código.');
+            toast.error(err?.data?.error || 'No se pudo vincular — verifica el código.');
         }
     };
 
@@ -174,13 +174,13 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                     startIcon={<TvIcon />}
                     onClick={handlePairNew}
                 >
-                    Emparejar nueva TV
+                    Vincular nueva TV
                 </Button>
             </Box>
 
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 Cada TV se identifica con un token opaco. Puedes cambiarle el dashboard en caliente
-                o revocarla en cualquier momento — la pantalla volverá sola a la pantalla de pareo.
+                o revocarla en cualquier momento — la pantalla volverá sola a la pantalla de vinculación.
             </Typography>
 
             {isLoading && (
@@ -189,7 +189,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
 
             {!isLoading && active.length === 0 && (
                 <Alert severity="info" sx={{ mb: 2 }}>
-                    No hay TVs pareadas. Usa <b>Emparejar nueva TV</b> para montar una.
+                    No hay TVs vinculadas. Usa <b>Vincular nueva TV</b> para montar una.
                 </Alert>
             )}
 
@@ -270,7 +270,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                                     <TableCell>Código</TableCell>
                                     <TableCell>Estado</TableCell>
                                     <TableCell>Última señal</TableCell>
-                                    <TableCell>Pareada por</TableCell>
+                                    <TableCell>Vinculada por</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -292,9 +292,9 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                 </>
             )}
 
-            {/* Emparejar nueva TV sin escanear QR — ingresas el code que ves en la pantalla. */}
+            {/* Vincular nueva TV sin escanear QR — ingresas el code que ves en la pantalla. */}
             <Dialog open={pairOpen} onClose={() => !pairing && setPairOpen(false)} maxWidth="xs" fullWidth>
-                <DialogTitle>Emparejar nueva TV</DialogTitle>
+                <DialogTitle>Vincular nueva TV</DialogTitle>
                 <DialogContent>
                     <Box sx={{ pt: 1 }}>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -355,7 +355,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                 <DialogActions>
                     <Button onClick={() => setPairOpen(false)} disabled={pairing}>Cancelar</Button>
                     <Button variant="contained" onClick={handlePairSubmit} disabled={pairing || !pairForm.code.trim()}>
-                        {pairing ? <CircularProgress size={18} color="inherit" /> : 'Emparejar'}
+                        {pairing ? <CircularProgress size={18} color="inherit" /> : 'Vincular'}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -387,7 +387,7 @@ export default function TvSessionsTab({ distributorCenterId, distributorCenterNa
                             />
                             <Box sx={{ mt: 2, p: 1.5, bgcolor: (t) => alpha(t.palette.info.main, 0.08), borderRadius: 1.5 }}>
                                 <Typography variant="caption">
-                                    La TV se actualizará sola por WebSocket — no hace falta reparearla.
+                                    La TV se actualizará sola por WebSocket — no hace falta volver a vincularla.
                                 </Typography>
                             </Box>
                         </Box>

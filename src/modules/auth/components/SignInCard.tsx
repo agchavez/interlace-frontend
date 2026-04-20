@@ -190,7 +190,8 @@ export default function SignInCard() {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 fontFamily: 'Inter',
-                                fontSize: '0.9rem',
+                                // iOS Safari hace zoom si el input está bajo 16px — usamos 16px en mobile.
+                                fontSize: { xs: '16px', sm: '0.9rem' },
                                 borderRadius: '10px',
                                 backgroundColor: 'white',
                                 transition: 'all 0.2s',
@@ -254,7 +255,8 @@ export default function SignInCard() {
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 fontFamily: 'Inter',
-                                fontSize: '0.9rem',
+                                // iOS Safari hace zoom si el input está bajo 16px — usamos 16px en mobile.
+                                fontSize: { xs: '16px', sm: '0.9rem' },
                                 borderRadius: '10px',
                                 backgroundColor: 'white',
                                 transition: 'all 0.2s',

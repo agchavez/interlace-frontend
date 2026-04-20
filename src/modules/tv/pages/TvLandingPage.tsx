@@ -13,7 +13,7 @@ const WS_URL = import.meta.env.VITE_JS_APP_API_URL_WS as string;
 
 /**
  * Pantalla que abre la TV — crea una sesión PENDING, muestra el code + QR y
- * se queda escuchando por WS a que un usuario escanée y confirme el pareo.
+ * se queda escuchando por WS a que un usuario escanée y confirme la vinculación.
  * Cuando llega el evento `session.paired`, guarda el token y navega al
  * dashboard configurado.
  */
@@ -118,7 +118,7 @@ export default function TvLandingPage() {
                 Interlace TV
             </Typography>
             <Typography variant="h6" sx={{ color: '#94a3b8', mb: 5 }}>
-                Escanea el código para asociar esta pantalla
+                Escanea el código para vincular esta pantalla
             </Typography>
 
             <Box sx={{ bgcolor: '#fff', p: 3, borderRadius: 3, mb: 4 }}>
@@ -143,7 +143,7 @@ export default function TvLandingPage() {
             </Typography>
 
             <Typography variant="body2" sx={{ color: '#64748b', mb: 0.5 }}>
-                {readyState === 1 ? '● Conectado, esperando pareo…' : '◌ Conectando al servidor…'}
+                {readyState === 1 ? '● Conectado, esperando vinculación…' : '◌ Conectando al servidor…'}
             </Typography>
             <Typography variant="caption" sx={{ color: '#475569', mb: 3 }}>
                 Expira en {Math.floor(expiresInSec / 60)}:{String(expiresInSec % 60).padStart(2, '0')}
