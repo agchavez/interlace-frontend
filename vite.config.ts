@@ -10,7 +10,7 @@ export default defineConfig({
       // No registrar SW automáticamente - usamos push-sw.js manual
       injectRegister: false,
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'robots.txt', 'logo.png', 'icons/*.png'],
+      includeAssets: ['favicon.ico', 'robots.txt', 'logo.png', 'icons/*.png', 'apple-touch-icon.png', 'manifest.webmanifest'],
       manifest: false,
       devOptions: {
         enabled: false
