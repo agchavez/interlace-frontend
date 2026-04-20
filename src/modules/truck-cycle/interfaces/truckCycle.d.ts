@@ -213,6 +213,7 @@ export interface BayAssignment {
 }
 
 export interface PautaDetail extends PautaListItem {
+    truck: number;
     complexity_score: number;
     reload_count: number;
     notes: string;

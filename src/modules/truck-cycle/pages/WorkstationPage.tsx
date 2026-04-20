@@ -34,7 +34,7 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_LABELS: Record<PautaStatus, string> = {
     PENDING_PICKING: 'Pend. Picking', PICKING_ASSIGNED: 'Picker Asignado',
     PICKING_IN_PROGRESS: 'Picking', PICKING_DONE: 'Picking OK',
-    IN_BAY: 'En Bahia', PENDING_COUNT: 'Pend. Conteo',
+    MOVING_TO_BAY: 'A Bahia', IN_BAY: 'En Bahia', PENDING_COUNT: 'Pend. Conteo',
     COUNTING: 'Contando', COUNTED: 'Contado',
     PENDING_CHECKOUT: 'Pend. Checkout', CHECKOUT_SECURITY: 'Seg.',
     CHECKOUT_OPS: 'Ops.', DISPATCHED: 'Despachado',
