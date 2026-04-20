@@ -34,17 +34,20 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
-import DateRangeButton from '../components/DateRangeButton';
-import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
+import DatePickerButton from '../components/DatePickerButton';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
+import { setPickingDate } from '../store/truckCycleFiltersSlice';
 import {
     useGetPautasQuery,
     useAssignPickerMutation,
     useStartPickingMutation,
     useCompletePickingMutation,
 } from '../services/truckCycleApi';
-import { useGetPersonnelProfilesQuery } from '../../../modules/personnel/services/personnelApi';
+import {
+    useGetPersonnelAutocompleteQuery,
+    type PersonnelAutocompleteItem,
+} from '../../../modules/personnel/services/personnelApi';
 import type { PautaListItem, PautaStatus } from '../interfaces/truckCycle';
-import type { PersonnelProfileList } from '../../../interfaces/personnel';
 
 // ---- Running timer component for PICKING_IN_PROGRESS pautas ----
 function PickingTimer({ createdAt }: { createdAt: string }) {
@@ -116,26 +119,28 @@ export default function PickingPage() {
     const navigate = useNavigate();
 
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
-    const dateFilter = useDateRangeFilter('today');
+    const dispatch = useAppDispatch();
+    const storedDate = useAppSelector((s) => s.truckCycleFilters.picking.date);
 
     // Dialog state for assigning picker
     const [assignDialogOpen, setAssignDialogOpen] = useState(false);
     const [selectedPauta, setSelectedPauta] = useState<PautaListItem | null>(null);
-    const [selectedPersonnel, setSelectedPersonnel] = useState<PersonnelProfileList | null>(null);
+    const [selectedPersonnel, setSelectedPersonnel] = useState<PersonnelAutocompleteItem | null>(null);
     const [personnelSearch, setPersonnelSearch] = useState('');
 
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: PICKING_STATUSES,
-        operational_date_after: dateFilter.dateAfter,
-        operational_date_before: dateFilter.dateBefore,
+        operational_date_after: storedDate,
+        operational_date_before: storedDate,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
 
-    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelProfilesQuery({
+    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery({
         search: personnelSearch || undefined,
         is_active: true,
+        position_type: 'PICKER,LOADER',
         limit: 50,
     }, { skip: !assignDialogOpen });
 
@@ -363,7 +368,11 @@ export default function PickingPage() {
                 <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
                     Picking
                 </Typography>
-                <DateRangeButton {...dateFilter} />
+                <DatePickerButton
+                    value={storedDate}
+                    onChange={(v) => dispatch(setPickingDate(v))}
+                    label="Fecha"
+                />
             </Box>
 
             {/* Stat Cards */}
@@ -436,7 +445,7 @@ export default function PickingPage() {
                         </Typography>
                     )}
                     <Autocomplete
-                        options={personnelData?.results || []}
+                        options={personnelData || []}
                         getOptionLabel={(option) => `${option.employee_code} - ${option.full_name}`}
                         value={selectedPersonnel}
                         onChange={(_, newValue) => setSelectedPersonnel(newValue)}

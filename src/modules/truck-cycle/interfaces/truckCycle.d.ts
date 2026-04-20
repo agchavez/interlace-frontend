@@ -22,9 +22,11 @@ export interface Bay {
     id: number;
     code: string;
     name: string;
+    row: number;
+    column: number;
     is_active: boolean;
     distributor_center: number;
-    created_at: string;
+    created_at?: string;
 }
 
 export interface KPITarget {
@@ -66,25 +68,30 @@ export interface UploadPreviewResponse {
     upload_id: number;
     file_name: string;
     row_count: number;
+    pautas_count: number;
     pautas_preview: PautaPreview[];
     errors: string[];
     warnings: string[];
+    missing_trucks?: string[];
 }
 
 export interface PautaPreview {
     transport_number: string;
     trip_number: string;
+    truck_code: string;
     truck_plate: string;
-    route_codes: string[];
+    route_code: string;
     total_boxes: number;
     total_skus: number;
-    products: { material_code: string; product_name: string; total_boxes: number }[];
+    full_pallets: number;
+    assembled_fractions: number;
+    complexity_score: number;
 }
 
 // ==================== PAUTAS ====================
 export type PautaStatus =
     | 'PENDING_PICKING' | 'PICKING_ASSIGNED' | 'PICKING_IN_PROGRESS' | 'PICKING_DONE'
-    | 'IN_BAY' | 'PENDING_COUNT' | 'COUNTING' | 'COUNTED'
+    | 'MOVING_TO_BAY' | 'IN_BAY' | 'PENDING_COUNT' | 'COUNTING' | 'COUNTED'
     | 'PENDING_CHECKOUT' | 'CHECKOUT_SECURITY' | 'CHECKOUT_OPS' | 'DISPATCHED'
     | 'IN_RELOAD_QUEUE' | 'PENDING_RETURN' | 'RETURN_PROCESSED'
     | 'IN_AUDIT' | 'AUDIT_COMPLETE' | 'CLOSED' | 'CANCELLED';
@@ -101,12 +108,14 @@ export interface PautaListItem {
     status_display: string;
     operational_date: string;
     is_reload: boolean;
+    reentered_at: string | null;
     truck_plate: string;
     truck_code: string;
     created_at: string;
     last_status_change: string | null;
     assigned_to: { name: string; role: string } | null;
     bay_code: string | null;
+    bay_id: number | null;
 }
 
 export interface PautaProductDetail {
@@ -217,6 +226,8 @@ export interface PautaDetail extends PautaListItem {
     photos: PautaPhoto[];
     checkout_validation: CheckoutValidation | null;
     pallet_tickets: PalletTicket[];
+    truck_primary_driver_id: number | null;
+    truck_primary_driver_name: string | null;
 }
 
 export interface WorkstationStatusGroup {
@@ -227,6 +238,72 @@ export interface WorkstationStatusGroup {
 
 export interface WorkstationData {
     [status: string]: WorkstationStatusGroup;
+}
+
+export interface PickerStats {
+    date: string;
+    completed_count: number;
+    total_boxes: number;
+    avg_picking_minutes: number | null;
+    boxes_per_hour: number | null;
+    in_progress: {
+        id: number;
+        transport_number: string;
+        total_boxes: number;
+        started_at: string | null;
+    } | null;
+}
+
+export interface CounterStats {
+    date: string;
+    completed_count: number;
+    total_boxes: number;
+    avg_counting_minutes: number | null;
+    boxes_per_hour: number | null;
+    in_progress: {
+        id: number;
+        transport_number: string;
+        total_boxes: number;
+        started_at: string | null;
+    } | null;
+}
+
+export interface ValidatorStats {
+    date: string;
+    completed_count: number;
+    total_boxes: number;
+    avg_validation_minutes: number | null;
+    pautas_per_hour: number | null;
+}
+
+export interface YardDriverStats {
+    date: string;
+    completed_count: number;
+    total_boxes: number;
+    avg_movement_minutes: number | null;
+    boxes_per_hour: number | null;
+    in_progress: {
+        id: number;
+        transport_number: string;
+        total_boxes: number;
+        started_at: string | null;
+    } | null;
+}
+
+export interface VendorStats {
+    date: string;
+    trips_dispatched: number;
+    trips_completed: number;
+    active: number;
+    total_boxes: number;
+    active_trip: {
+        id: number;
+        transport_number: string;
+        status: string;
+        truck_code: string | null;
+        dispatched_at: string | null;
+        trip_started_at: string | null;
+    } | null;
 }
 
 export interface KPISummary {
@@ -247,6 +324,8 @@ export interface PautaFilterParams {
     truck?: number;
     transport_number?: string;
     is_reload?: boolean;
+    assigned_role?: string;
+    my_vendor_pautas?: boolean;
     limit?: number;
     offset?: number;
 }

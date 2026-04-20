@@ -31,9 +31,15 @@ import {setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice';
 import NotificationsNoneTwoToneIcon from '@mui/icons-material/NotificationsNoneTwoTone';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import BootstrapDialogTitle from './BootstrapDialogTitle';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetMyProfileQuery } from '../../personnel/services/personnelApi';
 import { useSidebar } from '../context/SidebarContext';
+import PickerNavStats from '../../work/components/PickerNavStats';
+import CounterNavStats from '../../work/components/CounterNavStats';
+import SecurityNavStats from '../../work/components/SecurityNavStats';
+import OpsNavStats from '../../work/components/OpsNavStats';
+import YardNavStats from '../../work/components/YardNavStats';
+import VendorNavStats from '../../work/components/VendorNavStats';
 
 interface NavbarProps {
     notificationCount: number;
@@ -47,6 +53,14 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { status, user } = useAppSelector(state => state.auth);
+    const location = useLocation();
+    const inPickerWork = status === 'authenticated' && location.pathname.startsWith('/work/picker');
+    const inCounterWork = status === 'authenticated' && location.pathname.startsWith('/work/counter');
+    const inSecurityWork = status === 'authenticated' && location.pathname.startsWith('/work/security');
+    const inOpsWork = status === 'authenticated' && location.pathname.startsWith('/work/ops');
+    const inYardWork = status === 'authenticated' && location.pathname.startsWith('/work/yard');
+    const inVendorWork = status === 'authenticated' && location.pathname.startsWith('/work/vendor');
+    const inWorkMode = inPickerWork || inCounterWork || inSecurityWork || inOpsWork || inYardWork || inVendorWork;
 
     // Detectar móvil
     const theme = useTheme();
@@ -95,6 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
             <Grid container
                   alignItems="center"
                   justifyContent="space-between"
+                  wrap="nowrap"
                   sx={{
                       padding: '8px 16px',
                       paddingRight: '24px',
@@ -111,6 +126,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                       borderBottom: '1px solid',
                       borderColor: 'divider',
                       borderRadius: '0 0 16px 16px', // Bordes redondeados en la parte inferior
+                      flexWrap: 'nowrap',
                   }}>
                 <Grid item display={'flex'} justifyContent={'center'} alignItems={'center'}>
                     {status === 'authenticated' && <IconButton
@@ -124,32 +140,44 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                     </IconButton>}
                 </Grid>
 
-                <Grid item display={'flex'} justifyContent={'left'} alignItems={'center'} flexGrow={1} className='navbar__logo'>
-                    <div className="nav__img" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img
-                            src={isMobile ? logoSmall : logo}
-                            alt="img"
-                            width={isMobile ? 40 : 120}
-                            className="p-1"
-                            style={{ marginRight: isMobile ? '4px' : '8px' }}
-                        />
-                        {!isMobile && (
-                            <Typography variant="body2" component="p" sx={{
-                                borderLeft: '2px solid',
-                                borderColor: 'divider',
-                                paddingLeft: '8px',
-                                fontFamily: 'Inter',
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                color: 'text.primary',
-                            }}>
-                                {import.meta.env.VITE_JS_APP_NAME}
-                            </Typography>
-                        )}
-                    </div>
-                </Grid>
+                {!inWorkMode && (
+                    <Grid item display={'flex'} justifyContent={'flex-start'} alignItems={'center'} className='navbar__logo' sx={{ flex: '1 1 auto', minWidth: 0 }}>
+                        <div className="nav__img" style={{ display: 'flex', alignItems: 'center' }}>
+                            <img
+                                src={isMobile ? logoSmall : logo}
+                                alt="img"
+                                width={isMobile ? 40 : 120}
+                                className="p-1"
+                                style={{ marginRight: isMobile ? '4px' : '8px' }}
+                            />
+                            {!isMobile && (
+                                <Typography variant="body2" component="p" sx={{
+                                    borderLeft: '2px solid',
+                                    borderColor: 'divider',
+                                    paddingLeft: '8px',
+                                    fontFamily: 'Inter',
+                                    fontWeight: 600,
+                                    fontSize: '0.875rem',
+                                    color: 'text.primary',
+                                }}>
+                                    {import.meta.env.VITE_JS_APP_NAME}
+                                </Typography>
+                            )}
+                        </div>
+                    </Grid>
+                )}
+                {inWorkMode && (
+                    <Grid item sx={{ flex: '1 1 auto', minWidth: 0, mx: { xs: 0.5, sm: 1.5 }, display: 'flex', justifyContent: 'center' }}>
+                        {inPickerWork && <PickerNavStats />}
+                        {inCounterWork && <CounterNavStats />}
+                        {inSecurityWork && <SecurityNavStats />}
+                        {inOpsWork && <OpsNavStats />}
+                        {inYardWork && <YardNavStats />}
+                        {inVendorWork && <VendorNavStats />}
+                    </Grid>
+                )}
                 <Grid item display={'flex'} justifyContent={'right'} alignItems={'center'} sx={{ gap: 2 }}>
-                    {status === 'authenticated' && <IconButton
+                    {status === 'authenticated' && !inWorkMode && <IconButton
                         onClick={onDrawerOpen}
                         sx={{
                             width: 44,
@@ -176,7 +204,7 @@ const Navbar: React.FC<NavbarProps> = ({ notificationCount, onDrawerOpen }) => {
                             <NotificationsNoneTwoToneIcon sx={{ fontSize: '1.5rem', color: 'text.primary' }} />
                         </Badge>
                     </IconButton>}
-                    {status === 'authenticated' && <Grid item xs={12}
+                    {status === 'authenticated' && !inWorkMode && <Grid item xs={12}
                                                          display={'flex'}
                                                          justifyContent={'center'}
                                                          alignItems={'center'}

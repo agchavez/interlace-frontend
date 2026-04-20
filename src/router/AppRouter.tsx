@@ -16,6 +16,9 @@ import SidebarV2 from '../modules/ui/components/SidebarV2';
 import NotificationManager from "../modules/ui/components/NotificationManager.tsx";
 import { ChangeDistributorCenter } from '../modules/ui/components/ChangeDistributorCenter';
 import { useSidebar } from '../modules/ui/context/SidebarContext';
+import DevRoleSwitcher from '../modules/work/components/DevRoleSwitcher';
+import { useDevRoleOverride } from '../modules/work/utils/useDevRoleOverride';
+import { ROLE_TO_GROUP, ROLE_TO_PERMISSION } from '../modules/work/utils/workRole';
 
 const UserRouter = lazy(() => import('../modules/user/UserRouter'));
 const AuthRouter = lazy(() => import('../modules/auth/AuthRouter'));
@@ -30,6 +33,7 @@ const PersonnelRouter = lazy(() => import('../modules/personnel/PersonnelRouter'
 const TokenRouter = lazy(() => import('../modules/tokens/TokenRouter'));
 const PublicTokenPage = lazy(() => import('../modules/tokens/pages/PublicTokenPage').then(m => ({ default: m.PublicTokenPage })));
 const TruckCycleRouter = lazy(() => import('../modules/truck-cycle/TruckCycleRouter'));
+const WorkRouter = lazy(() => import('../modules/work/WorkRouter'));
 const PublicArrivalPage = lazy(() => import('../modules/truck-cycle/pages/PublicArrivalPage'));
 
 export function AppRouter() {
@@ -51,6 +55,8 @@ export function AppRouter() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status])
 
+    const devRole = useDevRoleOverride();
+
     const permitedRoute = useMemo(() => {
         const location_ = location.pathname;
         const obj = permisions.find(perm => {
@@ -64,11 +70,27 @@ export function AppRouter() {
         const requiredPermissions = obj?.permissions
         if (requiredPermissions.includes("any")) return true;
         if (requiredPermissions.includes("cd.more") && user?.distributions_centers && user?.distributions_centers?.length >= 1) return true;
-        return requiredPermissions.every(r_perm =>
-            user?.list_permissions.includes(r_perm) ||
-            user?.user_permissions.includes(r_perm)
-        )
-    }, [location.pathname, user?.list_permissions, user?.user_permissions, user?.distributions_centers])
+        // Dev override: si el perm requerido es el de la pantalla /work/* del
+        // rol activo en el switcher, se concede acceso aunque el usuario real
+        // no tenga el permiso/grupo.
+        if (devRole) {
+            const devPerm = ROLE_TO_PERMISSION[devRole];
+            if (requiredPermissions.includes(devPerm)) return true;
+        }
+        return requiredPermissions.every(r_perm => {
+            if (user?.list_permissions.includes(r_perm) || user?.user_permissions.includes(r_perm)) return true;
+            // Fallback por grupo: el setup_work_groups asigna el permiso al grupo,
+            // así que list_permissions ya lo debería tener; esto es solo por si
+            // el backend no lo propagó aún.
+            const groupFallback = Object.entries(ROLE_TO_PERMISSION).find(([, p]) => p === r_perm);
+            if (groupFallback) {
+                const [role] = groupFallback;
+                const group = ROLE_TO_GROUP[role as keyof typeof ROLE_TO_GROUP];
+                return user?.list_groups?.includes(group) ?? false;
+            }
+            return false;
+        })
+    }, [location.pathname, user?.list_permissions, user?.user_permissions, user?.list_groups, user?.distributions_centers, devRole])
 
     if (status === 'checking') return <></>
 
@@ -81,9 +103,10 @@ export function AppRouter() {
     return <>
         {status === 'authenticated' && <ChangeDistributorCenter />}
         {status === 'authenticated' && <SidebarV2 />}
+        {status === 'authenticated' && <DevRoleSwitcher />}
         <NotificationManager/>
         <LogOutTimer />
-        <div className={status === 'authenticated' ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}` : 'ui__container__auth'}>
+        <div className={status === 'authenticated' ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}${location.pathname.startsWith('/work') ? ' work-mode' : ''}` : 'ui__container__auth'}>
             <Routes>
                 <Route path="/auth/*" element={
                     <PrivateRoute access={status === 'unauthenticated'} path="/" next={next || undefined}>
@@ -179,6 +202,13 @@ export function AppRouter() {
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             TruckCycleRouter
+                        } />
+                    </PrivateRoute>
+                } />
+                <Route path="/work/*" element={
+                    <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                        <LazyLoading Children={
+                            WorkRouter
                         } />
                     </PrivateRoute>
                 } />

@@ -6,7 +6,6 @@ import PautaDetailPage from './pages/PautaDetailPage';
 import PickingPage from './pages/PickingPage';
 import CountingPage from './pages/CountingPage';
 import CheckoutPage from './pages/CheckoutPage';
-import ReloadQueuePage from './pages/ReloadQueuePage';
 import WorkstationPage from './pages/WorkstationPage';
 import KPIConfigPage from './pages/KPIConfigPage';
 import KPIReportPage from './pages/KPIReportPage';
@@ -26,7 +25,6 @@ function TruckCycleRouter() {
       <Route path="/verify/:id" element={<VerificationPage />} />
       <Route path="/pallet-print/:id" element={<PalletPrintPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
-      <Route path="/reload-queue" element={<ReloadQueuePage />} />
       <Route path="/workstation" element={<WorkstationPage />} />
       <Route path="/kpi/config" element={<KPIConfigPage />} />
       <Route path="/kpi/report" element={<KPIReportPage />} />

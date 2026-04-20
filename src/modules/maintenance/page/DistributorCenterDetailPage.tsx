@@ -53,6 +53,8 @@ import {
     useDeleteBayMutation,
 } from '../../truck-cycle/services/truckCycleApi';
 import type { Truck, Bay } from '../../truck-cycle/interfaces/truckCycle';
+import BayGridEditor from '../../truck-cycle/components/BayGridEditor';
+import type { DockPosition } from '../../truck-cycle/components/BayGridPicker';
 
 // Info item helper
 const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) => (
@@ -195,6 +197,33 @@ export function DistributorCenterDetailPage() {
         try {
             await updateTruck({ id: truck.id, data: { is_active: !truck.is_active } }).unwrap();
         } catch { toast.error('Error al actualizar'); }
+    };
+
+    const dockStorageKey = id ? `bayDock_${id}` : 'bayDock';
+    const [dockPosition, setDockPosition] = useState<DockPosition>(() => {
+        const stored = typeof window !== 'undefined' ? window.localStorage.getItem(dockStorageKey) : null;
+        return (stored === 'top' || stored === 'bottom' || stored === 'left' || stored === 'right') ? stored : 'top';
+    });
+    const handleDockChange = (d: DockPosition) => {
+        setDockPosition(d);
+        try { window.localStorage.setItem(dockStorageKey, d); } catch { /* ignore */ }
+    };
+
+    const [savingLayout, setSavingLayout] = useState(false);
+    const handleSaveLayout = async (
+        changes: Array<{ id: number; row: number; column: number }>,
+    ) => {
+        setSavingLayout(true);
+        try {
+            await Promise.all(
+                changes.map((c) => updateBay({ id: c.id, data: { row: c.row, column: c.column } }).unwrap()),
+            );
+            toast.success('Layout actualizado');
+        } catch {
+            toast.error('Error al guardar el layout');
+        } finally {
+            setSavingLayout(false);
+        }
     };
 
     const handleToggleBay = async (bay: Bay) => {
@@ -421,6 +450,24 @@ export function DistributorCenterDetailPage() {
                                 Agregar Bahía
                             </Button>
                         </Box>
+
+                        {/* Layout editor */}
+                        <Box sx={{ mb: 3 }}>
+                            {loadingBays ? (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                                    <CircularProgress size={24} />
+                                </Box>
+                            ) : (
+                                <BayGridEditor
+                                    bays={bays}
+                                    onSave={handleSaveLayout}
+                                    saving={savingLayout}
+                                    dockPosition={dockPosition}
+                                    onDockPositionChange={handleDockChange}
+                                />
+                            )}
+                        </Box>
+
                         <DataGrid
                             rows={bays}
                             columns={bayColumns}

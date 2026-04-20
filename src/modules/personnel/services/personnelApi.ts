@@ -58,6 +58,26 @@ export const personnelApi = createApi({
             ]
           : [{ type: 'PersonnelProfiles', id: 'LIST' }],
     }),
+    // Endpoint ligero para autocompletes / dropdowns.
+    // Devuelve solo id, employee_code, full_name, position, position_type.
+    getPersonnelAutocomplete: builder.query<
+      PersonnelAutocompleteItem[],
+      {
+        search?: string;
+        position_type?: string;
+        hierarchy_level?: string;
+        primary_distributor_center?: number;
+        is_active?: boolean;
+        limit?: number;
+      }
+    >({
+      query: (params) => ({
+        url: '/profiles/autocomplete/',
+        method: 'GET',
+        params,
+      }),
+      keepUnusedDataFor: 120,
+    }),
 
     getPersonnelProfile: builder.query<PersonnelProfile, number>({
       query: (id) => ({
@@ -665,9 +685,20 @@ export const personnelApi = createApi({
   }),
 });
 
+export interface PersonnelAutocompleteItem {
+  id: number;
+  employee_code: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  position: string;
+  position_type: string;
+}
+
 export const {
   // Personnel Profiles
   useGetPersonnelProfilesQuery,
+  useGetPersonnelAutocompleteQuery,
   useGetPersonnelProfileQuery,
   useCreatePersonnelProfileMutation,
   useUpdatePersonnelProfileMutation,

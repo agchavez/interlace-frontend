@@ -49,8 +49,9 @@ import {
 } from '@mui/icons-material';
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import PautaStatusBadge from '../components/PautaStatusBadge';
-import DateRangeButton from '../components/DateRangeButton';
-import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
+import DatePickerButton from '../components/DatePickerButton';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
+import { setCheckoutDate } from '../store/truckCycleFiltersSlice';
 import {
     useGetPautasQuery,
     useCheckoutSecurityMutation,
@@ -60,9 +61,11 @@ import {
     useCreateInconsistencyMutation,
 } from '../services/truckCycleApi';
 import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
-import { useGetPersonnelProfilesQuery } from '../../../modules/personnel/services/personnelApi';
+import {
+    useGetPersonnelAutocompleteQuery,
+    type PersonnelAutocompleteItem,
+} from '../../../modules/personnel/services/personnelApi';
 import type { PautaStatus, PautaListItem, Inconsistency } from '../interfaces/truckCycle';
-import type { PersonnelProfileList } from '../../../interfaces/personnel';
 
 const CHECKOUT_STATUSES = 'COUNTED,PENDING_CHECKOUT,CHECKOUT_SECURITY,CHECKOUT_OPS';
 
@@ -134,7 +137,8 @@ export default function CheckoutPage() {
     const navigate = useNavigate();
 
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
-    const dateFilter = useDateRangeFilter('today');
+    const dispatch = useAppDispatch();
+    const storedDate = useAppSelector((s) => s.truckCycleFilters.checkout.date);
 
     // Menu state
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -143,8 +147,8 @@ export default function CheckoutPage() {
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: CHECKOUT_STATUSES,
-        operational_date_after: dateFilter.dateAfter,
-        operational_date_before: dateFilter.dateBefore,
+        operational_date_after: storedDate,
+        operational_date_before: storedDate,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -154,14 +158,15 @@ export default function CheckoutPage() {
     const [dialogFlow, setDialogFlow] = useState<ValidationFlow>('security');
     const [dialogPauta, setDialogPauta] = useState<PautaListItem | null>(null);
     const [validatorId, setValidatorId] = useState<number | ''>('');
-    const [selectedValidator, setSelectedValidator] = useState<PersonnelProfileList | null>(null);
+    const [selectedValidator, setSelectedValidator] = useState<PersonnelAutocompleteItem | null>(null);
     const [validatorSearch, setValidatorSearch] = useState('');
     const [exitPassConsumables, setExitPassConsumables] = useState(false);
     const [inconsistencies, setInconsistencies] = useState<InconsistencyRow[]>([]);
 
-    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelProfilesQuery({
+    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery({
         search: validatorSearch || undefined,
         is_active: true,
+        position_type: dialogFlow === 'security' ? 'SECURITY_GUARD' : 'WAREHOUSE_ASSISTANT',
         limit: 50,
     }, { skip: !dialogOpen });
 
@@ -261,7 +266,7 @@ export default function CheckoutPage() {
     const handleDispatch = async (pautaId: number) => {
         handleCloseMenu();
         try {
-            await dispatchPauta(pautaId).unwrap();
+            await dispatchPauta({ id: pautaId }).unwrap();
             setSnackbar({ open: true, message: 'Pauta despachada correctamente.', severity: 'success' });
         } catch (err: any) {
             setSnackbar({ open: true, message: err?.data?.detail || err?.data?.error || 'Error al despachar.', severity: 'error' });
@@ -445,7 +450,11 @@ export default function CheckoutPage() {
                         Validación de seguridad y operaciones antes del despacho
                     </Typography>
                 </Box>
-                <DateRangeButton {...dateFilter} />
+                <DatePickerButton
+                    value={storedDate}
+                    onChange={(v) => dispatch(setCheckoutDate(v))}
+                    label="Fecha"
+                />
             </Box>
 
             {/* Stat Cards */}
@@ -546,7 +555,7 @@ export default function CheckoutPage() {
                                 {dialogFlow === 'security' ? 'Validador de Seguridad' : 'Validador de Operaciones'}
                             </Typography>
                             <Autocomplete
-                                options={personnelData?.results || []}
+                                options={personnelData || []}
                                 getOptionLabel={(option) => `${option.employee_code} - ${option.full_name}`}
                                 value={selectedValidator}
                                 onChange={(_, newValue) => {

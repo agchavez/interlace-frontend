@@ -6,6 +6,7 @@ const STATUS_CONFIG: Record<PautaStatus, { label: string; color: 'default' | 'pr
     PICKING_ASSIGNED: { label: 'Picker Asignado', color: 'info' },
     PICKING_IN_PROGRESS: { label: 'Picking en Progreso', color: 'info' },
     PICKING_DONE: { label: 'Picking Completado', color: 'info' },
+    MOVING_TO_BAY: { label: 'Moviéndose a Bahía', color: 'warning' },
     IN_BAY: { label: 'En Bahia', color: 'warning' },
     PENDING_COUNT: { label: 'Pendiente de Conteo', color: 'warning' },
     COUNTING: { label: 'En Conteo', color: 'warning' },

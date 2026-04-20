@@ -253,7 +253,7 @@ export default function PautaDetailPage() {
         },
         CHECKOUT_OPS: {
             label: 'Despachar',
-            action: () => dispatchPauta(pauta.id),
+            action: () => dispatchPauta({ id: pauta.id }),
             loading: dispatching,
             color: 'warning',
         },
@@ -356,7 +356,7 @@ export default function PautaDetailPage() {
         <Container maxWidth="xl" sx={{ py: 3 }}>
             {/* Header Navigation */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <IconButton onClick={() => navigate('/truck-cycle/pautas')} sx={{ bgcolor: 'grey.100' }}>
+                <IconButton onClick={() => navigate(-1)} sx={{ bgcolor: 'grey.100' }}>
                     <BackIcon />
                 </IconButton>
                 <Typography variant="h5" fontWeight={600}>

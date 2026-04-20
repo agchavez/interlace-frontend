@@ -17,6 +17,7 @@ import {claimSlice} from "./claim/claimSlice.ts";
 import { personnelApi } from "../modules/personnel/services/personnelApi";
 import { tokenApi } from "../modules/tokens/services/tokenApi";
 import { truckCycleApi } from "../modules/truck-cycle/services/truckCycleApi";
+import { truckCycleFiltersSlice } from "../modules/truck-cycle/store/truckCycleFiltersSlice";
 
 export const store = configureStore({
     reducer: {
@@ -44,6 +45,7 @@ export const store = configureStore({
         [personnelApi.reducerPath]: personnelApi.reducer,
         [tokenApi.reducerPath]: tokenApi.reducer,
         [truckCycleApi.reducerPath]: truckCycleApi.reducer,
+        [truckCycleFiltersSlice.name]: truckCycleFiltersSlice.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)

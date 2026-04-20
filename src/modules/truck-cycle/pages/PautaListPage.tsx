@@ -37,12 +37,16 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { toast } from 'sonner';
 import PautaStatusBadge from '../components/PautaStatusBadge';
-import DateRangeButton from '../components/DateRangeButton';
-import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
+import DatePickerButton from '../components/DatePickerButton';
 import { PautaFilters } from '../components/PautaFilters';
 import ChipFilterCategory from '../../ui/components/ChipFilter';
 import { useGetPautasQuery } from '../services/truckCycleApi';
-import { useAppSelector } from '../../../store';
+import { useAppSelector, useAppDispatch } from '../../../store/store';
+import {
+    setPautaListDate,
+    setPautaListStatus,
+    setPautaListTransportNumber,
+} from '../store/truckCycleFiltersSlice';
 import type { PautaFilterParams, PautaStatus, PautaListItem } from '../interfaces/truckCycle';
 
 const STATUS_LABELS: Record<string, string> = {
@@ -93,12 +97,17 @@ export default function PautaListPage() {
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
     const isFullHD = useMediaQuery(theme.breakpoints.up('xl'));
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const authToken = useAppSelector((state) => state.auth.token);
+    const storedFilters = useAppSelector((state) => state.truckCycleFilters.pautaList);
 
     const [openFilter, setOpenFilter] = useState(false);
     const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
-    const [filters, setFilters] = useState<PautaFilterParams>({});
-    const dateFilter = useDateRangeFilter('today');
+
+    const filters: PautaFilterParams = useMemo(() => ({
+        status: storedFilters.status,
+        transport_number: storedFilters.transport_number,
+    }), [storedFilters.status, storedFilters.transport_number]);
 
     // Export
     const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
@@ -111,8 +120,8 @@ export default function PautaListPage() {
 
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         ...filters,
-        operational_date_after: filters.operational_date_after || dateFilter.dateAfter,
-        operational_date_before: filters.operational_date_before || dateFilter.dateBefore,
+        operational_date_after: storedFilters.date,
+        operational_date_before: storedFilters.date,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
@@ -134,19 +143,16 @@ export default function PautaListPage() {
     };
 
     const handleFilterChange = (newFilters: PautaFilterParams) => {
-        setFilters(newFilters);
+        dispatch(setPautaListStatus(newFilters.status || undefined));
+        dispatch(setPautaListTransportNumber(newFilters.transport_number || undefined));
         setPaginationModel((prev) => ({ ...prev, page: 0 }));
     };
 
     const clearFilter = (filterKey: string) => {
-        const newFilters = { ...filters };
         switch (filterKey) {
-            case 'status': delete newFilters.status; break;
-            case 'transport_number': delete newFilters.transport_number; break;
-            case 'operational_date_after': delete newFilters.operational_date_after; break;
-            case 'operational_date_before': delete newFilters.operational_date_before; break;
+            case 'status': dispatch(setPautaListStatus(undefined)); break;
+            case 'transport_number': dispatch(setPautaListTransportNumber(undefined)); break;
         }
-        setFilters(newFilters);
     };
 
     const handleOpenMenu = useCallback((event: React.MouseEvent<HTMLElement>, row: PautaListItem) => {
@@ -178,8 +184,8 @@ export default function PautaListPage() {
         const params = new URLSearchParams();
         if (filters.status) params.set('status', filters.status);
         if (filters.transport_number) params.set('transport_number', filters.transport_number);
-        if (filters.operational_date_after) params.set('operational_date_after', filters.operational_date_after);
-        if (filters.operational_date_before) params.set('operational_date_before', filters.operational_date_before);
+        params.set('operational_date_after', storedFilters.date);
+        params.set('operational_date_before', storedFilters.date);
         return params.toString();
     };
 
@@ -380,7 +386,11 @@ export default function PautaListPage() {
                             >
                                 Listado de Pautas
                             </Typography>
-                            <DateRangeButton {...dateFilter} />
+                            <DatePickerButton
+                                value={storedFilters.date}
+                                onChange={(v) => dispatch(setPautaListDate(v))}
+                                label="Fecha"
+                            />
                         </Box>
                         <Divider sx={{ marginBottom: 0, marginTop: 1 }} />
                     </Grid>
@@ -447,26 +457,6 @@ export default function PautaListPage() {
                                         label: STATUS_LABELS[filters.status] || filters.status,
                                         id: 'status',
                                         deleteAction: () => clearFilter('status'),
-                                    }]}
-                                />
-                            )}
-                            {filters.operational_date_after && (
-                                <ChipFilterCategory
-                                    label="Desde: "
-                                    items={[{
-                                        label: filters.operational_date_after,
-                                        id: 'operational_date_after',
-                                        deleteAction: () => clearFilter('operational_date_after'),
-                                    }]}
-                                />
-                            )}
-                            {filters.operational_date_before && (
-                                <ChipFilterCategory
-                                    label="Hasta: "
-                                    items={[{
-                                        label: filters.operational_date_before,
-                                        id: 'operational_date_before',
-                                        deleteAction: () => clearFilter('operational_date_before'),
                                     }]}
                                 />
                             )}

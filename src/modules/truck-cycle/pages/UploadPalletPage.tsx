@@ -32,6 +32,8 @@ import {
     useLazyDownloadTemplateQuery,
 } from '../services/truckCycleApi';
 import type { UploadPreviewResponse } from '../interfaces/truckCycle';
+import DatePickerButton from '../components/DatePickerButton';
+import { format } from 'date-fns';
 
 const STEPS = ['Preparar Plantilla', 'Subir Archivo', 'Revisar y Confirmar', 'Resultados'];
 
@@ -39,12 +41,15 @@ export default function UploadPalletPage() {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [activeStep, setActiveStep] = useState(0);
     const [preview, setPreview] = useState<UploadPreviewResponse | null>(null);
     const [fileName, setFileName] = useState('');
     const [isDragOver, setIsDragOver] = useState(false);
     const [confirmResult, setConfirmResult] = useState<any>(null);
+    const [operationalDate, setOperationalDate] = useState<string>(todayStr);
 
     const [previewUpload, { isLoading: previewing, error: previewError }] = usePreviewUploadMutation();
     const [confirmUpload, { isLoading: confirming }] = useConfirmUploadMutation();
@@ -68,6 +73,7 @@ export default function UploadPalletPage() {
 
         const formData = new FormData();
         formData.append('file', file);
+        formData.append('operational_date', operationalDate);
 
         try {
             const result = await previewUpload(formData).unwrap();
@@ -97,7 +103,10 @@ export default function UploadPalletPage() {
     const handleConfirm = async () => {
         if (!preview) return;
         try {
-            const result = await confirmUpload(preview.upload_id).unwrap();
+            const result = await confirmUpload({
+                uploadId: preview.upload_id,
+                operational_date: operationalDate,
+            }).unwrap();
             setConfirmResult(result);
             setActiveStep(3);
         } catch {
@@ -110,17 +119,19 @@ export default function UploadPalletPage() {
         setPreview(null);
         setFileName('');
         setConfirmResult(null);
+        setOperationalDate(todayStr);
     };
 
     const previewColumns: GridColDef[] = [
         { field: 'trip_number', headerName: 'Viaje', width: 80 },
         { field: 'transport_number', headerName: 'Transporte', flex: 1, minWidth: 120 },
         { field: 'truck_code', headerName: 'Camión', flex: 0.8, minWidth: 100 },
-        { field: 'truck_plate', headerName: 'Placa', flex: 0.8, minWidth: 100 },
+        { field: 'truck_plate', headerName: 'Placa (catálogo)', flex: 0.8, minWidth: 110 },
         { field: 'route_code', headerName: 'Ruta', flex: 0.8, minWidth: 100 },
         { field: 'total_boxes', headerName: 'Cajas', width: 90, align: 'right', headerAlign: 'right' },
         { field: 'total_skus', headerName: 'SKUs', width: 80, align: 'right', headerAlign: 'right' },
         { field: 'full_pallets', headerName: 'P. Completos', width: 110, align: 'right', headerAlign: 'right' },
+        { field: 'assembled_fractions', headerName: 'Frac. Armadas', width: 120, align: 'right', headerAlign: 'right' },
         { field: 'complexity_score', headerName: 'Complejidad', width: 110, align: 'right', headerAlign: 'right' },
     ];
 
@@ -137,9 +148,12 @@ export default function UploadPalletPage() {
                     (un viaje de un camión con su carga asignada).
                 </Typography>
 
-                <Alert severity="info" sx={{ mb: 3, textAlign: 'left', maxWidth: 500, mx: 'auto' }}>
+                <Alert severity="info" sx={{ mb: 3, textAlign: 'left', maxWidth: 560, mx: 'auto' }}>
                     <Typography variant="body2">
-                        <strong>Columnas:</strong> Viaje, Transporte, Camión, Placa, Ruta, Cajas, SKUs, Pallets Completos, Complejidad
+                        <strong>Columnas:</strong> Viaje, Transporte, Camión, Ruta, Cajas, SKUs, Pallets Completos, Fracciones Armadas, Complejidad
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        La placa se toma del catálogo de camiones. El camión debe existir previamente registrado.
                     </Typography>
                 </Alert>
 
@@ -175,6 +189,23 @@ export default function UploadPalletPage() {
                     hidden
                     onChange={handleFileSelect}
                 />
+
+                {/* Operational date selector — must be set before upload */}
+                <Paper variant="outlined" sx={{ p: 2.5, mb: 3, textAlign: 'left', maxWidth: 560, mx: 'auto' }}>
+                    <Typography variant="body2" fontWeight={600} gutterBottom>
+                        Fecha Operativa
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                        Las pautas se asignarán a esta fecha. Sólo se permite hoy en adelante.
+                    </Typography>
+                    <DatePickerButton
+                        value={operationalDate}
+                        onChange={setOperationalDate}
+                        label="Fecha operativa"
+                        minDate={todayStr}
+                        size="small"
+                    />
+                </Paper>
 
                 {/* Drop zone */}
                 <Paper
@@ -242,16 +273,34 @@ export default function UploadPalletPage() {
     const renderStep2 = () => {
         if (!preview) return null;
         const hasErrors = preview.errors.length > 0;
+        const missingTrucks = preview.missing_trucks || [];
 
         return (
             <Box>
                 {/* Summary chips */}
                 <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
                     <Chip icon={<FileIcon />} label={fileName} variant="outlined" />
+                    <Chip label={`Fecha: ${operationalDate}`} color="default" variant="outlined" />
                     <Chip icon={<BoxIcon />} label={`${preview.row_count} filas`} color="info" variant="outlined" />
-                    <Chip icon={<TruckIcon />} label={`${preview.pautas_preview?.length || 0} pautas`} color="primary" />
+                    <Chip icon={<TruckIcon />} label={`${preview.pautas_preview?.length || 0} pautas válidas`} color="primary" />
                     {hasErrors && <Chip label={`${preview.errors.length} errores`} color="error" />}
                 </Box>
+
+                {missingTrucks.length > 0 && (
+                    <Alert severity="warning" sx={{ mb: 2 }}>
+                        <Typography variant="body2" fontWeight={600} gutterBottom>
+                            Camiones no registrados en el catálogo:
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+                            {missingTrucks.map((code) => (
+                                <Chip key={code} label={code} size="small" color="warning" />
+                            ))}
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                            Registre estos camiones en el catálogo antes de volver a subir el archivo.
+                        </Typography>
+                    </Alert>
+                )}
 
                 {hasErrors && (
                     <Alert severity="error" sx={{ mb: 2 }}>
@@ -306,7 +355,7 @@ export default function UploadPalletPage() {
                             onClick={handleConfirm}
                             disabled={confirming}
                         >
-                            {confirming ? 'Confirmando...' : 'Confirmar Carga'}
+                            {confirming ? 'Confirmando...' : `Confirmar Carga (${operationalDate})`}
                         </Button>
                     )}
                 </Box>

@@ -51,6 +51,9 @@ import { setOpenChangeDistributionCenter } from '../../../store/ui/uiSlice';
 import BootstrapDialogTitle from './BootstrapDialogTitle';
 import { useGetMyProfileQuery } from '../../personnel/services/personnelApi';
 import { useNavigate } from 'react-router-dom';
+import { useDevRoleOverride } from '../../work/utils/useDevRoleOverride';
+import { useGroupImpersonation } from '../../work/utils/useGroupImpersonation';
+import { GROUP_TO_ROLE, WORK_ROLE_TO_PATH, type WorkRoleCode } from '../../work/utils/workRole';
 
 interface SidebarItem {
   text: string;
@@ -128,6 +131,38 @@ const SidebarV2: React.FC = () => {
 
   // Check if user is in Security group
   const isSecurityUser = user?.list_groups?.includes('SEGURIDAD') || false;
+
+  // Override de rol en modo dev — permite a un tester ver un sidebar como si
+  // fuera de ese rol aunque su usuario real no tenga el grupo/permiso.
+  const devRole = useDevRoleOverride();
+  const devGroup = useGroupImpersonation();
+
+  // Grupos "efectivos": cuando hay impersonation activa, el sidebar se comporta
+  // como si el usuario solo fuera miembro de ese grupo. En prod devGroup es null.
+  const effectiveGroups: string[] = devGroup ? [devGroup] : (user?.list_groups || []);
+  // Idem permisos: al impersonar se usan solo los que el grupo confiera vía
+  // fallback group-based — no podemos saber desde el frontend qué permisos
+  // tiene un grupo arbitrario, así que `effectivePerms` queda vacío y la lógica
+  // del sidebar cae a los fallbacks por grupo.
+  const effectivePerms: string[] = devGroup ? [] : (user?.list_permissions || []);
+  const effectiveIsSuperuser: boolean = devGroup ? false : (user?.is_superuser === true);
+
+  // Helper para visibilidad de pantallas /work/*: grupo, permiso o dev-override.
+  // Nota: NO acepta superuser/staff como bypass — los /work/* son específicos
+  // del rol operativo. Admins pueden entrar vía el dev role switcher.
+  const canAccessWork = (group: string, permission: string, roleCode: string): boolean => {
+    if (!user) return false;
+    if (devRole === roleCode) return true;
+    if (user.list_groups?.includes(group)) return true;
+    if (user.list_permissions?.includes(permission)) return true;
+    return false;
+  };
+  const canPicker   = canAccessWork('Picker',            'truck_cycle.access_work_picker',   'PICKER');
+  const canCounter  = canAccessWork('Contador',          'truck_cycle.access_work_counter',  'COUNTER');
+  const canSecurity = canAccessWork('Seguridad Ciclo',   'truck_cycle.access_work_security', 'SECURITY');
+  const canOps      = canAccessWork('Operaciones Ciclo', 'truck_cycle.access_work_ops',      'OPS');
+  const canYard     = canAccessWork('Chofer de Patio',   'truck_cycle.access_work_yard',     'YARD_DRIVER');
+  const canVendor   = canAccessWork('Chofer Vendedor',   'truck_cycle.access_work_vendor',   'VENDOR');
 
   // Menu items definition
   const items: SidebarItem[] = useMemo(
@@ -225,10 +260,12 @@ const SidebarV2: React.FC = () => {
           { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
           { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
           { text: 'Operaciones del Día', href: '/truck-cycle/operations', id: 'tc-operations' },
-          { text: 'Picking', href: '/truck-cycle/picking', id: 'tc-picking' },
-          { text: 'Conteo', href: '/truck-cycle/counting', id: 'tc-counting' },
-          { text: 'Checkout', href: '/truck-cycle/checkout', id: 'tc-checkout' },
-          { text: 'Cola de Recargas', href: '/truck-cycle/reload-queue', id: 'tc-reload' },
+          { text: 'Picking', href: '/work/picker', id: 'tc-picking', visible: canPicker },
+          { text: 'Conteo', href: '/work/counter', id: 'tc-counting', visible: canCounter },
+          { text: 'Seguridad', href: '/work/security', id: 'tc-security', visible: canSecurity },
+          { text: 'Operaciones', href: '/work/ops', id: 'tc-ops', visible: canOps },
+          { text: 'Chofer de Patio', href: '/work/yard', id: 'tc-yard', visible: canYard },
+          { text: 'Chofer Vendedor', href: '/work/vendor', id: 'tc-vendor', visible: canVendor },
           { text: 'Workstation', href: '/truck-cycle/workstation', id: 'tc-workstation' },
           { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
         ],
@@ -274,9 +311,9 @@ const SidebarV2: React.FC = () => {
 
   // Filter items based on permissions
   const sidebarItems = useMemo(() => {
-    const isSuperuser = user?.is_superuser === true;
+    const isSuperuser = effectiveIsSuperuser;
 
-    return items.map((item) => {
+    const processed = items.map((item) => {
       const subitems = item.subItems.map((sub) => {
         // Get permissions from directory if not set
         const permissions = sub.permissions || RoutePermissionsDirectory[sub.href || ''] || [];
@@ -291,21 +328,41 @@ const SidebarV2: React.FC = () => {
           // Permiso especial para usuarios con centro de distribución asignado
           sub.visible = true;
         } else {
-          // Superusers see everything
-          if (isSuperuser) {
+          // Reglas especiales para /work/* — nunca visibles por bypass de superuser:
+          // solo cuando el usuario pertenece al grupo CICLO_* o tiene el permiso.
+          const PERM_TO_GROUP: Record<string, string> = {
+            'truck_cycle.access_work_picker':   'Picker',
+            'truck_cycle.access_work_counter':  'Contador',
+            'truck_cycle.access_work_security': 'Seguridad Ciclo',
+            'truck_cycle.access_work_ops':      'Operaciones Ciclo',
+            'truck_cycle.access_work_yard':     'Chofer de Patio',
+            'truck_cycle.access_work_vendor':   'Chofer Vendedor',
+          };
+          const PERM_TO_ROLE: Record<string, string> = {
+            'truck_cycle.access_work_picker':   'PICKER',
+            'truck_cycle.access_work_counter':  'COUNTER',
+            'truck_cycle.access_work_security': 'SECURITY',
+            'truck_cycle.access_work_ops':      'OPS',
+            'truck_cycle.access_work_yard':     'YARD_DRIVER',
+            'truck_cycle.access_work_vendor':   'VENDOR',
+          };
+          const isWorkItem = permissions.some((p: string) => p in PERM_TO_GROUP);
+
+          if (isWorkItem) {
+            sub.visible = permissions.every((perm: string) => {
+              if (devRole && PERM_TO_ROLE[perm] === devRole) return true;
+              if (effectivePerms.includes(perm)) return true;
+              const group = PERM_TO_GROUP[perm];
+              return group ? effectiveGroups.includes(group) : false;
+            });
+          } else if (isSuperuser) {
             sub.visible = true;
           } else if (!permissions || permissions.length === 0) {
-            // No permissions defined - hide by default
             sub.visible = false;
           } else {
             sub.visible = permissions.includes('any')
               ? true
-              : permissions.every((perm: string) => {
-                  return (
-                    user?.list_permissions?.includes(perm) ||
-                    user?.user_permissions?.includes(perm)
-                  );
-                });
+              : permissions.every((perm: string) => effectivePerms.includes(perm));
           }
         }
         return sub;
@@ -314,7 +371,27 @@ const SidebarV2: React.FC = () => {
       item.visible = subitems.some((sub) => sub.visible);
       return item;
     });
-  }, [items, user]);
+
+    // Si el usuario está "bloqueado" en un rol operativo (dev override o grupo
+    // del Ciclo), el sidebar solo muestra la pantalla /work/<rol> correspondiente
+    // — todo lo demás se oculta para que el operario no tenga distracciones.
+    const activeWorkRole: WorkRoleCode | null = devRole ?? (() => {
+      for (const g of effectiveGroups) {
+        if (GROUP_TO_ROLE[g]) return GROUP_TO_ROLE[g];
+      }
+      return null;
+    })();
+
+    if (activeWorkRole) {
+      const allowedHref = WORK_ROLE_TO_PATH[activeWorkRole];
+      return processed.map((item) => {
+        const filtered = item.subItems.filter((s) => s.visible && s.href === allowedHref);
+        return { ...item, subItems: filtered, visible: filtered.length > 0 };
+      });
+    }
+
+    return processed;
+  }, [items, user, devRole, devGroup]);
 
   const drawerWidth = isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_OPEN;
 

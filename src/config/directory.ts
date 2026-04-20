@@ -509,12 +509,6 @@ export const permisions = [
         ]
     },
     {
-        url: "/truck-cycle/reload-queue",
-        permissions: [
-            "truck_cycle.view_pautamodel"
-        ]
-    },
-    {
         url: "/truck-cycle/workstation",
         permissions: [
             "truck_cycle.view_pautamodel"
@@ -562,6 +556,67 @@ export const permisions = [
         permissions: [
             "truck_cycle.view_baymodel"
         ]
+    },
+    // Work (pantallas mobile-first por rol)
+    {
+        url: "/work",
+        permissions: [
+            "any"
+        ]
+    },
+    {
+        url: "/work/picker",
+        permissions: ["truck_cycle.access_work_picker"],
+    },
+    {
+        url: "/work/picker/:id",
+        reg: /\/work\/picker\/\d+/,
+        permissions: ["truck_cycle.access_work_picker"],
+    },
+    {
+        url: "/work/counter",
+        permissions: ["truck_cycle.access_work_counter"],
+    },
+    {
+        url: "/work/counter/:id",
+        reg: /\/work\/counter\/\d+/,
+        permissions: ["truck_cycle.access_work_counter"],
+    },
+    {
+        url: "/work/security",
+        permissions: ["truck_cycle.access_work_security"],
+    },
+    {
+        url: "/work/security/:id",
+        reg: /\/work\/security\/\d+/,
+        permissions: ["truck_cycle.access_work_security"],
+    },
+    {
+        url: "/work/ops",
+        permissions: ["truck_cycle.access_work_ops"],
+    },
+    {
+        url: "/work/ops/:id",
+        reg: /\/work\/ops\/\d+/,
+        permissions: ["truck_cycle.access_work_ops"],
+    },
+    {
+        url: "/work/yard",
+        permissions: ["truck_cycle.access_work_yard"],
+    },
+    {
+        url: "/work/yard/:id",
+        reg: /\/work\/yard\/\d+/,
+        permissions: ["truck_cycle.access_work_yard"],
+    },
+    {
+        url: "/work/vendor",
+        permissions: ["truck_cycle.access_work_vendor"],
+    },
+    {
+        url: "/work/vendor/:id",
+        reg: /\/work\/vendor\/\d+/,
+        permissions: ["truck_cycle.access_work_vendor"],
     }
 ]
 

@@ -46,6 +46,8 @@ import {
 import { useGetDistributorCentersQuery } from '../../../store/maintenance/maintenanceApi';
 import { useAppSelector } from '../../../store';
 import type { Bay } from '../interfaces/truckCycle';
+import BayGridEditor from '../components/BayGridEditor';
+import type { DockPosition } from '../components/BayGridPicker';
 
 interface BayFormData {
     code: string;
@@ -130,6 +132,30 @@ export default function BayManagementPage() {
         await updateBay({ id: bay.id, data: { is_active: !bay.is_active } });
     };
 
+    const dockStorageKey = `bayDock_${user?.centro_distribucion ?? 'default'}`;
+    const [dockPosition, setDockPosition] = useState<DockPosition>(() => {
+        const stored = typeof window !== 'undefined' ? window.localStorage.getItem(dockStorageKey) : null;
+        return (stored === 'top' || stored === 'bottom' || stored === 'left' || stored === 'right') ? stored : 'top';
+    });
+    const handleDockChange = (d: DockPosition) => {
+        setDockPosition(d);
+        try { window.localStorage.setItem(dockStorageKey, d); } catch { /* ignore */ }
+    };
+
+    const [savingLayout, setSavingLayout] = useState(false);
+    const handleSaveLayout = async (
+        changes: Array<{ id: number; row: number; column: number }>,
+    ) => {
+        setSavingLayout(true);
+        try {
+            await Promise.all(
+                changes.map((c) => updateBay({ id: c.id, data: { row: c.row, column: c.column } }).unwrap()),
+            );
+        } finally {
+            setSavingLayout(false);
+        }
+    };
+
     const columns: GridColDef[] = [
         { field: 'code', headerName: 'Código', flex: 1, minWidth: 100 },
         { field: 'name', headerName: 'Nombre', flex: 1.5, minWidth: 150 },
@@ -210,6 +236,23 @@ export default function BayManagementPage() {
             <Alert severity="info" sx={{ mb: 3 }}>
                 <strong>Centro de Distribución:</strong> Las bahías mostradas corresponden al centro de distribución activo. Cada bahía se asigna a una pauta durante el proceso de carga.
             </Alert>
+
+            {/* Layout visual drag-and-drop */}
+            <Box sx={{ mb: 3 }}>
+                {isLoading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                        <CircularProgress />
+                    </Box>
+                ) : (
+                    <BayGridEditor
+                        bays={data?.results || []}
+                        onSave={handleSaveLayout}
+                        saving={savingLayout}
+                        dockPosition={dockPosition}
+                        onDockPositionChange={handleDockChange}
+                    />
+                )}
+            </Box>
 
             <Card>
                         <DataGrid

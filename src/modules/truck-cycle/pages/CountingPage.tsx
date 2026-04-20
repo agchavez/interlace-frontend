@@ -39,8 +39,9 @@ import {
 import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 import PautaStatusBadge from '../components/PautaStatusBadge';
-import DateRangeButton from '../components/DateRangeButton';
-import { useDateRangeFilter } from '../hooks/useDateRangeFilter';
+import DatePickerButton from '../components/DatePickerButton';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
+import { setCountingDate } from '../store/truckCycleFiltersSlice';
 import {
     useGetPautasQuery,
     useAssignCounterMutation,
@@ -49,9 +50,11 @@ import {
     useUploadPhotoMutation,
 } from '../services/truckCycleApi';
 import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
-import { useGetPersonnelProfilesQuery } from '../../../modules/personnel/services/personnelApi';
+import {
+    useGetPersonnelAutocompleteQuery,
+    type PersonnelAutocompleteItem,
+} from '../../../modules/personnel/services/personnelApi';
 import type { PautaStatus, PautaListItem, Inconsistency } from '../interfaces/truckCycle';
-import type { PersonnelProfileList } from '../../../interfaces/personnel';
 
 // --------------- Timer helper ---------------
 
@@ -172,7 +175,8 @@ export default function CountingPage() {
         page: 0,
         pageSize: 25,
     });
-    const dateFilter = useDateRangeFilter('today');
+    const dispatch = useAppDispatch();
+    const storedDate = useAppSelector((s) => s.truckCycleFilters.counting.date);
 
     // Menu state
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -181,7 +185,7 @@ export default function CountingPage() {
     // Dialog state: assign counter
     const [assignDialogOpen, setAssignDialogOpen] = useState(false);
     const [assignPauta, setAssignPauta] = useState<PautaListItem | null>(null);
-    const [selectedPersonnel, setSelectedPersonnel] = useState<PersonnelProfileList | null>(null);
+    const [selectedPersonnel, setSelectedPersonnel] = useState<PersonnelAutocompleteItem | null>(null);
     const [personnelSearch, setPersonnelSearch] = useState('');
 
     // Dialog state: inconsistency
@@ -201,15 +205,16 @@ export default function CountingPage() {
     // Queries
     const { data, isLoading, isFetching, error } = useGetPautasQuery({
         status: COUNTING_STATUSES,
-        operational_date_after: dateFilter.dateAfter,
-        operational_date_before: dateFilter.dateBefore,
+        operational_date_after: storedDate,
+        operational_date_before: storedDate,
         limit: paginationModel.pageSize,
         offset: paginationModel.page * paginationModel.pageSize,
     });
 
-    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelProfilesQuery({
+    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery({
         search: personnelSearch || undefined,
         is_active: true,
+        position_type: 'WAREHOUSE_ASSISTANT',
         limit: 50,
     }, { skip: !assignDialogOpen });
 
@@ -515,7 +520,11 @@ export default function CountingPage() {
                 <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
                     Conteo / Verificación
                 </Typography>
-                <DateRangeButton {...dateFilter} />
+                <DatePickerButton
+                    value={storedDate}
+                    onChange={(v) => dispatch(setCountingDate(v))}
+                    label="Fecha"
+                />
             </Box>
 
             {/* Stat Cards */}
@@ -657,7 +666,7 @@ export default function CountingPage() {
                         </Typography>
                     )}
                     <Autocomplete
-                        options={personnelData?.results || []}
+                        options={personnelData || []}
                         getOptionLabel={(option) => `${option.employee_code} - ${option.full_name}`}
                         value={selectedPersonnel}
                         onChange={(_, newValue) => setSelectedPersonnel(newValue)}

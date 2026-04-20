@@ -30,6 +30,7 @@ import {
 } from "@mui/icons-material";
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import { GROUP_TO_ROLE, WORK_ROLE_TO_PATH } from '../../work/utils/workRole';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialogContent-root": { padding: theme.spacing(2) },
@@ -94,10 +95,25 @@ export default function SignInCard() {
         if (next) {
             setTimeout(() => navigate(next), 100);
         } else {
-            const userGroups = resultLogin.data.user.list_groups || [];
+            const user = resultLogin.data.user;
+            const userGroups: string[] = user.list_groups || [];
+            const isAdmin = Boolean(user.is_superuser || user.is_staff);
+
+            // 1) Rol operativo del Ciclo del Camión — tiene prioridad.
+            //    Los admins NO entran aquí para que puedan ver el dashboard normal.
+            if (!isAdmin) {
+                for (const g of userGroups) {
+                    const role = GROUP_TO_ROLE[g];
+                    if (role) return <Navigate to={WORK_ROLE_TO_PATH[role]} />;
+                }
+            }
+
+            // 2) Caseta de seguridad (grupo legacy).
             if (userGroups.includes('SEGURIDAD')) {
                 return <Navigate to="/tokens/validate" />;
             }
+
+            // 3) Default: dashboard.
             return <Navigate to="/" />;
         }
     }

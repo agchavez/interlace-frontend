@@ -16,6 +16,11 @@ import type {
     Inconsistency,
     PautaPhoto,
     PalletTicket,
+    PickerStats,
+    CounterStats,
+    ValidatorStats,
+    YardDriverStats,
+    VendorStats,
 } from '../interfaces/truckCycle';
 
 export const truckCycleApi = createApi({
@@ -99,11 +104,13 @@ export const truckCycleApi = createApi({
                 method: 'POST',
                 body: formData,
             }),
+            transformErrorResponse: (response) => response,
         }),
-        confirmUpload: builder.mutation<PalletComplexUpload, number>({
-            query: (uploadId) => ({
+        confirmUpload: builder.mutation<PalletComplexUpload, { uploadId: number; operational_date?: string }>({
+            query: ({ uploadId, operational_date }) => ({
                 url: `/truck-cycle-upload/${uploadId}/confirm/`,
                 method: 'POST',
+                body: operational_date ? { operational_date } : {},
             }),
             invalidatesTags: ['Uploads', 'Pautas'],
         }),
@@ -123,12 +130,12 @@ export const truckCycleApi = createApi({
             query: (id) => ({ url: `/truck-cycle-pauta/${id}/` }),
             providesTags: (_result, _error, id) => [{ type: 'Pautas', id }],
         }),
-        getWorkstation: builder.query<WorkstationData, void>({
-            query: () => ({ url: '/truck-cycle-pauta/workstation/' }),
+        getWorkstation: builder.query<WorkstationData, { operational_date?: string } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/workstation/', params: params || undefined }),
             providesTags: ['Pautas'],
         }),
-        getReloadQueue: builder.query<PaginatedResponse<PautaListItem>, void>({
-            query: () => ({ url: '/truck-cycle-pauta/reload_queue/' }),
+        getReloadQueue: builder.query<PaginatedResponse<PautaListItem>, { operational_date?: string } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/reload_queue/', params: params || undefined }),
             providesTags: ['Pautas'],
         }),
         getKPISummary: builder.query<KPISummary, { operational_date?: string }>({
@@ -144,6 +151,54 @@ export const truckCycleApi = createApi({
             }),
             invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
+        takeAsPicker: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_picker/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        getPickerStats: builder.query<PickerStats, { operational_date?: string; personnel_id?: number } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/picker_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        takeAsCounter: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_counter/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        getCounterStats: builder.query<CounterStats, { operational_date?: string; personnel_id?: number } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/counter_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        takeAsSecurity: builder.mutation<PautaDetail, { id: number; exit_pass_consumables?: boolean }>({
+            query: ({ id, ...body }) => ({ url: `/truck-cycle-pauta/${id}/take_as_security/`, method: 'POST', body }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        getSecurityStats: builder.query<ValidatorStats, { operational_date?: string; personnel_id?: number } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/security_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        takeAsOps: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_ops/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        getOpsStats: builder.query<ValidatorStats, { operational_date?: string; personnel_id?: number } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/ops_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        takeAsYardDriver: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_yard_driver/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        getYardStats: builder.query<YardDriverStats, { operational_date?: string; personnel_id?: number } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/yard_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        getVendorStats: builder.query<VendorStats, { operational_date?: string } | void>({
+            query: (params) => ({ url: '/truck-cycle-pauta/vendor_stats/', params: params || undefined }),
+            providesTags: ['Pautas'],
+        }),
+        startTrip: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/start_trip/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
         startPicking: builder.mutation<PautaDetail, number>({
             query: (id) => ({ url: `/truck-cycle-pauta/${id}/start_picking/`, method: 'POST' }),
             invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
@@ -155,6 +210,30 @@ export const truckCycleApi = createApi({
         assignBay: builder.mutation<PautaDetail, { id: number; bay_id: number; yard_driver_id?: number }>({
             query: ({ id, ...body }) => ({
                 url: `/truck-cycle-pauta/${id}/assign_bay/`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        assignYardDriver: builder.mutation<PautaDetail, { id: number; personnel_id: number }>({
+            query: ({ id, ...body }) => ({
+                url: `/truck-cycle-pauta/${id}/assign_yard_driver/`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        positionAtBay: builder.mutation<PautaDetail, { id: number; bay_id: number }>({
+            query: ({ id, ...body }) => ({
+                url: `/truck-cycle-pauta/${id}/position_at_bay/`,
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        reloadReentry: builder.mutation<PautaDetail, { id: number; truck_id: number; bay_id: number }>({
+            query: ({ id, ...body }) => ({
+                url: `/truck-cycle-pauta/${id}/reload_reentry/`,
                 method: 'POST',
                 body,
             }),
@@ -192,9 +271,13 @@ export const truckCycleApi = createApi({
             }),
             invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
-        dispatchPauta: builder.mutation<PautaDetail, number>({
-            query: (id) => ({ url: `/truck-cycle-pauta/${id}/dispatch/`, method: 'POST' }),
-            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        dispatchPauta: builder.mutation<PautaDetail, { id: number; driver_id?: number }>({
+            query: ({ id, driver_id }) => ({
+                url: `/truck-cycle-pauta/${id}/dispatch/`,
+                method: 'POST',
+                body: driver_id ? { driver_id } : {},
+            }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
         arrivalPauta: builder.mutation<PautaDetail, number>({
             query: (id) => ({ url: `/truck-cycle-pauta/${id}/arrival/`, method: 'POST' }),
@@ -298,9 +381,24 @@ export const {
     useGetKPISummaryQuery,
     // Transitions
     useAssignPickerMutation,
+    useTakeAsPickerMutation,
+    useGetPickerStatsQuery,
+    useTakeAsCounterMutation,
+    useGetCounterStatsQuery,
+    useTakeAsSecurityMutation,
+    useGetSecurityStatsQuery,
+    useTakeAsOpsMutation,
+    useGetOpsStatsQuery,
+    useTakeAsYardDriverMutation,
+    useGetYardStatsQuery,
+    useGetVendorStatsQuery,
+    useStartTripMutation,
     useStartPickingMutation,
     useCompletePickingMutation,
     useAssignBayMutation,
+    useAssignYardDriverMutation,
+    usePositionAtBayMutation,
+    useReloadReentryMutation,
     useCompleteLoadingMutation,
     useAssignCounterMutation,
     useCompleteCountMutation,

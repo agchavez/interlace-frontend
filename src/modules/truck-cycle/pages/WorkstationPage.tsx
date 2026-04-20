@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { format } from 'date-fns';
 import { Box, Typography, Grid, Chip, Divider, LinearProgress, IconButton, Tooltip } from '@mui/material';
+import { todayInHonduras, HN_TIMEZONE } from '../../../utils/timezone';
 import {
     LocalShipping as TruckIcon,
     Inventory as BoxIcon,
@@ -71,13 +71,14 @@ function elapsedLabel(from: string | null | undefined) {
 // ─── Main ────────────────────────────────────────────────────────────────────
 export default function WorkstationPage() {
     const clock = useClock();
-    const operationalDate = format(new Date(), 'yyyy-MM-dd');
+    // Fecha operativa anclada a Honduras — independiente del TZ del cliente.
+    const operationalDate = useMemo(() => todayInHonduras(), []);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     // WebSocket para actualizaciones instantáneas + polling como fallback
     useTruckCycleSocket();
-    const { data: workstation, isLoading } = useGetWorkstationQuery(undefined, { pollingInterval: 30_000 });
-    const { data: reloadQueue } = useGetReloadQueueQuery(undefined, { pollingInterval: 30_000 });
+    const { data: workstation, isLoading } = useGetWorkstationQuery({ operational_date: operationalDate }, { pollingInterval: 30_000 });
+    const { data: reloadQueue } = useGetReloadQueueQuery({ operational_date: operationalDate }, { pollingInterval: 30_000 });
     const { data: kpi } = useGetKPISummaryQuery({ operational_date: operationalDate }, { pollingInterval: 30_000 });
 
     const toggleFullscreen = useCallback(() => {
@@ -155,7 +156,7 @@ export default function WorkstationPage() {
                         fontWeight={700}
                         sx={{ color: '#38bdf8', fontVariantNumeric: 'tabular-nums', fontSize: { xs: '1.75rem', md: '2.5rem', lg: '3rem' } }}
                     >
-                        {clock.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {clock.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: HN_TIMEZONE })}
                     </Typography>
                     <Tooltip title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa (TV)'}>
                         <IconButton onClick={toggleFullscreen} sx={{ color: '#94a3b8' }}>

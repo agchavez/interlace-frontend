@@ -55,10 +55,12 @@ import {
     useProcessReturnMutation,
 } from '../services/truckCycleApi';
 import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
-import { useGetPersonnelProfilesQuery } from '../../personnel/services/personnelApi';
+import {
+    useGetPersonnelAutocompleteQuery,
+    type PersonnelAutocompleteItem,
+} from '../../personnel/services/personnelApi';
 import type { PautaStatus, Inconsistency } from '../interfaces/truckCycle';
 import type { Product } from '../../../interfaces/tracking';
-import type { PersonnelProfileList } from '../../../interfaces/personnel';
 
 const INCONSISTENCY_TYPES = [
     { value: 'FALTANTE', label: 'Faltante', color: 'error' as const },
@@ -111,7 +113,7 @@ export default function VerificationPage() {
     const needsValidator = isCheckout || isCheckoutOps;
 
     // Checkout-specific state
-    const [selectedValidator, setSelectedValidator] = useState<PersonnelProfileList | null>(null);
+    const [selectedValidator, setSelectedValidator] = useState<PersonnelAutocompleteItem | null>(null);
     const [validatorSearch, setValidatorSearch] = useState('');
     const [exitPassConsumables, setExitPassConsumables] = useState(false);
 
@@ -195,8 +197,14 @@ export default function VerificationPage() {
     };
 
     // Personnel query for checkout validator
-    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelProfilesQuery(
-        { search: validatorSearch || undefined, is_active: true, limit: 50 },
+    const validatorPositionType = isCheckout ? 'SECURITY_GUARD' : 'WAREHOUSE_ASSISTANT';
+    const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery(
+        {
+            search: validatorSearch || undefined,
+            is_active: true,
+            position_type: validatorPositionType,
+            limit: 50,
+        },
         { skip: !needsValidator },
     );
 
@@ -306,28 +314,28 @@ export default function VerificationPage() {
                 await checkoutSecurity({ id: pauta.id, validator_id: selectedValidator.id }).unwrap();
                 showSnack('Checkout de seguridad completado');
                 setConfirmOpen(false);
-                navigate('/truck-cycle/checkout');
+                navigate(-1);
             } else if (isCheckoutOps) {
                 if (!selectedValidator) return;
                 await checkoutOps({ id: pauta.id, validator_id: selectedValidator.id }).unwrap();
                 showSnack('Checkout de operaciones completado');
                 setConfirmOpen(false);
-                navigate('/truck-cycle/checkout');
+                navigate(-1);
             } else if (isAudit) {
                 await completeAudit(pauta.id).unwrap();
                 showSnack('Auditoría completada');
                 setConfirmOpen(false);
-                navigate(`/truck-cycle/pautas/${pauta.id}`);
+                navigate(-1);
             } else if (isReturn) {
                 await processReturn(pauta.id).unwrap();
                 showSnack('Retorno procesado');
                 setConfirmOpen(false);
-                navigate('/truck-cycle/reload-queue');
+                navigate(-1);
             } else {
                 await completeCount(pauta.id).unwrap();
                 showSnack('Conteo completado');
                 setConfirmOpen(false);
-                navigate('/truck-cycle/counting');
+                navigate(-1);
             }
         } catch (err: any) {
             showSnack(err?.data?.detail || 'Error al completar', 'error');
@@ -426,7 +434,7 @@ export default function VerificationPage() {
                         <Grid container spacing={2} alignItems="center">
                             <Grid item xs={12} md={6}>
                                 <Autocomplete
-                                    options={personnelData?.results || []}
+                                    options={personnelData || []}
                                     getOptionLabel={(o) => `${o.employee_code} - ${o.full_name}`}
                                     value={selectedValidator}
                                     onChange={(_, v) => setSelectedValidator(v)}

@@ -169,6 +169,11 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+// Modo "work" (pantallas /work/*) — full-bleed sin padding horizontal.
+.ui__container__v2.work-mode {
+  padding: 0 !important;
+}
+
 @media screen and (max-width: 600px) {
   .ui__container{
     width: 96vw;
@@ -195,6 +200,15 @@
     margin-left: 0;
     margin-right: 0;
     padding: 0 2vw;
+  }
+
+  // En work-mode (móvil también) aprovechamos todo el viewport.
+  .ui__container__v2.work-mode,
+  .ui__container__v2.work-mode.collapsed {
+    width: 100vw;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 !important;
   }
 }
 
