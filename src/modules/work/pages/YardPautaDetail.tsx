@@ -25,6 +25,8 @@ import {
     useGetPautasQuery,
     useTakeAsYardDriverMutation,
     usePositionAtBayMutation,
+    useTakeBayForReturnMutation,
+    useParkTruckMutation,
 } from '../../truck-cycle/services/truckCycleApi';
 import PautaStatusBadge from '../../truck-cycle/components/PautaStatusBadge';
 import BayGridPicker, { type BayOccupancy, type DockPosition } from '../../truck-cycle/components/BayGridPicker';
@@ -77,6 +79,8 @@ export default function YardPautaDetail() {
     const { data: pauta, isLoading, error } = useGetPautaQuery(Number(id));
     const [takeAsYardDriver, { isLoading: taking }] = useTakeAsYardDriverMutation();
     const [positionAtBay, { isLoading: positioning }] = usePositionAtBayMutation();
+    const [takeBayForReturn, { isLoading: takingReturn }] = useTakeBayForReturnMutation();
+    const [parkTruck, { isLoading: parking }] = useParkTruckMutation();
 
     // Dock position del CD (localStorage).
     const dockPosition = useMemo<DockPosition>(() => {
@@ -112,7 +116,7 @@ export default function YardPautaDetail() {
         return map;
     }, [occupiedPautas]);
 
-    // Timestamps del movimiento
+    // Timestamps del movimiento estacionamiento → bahía.
     const movementStartedAt = useMemo(() => {
         if (!pauta?.timestamps) return null;
         const t = (pauta.timestamps as any[]).find((t) => t.event_type === 'T1A_YARD_START');
@@ -124,8 +128,22 @@ export default function YardPautaDetail() {
         return t?.timestamp ?? null;
     }, [pauta]);
 
+    // Timestamps del movimiento bahía → estacionamiento (retorno).
+    const returnStartedAt = useMemo(() => {
+        if (!pauta?.timestamps) return null;
+        const t = (pauta.timestamps as any[]).find((t) => t.event_type === 'T8A_YARD_RETURN_START');
+        return t?.timestamp ?? null;
+    }, [pauta]);
+    const returnEndedAt = useMemo(() => {
+        if (!pauta?.timestamps) return null;
+        const t = (pauta.timestamps as any[]).find((t) => t.event_type === 'T8B_YARD_RETURN_END');
+        return t?.timestamp ?? null;
+    }, [pauta]);
+
     const isMoving = pauta?.status === 'MOVING_TO_BAY';
     const elapsed = useLiveElapsed(isMoving ? movementStartedAt : null);
+    const isReturning = !!returnStartedAt && !returnEndedAt;
+    const elapsedReturn = useLiveElapsed(isReturning ? returnStartedAt : null);
 
     const finalDuration = useMemo(() => {
         if (!movementStartedAt || !movementEndedAt) return null;
@@ -135,6 +153,15 @@ export default function YardPautaDetail() {
         const s = Math.floor(diff % 60);
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     }, [movementStartedAt, movementEndedAt]);
+
+    const finalReturnDuration = useMemo(() => {
+        if (!returnStartedAt || !returnEndedAt) return null;
+        const diff = Math.max(0, (new Date(returnEndedAt).getTime() - new Date(returnStartedAt).getTime()) / 1000);
+        const h = Math.floor(diff / 3600);
+        const m = Math.floor((diff % 3600) / 60);
+        const s = Math.floor(diff % 60);
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, [returnStartedAt, returnEndedAt]);
 
     const [selectedBay, setSelectedBay] = useState<Bay | null>(null);
 
@@ -175,6 +202,27 @@ export default function YardPautaDetail() {
         }
     };
 
+    const handleTakeReturn = async () => {
+        if (!pauta) return;
+        try {
+            await takeBayForReturn(pauta.id).unwrap();
+            showSnack('Retorno iniciado — arranca el cronómetro');
+        } catch (err: any) {
+            showSnack(err?.data?.error || err?.data?.detail || 'Error al iniciar retorno', 'error');
+        }
+    };
+
+    const handlePark = async () => {
+        if (!pauta) return;
+        try {
+            await parkTruck(pauta.id).unwrap();
+            showSnack('Camión estacionado');
+            setTimeout(() => navigate(-1), 500);
+        } catch (err: any) {
+            showSnack(err?.data?.error || err?.data?.detail || 'Error al estacionar', 'error');
+        }
+    };
+
     if (isLoading) {
         return (
             <Container maxWidth="sm" sx={{ py: 6, textAlign: 'center' }}>
@@ -195,7 +243,14 @@ export default function YardPautaDetail() {
 
     const canTake = pauta.status === 'PICKING_DONE' && !pauta.is_reload;
     const canPosition = pauta.status === 'MOVING_TO_BAY';
-    const isTerminal = ['IN_BAY', 'PENDING_COUNT', 'COUNTING', 'COUNTED', 'DISPATCHED', 'CLOSED'].includes(pauta.status);
+    // Retorno bahía → estacionamiento: aplica en estados post-validación mientras
+    // el camión siga físicamente en la bahía.
+    const canTakeReturn = !returnStartedAt && [
+        'CHECKOUT_SECURITY', 'CHECKOUT_OPS', 'DISPATCHED',
+        'IN_RELOAD_QUEUE', 'PENDING_RETURN', 'RETURN_PROCESSED',
+    ].includes(pauta.status);
+    const canPark = !!returnStartedAt && !returnEndedAt;
+    const isTerminal = !canTake && !canPosition && !canTakeReturn && !canPark && ['IN_BAY', 'PENDING_COUNT', 'COUNTING', 'COUNTED', 'DISPATCHED', 'CLOSED'].includes(pauta.status);
 
     return (
         <Box sx={{ height: 'calc(100dvh - 60px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -270,6 +325,38 @@ export default function YardPautaDetail() {
                         }
                         return null;
                     })()}
+
+                    {/* Banner del retorno bahía → estacionamiento */}
+                    {isReturning && (
+                        <Box sx={{ p: 2.5, mb: 2, borderRadius: 2, background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`, color: '#fff', display: 'flex', alignItems: 'center', gap: 2, boxShadow: `0 4px 12px ${alpha(theme.palette.info.main, 0.35)}` }}>
+                            <Box sx={{ width: 48, height: 48, borderRadius: '50%', bgcolor: alpha('#fff', 0.2), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <TimerIcon sx={{ fontSize: '1.6rem' }} />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <Typography variant="caption" sx={{ opacity: 0.85, letterSpacing: 1, textTransform: 'uppercase', fontSize: '0.7rem' }}>
+                                    Retorno bahía → estacionamiento
+                                </Typography>
+                                <Typography sx={{ fontFamily: 'monospace', fontWeight: 900, fontSize: { xs: '2rem', sm: '2.5rem' }, lineHeight: 1.1, letterSpacing: 1 }}>
+                                    {elapsedReturn}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    )}
+                    {finalReturnDuration && !isReturning && (
+                        <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: alpha(theme.palette.info.main, 0.08), border: `1px solid ${alpha(theme.palette.info.main, 0.25)}`, display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: alpha(theme.palette.info.main, 0.15), color: theme.palette.info.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <DoneIcon />
+                            </Box>
+                            <Box sx={{ flex: 1 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: 1, textTransform: 'uppercase', fontSize: '0.65rem' }}>
+                                    Retorno bahía → estacionamiento
+                                </Typography>
+                                <Typography variant="subtitle1" fontWeight={800} sx={{ fontFamily: 'monospace' }}>
+                                    {finalReturnDuration}
+                                </Typography>
+                            </Box>
+                        </Box>
+                    )}
 
                     {/* Hero */}
                     <Paper elevation={2} sx={{ borderRadius: 3, overflow: 'hidden', mb: 2 }}>
@@ -375,7 +462,7 @@ export default function YardPautaDetail() {
                 </Container>
             </Box>
 
-            {(canTake || canPosition) && (
+            {(canTake || canPosition || canTakeReturn || canPark) && (
                 <Box sx={{ position: 'sticky', bottom: 0, zIndex: 5, bgcolor: 'background.paper', borderTop: 1, borderColor: 'divider' }}>
                     <Container maxWidth="md" sx={{ py: 2 }}>
                         {canTake && (
@@ -395,6 +482,26 @@ export default function YardPautaDetail() {
                                 onConfirm={handlePosition}
                                 loading={positioning}
                                 disabled={!selectedBay}
+                                color="success"
+                                icon={<DoneIcon />}
+                            />
+                        )}
+                        {canTakeReturn && (
+                            <SwipeToConfirm
+                                label="Desliza para tomar camión en bahía"
+                                loadingLabel="Iniciando retorno..."
+                                onConfirm={handleTakeReturn}
+                                loading={takingReturn}
+                                color="primary"
+                                icon={<TakeIcon />}
+                            />
+                        )}
+                        {canPark && (
+                            <SwipeToConfirm
+                                label="Desliza: camión estacionado"
+                                loadingLabel="Registrando..."
+                                onConfirm={handlePark}
+                                loading={parking}
                                 color="success"
                                 icon={<DoneIcon />}
                             />

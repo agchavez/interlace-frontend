@@ -151,9 +151,13 @@ export const truckCycleApi = createApi({
             }),
             invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
-        takeAsPicker: builder.mutation<PautaDetail, number>({
-            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_picker/`, method: 'POST' }),
-            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        takeAsPicker: builder.mutation<PautaDetail, { id: number; personnel_id?: number }>({
+            query: ({ id, personnel_id }) => ({
+                url: `/truck-cycle-pauta/${id}/take_as_picker/`,
+                method: 'POST',
+                body: personnel_id ? { personnel_id } : {},
+            }),
+            invalidatesTags: (_result, _error, { id }) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
         getPickerStats: builder.query<PickerStats, { operational_date?: string; personnel_id?: number } | void>({
             query: (params) => ({ url: '/truck-cycle-pauta/picker_stats/', params: params || undefined }),
@@ -185,6 +189,14 @@ export const truckCycleApi = createApi({
         }),
         takeAsYardDriver: builder.mutation<PautaDetail, number>({
             query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_as_yard_driver/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        takeBayForReturn: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/take_bay_for_return/`, method: 'POST' }),
+            invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
+        }),
+        parkTruck: builder.mutation<PautaDetail, number>({
+            query: (id) => ({ url: `/truck-cycle-pauta/${id}/park_truck/`, method: 'POST' }),
             invalidatesTags: (_result, _error, id) => [{ type: 'Pautas', id }, { type: 'Pautas', id: 'LIST' }],
         }),
         getYardStats: builder.query<YardDriverStats, { operational_date?: string; personnel_id?: number } | void>({
@@ -390,6 +402,8 @@ export const {
     useTakeAsOpsMutation,
     useGetOpsStatsQuery,
     useTakeAsYardDriverMutation,
+    useTakeBayForReturnMutation,
+    useParkTruckMutation,
     useGetYardStatsQuery,
     useGetVendorStatsQuery,
     useStartTripMutation,

@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { useAppSelector } from '../../../store/store';
 import { useGetPautasQuery } from '../../truck-cycle/services/truckCycleApi';
 import PickerPautaCard from '../components/PickerPautaCard';
+import RoleLiveStats from '../components/RoleLiveStats';
 import type { PautaListItem } from '../../truck-cycle/interfaces/truckCycle';
 
 const AVAILABLE_STATUSES = 'PENDING_PICKING';
@@ -33,7 +34,6 @@ export default function PickerHome() {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const navigate = useNavigate();
     const user = useAppSelector((s) => s.auth.user);
-    const isAdmin = Boolean(user?.is_superuser || user?.is_staff);
 
     const today = format(new Date(), 'yyyy-MM-dd');
     const [tab, setTab] = useState<0 | 1 | 2>(1);
@@ -51,13 +51,15 @@ export default function PickerHome() {
         refetch: refetchAvailable,
     } = useGetPautasQuery({ ...commonParams, status: AVAILABLE_STATUSES }, { pollingInterval: 20_000 });
 
+    // Dispositivo rotativo: el supervisor/checador ve todas las pautas en curso
+    // del CD (no solo las asignadas a él). Por eso no se filtra por assigned_role.
     const {
         data: mineData,
         isLoading: loadingMine,
         isFetching: fetchingMine,
         refetch: refetchMine,
     } = useGetPautasQuery(
-        { ...commonParams, status: MINE_STATUSES, assigned_role: isAdmin ? undefined : 'PICKER' } as any,
+        { ...commonParams, status: MINE_STATUSES } as any,
         { pollingInterval: 15_000 },
     );
 
@@ -66,7 +68,7 @@ export default function PickerHome() {
         isLoading: loadingDone,
         refetch: refetchDone,
     } = useGetPautasQuery(
-        { ...commonParams, status: DONE_STATUSES, assigned_role: isAdmin ? undefined : 'PICKER' } as any,
+        { ...commonParams, status: DONE_STATUSES } as any,
     );
 
     const available = availableData?.results || [];
@@ -141,7 +143,7 @@ export default function PickerHome() {
                         }}
                     >
                         <Tab label={`Disponibles${available.length ? ` (${available.length})` : ''}`} />
-                        <Tab label={`Mías${mine.length ? ` (${mine.length})` : ''}`} />
+                        <Tab label={`En curso${mine.length ? ` (${mine.length})` : ''}`} />
                         <Tab label={`Completadas${done.length ? ` (${done.length})` : ''}`} />
                     </Tabs>
                 </Container>
@@ -150,6 +152,7 @@ export default function PickerHome() {
             {/* Content (scroll interno) */}
             <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : '#f5f5f5' }}>
                 <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 } }}>
+                    <RoleLiveStats role="picker" distributorCenterId={user?.centro_distribucion} />
                     {activeData.loading && (
                         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
                             <CircularProgress />
@@ -161,8 +164,8 @@ export default function PickerHome() {
                             <EmptyIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 1 }} />
                             <Typography variant="body1" color="text.secondary">
                                 {tab === 0 && 'No hay pautas disponibles para tomar hoy.'}
-                                {tab === 1 && 'No tienes pautas asignadas.'}
-                                {tab === 2 && 'Aún no completaste ninguna hoy.'}
+                                {tab === 1 && 'No hay pautas en curso en el centro.'}
+                                {tab === 2 && 'No se ha completado ninguna hoy.'}
                             </Typography>
                             {tab === 1 && available.length > 0 && (
                                 <Button onClick={() => setTab(0)} sx={{ mt: 1.5 }}>

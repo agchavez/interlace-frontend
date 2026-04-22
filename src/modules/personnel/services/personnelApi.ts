@@ -682,8 +682,86 @@ export const personnelApi = createApi({
         params,
       }),
     }),
+
+    // ==========================================
+    // Metric Samples (truck_cycle auto-feed)
+    // ==========================================
+    getMetricSamples: builder.query<
+      { count: number; results: MetricSampleItem[] },
+      {
+        personnel?: number;
+        metric_type?: number;
+        operational_date?: string;
+        operational_date__gte?: string;
+        operational_date__lte?: string;
+        source?: string;
+        limit?: number;
+        offset?: number;
+      }
+    >({
+      query: (params) => ({
+        url: '/metric-samples/',
+        method: 'GET',
+        params,
+      }),
+    }),
+
+    getMetricsLive: builder.query<
+      MetricsLiveResponse,
+      { personnel_id?: number; operational_date?: string; distributor_center?: number }
+    >({
+      query: (params) => ({
+        url: '/metric-samples/live/',
+        method: 'GET',
+        params,
+      }),
+    }),
   }),
 });
+
+export interface MetricSampleItem {
+  id: number;
+  personnel: number;
+  personnel_name: string;
+  personnel_code: string;
+  position_type: string;
+  metric_type: number;
+  metric_code: string;
+  metric_name: string;
+  metric_unit: string;
+  operational_date: string;
+  numeric_value: string;
+  source: string;
+  pauta_id: number | null;
+  context: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface MetricsLiveResponse {
+  date: string;
+  personnel_id: number | null;
+  picker: {
+    pallets_per_hour: number | null;
+    loads_assembled: number;
+    fractions_assembled: number;
+    avg_time_per_pauta_min: number | null;
+    load_error_rate_pct: number | null;
+    samples_count: number;
+  };
+  counter: {
+    pallets_per_hour: number | null;
+    avg_time_per_truck_min: number | null;
+    error_rate_pct: number | null;
+    samples_count: number;
+  };
+  yard: {
+    trucks_moved: number;
+    avg_park_to_bay_min: number | null;
+    avg_bay_to_park_min: number | null;
+    avg_total_move_min: number | null;
+    samples_count: number;
+  };
+}
 
 export interface PersonnelAutocompleteItem {
   id: number;
@@ -764,4 +842,7 @@ export const {
   useUpdateEvaluationMutation,
   useSubmitEvaluationMutation,
   useGetEvaluationStatisticsQuery,
+  // Métricas automáticas (truck_cycle)
+  useGetMetricSamplesQuery,
+  useGetMetricsLiveQuery,
 } = personnelApi;

@@ -152,7 +152,7 @@ export default function CounterPautaDetail() {
         );
     }
 
-    const canTake = pauta.status === 'PENDING_COUNT';
+    const canTake = pauta.status === 'PENDING_COUNT' || pauta.status === 'IN_BAY';
     const canComplete = pauta.status === 'COUNTING';
     const isTerminal = ['COUNTED', 'CLOSED', 'CANCELLED'].includes(pauta.status);
 
@@ -225,7 +225,7 @@ export default function CounterPautaDetail() {
                                 </Box>
                             );
                         }
-                        if (pauta.status === 'PENDING_COUNT') {
+                        if (pauta.status === 'PENDING_COUNT' || pauta.status === 'IN_BAY') {
                             return (
                                 <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: alpha(theme.palette.primary.main, 0.08), border: `1px solid ${alpha(theme.palette.primary.main, 0.25)}`, display: 'flex', alignItems: 'center', gap: 2 }}>
                                     <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: alpha(theme.palette.primary.main, 0.15), color: theme.palette.primary.main, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

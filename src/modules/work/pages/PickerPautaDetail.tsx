@@ -10,6 +10,7 @@ import {
     Alert,
     Snackbar,
     Paper,
+    Chip,
     useTheme,
     useMediaQuery,
 } from '@mui/material';
@@ -25,6 +26,7 @@ import {
     Category as CategoryIcon,
     ViewModule as PalletIcon,
     PieChartOutline as FractionIcon,
+    Person as PersonIcon,
 } from '@mui/icons-material';
 import SwipeToConfirm from '../../ui/components/SwipeToConfirm';
 import { alpha } from '@mui/material/styles';
@@ -36,6 +38,7 @@ import {
 } from '../../truck-cycle/services/truckCycleApi';
 import PautaStatusBadge from '../../truck-cycle/components/PautaStatusBadge';
 import type { PautaStatus } from '../../truck-cycle/interfaces/truckCycle';
+import PickerSelectDialog from '../components/PickerSelectDialog';
 
 function StatTile({ label, value, color, icon }: { label: string; value: number | string; color: string; icon: React.ReactNode }) {
     return (
@@ -119,6 +122,7 @@ export default function PickerPautaDetail() {
     const [startPicking, { isLoading: starting }] = useStartPickingMutation();
     const [completePicking, { isLoading: completing }] = useCompletePickingMutation();
 
+    const [pickerDialogOpen, setPickerDialogOpen] = useState(false);
     const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
         open: false,
         message: '',
@@ -127,13 +131,22 @@ export default function PickerPautaDetail() {
     const showSnack = (message: string, severity: 'success' | 'error' = 'success') =>
         setSnack({ open: true, message, severity });
 
-    const handleAction = async (action: 'take' | 'start' | 'complete') => {
+    const handleTakeConfirm = async (personnelId: number) => {
         if (!pauta) return;
         try {
-            if (action === 'take') {
-                await takeAsPicker(pauta.id).unwrap();
-                showSnack('Pauta tomada');
-            } else if (action === 'start') {
+            await takeAsPicker({ id: pauta.id, personnel_id: personnelId }).unwrap();
+            showSnack('Pauta asignada');
+            setPickerDialogOpen(false);
+            refetch();
+        } catch (err: any) {
+            showSnack(err?.data?.error || err?.data?.detail || 'Error al asignar', 'error');
+        }
+    };
+
+    const handleAction = async (action: 'start' | 'complete') => {
+        if (!pauta) return;
+        try {
+            if (action === 'start') {
                 await startPicking(pauta.id).unwrap();
                 showSnack('Picking iniciado');
             } else {
@@ -147,6 +160,13 @@ export default function PickerPautaDetail() {
             showSnack(err?.data?.error || err?.data?.detail || 'Error al ejecutar la acción', 'error');
         }
     };
+
+    const assignedPickerName = useMemo(() => {
+        const assignments = (pauta as any)?.assignments as any[] | undefined;
+        if (!assignments) return null;
+        const picker = assignments.find((a) => a.role === 'PICKER' && a.is_active);
+        return picker?.personnel_name || null;
+    }, [pauta]);
 
     if (isLoading) {
         return (
@@ -373,6 +393,21 @@ export default function PickerPautaDetail() {
                                 </Typography>
                             </Box>
                         </Box>
+                        {assignedPickerName && (
+                            <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Chip
+                                    icon={<PersonIcon />}
+                                    label={`Picker: ${assignedPickerName}`}
+                                    size="small"
+                                    sx={{
+                                        bgcolor: alpha('#fff', 0.18),
+                                        color: '#fff',
+                                        fontWeight: 700,
+                                        '& .MuiChip-icon': { color: '#fff' },
+                                    }}
+                                />
+                            </Box>
+                        )}
                     </Box>
 
                     {/* Ruta banner */}
@@ -506,9 +541,9 @@ export default function PickerPautaDetail() {
                     <Container maxWidth="md" sx={{ py: 2 }}>
                         {canTake && (
                             <SwipeToConfirm
-                                label="Desliza para tomar"
-                                loadingLabel="Tomando..."
-                                onConfirm={() => handleAction('take')}
+                                label="Desliza para asignar picker"
+                                loadingLabel="Abriendo..."
+                                onConfirm={() => setPickerDialogOpen(true)}
                                 loading={taking}
                                 color="primary"
                                 icon={<TakeIcon />}
@@ -537,6 +572,14 @@ export default function PickerPautaDetail() {
                     </Container>
                 </Box>
             )}
+
+            <PickerSelectDialog
+                open={pickerDialogOpen}
+                onClose={() => setPickerDialogOpen(false)}
+                onConfirm={handleTakeConfirm}
+                loading={taking}
+                distributorCenterId={(pauta as any)?.distributor_center ?? null}
+            />
 
             <Snackbar
                 open={snack.open}

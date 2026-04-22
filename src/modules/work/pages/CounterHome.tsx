@@ -22,15 +22,19 @@ import { useAppSelector } from '../../../store/store';
 import { useGetPautasQuery } from '../../truck-cycle/services/truckCycleApi';
 import CounterPautaCard from '../components/CounterPautaCard';
 import BayMapView from '../components/BayMapView';
+import RoleLiveStats from '../components/RoleLiveStats';
 import type { PautaListItem } from '../../truck-cycle/interfaces/truckCycle';
 
 const COUNTER_STATUS_LABELS: Record<string, string> = {
+    IN_BAY: 'En bahía',
     PENDING_COUNT: 'Pendiente',
     COUNTING: 'En conteo',
     COUNTED: 'Contado',
 };
 
-const AVAILABLE_STATUSES = 'PENDING_COUNT';
+// IN_BAY también es tomable: al iniciar conteo el backend emite T4 + T5
+// automáticamente (no se depende del "Carga OK" manual del supervisor).
+const AVAILABLE_STATUSES = 'IN_BAY,PENDING_COUNT';
 const MINE_STATUSES = 'COUNTING';
 const DONE_STATUSES = 'COUNTED';
 
@@ -148,6 +152,7 @@ export default function CounterHome() {
 
             <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : '#f5f5f5' }}>
                 <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 } }}>
+                    <RoleLiveStats role="counter" distributorCenterId={user?.centro_distribucion} />
                     {activeData.loading && (
                         <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
                             <CircularProgress />

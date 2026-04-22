@@ -14,11 +14,14 @@ import { useAppSelector } from '../../../store/store';
 import { useGetPautasQuery } from '../../truck-cycle/services/truckCycleApi';
 import YardPautaCard from '../components/YardPautaCard';
 import PautaSearchBar, { filterPautasByText } from '../components/PautaSearchBar';
+import RoleLiveStats from '../components/RoleLiveStats';
 import type { PautaListItem } from '../../truck-cycle/interfaces/truckCycle';
 
 const AVAILABLE_STATUSES = 'PICKING_DONE';
 const MINE_STATUSES = 'MOVING_TO_BAY';
 const DONE_STATUSES = 'IN_BAY,PENDING_COUNT,COUNTING,COUNTED,CHECKOUT_SECURITY,CHECKOUT_OPS,DISPATCHED';
+// Pautas candidatas para el retorno bahía → estacionamiento (post-validación).
+const RETURN_STATUSES = 'CHECKOUT_SECURITY,CHECKOUT_OPS,DISPATCHED,IN_RELOAD_QUEUE,PENDING_RETURN,RETURN_PROCESSED';
 
 export default function YardHome() {
     const theme = useTheme();
@@ -28,47 +31,60 @@ export default function YardHome() {
     const isAdmin = Boolean(user?.is_superuser || user?.is_staff);
 
     const today = format(new Date(), 'yyyy-MM-dd');
-    const [tab, setTab] = useState<0 | 1 | 2>(0);
+    const [tab, setTab] = useState<0 | 1 | 2 | 3>(0);
     const [search, setSearch] = useState('');
 
     const commonParams = {
         operational_date_after: today,
         operational_date_before: today,
-        is_reload: false, // Solo cargas (trip 1)
         limit: 100,
     } as any;
+    // El ida (estacionamiento→bahía) es solo para cargas (trip 1).
+    const ingressParams = { ...commonParams, is_reload: false };
 
     const {
         data: availableData, isLoading: loadingAvailable, refetch: refetchAvailable,
-    } = useGetPautasQuery({ ...commonParams, status: AVAILABLE_STATUSES }, { pollingInterval: 20_000 });
+    } = useGetPautasQuery({ ...ingressParams, status: AVAILABLE_STATUSES }, { pollingInterval: 20_000 });
 
     const {
         data: mineData, isLoading: loadingMine, refetch: refetchMine,
     } = useGetPautasQuery(
-        { ...commonParams, status: MINE_STATUSES, assigned_role: isAdmin ? undefined : 'YARD_DRIVER' } as any,
+        { ...ingressParams, status: MINE_STATUSES, assigned_role: isAdmin ? undefined : 'YARD_DRIVER' } as any,
         { pollingInterval: 15_000 },
     );
 
     const {
         data: doneData, isLoading: loadingDone, refetch: refetchDone,
     } = useGetPautasQuery(
-        { ...commonParams, status: DONE_STATUSES, assigned_role: isAdmin ? undefined : 'YARD_DRIVER' } as any,
+        { ...ingressParams, status: DONE_STATUSES, assigned_role: isAdmin ? undefined : 'YARD_DRIVER' } as any,
+    );
+
+    // Retorno: el vendor ya no está en la bahía. Incluye cargas Y recargas
+    // (para recargas el camión también termina en la bahía y hay que moverlo).
+    const {
+        data: returnData, isLoading: loadingReturn, refetch: refetchReturn,
+    } = useGetPautasQuery(
+        { ...commonParams, status: RETURN_STATUSES } as any,
+        { pollingInterval: 20_000 },
     );
 
     const available = availableData?.results || [];
     const mine = mineData?.results || [];
     const done = doneData?.results || [];
+    const returnPool = returnData?.results || [];
 
     const activeData = useMemo(() => {
         const base = tab === 0
             ? { items: available, loading: loadingAvailable }
             : tab === 1
             ? { items: mine, loading: loadingMine }
-            : { items: done, loading: loadingDone };
+            : tab === 2
+            ? { items: done, loading: loadingDone }
+            : { items: returnPool, loading: loadingReturn };
         return { items: filterPautasByText(base.items, search), loading: base.loading };
-    }, [tab, available, mine, done, loadingAvailable, loadingMine, loadingDone, search]);
+    }, [tab, available, mine, done, returnPool, loadingAvailable, loadingMine, loadingDone, loadingReturn, search]);
 
-    const handleRefresh = () => { refetchAvailable(); refetchMine(); refetchDone(); };
+    const handleRefresh = () => { refetchAvailable(); refetchMine(); refetchDone(); refetchReturn(); };
 
     const handleCardClick = (pauta: PautaListItem) => {
         navigate(`/work/yard/${pauta.id}`);
@@ -110,12 +126,14 @@ export default function YardHome() {
                         <Tab label={`Por mover${available.length ? ` (${available.length})` : ''}`} />
                         <Tab label={`Moviendo${mine.length ? ` (${mine.length})` : ''}`} />
                         <Tab label={`Posicionadas${done.length ? ` (${done.length})` : ''}`} />
+                        <Tab label={`Retorno${returnPool.length ? ` (${returnPool.length})` : ''}`} />
                     </Tabs>
                 </Container>
             </Box>
 
             <Box sx={{ flex: 1, overflowY: 'auto', bgcolor: theme.palette.mode === 'dark' ? 'background.default' : '#f5f5f5' }}>
                 <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 } }}>
+                    <RoleLiveStats role="yard" distributorCenterId={user?.centro_distribucion} />
                     <PautaSearchBar value={search} onChange={setSearch} />
 
                     {activeData.loading && (
@@ -129,6 +147,7 @@ export default function YardHome() {
                                 {tab === 0 && 'No hay pautas listas para mover.'}
                                 {tab === 1 && 'No estás moviendo ningún camión ahora mismo.'}
                                 {tab === 2 && 'Aún no posicionaste camiones hoy.'}
+                                {tab === 3 && 'No hay camiones en bahía para devolver al estacionamiento.'}
                             </Typography>
                             {tab === 1 && available.length > 0 && (
                                 <Button onClick={() => setTab(0)} sx={{ mt: 1.5 }}>

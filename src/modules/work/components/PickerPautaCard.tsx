@@ -5,6 +5,7 @@ import {
     Inventory as BoxIcon,
     Timer as TimerIcon,
     CheckCircle as DoneIcon,
+    Person as PersonIcon,
 } from '@mui/icons-material';
 import type { PautaListItem } from '../../truck-cycle/interfaces/truckCycle';
 
@@ -87,6 +88,15 @@ export default function PickerPautaCard({ pauta, onClick }: Props) {
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                     Ruta: {pauta.route_code || '—'}
                 </Typography>
+
+                {(pauta as any).assigned_to?.name && pauta.status !== 'PENDING_PICKING' && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.75 }}>
+                        <PersonIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                        <Typography variant="caption" color="text.secondary" noWrap sx={{ fontWeight: 600 }}>
+                            {(pauta as any).assigned_to.name}
+                        </Typography>
+                    </Box>
+                )}
 
                 <Box sx={{ display: 'flex', gap: 1, mt: 1.25, flexWrap: 'wrap' }}>
                     <Chip size="small" icon={<BoxIcon />} label={`${pauta.total_boxes} cajas`} />
