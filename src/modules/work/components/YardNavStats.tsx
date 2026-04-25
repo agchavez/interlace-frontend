@@ -1,22 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Box, Typography, useTheme, alpha, Tooltip, ButtonBase } from '@mui/material';
 import {
-    CheckCircle as DoneIcon,
-    Inventory as BoxIcon,
+    LocalShipping as TruckIcon,
+    ArrowUpward as InboundIcon,
+    ArrowDownward as OutboundIcon,
     Timer as TimerIcon,
-    Speed as SpeedIcon,
     PlayCircleFilled as PlayIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useGetYardStatsQuery } from '../../truck-cycle/services/truckCycleApi';
+import { useGetMetricsLiveQuery, type MetricValueWithBand } from '../../personnel/services/personnelApi';
+import { useAppSelector } from '../../../store/store';
 import { NavStat, navStatsGridSx, statSx } from './NavStatShared';
+import { bandColor, formatMetricValue } from '../utils/bands';
 
 function formatHms(totalSeconds: number): string {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = Math.floor(totalSeconds % 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function fmt(n: number | null | undefined, digits = 1): string {
+    if (n === null || n === undefined) return '—';
+    return n.toLocaleString('es-HN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function val(m: MetricValueWithBand | undefined, suffix = '', digits = 1): string {
+    if (!m || m.value === null || m.value === undefined) return '—';
+    return `${formatMetricValue(m, digits)}${suffix}`;
 }
 
 function InProgressTimer({ pautaId, startedAt, transportNumber }: { pautaId: number; startedAt: string; transportNumber: string }) {
@@ -59,29 +72,64 @@ function InProgressTimer({ pautaId, startedAt, transportNumber }: { pautaId: num
 export default function YardNavStats() {
     const theme = useTheme();
     const today = format(new Date(), 'yyyy-MM-dd');
+    const dcId = useAppSelector((s) => s.auth.user?.centro_distribucion);
+
+    const { data: live } = useGetMetricsLiveQuery(
+        { operational_date: today, ...(dcId ? { distributor_center: dcId } : {}) },
+        { pollingInterval: 30_000 },
+    );
     const { data: stats } = useGetYardStatsQuery({ operational_date: today }, { pollingInterval: 15_000 });
-    if (!stats) return null;
-    const primary = theme.palette.primary.main;
+
     const iconSize = { xs: '0.95rem', md: '1.15rem' };
-    const hasTrailing = Boolean(stats.in_progress?.started_at);
+    const hasTrailing = Boolean(stats?.in_progress?.started_at);
+
+    const y = live?.yard;
 
     return (
         <Box sx={navStatsGridSx(hasTrailing)}>
             <Box sx={statSx.cell1}>
-                <NavStat icon={<DoneIcon sx={{ fontSize: iconSize }} />} label="Pautas movidas" shortLabel="Pautas" value={stats.completed_count} accent={primary} />
+                <NavStat
+                    icon={<TruckIcon sx={{ fontSize: iconSize }} />}
+                    label="Camiones movidos"
+                    shortLabel="Camiones"
+                    value={val(y?.trucks_moved, '', 0)}
+                    accent={y ? bandColor(theme, y.trucks_moved.band) : theme.palette.primary.main}
+                />
             </Box>
             <Box sx={statSx.cell2}>
-                <NavStat icon={<TimerIcon sx={{ fontSize: iconSize }} />} label="Promedio por movimiento" shortLabel="Prom" value={stats.avg_movement_minutes != null ? `${stats.avg_movement_minutes}'` : '—'} accent={primary} />
+                <NavStat
+                    icon={<InboundIcon sx={{ fontSize: iconSize }} />}
+                    label="Estac. → Bahía (prom)"
+                    shortLabel="E→B"
+                    value={val(y?.avg_park_to_bay_min, `'`, 0)}
+                    accent={y ? bandColor(theme, y.avg_park_to_bay_min.band) : theme.palette.primary.main}
+                />
             </Box>
             <Box sx={statSx.cell3}>
-                <NavStat icon={<BoxIcon sx={{ fontSize: iconSize }} />} label="Cajas movidas" shortLabel="Cajas" value={stats.total_boxes} accent={primary} />
+                <NavStat
+                    icon={<OutboundIcon sx={{ fontSize: iconSize }} />}
+                    label="Bahía → Estac. (prom)"
+                    shortLabel="B→E"
+                    value={val(y?.avg_bay_to_park_min, `'`, 0)}
+                    accent={y ? bandColor(theme, y.avg_bay_to_park_min.band) : theme.palette.primary.main}
+                />
             </Box>
             <Box sx={statSx.cell4}>
-                <NavStat icon={<SpeedIcon sx={{ fontSize: iconSize }} />} label="Cajas por hora" shortLabel="Cajas/h" value={stats.boxes_per_hour != null ? stats.boxes_per_hour : '—'} accent={primary} />
+                <NavStat
+                    icon={<TimerIcon sx={{ fontSize: iconSize }} />}
+                    label="Tiempo total por camión"
+                    shortLabel="T. Total"
+                    value={val(y?.avg_total_move_min, `'`, 0)}
+                    accent={y ? bandColor(theme, y.avg_total_move_min.band) : theme.palette.primary.main}
+                />
             </Box>
-            {hasTrailing && stats.in_progress?.started_at && (
+            {hasTrailing && stats?.in_progress?.started_at && (
                 <Box sx={statSx.trailing}>
-                    <InProgressTimer pautaId={stats.in_progress.id} startedAt={stats.in_progress.started_at} transportNumber={stats.in_progress.transport_number} />
+                    <InProgressTimer
+                        pautaId={stats.in_progress.id}
+                        startedAt={stats.in_progress.started_at}
+                        transportNumber={stats.in_progress.transport_number}
+                    />
                 </Box>
             )}
         </Box>

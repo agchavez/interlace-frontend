@@ -7,7 +7,7 @@ import {
     useCreateTvSessionMutation,
     type TvSessionPublic,
 } from '../services/tvApi';
-import { setTvSession, getTvToken } from '../utils/tvToken';
+import { setTvSession, getTvToken, getTvDashboard } from '../utils/tvToken';
 
 const WS_URL = import.meta.env.VITE_JS_APP_API_URL_WS as string;
 
@@ -27,7 +27,8 @@ export default function TvLandingPage() {
     // Si ya hay token guardado, saltar al dashboard directo.
     useEffect(() => {
         if (getTvToken()) {
-            navigate('/tv/dashboard/workstation', { replace: true });
+            const dash = (getTvDashboard() || 'WORKSTATION').toLowerCase();
+            navigate(`/tv/dashboard/${dash}`, { replace: true });
         }
     }, [navigate]);
 

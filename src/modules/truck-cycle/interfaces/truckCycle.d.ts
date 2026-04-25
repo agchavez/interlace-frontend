@@ -31,7 +31,9 @@ export interface Bay {
 
 export interface KPITarget {
     id: number;
-    kpi_type: 'BOXES_PER_HOUR' | 'COUNT_ACCURACY' | 'PICKING_ERROR_RATE' | 'LOADING_TIME' | 'DISPATCH_TIME';
+    kpi_type: 'BOXES_PER_HOUR' | 'COUNT_ACCURACY' | 'PICKING_ERROR_RATE' | 'LOADING_TIME' | 'DISPATCH_TIME' | null;
+    metric_type: number | null;
+    direction: 'HIGHER_IS_BETTER' | 'LOWER_IS_BETTER';
     target_value: number;
     unit: string;
     warning_threshold: number | null;

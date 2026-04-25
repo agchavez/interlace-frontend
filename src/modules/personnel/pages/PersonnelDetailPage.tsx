@@ -68,6 +68,7 @@ import { useGetTokensByPersonnelQuery } from '../../tokens/services/tokenApi';
 import { TokenStatus, TokenStatusLabels, TokenType, TokenTypeLabels } from '../../tokens/interfaces/token';
 import { toast } from 'sonner';
 import { AssignUserDialog } from '../components/AssignUserDialog';
+import PersonnelOperationalMetrics from '../components/PersonnelOperationalMetrics';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -744,6 +745,10 @@ export const PersonnelDetailPage = () => {
           {/* Tab 4: Performance */}
           <TabPanel value={activeTab} index={3}>
             <Box sx={{ px: { xs: 2, sm: 4 } }}>
+              <PersonnelOperationalMetrics
+                personnelId={Number(id)}
+                positionType={(profile as any)?.position_type}
+              />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: 600 }}>
                   <TrendingUpIcon color="primary" />

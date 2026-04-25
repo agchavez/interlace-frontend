@@ -39,7 +39,11 @@ export const personnelApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['PersonnelProfiles', 'Certifications', 'MedicalRecords', 'PerformanceMetrics', 'MetricTypes', 'Evaluations'],
+  tagTypes: [
+    'PersonnelProfiles', 'Certifications', 'MedicalRecords',
+    'PerformanceMetrics', 'MetricTypes', 'Evaluations',
+    'MetricSamples', 'MetricsLive', 'MetricsWorkstation', 'MetricsHourly',
+  ],
   endpoints: (builder) => ({
     // ==========================================
     // Personnel Profiles
@@ -704,6 +708,7 @@ export const personnelApi = createApi({
         method: 'GET',
         params,
       }),
+      providesTags: ['MetricSamples'],
     }),
 
     getMetricsLive: builder.query<
@@ -715,9 +720,88 @@ export const personnelApi = createApi({
         method: 'GET',
         params,
       }),
+      providesTags: ['MetricsLive'],
+    }),
+
+    getRoleWorkstation: builder.query<
+      WorkstationResponse,
+      { role: 'picker' | 'counter' | 'yard'; operational_date?: string; distributor_center?: number }
+    >({
+      query: (params) => ({
+        url: '/metric-samples/workstation/',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['MetricsWorkstation'],
+    }),
+
+    getMetricsHourly: builder.query<
+      MetricsHourlyResponse,
+      { metric_code: string; operational_date?: string; distributor_center?: number; personnel_id?: number }
+    >({
+      query: (params) => ({
+        url: '/metric-samples/hourly/',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['MetricsHourly'],
     }),
   }),
 });
+
+export interface MetricsHourlyHour {
+  hour: number;
+  value: number | null;
+  band: Band;
+  count: number;
+}
+export interface ShiftInfo {
+  name: string;
+  day_of_week: string;
+  start_time: string;
+  end_time: string;
+  start_hour: number;
+  end_hour: number;
+  is_active_now: boolean;
+  current_hour: number;
+}
+
+export interface MetricsHourlyResponse {
+  date: string;
+  metric_code: string;
+  metric_name: string;
+  unit: string;
+  target: number | null;
+  trigger: number | null;
+  direction: Direction;
+  hours: MetricsHourlyHour[];
+  shift: ShiftInfo | null;
+}
+
+export interface WorkstationMetricHeader {
+  code: string;
+  name: string;
+  unit: string;
+  direction: Direction;
+  target: number | null;
+  trigger: number | null;
+}
+
+export interface WorkstationPersonRow {
+  id: number;
+  name: string;
+  code: string;
+  position_type: string;
+  values: Record<string, MetricValueWithBand>;
+}
+
+export interface WorkstationResponse {
+  date: string;
+  role: 'picker' | 'counter' | 'yard';
+  distributor_center: number | null;
+  metrics: WorkstationMetricHeader[];
+  personnel: WorkstationPersonRow[];
+}
 
 export interface MetricSampleItem {
   id: number;
@@ -737,28 +821,41 @@ export interface MetricSampleItem {
   created_at: string;
 }
 
+export type Band = 'GREEN' | 'YELLOW' | 'RED' | 'GRAY';
+export type Direction = 'HIGHER_IS_BETTER' | 'LOWER_IS_BETTER' | null;
+
+export interface MetricValueWithBand {
+  value: number | null;
+  target: number | null;
+  trigger: number | null;
+  direction: Direction;
+  unit: string | null;
+  band: Band;
+}
+
 export interface MetricsLiveResponse {
   date: string;
   personnel_id: number | null;
+  distributor_center: number | null;
   picker: {
-    pallets_per_hour: number | null;
-    loads_assembled: number;
+    pallets_per_hour: MetricValueWithBand;
+    loads_assembled: MetricValueWithBand;
     fractions_assembled: number;
-    avg_time_per_pauta_min: number | null;
-    load_error_rate_pct: number | null;
+    avg_time_per_pauta_min: MetricValueWithBand;
+    load_error_rate_pct: MetricValueWithBand;
     samples_count: number;
   };
   counter: {
-    pallets_per_hour: number | null;
-    avg_time_per_truck_min: number | null;
-    error_rate_pct: number | null;
+    pallets_per_hour: MetricValueWithBand;
+    avg_time_per_truck_min: MetricValueWithBand;
+    error_rate_pct: MetricValueWithBand;
     samples_count: number;
   };
   yard: {
-    trucks_moved: number;
-    avg_park_to_bay_min: number | null;
-    avg_bay_to_park_min: number | null;
-    avg_total_move_min: number | null;
+    trucks_moved: MetricValueWithBand;
+    avg_park_to_bay_min: MetricValueWithBand;
+    avg_bay_to_park_min: MetricValueWithBand;
+    avg_total_move_min: MetricValueWithBand;
     samples_count: number;
   };
 }
@@ -845,4 +942,6 @@ export const {
   // Métricas automáticas (truck_cycle)
   useGetMetricSamplesQuery,
   useGetMetricsLiveQuery,
+  useGetRoleWorkstationQuery,
+  useGetMetricsHourlyQuery,
 } = personnelApi;

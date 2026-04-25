@@ -57,8 +57,11 @@ export interface TvSessionAdmin {
 }
 
 export const TV_DASHBOARDS: Array<{ value: string; label: string }> = [
-    { value: 'WORKSTATION',         label: 'Workstation (estaciones de trabajo)' },
-    { value: 'WORKSTATION_PICKING', label: 'Estación de trabajo del operador · Picking' },
+    { value: 'WORKSTATION',         label: 'Workstation · Torre de control' },
+    { value: 'WORKSTATION_PICKING', label: 'Workstation Picking · legacy' },
+    { value: 'WORKSTATION_PICKER',  label: 'Workstation Picker · KPIs por turno' },
+    { value: 'WORKSTATION_COUNTER', label: 'Workstation Contador · KPIs por turno' },
+    { value: 'WORKSTATION_YARD',    label: 'Workstation Chofer de Patio · KPIs por turno' },
 ];
 
 export const tvApi = createApi({

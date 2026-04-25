@@ -3,7 +3,20 @@ const TV_DASHBOARD_KEY = 'tvDashboard';
 const TV_CODE_KEY = 'tvCode';
 const TV_LABEL_KEY = 'tvLabel';
 
-export type TvDashboard = 'WORKSTATION' | 'WORKSTATION_PICKING';
+export type TvDashboard =
+    | 'WORKSTATION'
+    | 'WORKSTATION_PICKING'
+    | 'WORKSTATION_PICKER'
+    | 'WORKSTATION_COUNTER'
+    | 'WORKSTATION_YARD';
+
+const VALID_DASHBOARDS = new Set<string>([
+    'WORKSTATION',
+    'WORKSTATION_PICKING',
+    'WORKSTATION_PICKER',
+    'WORKSTATION_COUNTER',
+    'WORKSTATION_YARD',
+]);
 
 export function updateTvDashboard(dashboard: TvDashboard, label?: string): void {
     if (typeof window === 'undefined') return;
@@ -18,7 +31,7 @@ export function getTvToken(): string | null {
 export function getTvDashboard(): TvDashboard | null {
     if (typeof window === 'undefined') return null;
     const v = window.localStorage.getItem(TV_DASHBOARD_KEY);
-    return (v === 'WORKSTATION' ? v : null) as TvDashboard | null;
+    return v && VALID_DASHBOARDS.has(v) ? (v as TvDashboard) : null;
 }
 
 export function getTvCode(): string | null {

@@ -2,21 +2,34 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, useTheme, alpha, Tooltip, ButtonBase } from '@mui/material';
 import {
     CheckCircle as DoneIcon,
-    Inventory as BoxIcon,
-    Timer as TimerIcon,
     Speed as SpeedIcon,
+    Timer as TimerIcon,
+    ReportProblem as ErrorIcon,
     PlayCircleFilled as PlayIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useGetCounterStatsQuery } from '../../truck-cycle/services/truckCycleApi';
+import { useGetMetricsLiveQuery, type MetricValueWithBand } from '../../personnel/services/personnelApi';
+import { useAppSelector } from '../../../store/store';
 import { NavStat, navStatsGridSx, statSx } from './NavStatShared';
+import { bandColor, formatMetricValue } from '../utils/bands';
 
 function formatHms(totalSeconds: number): string {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = Math.floor(totalSeconds % 60);
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function fmt(n: number | null | undefined, digits = 1): string {
+    if (n === null || n === undefined) return '—';
+    return n.toLocaleString('es-HN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+
+function val(m: MetricValueWithBand | undefined, suffix = '', digits = 1): string {
+    if (!m || m.value === null || m.value === undefined) return '—';
+    return `${formatMetricValue(m, digits)}${suffix}`;
 }
 
 function InProgressTimer({ pautaId, startedAt, transportNumber }: { pautaId: number; startedAt: string; transportNumber: string }) {
@@ -35,11 +48,9 @@ function InProgressTimer({ pautaId, startedAt, transportNumber }: { pautaId: num
             <ButtonBase
                 onClick={() => navigate(`/work/counter/${pautaId}`)}
                 sx={{
-                    display: 'flex', alignItems: 'center', gap: 0.75, px: 1,
-                    borderRadius: 1.5, height: '100%',
+                    display: 'flex', alignItems: 'center', gap: 0.75, px: 1, borderRadius: 1.5, height: '100%',
                     background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
-                    color: '#fff',
-                    boxShadow: `0 2px 6px ${alpha(theme.palette.warning.main, 0.35)}`,
+                    color: '#fff', boxShadow: `0 2px 6px ${alpha(theme.palette.warning.main, 0.35)}`,
                     transition: 'transform 0.15s ease, box-shadow 0.15s ease',
                     '&:hover': { transform: 'translateY(-1px)', boxShadow: `0 4px 10px ${alpha(theme.palette.warning.main, 0.55)}` },
                 }}
@@ -61,56 +72,58 @@ function InProgressTimer({ pautaId, startedAt, transportNumber }: { pautaId: num
 export default function CounterNavStats() {
     const theme = useTheme();
     const today = format(new Date(), 'yyyy-MM-dd');
-    const { data: stats } = useGetCounterStatsQuery(
-        { operational_date: today },
-        { pollingInterval: 15_000 },
-    );
+    const dcId = useAppSelector((s) => s.auth.user?.centro_distribucion);
 
-    if (!stats) return null;
+    const { data: live } = useGetMetricsLiveQuery(
+        { operational_date: today, ...(dcId ? { distributor_center: dcId } : {}) },
+        { pollingInterval: 30_000 },
+    );
+    const { data: stats } = useGetCounterStatsQuery({ operational_date: today }, { pollingInterval: 15_000 });
 
     const iconSize = { xs: '0.95rem', md: '1.15rem' };
-    const primary = theme.palette.primary.main;
-    const hasTrailing = Boolean(stats.in_progress?.started_at);
+    const hasTrailing = Boolean(stats?.in_progress?.started_at);
+
+    const c = live?.counter;
 
     return (
         <Box sx={navStatsGridSx(hasTrailing)}>
             <Box sx={statSx.cell1}>
                 <NavStat
-                    icon={<DoneIcon sx={{ fontSize: iconSize }} />}
-                    label="Pautas contadas"
-                    shortLabel="Pautas"
-                    value={stats.completed_count}
-                    accent={primary}
+                    icon={<SpeedIcon sx={{ fontSize: iconSize }} />}
+                    label="Pallets contados por hora"
+                    shortLabel="Pallets/h"
+                    value={val(c?.pallets_per_hour)}
+                    accent={c ? bandColor(theme, c.pallets_per_hour.band) : theme.palette.primary.main}
                 />
             </Box>
             <Box sx={statSx.cell2}>
                 <NavStat
                     icon={<TimerIcon sx={{ fontSize: iconSize }} />}
-                    label="Promedio por pauta"
-                    shortLabel="Prom"
-                    value={stats.avg_counting_minutes != null ? `${stats.avg_counting_minutes}'` : '—'}
-                    accent={primary}
+                    label="Tiempo por camión"
+                    shortLabel="T/Camión"
+                    value={val(c?.avg_time_per_truck_min, `'`, 0)}
+                    accent={c ? bandColor(theme, c.avg_time_per_truck_min.band) : theme.palette.primary.main}
                 />
             </Box>
             <Box sx={statSx.cell3}>
                 <NavStat
-                    icon={<BoxIcon sx={{ fontSize: iconSize }} />}
-                    label="Cajas contadas"
-                    shortLabel="Cajas"
-                    value={stats.total_boxes}
-                    accent={primary}
+                    icon={<ErrorIcon sx={{ fontSize: iconSize }} />}
+                    label="% Errores de conteo"
+                    shortLabel="% Err"
+                    value={val(c?.error_rate_pct, '%')}
+                    accent={c ? bandColor(theme, c.error_rate_pct.band) : theme.palette.primary.main}
                 />
             </Box>
             <Box sx={statSx.cell4}>
                 <NavStat
-                    icon={<SpeedIcon sx={{ fontSize: iconSize }} />}
-                    label="Cajas por hora"
-                    shortLabel="Cajas/h"
-                    value={stats.boxes_per_hour != null ? stats.boxes_per_hour : '—'}
-                    accent={primary}
+                    icon={<DoneIcon sx={{ fontSize: iconSize }} />}
+                    label="Conteos del día"
+                    shortLabel="Conteos"
+                    value={c?.samples_count ?? 0}
+                    accent={theme.palette.primary.main}
                 />
             </Box>
-            {hasTrailing && stats.in_progress?.started_at && (
+            {hasTrailing && stats?.in_progress?.started_at && (
                 <Box sx={statSx.trailing}>
                     <InProgressTimer
                         pautaId={stats.in_progress.id}

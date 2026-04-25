@@ -41,6 +41,7 @@ import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
 import { useAppDispatch, useAppSelector } from '../../../store';
@@ -182,6 +183,7 @@ const SidebarV2: React.FC = () => {
         icon: <DashboardIcon fontSize="small" />,
         subItems: [
           { text: 'Dashboard', href: '/', id: 'dashboard' },
+          { text: 'Mi Workstation', href: '/my-workstation', id: 'my-workstation' },
           // { text: 'IN-OUT', href: '/tracker/view', id: 'vista' },
           // { text: 'Dashboard CD', href: '/dashboard/cd', id: 'dashboardcd' },
         ],
@@ -266,10 +268,21 @@ const SidebarV2: React.FC = () => {
           { text: 'Operaciones', href: '/work/ops', id: 'tc-ops', visible: canOps },
           { text: 'Chofer de Patio', href: '/work/yard', id: 'tc-yard', visible: canYard },
           { text: 'Chofer Vendedor', href: '/work/vendor', id: 'tc-vendor', visible: canVendor },
-          { text: 'Workstation', href: '/truck-cycle/workstation', id: 'tc-workstation' },
           { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
+          { text: 'Metas KPI', href: '/truck-cycle/kpi/config', id: 'tc-kpi-config' },
         ],
         id: 'truck-cycle',
+      },
+      {
+        text: 'Workstations',
+        icon: <WorkspacesIcon fontSize="small" />,
+        subItems: [
+          { text: 'Torre de Control', href: '/truck-cycle/workstation', id: 'ws-overview' },
+          { text: 'Picker', href: '/work/picker/workstation', id: 'ws-picker' },
+          { text: 'Contador', href: '/work/counter/workstation', id: 'ws-counter' },
+          { text: 'Chofer de Patio', href: '/work/yard/workstation', id: 'ws-yard' },
+        ],
+        id: 'workstations',
       },
       {
         text: 'Tokens',

@@ -259,6 +259,27 @@ export const permisions = [
         ]
     },
     {
+        url: "/my-workstation",
+        permissions: [
+            "any"
+        ]
+    },
+    // Workstations por rol — acceso para staff/MANAGING/SUPERVISOR
+    // (se valida con el mismo permiso que /truck-cycle; si hace falta restringir más,
+    // agregar un permiso nuevo `truck_cycle.view_workstation`).
+    {
+        url: "/work/picker/workstation",
+        permissions: ["truck_cycle.view_pautamodel"],
+    },
+    {
+        url: "/work/counter/workstation",
+        permissions: ["truck_cycle.view_pautamodel"],
+    },
+    {
+        url: "/work/yard/workstation",
+        permissions: ["truck_cycle.view_pautamodel"],
+    },
+    {
         url: "/personnel",
         permissions: [
             "personnel.view_personnelprofile"
@@ -423,6 +444,18 @@ export const permisions = [
     {
         url: "/tv/dashboard/:dashboard",
         reg: /\/tv\/dashboard\/[^/]+\/?$/,
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/dashboard/workstation_picker",
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/dashboard/workstation_counter",
+        permissions: ["any"],
+    },
+    {
+        url: "/tv/dashboard/workstation_yard",
         permissions: ["any"],
     },
     {
