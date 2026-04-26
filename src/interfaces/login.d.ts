@@ -53,6 +53,7 @@ export interface User {
     user_permissions:    string[];
     distributions_centers: number[];
     photo_url?:          string | null;
+    personnel_profile_id?: number | null;
 }
 
 export interface LoginBody {

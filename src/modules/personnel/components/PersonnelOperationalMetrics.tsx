@@ -157,7 +157,8 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
                 map[code] = { name: s.metric_name, unit: s.metric_unit, values: [] };
             }
             map[code].values.push(Number(s.numeric_value));
-            if (!map[code].lastDate || s.operational_date > map[code].lastDate) {
+            const prevDate = map[code].lastDate;
+            if (!prevDate || s.operational_date > prevDate) {
                 map[code].lastDate = s.operational_date;
                 map[code].lastValue = Number(s.numeric_value);
             }
