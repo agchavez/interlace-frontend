@@ -555,7 +555,7 @@ export const personnelApi = createApi({
       query: (params) => ({
         url: '/metric-types/',
         method: 'GET',
-        params,
+        params: { limit: 1000, offset: 0, ...params },
       }),
       providesTags: (result) =>
         result?.results

@@ -39,7 +39,7 @@ export const truckCycleApi = createApi({
     endpoints: (builder) => ({
         // ==================== TRUCKS ====================
         getTrucks: builder.query<PaginatedResponse<Truck>, TruckFilterParams | void>({
-            query: (params) => ({ url: '/truck-cycle-truck/', params: params || undefined }),
+            query: (params) => ({ url: '/truck-cycle-truck/', params: { limit: 1000, offset: 0, ...(params || {}) } }),
             providesTags: ['Trucks'],
         }),
         createTruck: builder.mutation<Truck, Partial<Truck>>({
@@ -57,7 +57,7 @@ export const truckCycleApi = createApi({
 
         // ==================== BAYS ====================
         getBays: builder.query<PaginatedResponse<Bay>, void>({
-            query: () => ({ url: '/truck-cycle-bay/' }),
+            query: () => ({ url: '/truck-cycle-bay/', params: { limit: 1000, offset: 0 } }),
             providesTags: ['Bays'],
         }),
         createBay: builder.mutation<Bay, Partial<Bay>>({
@@ -75,7 +75,7 @@ export const truckCycleApi = createApi({
 
         // ==================== KPI TARGETS ====================
         getKPITargets: builder.query<PaginatedResponse<KPITarget>, void>({
-            query: () => ({ url: '/truck-cycle-kpi-target/' }),
+            query: () => ({ url: '/truck-cycle-kpi-target/', params: { limit: 1000, offset: 0 } }),
             providesTags: ['KPITargets'],
         }),
         createKPITarget: builder.mutation<KPITarget, Partial<KPITarget>>({
