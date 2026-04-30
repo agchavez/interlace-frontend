@@ -676,7 +676,15 @@ export const permisions = [
         url: "/work/vendor/:id",
         reg: /\/work\/vendor\/\d+/,
         permissions: ["truck_cycle.access_work_vendor"],
-    }
+    },
+    // Viewer del PDF de SOP/OPL accedido por QR — cualquier sesión Interlace.
+    // La gestión de las estaciones está dentro de cada Centro de Distribución
+    // (ver tab "Estaciones de Trabajo" en /maintenance/distributor-center/:id).
+    {
+        url: "/wd/:token",
+        reg: /\/wd\/[a-f0-9-]+/i,
+        permissions: ["any"],
+    },
 ]
 
 const directory: RoutePermissions = {}

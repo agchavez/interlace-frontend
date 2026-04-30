@@ -19,6 +19,7 @@ import { tokenApi } from "../modules/tokens/services/tokenApi";
 import { truckCycleApi } from "../modules/truck-cycle/services/truckCycleApi";
 import { truckCycleFiltersSlice } from "../modules/truck-cycle/store/truckCycleFiltersSlice";
 import { tvApi } from "../modules/tv/services/tvApi";
+import { workstationApi } from "../modules/workstation/services/workstationApi";
 
 export const store = configureStore({
     reducer: {
@@ -48,6 +49,7 @@ export const store = configureStore({
         [truckCycleApi.reducerPath]: truckCycleApi.reducer,
         [truckCycleFiltersSlice.name]: truckCycleFiltersSlice.reducer,
         [tvApi.reducerPath]: tvApi.reducer,
+        [workstationApi.reducerPath]: workstationApi.reducer,
     },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware()
         .concat(userApi.middleware)
@@ -68,6 +70,7 @@ export const store = configureStore({
         .concat(tokenApi.middleware)
         .concat(truckCycleApi.middleware)
         .concat(tvApi.middleware)
+        .concat(workstationApi.middleware)
     ,
     devTools: true
 })

@@ -36,6 +36,7 @@ const TruckCycleRouter = lazy(() => import('../modules/truck-cycle/TruckCycleRou
 const WorkRouter = lazy(() => import('../modules/work/WorkRouter'));
 const PublicArrivalPage = lazy(() => import('../modules/truck-cycle/pages/PublicArrivalPage'));
 const TvRouter = lazy(() => import('../modules/tv/TvRouter'));
+const WorkstationDocumentViewerPage = lazy(() => import('../modules/workstation/pages/WorkstationDocumentViewerPage'));
 
 export function AppRouter() {
     const { status, user } = useAppSelector(state => state.auth);
@@ -218,6 +219,14 @@ export function AppRouter() {
                     <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
                         <LazyLoading Children={
                             WorkRouter
+                        } />
+                    </PrivateRoute>
+                } />
+                {/* Viewer de documentos (SOPs/OPLs) accedidos por QR — requiere sesión Interlace */}
+                <Route path="/wd/:token" element={
+                    <PrivateRoute access={status === 'authenticated'} path="/" next={next || undefined}>
+                        <LazyLoading Children={
+                            WorkstationDocumentViewerPage
                         } />
                     </PrivateRoute>
                 } />

@@ -62,6 +62,7 @@ import type { Truck, Bay } from '../../truck-cycle/interfaces/truckCycle';
 import BayGridEditor from '../../truck-cycle/components/BayGridEditor';
 import type { DockPosition } from '../../truck-cycle/components/BayGridPicker';
 import TvSessionsTab from '../../tv/components/TvSessionsTab';
+import WorkstationsTab from '../../workstation/components/WorkstationsTab';
 
 // Info item helper
 const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) => (
@@ -500,6 +501,7 @@ export function DistributorCenterDetailPage() {
                     <Tab label="Turnos" />
                     <Tab label="Camiones" />
                     <Tab label="Bahías" />
+                    <Tab label="Estaciones de Trabajo" />
                     <Tab label="TVs" />
                 </Tabs>
 
@@ -852,6 +854,13 @@ export function DistributorCenterDetailPage() {
                 )}
 
                 {tabIndex === 4 && (
+                    <WorkstationsTab
+                        distributorCenterId={dc.id}
+                        distributorCenterName={dc.name}
+                    />
+                )}
+
+                {tabIndex === 5 && (
                     <TvSessionsTab
                         distributorCenterId={dc.id}
                         distributorCenterName={dc.name}
