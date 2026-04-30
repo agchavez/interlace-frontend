@@ -23,13 +23,14 @@ import WorkstationConfigDrawer from './WorkstationConfigDrawer';
 
 // PICKING quedó deprecated — solo se muestran las estaciones canónicas.
 // El rol sigue existiendo en backend para no romper datos viejos.
-const ROLE_ORDER: WorkstationRole[] = ['PICKER', 'COUNTER', 'YARD'];
+const ROLE_ORDER: WorkstationRole[] = ['PICKER', 'COUNTER', 'YARD', 'REPACK'];
 
 const ROLE_DESCRIPTION: Record<WorkstationRole, string> = {
     PICKING: 'Estación legacy del operador de picking.',
     PICKER:  'Operador que arma cargas desde el almacén.',
     COUNTER: 'Personal que verifica el conteo final del pedido.',
     YARD:    'Chofer de patio que mueve unidades entre bahías.',
+    REPACK:  'Auditoría y reempaque de mercancía.',
 };
 
 interface Props {

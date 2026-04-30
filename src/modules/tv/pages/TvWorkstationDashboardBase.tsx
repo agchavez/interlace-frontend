@@ -23,6 +23,7 @@ const ROLE_TO_DASHBOARD: Record<WorkstationRole, string> = {
     PICKER:  'WORKSTATION_PICKER',
     COUNTER: 'WORKSTATION_COUNTER',
     YARD:    'WORKSTATION_YARD',
+    REPACK:  'WORKSTATION_REPACK',
 };
 
 interface Props {

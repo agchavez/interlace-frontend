@@ -2,7 +2,7 @@
  * Tipos del módulo Workstation (modelo de bloques).
  */
 
-export type WorkstationRole = 'PICKING' | 'PICKER' | 'COUNTER' | 'YARD';
+export type WorkstationRole = 'PICKING' | 'PICKER' | 'COUNTER' | 'YARD' | 'REPACK';
 export type DocType = 'SOP' | 'OPL' | 'OTHER';
 
 export type BlockType =
@@ -209,6 +209,7 @@ export const ROLE_LABELS: Record<WorkstationRole, string> = {
     PICKER:  'Picker',
     COUNTER: 'Contador',
     YARD:    'Chofer de Patio',
+    REPACK:  'Reempaque',
 };
 
 export const ROLE_COLORS: Record<WorkstationRole, string> = {
@@ -216,6 +217,7 @@ export const ROLE_COLORS: Record<WorkstationRole, string> = {
     PICKER:  '#0288d1',
     COUNTER: '#f57c00',
     YARD:    '#388e3c',
+    REPACK:  '#7b1fa2',
 };
 
 export const DOC_TYPE_LABELS: Record<DocType, string> = {

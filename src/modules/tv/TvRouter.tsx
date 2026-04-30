@@ -6,6 +6,7 @@ import TvWorkstationPickingPage from './pages/TvWorkstationPickingPage';
 import TvWorkstationPickerPage from './pages/TvWorkstationPickerPage';
 import TvWorkstationCounterPage from './pages/TvWorkstationCounterPage';
 import TvWorkstationYardPage from './pages/TvWorkstationYardPage';
+import TvWorkstationRepackPage from './pages/TvWorkstationRepackPage';
 
 export default function TvRouter() {
     return (
@@ -17,6 +18,7 @@ export default function TvRouter() {
             <Route path="/dashboard/workstation_picker"  element={<TvWorkstationPickerPage />} />
             <Route path="/dashboard/workstation_counter" element={<TvWorkstationCounterPage />} />
             <Route path="/dashboard/workstation_yard"    element={<TvWorkstationYardPage />} />
+            <Route path="/dashboard/workstation_repack"  element={<TvWorkstationRepackPage />} />
             <Route path="*" element={<Navigate to="/tv" replace />} />
         </Routes>
     );

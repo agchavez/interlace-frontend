@@ -63,6 +63,7 @@ export const TV_DASHBOARDS: Array<{ value: string; label: string }> = [
     { value: 'WORKSTATION_PICKER',  label: 'Workstation Picker · KPIs por turno' },
     { value: 'WORKSTATION_COUNTER', label: 'Workstation Contador · KPIs por turno' },
     { value: 'WORKSTATION_YARD',    label: 'Workstation Chofer de Patio · KPIs por turno' },
+    { value: 'WORKSTATION_REPACK',  label: 'Workstation Reempaque · KPIs por turno' },
 ];
 
 export const tvApi = createApi({
