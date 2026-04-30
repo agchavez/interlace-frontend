@@ -94,6 +94,7 @@ export interface PautaPreview {
 export type PautaStatus =
     | 'PENDING_PICKING' | 'PICKING_ASSIGNED' | 'PICKING_IN_PROGRESS' | 'PICKING_DONE'
     | 'MOVING_TO_BAY' | 'IN_BAY' | 'PENDING_COUNT' | 'COUNTING' | 'COUNTED'
+    | 'MOVING_TO_PARKING' | 'PARKED'
     | 'PENDING_CHECKOUT' | 'CHECKOUT_SECURITY' | 'CHECKOUT_OPS' | 'DISPATCHED'
     | 'IN_RELOAD_QUEUE' | 'PENDING_RETURN' | 'RETURN_PROCESSED'
     | 'IN_AUDIT' | 'AUDIT_COMPLETE' | 'CLOSED' | 'CANCELLED';
@@ -123,6 +124,7 @@ export interface PautaListItem {
     assembled_fractions?: number;
     bay_code: string | null;
     bay_id: number | null;
+    dispatched_without_security?: boolean;
 }
 
 export interface PautaProductDetail {
@@ -169,7 +171,8 @@ export interface Inconsistency {
     inconsistency_type: 'FALTANTE' | 'SOBRANTE' | 'CRUCE' | 'DANADO';
     material_code: string;
     product_name: string;
-    expected_quantity: number;
+    /** @deprecated dejado por compatibilidad — el backend lo ignora; el signo lo da el tipo. */
+    expected_quantity?: number;
     actual_quantity: number;
     difference: number;
     notes: string;
@@ -195,6 +198,7 @@ export interface CheckoutValidation {
     ops_validated: boolean;
     ops_validated_at: string | null;
     exit_pass_consumables: boolean;
+    dispatched_without_security: boolean;
     notes: string;
     security_validator_name: string | null;
     ops_validator_name: string | null;

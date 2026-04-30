@@ -339,8 +339,7 @@ export default function PautaDetailPage() {
             ),
         },
         { field: 'product_name', headerName: 'Producto', flex: 1, minWidth: 150 },
-        { field: 'expected_quantity', headerName: 'Esperado', flex: 0.5, minWidth: 90, align: 'right', headerAlign: 'right' },
-        { field: 'actual_quantity', headerName: 'Real', flex: 0.5, minWidth: 80, align: 'right', headerAlign: 'right' },
+        { field: 'actual_quantity', headerName: 'Cantidad', flex: 0.5, minWidth: 90, align: 'right', headerAlign: 'right' },
         { field: 'difference', headerName: 'Diferencia', flex: 0.5, minWidth: 100, align: 'right', headerAlign: 'right' },
         { field: 'reported_by_name', headerName: 'Reportado por', flex: 0.8, minWidth: 130 },
     ];
@@ -510,7 +509,7 @@ export default function PautaDetailPage() {
                                     <InfoItem
                                         icon={<SpeedIcon fontSize="small" />}
                                         label="Complejidad"
-                                        value={pauta.complexity_score}
+                                        value={`${Number(pauta.complexity_score).toFixed(2)}%`}
                                         color="secondary"
                                     />
                                 </Grid>
@@ -537,7 +536,7 @@ export default function PautaDetailPage() {
                                 </Grid>
                                 <Grid item xs={4}>
                                     <Paper variant="outlined" sx={{ p: 2, borderRadius: 1, textAlign: 'center' }}>
-                                        <Typography variant="caption" color="text.secondary">Pallets</Typography>
+                                        <Typography variant="caption" color="text.secondary">Pallets Completas</Typography>
                                         <Typography variant="h5" fontWeight={700} color="warning.main">
                                             {pauta.total_pallets}
                                         </Typography>

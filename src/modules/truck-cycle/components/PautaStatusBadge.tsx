@@ -11,6 +11,8 @@ const STATUS_CONFIG: Record<PautaStatus, { label: string; color: 'default' | 'pr
     PENDING_COUNT: { label: 'Pendiente de Conteo', color: 'warning' },
     COUNTING: { label: 'En Conteo', color: 'warning' },
     COUNTED: { label: 'Contado', color: 'warning' },
+    MOVING_TO_PARKING: { label: 'Moviéndose a Estacionamiento', color: 'warning' },
+    PARKED: { label: 'Estacionado', color: 'info' },
     PENDING_CHECKOUT: { label: 'Pendiente de Checkout', color: 'secondary' },
     CHECKOUT_SECURITY: { label: 'Checkout Seguridad', color: 'secondary' },
     CHECKOUT_OPS: { label: 'Checkout Operaciones', color: 'secondary' },

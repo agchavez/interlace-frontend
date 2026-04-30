@@ -263,7 +263,7 @@ function PautaRow({ pauta, color, onClick }: { pauta: PautaListItem; color: stri
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.5, mt: 1.5, mb: 1.5 }}>
                 <MiniStat icon={<BoxIcon sx={{ fontSize: '0.9rem' }} />} label="Cajas" value={pauta.total_boxes} />
                 <MiniStat icon={<SkuIcon sx={{ fontSize: '0.9rem' }} />} label="SKUs" value={pauta.total_skus} />
-                <MiniStat icon={<PalletIcon sx={{ fontSize: '0.9rem' }} />} label="Tarimas" value={pauta.total_pallets} />
+                <MiniStat icon={<PalletIcon sx={{ fontSize: '0.9rem' }} />} label="P. Completas" value={pauta.total_pallets} />
                 <MiniStat icon={<FractionIcon sx={{ fontSize: '0.9rem' }} />} label="Fracc." value={fractions} />
             </Box>
 

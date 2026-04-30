@@ -25,6 +25,7 @@ const STATUS_COLORS: Record<string, string> = {
     PICKING_IN_PROGRESS: '#039be5', PICKING_DONE: '#0277bd',
     IN_BAY: '#ffa726', PENDING_COUNT: '#ffb74d',
     COUNTING: '#ff9800', COUNTED: '#f57c00',
+    MOVING_TO_PARKING: '#00acc1', PARKED: '#00838f',
     PENDING_CHECKOUT: '#ab47bc', CHECKOUT_SECURITY: '#9c27b0',
     CHECKOUT_OPS: '#7b1fa2', DISPATCHED: '#66bb6a',
     IN_RELOAD_QUEUE: '#26c6da', PENDING_RETURN: '#ef5350',
@@ -37,6 +38,7 @@ const STATUS_LABELS: Record<PautaStatus, string> = {
     PICKING_IN_PROGRESS: 'Picking', PICKING_DONE: 'Picking OK',
     MOVING_TO_BAY: 'A Bahia', IN_BAY: 'En Bahia', PENDING_COUNT: 'Pend. Conteo',
     COUNTING: 'Contando', COUNTED: 'Contado',
+    MOVING_TO_PARKING: 'A Estac.', PARKED: 'Estacionado',
     PENDING_CHECKOUT: 'Pend. Checkout', CHECKOUT_SECURITY: 'Seg.',
     CHECKOUT_OPS: 'Ops.', DISPATCHED: 'Despachado',
     IN_RELOAD_QUEUE: 'Cola Recarga', PENDING_RETURN: 'Pend. Retorno',
@@ -47,6 +49,7 @@ const STATUS_LABELS: Record<PautaStatus, string> = {
 const PIPELINE_ORDER: string[] = [
     'PENDING_PICKING', 'PICKING_ASSIGNED', 'PICKING_IN_PROGRESS', 'PICKING_DONE',
     'IN_BAY', 'PENDING_COUNT', 'COUNTING', 'COUNTED',
+    'MOVING_TO_PARKING', 'PARKED',
     'PENDING_CHECKOUT', 'CHECKOUT_SECURITY', 'CHECKOUT_OPS', 'DISPATCHED',
     'IN_RELOAD_QUEUE', 'PENDING_RETURN', 'RETURN_PROCESSED',
     'IN_AUDIT', 'AUDIT_COMPLETE', 'CLOSED', 'CANCELLED',

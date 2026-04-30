@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { format } from 'date-fns';
 
-export type OperationsPhaseKey = 'picking' | 'bay' | 'counting' | 'checkout' | 'audit' | 'dispatched';
+export type OperationsPhaseKey = 'picking' | 'bay' | 'counting' | 'parking' | 'checkout' | 'audit' | 'dispatched';
 
 interface PautaListFilters {
     date: string;

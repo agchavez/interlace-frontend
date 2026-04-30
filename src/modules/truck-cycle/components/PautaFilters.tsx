@@ -30,6 +30,8 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'PENDING_COUNT', label: 'Pendiente de Conteo' },
   { value: 'COUNTING', label: 'En Conteo' },
   { value: 'COUNTED', label: 'Contado' },
+  { value: 'MOVING_TO_PARKING', label: 'Moviéndose a Estacionamiento' },
+  { value: 'PARKED', label: 'Estacionado' },
   { value: 'PENDING_CHECKOUT', label: 'Pendiente de Checkout' },
   { value: 'DISPATCHED', label: 'Despachado' },
   { value: 'CLOSED', label: 'Cerrada' },
