@@ -151,8 +151,13 @@ function RoleCard({
             <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1 }}>
                 <Box sx={{ minWidth: 0 }}>
                     <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                        {ROLE_LABELS[role]}
+                        {ws?.name?.trim() || ROLE_LABELS[role]}
                     </Typography>
+                    {ws?.name?.trim() && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontWeight: 500 }}>
+                            {ROLE_LABELS[role]}
+                        </Typography>
+                    )}
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
                         {ROLE_DESCRIPTION[role]}
                     </Typography>

@@ -231,6 +231,24 @@ function Header({ ws, centerName, onClose }: { ws: Workstation; centerName: stri
     const [updateWs] = useUpdateWorkstationMutation();
     const [applyTemplate] = useApplyTemplateMutation();
 
+    // Nombre editable. Si el usuario no escribió uno custom, mostramos el
+    // role_display como placeholder. Solo se persiste cuando pierde foco
+    // (onBlur) para evitar request por cada tecla.
+    const [name, setName] = useState(ws.name || '');
+    useEffect(() => { setName(ws.name || ''); }, [ws.id, ws.name]);
+
+    const persistName = async () => {
+        const trimmed = name.trim();
+        if ((trimmed || '') === (ws.name || '')) return;
+        try {
+            await updateWs({ id: ws.id, data: { name: trimmed } }).unwrap();
+            toast.success('Nombre actualizado');
+        } catch {
+            toast.error('No se pudo actualizar el nombre');
+            setName(ws.name || '');
+        }
+    };
+
     const onApplyTemplate = async () => {
         if (!window.confirm('Esto reemplaza todo el contenido por el template default del rol. ¿Continuar?')) return;
         await applyTemplate(ws.id).unwrap();
@@ -246,11 +264,30 @@ function Header({ ws, centerName, onClose }: { ws: Workstation; centerName: stri
             <IconButton onClick={onClose}><CloseIcon /></IconButton>
             <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1 }}>
-                    {centerName}
+                    {centerName} · {ws.role_display}
                 </Typography>
-                <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                    Configurar · {ws.role_display}
-                </Typography>
+                <TextField
+                    value={name}
+                    placeholder={ws.role_display}
+                    onChange={(e) => setName(e.target.value)}
+                    onBlur={persistName}
+                    onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+                    variant="standard"
+                    InputProps={{
+                        disableUnderline: true,
+                        sx: {
+                            fontSize: '1.25rem',
+                            fontWeight: 700,
+                            lineHeight: 1.2,
+                            '&:hover': { bgcolor: 'action.hover' },
+                            '&.Mui-focused': { bgcolor: 'action.hover' },
+                            borderRadius: 0.5,
+                            px: 0.5,
+                        },
+                    }}
+                    inputProps={{ 'aria-label': 'Nombre de la estación', maxLength: 80 }}
+                    sx={{ width: '100%', mt: 0.25 }}
+                />
             </Box>
             <FormControlLabel
                 control={
