@@ -12,6 +12,13 @@ import {
     Stepper,
     Paper,
     Divider,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    Autocomplete,
+    Grid,
     useTheme,
     useMediaQuery,
 } from '@mui/material';
@@ -24,13 +31,17 @@ import {
     ArrowForward as NextIcon,
     Inventory as BoxIcon,
     LocalShipping as TruckIcon,
+    FlashOn as EmergencyIcon,
 } from '@mui/icons-material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
     usePreviewUploadMutation,
     useConfirmUploadMutation,
     useLazyDownloadTemplateQuery,
+    useCreateManualPautaMutation,
+    useGetTrucksQuery,
 } from '../services/truckCycleApi';
+import type { Truck } from '../interfaces/truckCycle';
 import type { UploadPreviewResponse } from '../interfaces/truckCycle';
 import DatePickerButton from '../components/DatePickerButton';
 import { format } from 'date-fns';
@@ -54,6 +65,65 @@ export default function UploadPalletPage() {
     const [previewUpload, { isLoading: previewing, error: previewError }] = usePreviewUploadMutation();
     const [confirmUpload, { isLoading: confirming }] = useConfirmUploadMutation();
     const [downloadTemplate] = useLazyDownloadTemplateQuery();
+    const [createManualPauta, { isLoading: creatingManual }] = useCreateManualPautaMutation();
+    const { data: trucksData } = useGetTrucksQuery({ limit: 1000, offset: 0 });
+
+    // Carga emergente (manual)
+    const [emergencyOpen, setEmergencyOpen] = useState(false);
+    const [emergencyError, setEmergencyError] = useState<string | null>(null);
+    const [emergencySuccess, setEmergencySuccess] = useState<string | null>(null);
+    const [emergencyForm, setEmergencyForm] = useState({
+        trip_number: '1',
+        transport_number: '',
+        truck: null as Truck | null,
+        route_code: '',
+        total_boxes: '' as string | number,
+        total_skus: '' as string | number,
+        total_pallets: '' as string | number,
+        assembled_fractions: '' as string | number,
+        complexity_score: '' as string | number,
+    });
+
+    const resetEmergencyForm = () => {
+        setEmergencyForm({
+            trip_number: '1',
+            transport_number: '',
+            truck: null,
+            route_code: '',
+            total_boxes: '',
+            total_skus: '',
+            total_pallets: '',
+            assembled_fractions: '',
+            complexity_score: '',
+        });
+        setEmergencyError(null);
+    };
+
+    const handleEmergencySubmit = async () => {
+        setEmergencyError(null);
+        if (!emergencyForm.truck) { setEmergencyError('Seleccione un camión.'); return; }
+        if (!emergencyForm.transport_number.trim()) { setEmergencyError('Transporte es requerido.'); return; }
+        if (!emergencyForm.trip_number.trim()) { setEmergencyError('Viaje es requerido.'); return; }
+        try {
+            const created = await createManualPauta({
+                trip_number: emergencyForm.trip_number.trim(),
+                transport_number: emergencyForm.transport_number.trim(),
+                truck_id: emergencyForm.truck.id,
+                route_code: emergencyForm.route_code.trim(),
+                total_boxes: Number(emergencyForm.total_boxes) || 0,
+                total_skus: Number(emergencyForm.total_skus) || 0,
+                total_pallets: Number(emergencyForm.total_pallets) || 0,
+                assembled_fractions: Number(emergencyForm.assembled_fractions) || 0,
+                complexity_score: Number(emergencyForm.complexity_score) || 0,
+                operational_date: operationalDate,
+            }).unwrap();
+            setEmergencySuccess(`Pauta creada: T-${created.transport_number}`);
+            resetEmergencyForm();
+            setEmergencyOpen(false);
+        } catch (err: any) {
+            setEmergencyError(err?.data?.error || err?.data?.detail || 'Error al crear la pauta.');
+        }
+    };
 
     const handleDownloadTemplate = async () => {
         const result = await downloadTemplate();
@@ -100,18 +170,26 @@ export default function UploadPalletPage() {
         }
     };
 
-    const handleConfirm = async () => {
+    const handleConfirm = async (opts?: { skipInvalid?: boolean }) => {
         if (!preview) return;
         try {
             const result = await confirmUpload({
                 uploadId: preview.upload_id,
                 operational_date: operationalDate,
+                skip_invalid: opts?.skipInvalid,
             }).unwrap();
             setConfirmResult(result);
             setActiveStep(3);
         } catch {
             // Error handled by RTK Query
         }
+    };
+
+    const handleReupload = () => {
+        setPreview(null);
+        setFileName('');
+        setActiveStep(1);
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleReset = () => {
@@ -130,9 +208,19 @@ export default function UploadPalletPage() {
         { field: 'route_code', headerName: 'Ruta', flex: 0.8, minWidth: 100 },
         { field: 'total_boxes', headerName: 'Cajas', width: 90, align: 'right', headerAlign: 'right' },
         { field: 'total_skus', headerName: 'SKUs', width: 80, align: 'right', headerAlign: 'right' },
-        { field: 'full_pallets', headerName: 'P. Completos', width: 110, align: 'right', headerAlign: 'right' },
+        { field: 'full_pallets', headerName: 'P. Completas', width: 110, align: 'right', headerAlign: 'right' },
         { field: 'assembled_fractions', headerName: 'Frac. Armadas', width: 120, align: 'right', headerAlign: 'right' },
-        { field: 'complexity_score', headerName: 'Complejidad', width: 110, align: 'right', headerAlign: 'right' },
+        {
+            field: 'complexity_score',
+            headerName: 'Complejidad',
+            width: 110,
+            align: 'right',
+            headerAlign: 'right',
+            valueFormatter: (params) => {
+                const v = Number(params.value);
+                return Number.isFinite(v) ? `${v.toFixed(2)}%` : '';
+            },
+        },
     ];
 
     // Step content renderers
@@ -150,10 +238,10 @@ export default function UploadPalletPage() {
 
                 <Alert severity="info" sx={{ mb: 3, textAlign: 'left', maxWidth: 560, mx: 'auto' }}>
                     <Typography variant="body2">
-                        <strong>Columnas:</strong> Viaje, Transporte, Camión, Ruta, Cajas, SKUs, Pallets Completos, Fracciones Armadas, Complejidad
+                        <strong>Columnas:</strong> Viaje, Transporte, Camión, Ruta, Cajas, SKUs, Pallets Completas, Fracciones Armadas, Complejidad %
                     </Typography>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                        La placa se toma del catálogo de camiones. El camión debe existir previamente registrado.
+                        La placa la resuelve el sistema desde el catálogo a partir del código del camión.
                     </Typography>
                 </Alert>
 
@@ -303,8 +391,20 @@ export default function UploadPalletPage() {
                 )}
 
                 {hasErrors && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        <Typography variant="body2" fontWeight={600} gutterBottom>Errores encontrados:</Typography>
+                    <Alert
+                        severity="error"
+                        sx={{ mb: 2 }}
+                        action={
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                <Button color="inherit" size="small" onClick={handleReupload} startIcon={<UploadIcon />}>
+                                    Re-cargar archivo
+                                </Button>
+                            </Box>
+                        }
+                    >
+                        <Typography variant="body2" fontWeight={600} gutterBottom>
+                            {preview.errors.length} fila{preview.errors.length === 1 ? '' : 's'} con error:
+                        </Typography>
                         <ul style={{ margin: 0, paddingLeft: 20 }}>
                             {preview.errors.slice(0, 10).map((err, i) => (
                                 <li key={i}><Typography variant="body2">{err}</Typography></li>
@@ -313,6 +413,10 @@ export default function UploadPalletPage() {
                                 <li><Typography variant="body2">...y {preview.errors.length - 10} más</Typography></li>
                             )}
                         </ul>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                            Puede continuar omitiendo las filas inválidas, corregir el archivo y volver a cargarlo,
+                            o registrar los camiones faltantes en el catálogo.
+                        </Typography>
                     </Alert>
                 )}
 
@@ -342,17 +446,30 @@ export default function UploadPalletPage() {
                     />
                 </Card>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                    <Button startIcon={<BackIcon />} onClick={() => { setActiveStep(1); setPreview(null); }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3, flexWrap: 'wrap', gap: 1 }}>
+                    <Button startIcon={<BackIcon />} onClick={handleReupload}>
                         Subir otro archivo
                     </Button>
-                    {!hasErrors && (
+                    {hasErrors ? (
+                        <Button
+                            variant="contained"
+                            color="warning"
+                            size="large"
+                            startIcon={confirming ? <CircularProgress size={18} color="inherit" /> : <ConfirmIcon />}
+                            onClick={() => handleConfirm({ skipInvalid: true })}
+                            disabled={confirming || (preview.pautas_preview?.length || 0) === 0}
+                        >
+                            {confirming
+                                ? 'Confirmando...'
+                                : `Continuar omitiendo ${preview.errors.length} fila${preview.errors.length === 1 ? '' : 's'}`}
+                        </Button>
+                    ) : (
                         <Button
                             variant="contained"
                             color="success"
                             size="large"
                             startIcon={confirming ? <CircularProgress size={18} color="inherit" /> : <ConfirmIcon />}
-                            onClick={handleConfirm}
+                            onClick={() => handleConfirm()}
                             disabled={confirming}
                         >
                             {confirming ? 'Confirmando...' : `Confirmar Carga (${operationalDate})`}
@@ -363,30 +480,48 @@ export default function UploadPalletPage() {
         );
     };
 
-    const renderStep3 = () => (
-        <Card>
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-                <ConfirmIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-                <Typography variant="h5" fontWeight={600} gutterBottom>
-                    Carga completada
-                </Typography>
-                {confirmResult && (
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                        {confirmResult.message || `Se crearon ${confirmResult.pauta_ids?.length || 0} pautas exitosamente.`}
+    const renderStep3 = () => {
+        const skippedErrors: string[] = confirmResult?.skipped_errors || [];
+        return (
+            <Card>
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                    <ConfirmIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+                    <Typography variant="h5" fontWeight={600} gutterBottom>
+                        Carga completada
                     </Typography>
-                )}
-                <Divider sx={{ my: 3 }} />
-                <Button variant="contained" onClick={handleReset} startIcon={<UploadIcon />}>
-                    Cargar otro archivo
-                </Button>
-            </Box>
-        </Card>
-    );
+                    {confirmResult && (
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                            {confirmResult.message || `Se crearon ${confirmResult.pauta_ids?.length || 0} pautas exitosamente.`}
+                        </Typography>
+                    )}
+                    {skippedErrors.length > 0 && (
+                        <Alert severity="warning" sx={{ mb: 3, textAlign: 'left', maxWidth: 600, mx: 'auto' }}>
+                            <Typography variant="body2" fontWeight={600} gutterBottom>
+                                Filas omitidas durante la carga:
+                            </Typography>
+                            <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                {skippedErrors.slice(0, 10).map((err, i) => (
+                                    <li key={i}><Typography variant="body2">{err}</Typography></li>
+                                ))}
+                                {skippedErrors.length > 10 && (
+                                    <li><Typography variant="body2">...y {skippedErrors.length - 10} más</Typography></li>
+                                )}
+                            </ul>
+                        </Alert>
+                    )}
+                    <Divider sx={{ my: 3 }} />
+                    <Button variant="contained" onClick={handleReset} startIcon={<UploadIcon />}>
+                        Cargar otro archivo
+                    </Button>
+                </Box>
+            </Card>
+        );
+    };
 
     return (
         <Box sx={{ p: 3 }}>
             {/* Header */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" fontWeight={400}>
                         Carga de Pautas
@@ -395,7 +530,21 @@ export default function UploadPalletPage() {
                         Cargue las pautas de distribución desde una plantilla Excel para iniciar el ciclo del camión
                     </Typography>
                 </Box>
+                <Button
+                    variant="outlined"
+                    color="warning"
+                    startIcon={<EmergencyIcon />}
+                    onClick={() => { resetEmergencyForm(); setEmergencyOpen(true); }}
+                >
+                    Carga Emergente
+                </Button>
             </Box>
+
+            {emergencySuccess && (
+                <Alert severity="success" onClose={() => setEmergencySuccess(null)} sx={{ mb: 2 }}>
+                    {emergencySuccess}
+                </Alert>
+            )}
 
             {/* Stepper */}
             <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel={isMobile}>
@@ -411,6 +560,140 @@ export default function UploadPalletPage() {
             {activeStep === 1 && renderStep1()}
             {activeStep === 2 && renderStep2()}
             {activeStep === 3 && renderStep3()}
+
+            {/* Carga Emergente Dialog */}
+            <Dialog
+                open={emergencyOpen}
+                onClose={() => setEmergencyOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{ sx: { borderRadius: 2 } }}
+            >
+                <Box sx={{
+                    px: 3, pt: 2.5, pb: 2,
+                    borderBottom: 1, borderColor: 'divider',
+                    display: 'flex', alignItems: 'center', gap: 1.5,
+                }}>
+                    <Box sx={{
+                        width: 36, height: 36, borderRadius: 1.5,
+                        bgcolor: 'warning.main', color: '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        <EmergencyIcon fontSize="small" />
+                    </Box>
+                    <Box>
+                        <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                            Carga Emergente
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            Crear pauta manual · fecha operativa {operationalDate}
+                        </Typography>
+                    </Box>
+                </Box>
+
+                <DialogContent sx={{ pt: 2.5, pb: 1 }}>
+                    {emergencyError && (
+                        <Alert severity="error" sx={{ mb: 2, borderRadius: 1 }}>{emergencyError}</Alert>
+                    )}
+
+                    {/* Sección 1: Identificación */}
+                    <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1, fontWeight: 600 }}>
+                        Identificación
+                    </Typography>
+                    <Grid container spacing={1.5} sx={{ mt: 0.25, mb: 2.5 }}>
+                        <Grid item xs={4}>
+                            <TextField
+                                fullWidth size="small" label="Viaje" type="number" required
+                                value={emergencyForm.trip_number}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, trip_number: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={8}>
+                            <TextField
+                                fullWidth size="small" label="No. Transporte" required
+                                value={emergencyForm.transport_number}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, transport_number: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Autocomplete
+                                size="small"
+                                options={trucksData?.results || []}
+                                value={emergencyForm.truck}
+                                getOptionLabel={(t) => `${t.code} — ${t.plate}`}
+                                onChange={(_, val) => setEmergencyForm((p) => ({ ...p, truck: val }))}
+                                renderInput={(params) => <TextField {...params} label="Camión" required />}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth size="small" label="Ruta (opcional)"
+                                value={emergencyForm.route_code}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, route_code: e.target.value }))}
+                            />
+                        </Grid>
+                    </Grid>
+
+                    {/* Sección 2: Carga */}
+                    <Typography variant="overline" color="text.secondary" sx={{ letterSpacing: 1, fontWeight: 600 }}>
+                        Carga
+                    </Typography>
+                    <Grid container spacing={1.5} sx={{ mt: 0.25 }}>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth size="small" type="number" label="Cajas"
+                                value={emergencyForm.total_boxes}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, total_boxes: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth size="small" type="number" label="SKUs"
+                                value={emergencyForm.total_skus}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, total_skus: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth size="small" type="number" label="Pallets Completas"
+                                value={emergencyForm.total_pallets}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, total_pallets: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                fullWidth size="small" type="number" label="Fracciones"
+                                value={emergencyForm.assembled_fractions}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, assembled_fractions: e.target.value }))}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                fullWidth size="small" type="number"
+                                label="Complejidad (%)"
+                                placeholder="0 – 100"
+                                value={emergencyForm.complexity_score}
+                                onChange={(e) => setEmergencyForm((p) => ({ ...p, complexity_score: e.target.value }))}
+                            />
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, pb: 2.5, pt: 1 }}>
+                    <Button onClick={() => setEmergencyOpen(false)} sx={{ textTransform: 'none' }}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="contained" color="warning" disableElevation
+                        startIcon={creatingManual ? <CircularProgress size={16} color="inherit" /> : <EmergencyIcon />}
+                        disabled={creatingManual}
+                        onClick={handleEmergencySubmit}
+                        sx={{ textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Crear pauta
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
