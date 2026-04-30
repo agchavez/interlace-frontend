@@ -58,6 +58,8 @@ import {
     useCheckoutSecurityMutation,
     useCheckoutOpsMutation,
     useDispatchPautaMutation,
+    useTakeBayForReturnMutation,
+    useParkTruckMutation,
 } from '../services/truckCycleApi';
 import {
     useGetPersonnelAutocompleteQuery,
@@ -124,6 +126,12 @@ const PHASE_CONFIG: Record<OperationsPhaseKey, { label: string; color: string; i
         icon: <CountIcon />,
         statuses: ['PENDING_COUNT', 'COUNTING', 'COUNTED'],
     },
+    parking: {
+        label: 'Estacionamiento',
+        color: '#0097a7',
+        icon: <BayIcon />,
+        statuses: ['MOVING_TO_PARKING', 'PARKED'],
+    },
     checkout: {
         label: 'Checkout',
         color: '#9c27b0',
@@ -144,7 +152,7 @@ const PHASE_CONFIG: Record<OperationsPhaseKey, { label: string; color: string; i
     },
 };
 
-const PHASE_ORDER: OperationsPhaseKey[] = ['picking', 'bay', 'counting', 'checkout', 'audit', 'dispatched'];
+const PHASE_ORDER: OperationsPhaseKey[] = ['picking', 'bay', 'counting', 'parking', 'checkout', 'audit', 'dispatched'];
 
 const STATUS_TO_PHASE: Record<string, OperationsPhaseKey> = {};
 for (const [phase, cfg] of Object.entries(PHASE_CONFIG)) {
@@ -258,7 +266,7 @@ export default function OperationsPage() {
 
     // Phase counts (for cards)
     const phaseCounts = useMemo(() => {
-        const counts: Record<OperationsPhaseKey, number> = { picking: 0, bay: 0, counting: 0, checkout: 0, audit: 0, dispatched: 0 };
+        const counts: Record<OperationsPhaseKey, number> = { picking: 0, bay: 0, counting: 0, parking: 0, checkout: 0, audit: 0, dispatched: 0 };
         if (!data?.results) return counts;
         for (const p of data.results) {
             const phase = STATUS_TO_PHASE[p.status];
@@ -307,6 +315,8 @@ export default function OperationsPage() {
     const [checkoutSecurity, { isLoading: checkingSecurity }] = useCheckoutSecurityMutation();
     const [checkoutOps, { isLoading: checkingOps }] = useCheckoutOpsMutation();
     const [dispatchPauta] = useDispatchPautaMutation();
+    const [takeBayForReturn] = useTakeBayForReturnMutation();
+    const [parkTruck] = useParkTruckMutation();
 
     // ── Dialog ──────────────────────────────────────────────────────────────
     const [dialogState, dialogDispatch] = useReducer(dialogReducer, { type: 'closed' });
@@ -414,6 +424,8 @@ export default function OperationsPage() {
                 case 'completePicking': await completePicking(pauta.id).unwrap(); showSnack('Picking completado'); break;
                 case 'completeLoading': await completeLoading(pauta.id).unwrap(); showSnack('Carga completada'); break;
                 case 'completeCount': await completeCount(pauta.id).unwrap(); showSnack('Conteo completado'); break;
+                case 'takeBayForReturn': await takeBayForReturn(pauta.id).unwrap(); showSnack('Camión en movimiento al estacionamiento'); break;
+                case 'parkTruck': await parkTruck(pauta.id).unwrap(); showSnack('Camión estacionado'); break;
                 case 'dispatch': await dispatchPauta({ id: pauta.id }).unwrap(); showSnack('Pauta despachada'); break;
             }
         } catch (err: any) {
@@ -439,7 +451,12 @@ export default function OperationsPage() {
             case 'IN_BAY': handleDirectAction(pauta, 'completeLoading'); break;
             case 'PENDING_COUNT': openDialog('assign-counter', pauta); break;
             case 'COUNTING': navigate(`/truck-cycle/verify/${pauta.id}`); break;
-            case 'COUNTED': navigate(`/truck-cycle/verify/${pauta.id}?phase=CHECKOUT`); break;
+            case 'COUNTED': handleDirectAction(pauta, 'takeBayForReturn'); break;
+            case 'MOVING_TO_PARKING': handleDirectAction(pauta, 'parkTruck'); break;
+            case 'PARKED':
+                // Seguridad es opcional — acción primaria = Despachar directo.
+                handleDirectAction(pauta, 'dispatch');
+                break;
             case 'CHECKOUT_SECURITY':
                 // Ops es opcional — acción primaria = Despachar directo.
                 handleDirectAction(pauta, 'dispatch');
@@ -452,7 +469,9 @@ export default function OperationsPage() {
 
     // Secondary action for CHECKOUT_SECURITY: open optional Ops dialog.
     const handleSecondaryAction = (pauta: PautaListItem) => {
-        if (pauta.status === 'CHECKOUT_SECURITY') {
+        if (pauta.status === 'PARKED') {
+            openDialog('checkout-security', pauta);
+        } else if (pauta.status === 'CHECKOUT_SECURITY') {
             openDialog('checkout-ops', pauta);
         } else if (pauta.status === 'PICKING_DONE' && pauta.is_reload && !pauta.reentered_at) {
             openDialog('reload-reentry', pauta);
@@ -471,7 +490,9 @@ export default function OperationsPage() {
         IN_BAY: { label: 'Carga OK', icon: <CompleteIcon />, color: 'success', variant: 'contained' },
         PENDING_COUNT: { label: 'Asignar', icon: <AssignIcon />, color: 'primary', variant: 'outlined' },
         COUNTING: { label: 'Verificar', icon: <CountIcon />, color: 'primary', variant: 'contained' },
-        COUNTED: { label: 'Seguridad', icon: <SecurityIcon />, color: 'primary', variant: 'outlined' },
+        COUNTED: { label: 'Mover a Estac.', icon: <TruckIcon />, color: 'warning', variant: 'contained' },
+        MOVING_TO_PARKING: { label: 'Estacionado', icon: <CompleteIcon />, color: 'success', variant: 'contained' },
+        PARKED: { label: 'Despachar', icon: <DispatchIcon />, color: 'success', variant: 'contained' },
         CHECKOUT_SECURITY: { label: 'Despachar', icon: <DispatchIcon />, color: 'success', variant: 'contained' },
         CHECKOUT_OPS: { label: 'Despachar', icon: <DispatchIcon />, color: 'success', variant: 'contained' },
         IN_AUDIT: { label: 'Auditar', icon: <AuditIcon />, color: 'warning', variant: 'contained' },
@@ -490,6 +511,9 @@ export default function OperationsPage() {
     };
 
     const getSecondaryCfg = (pauta: PautaListItem): ActionCfg | null => {
+        if (pauta.status === 'PARKED') {
+            return { label: 'Seguridad', icon: <SecurityIcon />, color: 'secondary', variant: 'outlined' };
+        }
         if (pauta.status === 'CHECKOUT_SECURITY') {
             return { label: 'Ops', icon: <OpsIcon />, color: 'secondary', variant: 'outlined' };
         }

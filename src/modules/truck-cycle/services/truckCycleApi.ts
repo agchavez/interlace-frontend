@@ -106,13 +106,33 @@ export const truckCycleApi = createApi({
             }),
             transformErrorResponse: (response) => response,
         }),
-        confirmUpload: builder.mutation<PalletComplexUpload, { uploadId: number; operational_date?: string }>({
-            query: ({ uploadId, operational_date }) => ({
+        confirmUpload: builder.mutation<PalletComplexUpload, { uploadId: number; operational_date?: string; skip_invalid?: boolean }>({
+            query: ({ uploadId, operational_date, skip_invalid }) => ({
                 url: `/truck-cycle-upload/${uploadId}/confirm/`,
                 method: 'POST',
-                body: operational_date ? { operational_date } : {},
+                body: {
+                    ...(operational_date ? { operational_date } : {}),
+                    ...(skip_invalid ? { skip_invalid: true } : {}),
+                },
             }),
             invalidatesTags: ['Uploads', 'Pautas'],
+        }),
+        createManualPauta: builder.mutation<PautaDetail, {
+            trip_number: string;
+            transport_number: string;
+            truck_id?: number;
+            truck_code?: string;
+            route_code?: string;
+            total_boxes?: number;
+            total_skus?: number;
+            total_pallets?: number;
+            assembled_fractions?: number;
+            complexity_score?: number;
+            operational_date?: string;
+            notes?: string;
+        }>({
+            query: (body) => ({ url: '/truck-cycle-pauta/manual-create/', method: 'POST', body }),
+            invalidatesTags: ['Pautas'],
         }),
 
         // ==================== PAUTAS ====================
@@ -385,6 +405,7 @@ export const {
     useLazyDownloadTemplateQuery,
     usePreviewUploadMutation,
     useConfirmUploadMutation,
+    useCreateManualPautaMutation,
     // Pautas
     useGetPautasQuery,
     useGetPautaQuery,

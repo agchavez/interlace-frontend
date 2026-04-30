@@ -67,7 +67,7 @@ import {
 } from '../../../modules/personnel/services/personnelApi';
 import type { PautaStatus, PautaListItem, Inconsistency } from '../interfaces/truckCycle';
 
-const CHECKOUT_STATUSES = 'COUNTED,PENDING_CHECKOUT,CHECKOUT_SECURITY,CHECKOUT_OPS';
+const CHECKOUT_STATUSES = 'PARKED,CHECKOUT_SECURITY,CHECKOUT_OPS';
 
 type ValidationFlow = 'security' | 'ops';
 
@@ -75,7 +75,6 @@ interface InconsistencyRow {
     inconsistency_type: Inconsistency['inconsistency_type'];
     material_code: string;
     product_name: string;
-    expected_quantity: number | '';
     actual_quantity: number | '';
     notes: string;
 }
@@ -84,7 +83,6 @@ const EMPTY_INCONSISTENCY: InconsistencyRow = {
     inconsistency_type: 'FALTANTE',
     material_code: '',
     product_name: '',
-    expected_quantity: '',
     actual_quantity: '',
     notes: '',
 };
@@ -92,7 +90,6 @@ const EMPTY_INCONSISTENCY: InconsistencyRow = {
 const INCONSISTENCY_TYPE_OPTIONS: { value: Inconsistency['inconsistency_type']; label: string }[] = [
     { value: 'FALTANTE', label: 'Faltante' },
     { value: 'SOBRANTE', label: 'Sobrante' },
-    { value: 'CRUCE', label: 'Cruce' },
     { value: 'DANADO', label: 'Dañado' },
 ];
 
@@ -238,14 +235,13 @@ export default function CheckoutPage() {
         if (!dialogPauta || validatorId === '') return;
         try {
             for (const inc of inconsistencies) {
-                if (inc.material_code && inc.expected_quantity !== '' && inc.actual_quantity !== '') {
+                if (inc.material_code && inc.actual_quantity !== '') {
                     await createInconsistency({
                         pauta: dialogPauta.id,
                         phase: 'CHECKOUT',
                         inconsistency_type: inc.inconsistency_type,
                         material_code: inc.material_code,
                         product_name: inc.product_name,
-                        expected_quantity: Number(inc.expected_quantity),
                         actual_quantity: Number(inc.actual_quantity),
                         notes: inc.notes,
                     }).unwrap();
@@ -263,6 +259,8 @@ export default function CheckoutPage() {
         }
     };
 
+    const [pendingDispatchPauta, setPendingDispatchPauta] = useState<PautaListItem | null>(null);
+
     const handleDispatch = async (pautaId: number) => {
         handleCloseMenu();
         try {
@@ -271,6 +269,20 @@ export default function CheckoutPage() {
         } catch (err: any) {
             setSnackbar({ open: true, message: err?.data?.detail || err?.data?.error || 'Error al despachar.', severity: 'error' });
         }
+    };
+
+    const handleDispatchRequest = (pauta: PautaListItem) => {
+        if (pauta.status === 'PARKED') {
+            setPendingDispatchPauta(pauta);
+            return;
+        }
+        handleDispatch(pauta.id);
+    };
+
+    const confirmDispatchWithoutSecurity = async () => {
+        if (!pendingDispatchPauta) return;
+        await handleDispatch(pendingDispatchPauta.id);
+        setPendingDispatchPauta(null);
     };
 
     const handleStartAudit = async (pautaId: number) => {
@@ -291,7 +303,7 @@ export default function CheckoutPage() {
     const stats = useMemo(() => {
         if (!data?.results) return { pendientes: 0, enCheckout: 0, total: 0 };
         return {
-            pendientes: data.results.filter((p) => ['COUNTED', 'PENDING_CHECKOUT'].includes(p.status)).length,
+            pendientes: data.results.filter((p) => p.status === 'PARKED').length,
             enCheckout: data.results.filter((p) => ['CHECKOUT_SECURITY', 'CHECKOUT_OPS'].includes(p.status)).length,
             total: data.count,
         };
@@ -299,17 +311,29 @@ export default function CheckoutPage() {
 
     // Action button for each row
     const renderActionButton = (row: PautaListItem) => {
-        if (['COUNTED', 'PENDING_CHECKOUT'].includes(row.status)) {
+        if (row.status === 'PARKED') {
+            // Doble acción: Despachar (con confirmación si no hay seguridad) + Seguridad (opcional).
             return (
-                <Tooltip title="Checkout Seguridad">
-                    <Button size="small" variant="outlined" color="primary"
-                        startIcon={!isMobile ? <SecurityIcon /> : undefined}
-                        onClick={(e) => { e.stopPropagation(); navigate(`/truck-cycle/verify/${row.id}?phase=CHECKOUT`); }}
-                        sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
-                    >
-                        {isMobile ? <SecurityIcon fontSize="small" /> : 'Seguridad'}
-                    </Button>
-                </Tooltip>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <Tooltip title="Despachar (seguridad opcional)">
+                        <Button size="small" variant="contained" color="success"
+                            startIcon={!isMobile ? <LocalShippingIcon /> : undefined}
+                            onClick={(e) => { e.stopPropagation(); handleDispatchRequest(row); }}
+                            disabled={isDispatchLoading}
+                            sx={{ minWidth: isMobile ? 36 : undefined, px: isMobile ? 1 : undefined }}
+                        >
+                            {isMobile ? <LocalShippingIcon fontSize="small" /> : 'Despachar'}
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title="Validar Seguridad (opcional)">
+                        <Button size="small" variant="outlined" color="primary"
+                            onClick={(e) => { e.stopPropagation(); navigate(`/truck-cycle/verify/${row.id}?phase=CHECKOUT`); }}
+                            sx={{ minWidth: 36, px: 1 }}
+                        >
+                            <SecurityIcon fontSize="small" />
+                        </Button>
+                    </Tooltip>
+                </Box>
             );
         }
         if (row.status === 'CHECKOUT_SECURITY') {
@@ -396,10 +420,19 @@ export default function CheckoutPage() {
                     renderCell: (params: GridRenderCellParams) => <PautaStatusBadge status={params.value as PautaStatus} />,
                 },
                 {
-                    field: 'security', headerName: 'Seg.', width: 60, align: 'center', headerAlign: 'center', sortable: false,
-                    renderCell: (params: GridRenderCellParams) => getSecurityValidated(params.row)
-                        ? <CheckCircleIcon color="success" fontSize="small" />
-                        : <CancelIcon color="disabled" fontSize="small" />,
+                    field: 'security', headerName: 'Seg.', width: 70, align: 'center', headerAlign: 'center', sortable: false,
+                    renderCell: (params: GridRenderCellParams) => {
+                        if (params.row.dispatched_without_security) {
+                            return (
+                                <Tooltip title="Despachado sin validación de seguridad">
+                                    <CancelIcon color="warning" fontSize="small" />
+                                </Tooltip>
+                            );
+                        }
+                        return getSecurityValidated(params.row)
+                            ? <CheckCircleIcon color="success" fontSize="small" />
+                            : <CancelIcon color="disabled" fontSize="small" />;
+                    },
                 },
                 {
                     field: 'operations', headerName: 'Ops.', width: 60, align: 'center', headerAlign: 'center', sortable: false,
@@ -658,21 +691,11 @@ export default function CheckoutPage() {
                                                 noOptionsText={productSearch ? 'Sin resultados' : 'Escriba para buscar'}
                                             />
                                         </Grid>
-                                        <Grid item xs={4} sm={1.5}>
+                                        <Grid item xs={8} sm={3}>
                                             <TextField
                                                 size="small"
                                                 type="number"
-                                                label="Esperado"
-                                                value={inc.expected_quantity}
-                                                onChange={(e) => updateInconsistencyRow(idx, 'expected_quantity', e.target.value === '' ? '' : Number(e.target.value))}
-                                                fullWidth
-                                            />
-                                        </Grid>
-                                        <Grid item xs={4} sm={1.5}>
-                                            <TextField
-                                                size="small"
-                                                type="number"
-                                                label="Real"
+                                                label="Cantidad"
                                                 value={inc.actual_quantity}
                                                 onChange={(e) => updateInconsistencyRow(idx, 'actual_quantity', e.target.value === '' ? '' : Number(e.target.value))}
                                                 fullWidth
@@ -710,6 +733,35 @@ export default function CheckoutPage() {
                         startIcon={(dialogFlow === 'security' ? isSecurityLoading : isOpsLoading) ? <CircularProgress size={16} /> : undefined}
                     >
                         {(dialogFlow === 'security' ? isSecurityLoading : isOpsLoading) ? 'Procesando...' : 'Confirmar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirmar despacho sin validación de seguridad */}
+            <Dialog open={!!pendingDispatchPauta} onClose={() => setPendingDispatchPauta(null)} maxWidth="xs" fullWidth>
+                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <SecurityIcon color="warning" />
+                    Despachar sin validación de seguridad
+                </DialogTitle>
+                <DialogContent>
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                        Esta pauta se va a despachar sin pasar por checkout de seguridad. Quedará marcada como
+                        "despachada sin seguridad" para auditoría.
+                    </Alert>
+                    {pendingDispatchPauta && (
+                        <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="text.secondary">Transporte</Typography>
+                            <Typography variant="body1" fontWeight={600}>T-{pendingDispatchPauta.transport_number} / V-{pendingDispatchPauta.trip_number}</Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Camión</Typography>
+                            <Typography variant="body1">{pendingDispatchPauta.truck_code} - {pendingDispatchPauta.truck_plate}</Typography>
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setPendingDispatchPauta(null)}>Cancelar</Button>
+                    <Button onClick={confirmDispatchWithoutSecurity} variant="contained" color="warning"
+                        disabled={isDispatchLoading} startIcon={<LocalShippingIcon />}>
+                        Despachar de todas formas
                     </Button>
                 </DialogActions>
             </Dialog>
