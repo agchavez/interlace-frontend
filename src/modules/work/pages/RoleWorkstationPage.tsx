@@ -30,6 +30,12 @@ import { useGetMetricsLiveQuery, useGetRoleWorkstationQuery, useGetMetricsHourly
 import { useAppSelector } from '../../../store/store';
 import { HN_TIMEZONE, todayInHonduras } from '../../../utils/timezone';
 import { useMetricsSocket } from '../hooks/useMetricsSocket';
+import {
+    useGetWorkstationsQuery,
+    useGetWorkstationQuery,
+} from '../../workstation/services/workstationApi';
+import WorkstationFixedLayout from '../../workstation/components/WorkstationFixedLayout';
+import type { SicChartBlockConfig } from '../../workstation/interfaces/workstation';
 
 type Role = 'picker' | 'counter' | 'yard';
 
@@ -137,22 +143,47 @@ export default function RoleWorkstationPage({ role }: Props) {
         ...(dcId ? { distributor_center: dcId } : {}),
     });
 
-    const primaryCode = selectedMetricCode || ROLE_PRIMARY_METRIC[role];
+    // Workstation config (riesgos, prohibiciones, planes, QRs) configurada
+    // desde el CD. Mapea role → CHOICES del backend (PICKER, COUNTER, YARD).
+    const wsRole = role.toUpperCase();  // 'picker' → 'PICKER'
+    const { data: wsList = [] } = useGetWorkstationsQuery(
+        { role: wsRole, ...(dcId ? { distributor_center: dcId } : {}), is_active: true },
+        { skip: !dcId },
+    );
+    const configuredWsId = wsList[0]?.id;
+    const { data: configuredWs } = useGetWorkstationQuery(configuredWsId!, { skip: !configuredWsId });
+
+    // Bloques que necesitamos para auto-rotación de KPI / data live.
+    const sicBlock = configuredWs?.blocks.find(b => b.type === 'SIC_CHART' && b.is_active);
+    const sicConfiguredCodes = new Set(
+        ((sicBlock?.config as SicChartBlockConfig | undefined)?.metric_codes) ?? [],
+    );
+    const sicMetricsToShow = (ws?.metrics ?? []).filter(
+        m => sicConfiguredCodes.size === 0 || sicConfiguredCodes.has(m.code),
+    );
+
+    // KPI por defecto: primero del SIC configurado; si no hay config, el del rol.
+    const sicDefaultCode = sicMetricsToShow[0]?.code || ROLE_PRIMARY_METRIC[role];
+    const primaryCode = selectedMetricCode || sicDefaultCode;
     const primaryHeader = ws?.metrics.find((m) => m.code === primaryCode);
 
-    // Auto-rotación del indicador cada 10s cuando autoRotate = true.
+    // Auto-rotación cada N seg, sobre los KPIs configurados en SIC.
+    // Si SicChartBlockConfig.cycle_seconds está definido, lo usa; sino 10s.
+    const cycleSeconds = (sicBlock?.config as SicChartBlockConfig | undefined)?.cycle_seconds || 10;
     useEffect(() => {
-        if (!autoRotate || !ws?.metrics || ws.metrics.length < 2) return;
+        if (!autoRotate || sicMetricsToShow.length < 2) return;
         const id = setInterval(() => {
             setSelectedMetricCode((curr) => {
-                const metrics = ws.metrics;
-                const currentIdx = curr ? metrics.findIndex((m) => m.code === curr) : metrics.findIndex((m) => m.code === ROLE_PRIMARY_METRIC[role]);
+                const metrics = sicMetricsToShow;
+                const currentIdx = curr
+                    ? metrics.findIndex((m) => m.code === curr)
+                    : metrics.findIndex((m) => m.code === sicDefaultCode);
                 const nextIdx = (currentIdx + 1) % metrics.length;
                 return metrics[nextIdx].code;
             });
-        }, 10_000);
+        }, cycleSeconds * 1000);
         return () => clearInterval(id);
-    }, [autoRotate, ws?.metrics, role]);
+    }, [autoRotate, sicMetricsToShow, sicDefaultCode, cycleSeconds]);
 
     const hnClock = useMemo(
         () => clock.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', timeZone: HN_TIMEZONE }),
@@ -261,73 +292,28 @@ export default function RoleWorkstationPage({ role }: Props) {
                 <Box sx={{ textAlign: 'center', py: 4 }}><CircularProgress sx={{ color: C.white }} /></Box>
             )}
 
-            {/* ─────────── Primera fila: Riesgos + Prohibiciones + Disparadores ─────────── */}
-            <Grid container spacing={1} sx={{ mb: 1, flexShrink: 0, alignItems: 'stretch', maxHeight: '38%' }}>
-                <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
-                    <SectionCard title="Riesgos del área" fullHeight>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1 }}>
-                            {RIESGOS.map((r) => <HazardBadge key={r.label} label={r.label} Icon={r.Icon} />)}
+            {/* ─────────── Body: mismo layout fijo que la TV (Ricardo's order). ───────────
+                Si no hay workstation configurada para este (CD, rol) mostramos un hint. */}
+            <Box sx={{ flex: 1, minHeight: 0, position: 'relative' }}>
+                {configuredWs ? (
+                    <WorkstationFixedLayout workstation={configuredWs} mode="embedded" />
+                ) : (
+                    <Box sx={{
+                        height: '100%', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 2,
+                        color: C.text, p: 4,
+                    }}>
+                        <Box sx={{ textAlign: 'center', maxWidth: 480 }}>
+                            <Typography variant="h6" fontWeight={700}>Estación sin configurar</Typography>
+                            <Typography sx={{ mt: 1 }}>
+                                Pedile al admin del CD que configure los riesgos, planes y QRs en
+                                <b> Mantenimiento → Centro de Distribución → Estaciones de Trabajo</b>.
+                            </Typography>
                         </Box>
-                    </SectionCard>
-                </Grid>
-                <Grid item xs={12} md={3} sx={{ display: 'flex' }}>
-                    <SectionCard title="Prohibiciones del área" fullHeight>
-                        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
-                            {PROHIBICIONES.map((p) => <ProhibitionBadge key={p.label} label={p.label} Icon={p.Icon} />)}
-                        </Box>
-                    </SectionCard>
-                </Grid>
-                <Grid item xs={12} md={5} sx={{ display: 'flex' }}>
-                    <SectionCard title="Disparador resolución de problemas" fullHeight>
-                        <DisparadoresTable rows={disparadores} />
-                    </SectionCard>
-                </Grid>
-            </Grid>
-
-            {/* ─────────── Segunda fila: SIC/Pi + Planes de Reacción ─────────── */}
-            <Grid container spacing={1} sx={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                <Grid item xs={12} md={7} sx={{ display: 'flex' }}>
-                    <SectionCard title="SIC/Pi Crítico" fullHeight>
-                        {/* Selector de indicador */}
-                        {ws?.metrics && ws.metrics.length > 1 && (
-                            <Box sx={{ mb: 1.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                                {ws.metrics.map((m) => (
-                                    <Box
-                                        key={m.code}
-                                        onClick={() => setSelectedMetricCode(m.code)}
-                                        sx={{
-                                            px: 1.25, py: 0.5, borderRadius: 1, cursor: 'pointer',
-                                            bgcolor: m.code === primaryCode ? C.orangeDark : C.white,
-                                            color: m.code === primaryCode ? C.white : C.text,
-                                            border: `1px solid ${m.code === primaryCode ? C.orangeDark : C.border}`,
-                                            fontSize: '0.75rem', fontWeight: 700,
-                                            '&:hover': { bgcolor: m.code === primaryCode ? C.orangeDark : alpha(C.orange, 0.15) },
-                                        }}
-                                    >
-                                        {m.name}
-                                    </Box>
-                                ))}
-                            </Box>
-                        )}
-                        <SicPiChart
-                            operationalDate={operationalDate}
-                            metricCode={primaryCode}
-                            distributorCenterId={dcId ?? undefined}
-                            personnelId={view === 'individual' ? selectedPerson?.id : undefined}
-                            target={primaryHeader?.target ?? null}
-                            trigger={primaryHeader?.trigger ?? null}
-                            unit={primaryHeader?.unit || ''}
-                            direction={primaryHeader?.direction ?? null}
-                            liveValue={liveValueFor(live, role, primaryCode)}
-                        />
-                    </SectionCard>
-                </Grid>
-                <Grid item xs={12} md={5} sx={{ display: 'flex' }}>
-                    <SectionCard title="Planes de Reacción" fullHeight>
-                        <PlanesReaccion kpiName={primaryHeader?.name || ROLE_TITLE[role]} />
-                    </SectionCard>
-                </Grid>
-            </Grid>
+                    </Box>
+                )}
+            </Box>
 
             {/* Drawer para elegir persona (vista individual) */}
             <Drawer
@@ -921,6 +907,22 @@ function PlanesReaccion({ kpiName }: { kpiName: string }) {
                     </Typography>
                 </Box>
             </Box>
+        </Box>
+    );
+}
+
+// ────────── Hint cuando la estación no está configurada ──────────
+
+function ConfigHint() {
+    return (
+        <Box sx={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 60,
+            color: C.textSoft, p: 1, textAlign: 'center',
+        }}>
+            <Typography sx={{ fontSize: '0.78rem', fontStyle: 'italic', lineHeight: 1.3 }}>
+                Sin configurar · pedí al admin del CD que configure esta estación
+                en Mantenimiento → Centros de Distribución → Estaciones de Trabajo.
+            </Typography>
         </Box>
     );
 }

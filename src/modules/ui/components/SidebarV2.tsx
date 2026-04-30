@@ -54,6 +54,7 @@ import { useGetMyProfileQuery } from '../../personnel/services/personnelApi';
 import { useNavigate } from 'react-router-dom';
 import { useDevRoleOverride } from '../../work/utils/useDevRoleOverride';
 import { useGroupImpersonation } from '../../work/utils/useGroupImpersonation';
+import { useImpersonatedGroupPerms } from '../../work/utils/useImpersonatedGroupPerms';
 import { GROUP_TO_ROLE, WORK_ROLE_TO_PATH, type WorkRoleCode } from '../../work/utils/workRole';
 
 interface SidebarItem {
@@ -137,16 +138,20 @@ const SidebarV2: React.FC = () => {
   // fuera de ese rol aunque su usuario real no tenga el grupo/permiso.
   const devRole = useDevRoleOverride();
   const devGroup = useGroupImpersonation();
+  // Permisos del grupo impersonado, cargados del backend bajo demanda.
+  const impersonated = useImpersonatedGroupPerms();
 
   // Grupos "efectivos": cuando hay impersonation activa, el sidebar se comporta
   // como si el usuario solo fuera miembro de ese grupo. En prod devGroup es null.
   const effectiveGroups: string[] = devGroup ? [devGroup] : (user?.list_groups || []);
-  // Idem permisos: al impersonar se usan solo los que el grupo confiera vía
-  // fallback group-based — no podemos saber desde el frontend qué permisos
-  // tiene un grupo arbitrario, así que `effectivePerms` queda vacío y la lógica
-  // del sidebar cae a los fallbacks por grupo.
-  const effectivePerms: string[] = devGroup ? [] : (user?.list_permissions || []);
-  const effectiveIsSuperuser: boolean = devGroup ? false : (user?.is_superuser === true);
+  // Permisos efectivos: al impersonar usamos los permisos reales del grupo
+  // (cargados del backend). Esto hace que el sidebar muestre los items que
+  // ese grupo realmente puede ver — no solo los items con fallback por grupo.
+  const effectivePerms: string[] = devGroup ? impersonated.perms : (user?.list_permissions || []);
+  // SUPERADMIN se comporta como superuser para que el sidebar muestre todo.
+  const effectiveIsSuperuser: boolean = devGroup
+    ? impersonated.isSuperadmin
+    : (user?.is_superuser === true);
 
   // Helper para visibilidad de pantallas /work/*: grupo, permiso o dev-override.
   // Nota: NO acepta superuser/staff como bypass — los /work/* son específicos
@@ -404,7 +409,7 @@ const SidebarV2: React.FC = () => {
     }
 
     return processed;
-  }, [items, user, devRole, devGroup]);
+  }, [items, user, devRole, devGroup, impersonated.perms, impersonated.isSuperadmin]);
 
   const drawerWidth = isCollapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_OPEN;
 
