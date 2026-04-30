@@ -145,29 +145,31 @@ export default function WorkstationFixedLayout({ workstation, mode = 'tv', highl
             zIndex: mode === 'tv' ? 9999 : undefined,
             borderRadius: mode === 'embedded' ? 2 : undefined,
         }}>
-            {/* Header */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.25, flexShrink: 0 }}>
-                <Typography sx={{
-                    color: C.white, flex: 1, textAlign: 'center', fontWeight: 900,
-                    fontSize: mode === 'tv'
-                        ? { xs: '1.4rem', md: '2rem', lg: '2.5rem' }
-                        : '1.25rem',
-                    letterSpacing: '0.02em',
-                    textShadow: '2px 2px 4px rgba(0,0,0,0.15)',
-                }}>
-                    {ROLE_TITLE[workstation.role] || 'ESTACIÓN DE TRABAJO'}
-                </Typography>
-                <Box sx={{ bgcolor: C.white, borderRadius: 1.5, px: 1.25, py: 0.5, textAlign: 'center' }}>
-                    <Typography fontWeight={900} sx={{ color: C.text, fontSize: '0.85rem', lineHeight: 1 }}>DPO</Typography>
-                    <Typography sx={{ color: C.soft, fontSize: '0.5rem', letterSpacing: 1 }}>ES EL CAMINO</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.5, bgcolor: 'rgba(0,0,0,0.1)', borderRadius: 1.5 }}>
-                    <ClockIcon sx={{ color: C.white, fontSize: '1rem' }} />
-                    <Typography fontWeight={800} sx={{ color: C.white, fontFamily: 'monospace', fontSize: '0.95rem' }}>
-                        {hnClock}
+            {/* Header — oculto en modo embedded para no duplicar con el wrapper */}
+            {mode !== 'embedded' && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.25, flexShrink: 0 }}>
+                    <Typography sx={{
+                        color: C.white, flex: 1, textAlign: 'center', fontWeight: 900,
+                        fontSize: mode === 'tv'
+                            ? { xs: '1.4rem', md: '2rem', lg: '2.5rem' }
+                            : '1.25rem',
+                        letterSpacing: '0.02em',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.15)',
+                    }}>
+                        {ROLE_TITLE[workstation.role] || 'ESTACIÓN DE TRABAJO'}
                     </Typography>
+                    <Box sx={{ bgcolor: C.white, borderRadius: 1.5, px: 1.25, py: 0.5, textAlign: 'center' }}>
+                        <Typography fontWeight={900} sx={{ color: C.text, fontSize: '0.85rem', lineHeight: 1 }}>DPO</Typography>
+                        <Typography sx={{ color: C.soft, fontSize: '0.5rem', letterSpacing: 1 }}>ES EL CAMINO</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.5, bgcolor: 'rgba(0,0,0,0.1)', borderRadius: 1.5 }}>
+                        <ClockIcon sx={{ color: C.white, fontSize: '1rem' }} />
+                        <Typography fontWeight={800} sx={{ color: C.white, fontFamily: 'monospace', fontSize: '0.95rem' }}>
+                            {hnClock}
+                        </Typography>
+                    </Box>
                 </Box>
-            </Box>
+            )}
 
             {/* Body — orden Ricardo: Rojo · Amarillo · (Rosado + Verde)
                 En pantallas chicas se stackean verticalmente para legibilidad. */}
