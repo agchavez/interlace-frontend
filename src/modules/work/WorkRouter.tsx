@@ -32,6 +32,7 @@ export default function WorkRouter() {
             <Route path="/yard"       element={<WorkRoleGuard role="YARD_DRIVER"><YardHome /></WorkRoleGuard>} />
             <Route path="/yard/workstation" element={<RoleWorkstationPage role="yard" />} />
             <Route path="/yard/:id"   element={<WorkRoleGuard role="YARD_DRIVER"><YardPautaDetail /></WorkRoleGuard>} />
+            <Route path="/repack/workstation" element={<RoleWorkstationPage role="repack" />} />
             <Route path="/vendor"     element={<WorkRoleGuard role="VENDOR"><VendorHome /></WorkRoleGuard>} />
             <Route path="/vendor/:id" element={<WorkRoleGuard role="VENDOR"><VendorPautaDetail /></WorkRoleGuard>} />
             <Route path="*" element={<Navigate to="/work" replace />} />

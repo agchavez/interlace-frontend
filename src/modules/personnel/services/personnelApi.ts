@@ -725,7 +725,7 @@ export const personnelApi = createApi({
 
     getRoleWorkstation: builder.query<
       WorkstationResponse,
-      { role: 'picker' | 'counter' | 'yard'; operational_date?: string; distributor_center?: number }
+      { role: 'picker' | 'counter' | 'yard' | 'repack'; operational_date?: string; distributor_center?: number }
     >({
       query: (params) => ({
         url: '/metric-samples/workstation/',
@@ -797,7 +797,7 @@ export interface WorkstationPersonRow {
 
 export interface WorkstationResponse {
   date: string;
-  role: 'picker' | 'counter' | 'yard';
+  role: 'picker' | 'counter' | 'yard' | 'repack';
   distributor_center: number | null;
   metrics: WorkstationMetricHeader[];
   personnel: WorkstationPersonRow[];

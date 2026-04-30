@@ -286,6 +286,7 @@ const SidebarV2: React.FC = () => {
           { text: 'Picker', href: '/work/picker/workstation', id: 'ws-picker' },
           { text: 'Contador', href: '/work/counter/workstation', id: 'ws-counter' },
           { text: 'Chofer de Patio', href: '/work/yard/workstation', id: 'ws-yard' },
+          { text: 'Reempaque', href: '/work/repack/workstation', id: 'ws-repack' },
         ],
         id: 'workstations',
       },

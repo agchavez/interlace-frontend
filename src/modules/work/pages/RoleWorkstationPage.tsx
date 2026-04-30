@@ -37,7 +37,7 @@ import {
 import WorkstationFixedLayout from '../../workstation/components/WorkstationFixedLayout';
 import type { SicChartBlockConfig } from '../../workstation/interfaces/workstation';
 
-type Role = 'picker' | 'counter' | 'yard';
+type Role = 'picker' | 'counter' | 'yard' | 'repack';
 
 const C = {
     orange:       '#f5a623',
@@ -58,6 +58,7 @@ const ROLE_TITLE: Record<Role, string> = {
     picker: 'Picking',
     counter: 'Conteo',
     yard: 'Chofer de Patio',
+    repack: 'Reempaque',
 };
 
 // KPI principal del rol (el que va al gráfico SIC/Pi).
@@ -65,6 +66,7 @@ const ROLE_PRIMARY_METRIC: Record<Role, string> = {
     picker: 'picker_pallets_per_hour',
     counter: 'counter_pallets_per_hour',
     yard: 'yard_trucks_moved',
+    repack: 'repack_boxes_per_hour',
 };
 
 const RIESGOS = [
