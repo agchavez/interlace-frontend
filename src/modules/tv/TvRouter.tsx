@@ -3,7 +3,9 @@ import TvLandingPage from './pages/TvLandingPage';
 import TvPairPage from './pages/TvPairPage';
 import TvWorkstationPage from './pages/TvWorkstationPage';
 import TvWorkstationPickingPage from './pages/TvWorkstationPickingPage';
-import TvRoleWorkstationPage from './pages/TvRoleWorkstationPage';
+import TvWorkstationPickerPage from './pages/TvWorkstationPickerPage';
+import TvWorkstationCounterPage from './pages/TvWorkstationCounterPage';
+import TvWorkstationYardPage from './pages/TvWorkstationYardPage';
 
 export default function TvRouter() {
     return (
@@ -12,9 +14,9 @@ export default function TvRouter() {
             <Route path="/pair/:code" element={<TvPairPage />} />
             <Route path="/dashboard/workstation" element={<TvWorkstationPage />} />
             <Route path="/dashboard/workstation_picking" element={<TvWorkstationPickingPage />} />
-            <Route path="/dashboard/workstation_picker"  element={<TvRoleWorkstationPage role="picker" />} />
-            <Route path="/dashboard/workstation_counter" element={<TvRoleWorkstationPage role="counter" />} />
-            <Route path="/dashboard/workstation_yard"    element={<TvRoleWorkstationPage role="yard" />} />
+            <Route path="/dashboard/workstation_picker"  element={<TvWorkstationPickerPage />} />
+            <Route path="/dashboard/workstation_counter" element={<TvWorkstationCounterPage />} />
+            <Route path="/dashboard/workstation_yard"    element={<TvWorkstationYardPage />} />
             <Route path="*" element={<Navigate to="/tv" replace />} />
         </Routes>
     );

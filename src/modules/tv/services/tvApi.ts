@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../../../store/store';
 import { getTvToken } from '../utils/tvToken';
 import type { PautaListItem } from '../../truck-cycle/interfaces/truckCycle';
+import type { Workstation as WorkstationConfig } from '../../workstation/interfaces/workstation';
 
 const API_URL = import.meta.env.VITE_JS_APP_API_URL;
 
@@ -37,6 +38,7 @@ export interface TvWorkstationData {
     current_shift: TvCurrentShift | null;
     shifts_today: TvCurrentShift[];
     day_code: string | null;
+    workstation_config: WorkstationConfig | null;
 }
 
 export interface TvSessionAdmin {
@@ -58,7 +60,6 @@ export interface TvSessionAdmin {
 
 export const TV_DASHBOARDS: Array<{ value: string; label: string }> = [
     { value: 'WORKSTATION',         label: 'Workstation · Torre de control' },
-    { value: 'WORKSTATION_PICKING', label: 'Workstation Picking · legacy' },
     { value: 'WORKSTATION_PICKER',  label: 'Workstation Picker · KPIs por turno' },
     { value: 'WORKSTATION_COUNTER', label: 'Workstation Contador · KPIs por turno' },
     { value: 'WORKSTATION_YARD',    label: 'Workstation Chofer de Patio · KPIs por turno' },
