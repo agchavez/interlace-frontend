@@ -65,7 +65,6 @@ import type { Product } from '../../../interfaces/tracking';
 const INCONSISTENCY_TYPES = [
     { value: 'FALTANTE', label: 'Faltante', color: 'error' as const },
     { value: 'SOBRANTE', label: 'Sobrante', color: 'warning' as const },
-    { value: 'CRUCE', label: 'Cruce', color: 'info' as const },
     { value: 'DANADO', label: 'Dañado', color: 'error' as const },
 ];
 
@@ -80,7 +79,6 @@ interface IncForm {
     inconsistency_type: string;
     material_code: string;
     product_name: string;
-    expected_quantity: string;
     actual_quantity: string;
     notes: string;
 }
@@ -89,7 +87,6 @@ const EMPTY_FORM: IncForm = {
     inconsistency_type: 'FALTANTE',
     material_code: '',
     product_name: '',
-    expected_quantity: '',
     actual_quantity: '',
     notes: '',
 };
@@ -253,8 +250,8 @@ export default function VerificationPage() {
             setFormError('Seleccione un producto.');
             return;
         }
-        if (!form.expected_quantity || !form.actual_quantity) {
-            setFormError('Ingrese cantidad esperada y real.');
+        if (!form.actual_quantity) {
+            setFormError('Ingrese la cantidad.');
             return;
         }
         if (!pauta) return;
@@ -266,7 +263,6 @@ export default function VerificationPage() {
                 inconsistency_type: form.inconsistency_type as Inconsistency['inconsistency_type'],
                 material_code: form.material_code,
                 product_name: form.product_name,
-                expected_quantity: Number(form.expected_quantity),
                 actual_quantity: Number(form.actual_quantity),
                 notes: form.notes,
             }).unwrap();
@@ -605,24 +601,14 @@ export default function VerificationPage() {
                                 ))}
                             </TextField>
                         </Grid>
-                        <Grid item xs={6} sm={4}>
+                        <Grid item xs={12} sm={8}>
                             <TextField
                                 fullWidth
                                 size="small"
                                 type="number"
-                                label="Cantidad Esperada"
+                                label="Cantidad"
+                                helperText="El tipo de inconsistencia define el signo (faltante/dañado restan, sobrante suma)."
                                 inputRef={expectedQtyRef}
-                                inputProps={{ inputMode: 'numeric', min: 0 }}
-                                value={form.expected_quantity}
-                                onChange={(e) => updateForm('expected_quantity', e.target.value)}
-                            />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                type="number"
-                                label="Cantidad Real"
                                 inputProps={{ inputMode: 'numeric', min: 0 }}
                                 value={form.actual_quantity}
                                 onChange={(e) => updateForm('actual_quantity', e.target.value)}
@@ -733,11 +719,7 @@ export default function VerificationPage() {
                                         </Box>
                                         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                             <Box sx={{ textAlign: 'center' }}>
-                                                <Typography variant="caption" color="text.secondary">Esperado</Typography>
-                                                <Typography variant="body2" fontWeight={600}>{inc.expected_quantity}</Typography>
-                                            </Box>
-                                            <Box sx={{ textAlign: 'center' }}>
-                                                <Typography variant="caption" color="text.secondary">Real</Typography>
+                                                <Typography variant="caption" color="text.secondary">Cantidad</Typography>
                                                 <Typography variant="body2" fontWeight={600}>{inc.actual_quantity}</Typography>
                                             </Box>
                                             <Box sx={{ textAlign: 'center' }}>

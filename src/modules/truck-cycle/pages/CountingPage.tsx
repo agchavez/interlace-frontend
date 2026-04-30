@@ -97,7 +97,6 @@ function CountingTimer({ createdAt }: { createdAt: string }) {
 const INCONSISTENCY_TYPES = [
     { value: 'FALTANTE', label: 'Faltante' },
     { value: 'SOBRANTE', label: 'Sobrante' },
-    { value: 'CRUCE', label: 'Cruce' },
     { value: 'DANADO', label: 'Danado' },
 ];
 
@@ -105,7 +104,6 @@ interface InconsistencyForm {
     inconsistency_type: string;
     material_code: string;
     product_name: string;
-    expected_quantity: string;
     actual_quantity: string;
     notes: string;
 }
@@ -114,7 +112,6 @@ const EMPTY_INCONSISTENCY: InconsistencyForm = {
     inconsistency_type: '',
     material_code: '',
     product_name: '',
-    expected_quantity: '',
     actual_quantity: '',
     notes: '',
 };
@@ -324,7 +321,6 @@ export default function CountingPage() {
                 inconsistency_type: incForm.inconsistency_type as Inconsistency['inconsistency_type'],
                 material_code: incForm.material_code,
                 product_name: incForm.product_name,
-                expected_quantity: Number(incForm.expected_quantity),
                 actual_quantity: Number(incForm.actual_quantity),
                 notes: incForm.notes,
             }).unwrap();
@@ -772,28 +768,16 @@ export default function CountingPage() {
                         noOptionsText={productSearch ? 'Sin resultados' : 'Escriba para buscar'}
                         sx={{ mb: 2 }}
                     />
-                    <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                type="number"
-                                label="Cantidad esperada *"
-                                value={incForm.expected_quantity}
-                                onChange={(e) => handleIncFormChange('expected_quantity', e.target.value)}
-                            />
-                        </Grid>
-                        <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                size="small"
-                                type="number"
-                                label="Cantidad real *"
-                                value={incForm.actual_quantity}
-                                onChange={(e) => handleIncFormChange('actual_quantity', e.target.value)}
-                            />
-                        </Grid>
-                    </Grid>
+                    <TextField
+                        fullWidth
+                        size="small"
+                        type="number"
+                        label="Cantidad *"
+                        helperText="El tipo de inconsistencia define el signo (faltante/dañado restan, sobrante suma)."
+                        value={incForm.actual_quantity}
+                        onChange={(e) => handleIncFormChange('actual_quantity', e.target.value)}
+                        sx={{ mb: 2 }}
+                    />
                     <TextField
                         fullWidth
                         size="small"
