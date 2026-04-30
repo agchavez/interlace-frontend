@@ -28,8 +28,10 @@ import ProhibitionsBlock from './blocks/ProhibitionsBlock';
 import TriggersBlock from './blocks/TriggersBlock';
 import SicChartBlock from './blocks/SicChartBlock';
 import ReactionPlansBlock from './blocks/ReactionPlansBlock';
+import PerformersBlock from './blocks/PerformersBlock';
 import { QrDocumentBlock, QrExternalBlock } from './blocks/QrBlocks';
 import { ImageBlock, TextBlock } from './blocks/SimpleBlocks';
+import type { PerformersBlockConfig } from '../interfaces/workstation';
 import type {
     BlockType, ProhibitionsBlockConfig, ReactionPlansBlockConfig,
     RisksBlockConfig, SicChartBlockConfig, TriggersBlockConfig,
@@ -123,6 +125,8 @@ export default function WorkstationFixedLayout({ workstation, mode = 'tv', highl
     const triggers = byType.byType.TRIGGERS;
     const sic = byType.byType.SIC_CHART;
     const plans = byType.byType.REACTION_PLANS;
+    const performers = byType.byType.PERFORMERS;
+    const performersCfg: PerformersBlockConfig = (performers?.config || {}) as PerformersBlockConfig;
     const qrDocs = byType.lists.QR_DOCUMENT || [];
     const qrExts = byType.lists.QR_EXTERNAL || [];
 
@@ -217,10 +221,27 @@ export default function WorkstationFixedLayout({ workstation, mode = 'tv', highl
                     minWidth: 0,
                     minHeight: { xs: 380, md: 0 },
                 }}>
-                    {/* Rosado: Top y Bottom performers (placeholder por ahora) */}
+                    {/* Rosado: Top y Bottom performers — configurable por workstation. */}
                     <Box sx={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, minHeight: 0 }}>
-                        <PinkPlaceholder title="Top performers" />
-                        <PinkPlaceholder title="Bottom performers" />
+                        {performers && performersCfg.metric_code ? (
+                            <>
+                                <PerformersBlock
+                                    workstationId={workstation.id}
+                                    config={performersCfg}
+                                    variant="top"
+                                />
+                                <PerformersBlock
+                                    workstationId={workstation.id}
+                                    config={performersCfg}
+                                    variant="bottom"
+                                />
+                            </>
+                        ) : (
+                            <>
+                                <PinkPlaceholder title="Top performers" />
+                                <PinkPlaceholder title="Bottom performers" />
+                            </>
+                        )}
                     </Box>
 
                     {/* Verde: Planes de Reacción + QRs */}

@@ -11,6 +11,7 @@ export type BlockType =
     | 'TRIGGERS'
     | 'SIC_CHART'
     | 'REACTION_PLANS'
+    | 'PERFORMERS'
     | 'QR_DOCUMENT'
     | 'QR_EXTERNAL'
     | 'IMAGE'
@@ -18,6 +19,25 @@ export type BlockType =
     | 'TITLE'
     | 'CLOCK'
     | 'DPO';
+
+export interface PerformersBlockConfig {
+    title?: string;
+    /** Code del PerformanceMetricType para rankear. */
+    metric_code?: string;
+    /** Cuántos top mostrar (1-10, default 3). */
+    top_count?: number;
+    /** Cuántos bottom mostrar (1-10, default 3). */
+    bottom_count?: number;
+    /** 'today' (default) o 'week'. */
+    period?: 'today' | 'week';
+}
+
+export interface PerformerEntry {
+    personnel_id: number;
+    name: string;
+    photo_url: string | null;
+    value: number;
+}
 
 export interface RiskCatalogItem {
     id: number;

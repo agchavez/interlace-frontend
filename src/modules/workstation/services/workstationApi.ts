@@ -79,6 +79,19 @@ export const workstationApi = createApi({
             query: (body) => ({ url: '/workstations/ensure-for-role/', method: 'POST', body }),
             invalidatesTags: ['WorkstationList'],
         }),
+        // Top / Bottom performers para el bloque PERFORMERS de la TV.
+        getPerformers: builder.query<{
+            metric: { code: string; name: string; unit: string; direction: string } | null;
+            top: Array<{ personnel_id: number; name: string; photo_url: string | null; value: number }>;
+            bottom: Array<{ personnel_id: number; name: string; photo_url: string | null; value: number }>;
+            period?: string;
+            error?: string;
+        }, { workstationId: number; metric_code: string; top_count?: number; bottom_count?: number; period?: 'today' | 'week' }>({
+            query: ({ workstationId, ...params }) => ({
+                url: `/workstations/${workstationId}/performers/`,
+                params,
+            }),
+        }),
         updateWorkstation: builder.mutation<Workstation, { id: number; data: Partial<Workstation> }>({
             query: ({ id, data }) => ({ url: `/workstations/${id}/`, method: 'PATCH', body: data }),
             invalidatesTags: (_r, _e, { id }) => [{ type: 'Workstation', id }, 'WorkstationList'],
@@ -201,6 +214,7 @@ export const {
     useGetWorkstationQuery,
     useCreateWorkstationMutation,
     useEnsureWorkstationMutation,
+    useGetPerformersQuery,
     useUpdateWorkstationMutation,
     useDeleteWorkstationMutation,
     useSetBlocksMutation,

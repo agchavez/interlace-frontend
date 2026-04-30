@@ -35,6 +35,7 @@ import {
 import type {
     BlockType, ProhibitionsBlockConfig, ReactionPlansBlockConfig,
     RisksBlockConfig, SicChartBlockConfig, TriggersBlockConfig,
+    PerformersBlockConfig,
     QrDocumentBlockConfig, QrExternalBlockConfig, ImageBlockConfig,
     Workstation, WorkstationBlock,
 } from '../interfaces/workstation';
@@ -42,14 +43,15 @@ import WorkstationFixedLayout, { type WorkstationZone } from './WorkstationFixed
 
 /** Mapping de la key del accordion → zona a resaltar en el preview. */
 const SECTION_TO_ZONE: Record<string, WorkstationZone | null> = {
-    risks:    'RISKS',
-    prohib:   'PROHIBITIONS',
-    triggers: 'TRIGGERS',
-    sic:      'SIC_CHART',
-    plans:    'REACTION_PLANS',
-    qrdoc:    'QR_DOCUMENT',
-    qrext:    'QR_EXTERNAL',
-    images:   'IMAGE',
+    risks:      'RISKS',
+    prohib:     'PROHIBITIONS',
+    triggers:   'TRIGGERS',
+    sic:        'SIC_CHART',
+    plans:      'REACTION_PLANS',
+    performers: null,
+    qrdoc:      'QR_DOCUMENT',
+    qrext:      'QR_EXTERNAL',
+    images:     'IMAGE',
 };
 
 // Default sizes (heredados del template — el usuario no las ve)
@@ -59,6 +61,7 @@ const DEFAULT_SIZE: Record<BlockType, { x: number; y: number; w: number; h: numb
     TRIGGERS:       { x: 8, y: 0, w: 4, h: 4 },
     SIC_CHART:      { x: 0, y: 4, w: 8, h: 8 },
     REACTION_PLANS: { x: 8, y: 4, w: 4, h: 8 },
+    PERFORMERS:     { x: 8, y: 0, w: 4, h: 4 },
     QR_DOCUMENT:    { x: 0, y: 12, w: 2, h: 3 },
     QR_EXTERNAL:    { x: 2, y: 12, w: 2, h: 3 },
     IMAGE:          { x: 4, y: 12, w: 3, h: 3 },
@@ -356,6 +359,13 @@ function SectionsList({
                 expanded={open === 'plans'} onChange={handle('plans')}
             >
                 <ReactionPlansSection ws={ws} />
+            </Section>
+            <Section
+                title="Top / Bottom Performers (Rosado)"
+                description="Ranking de personal según un KPI configurable."
+                expanded={open === 'performers'} onChange={handle('performers')}
+            >
+                <PerformersSection ws={ws} />
             </Section>
             <Section
                 title="QRs · Documentos PDF (Verde)"
@@ -822,6 +832,111 @@ function ReactionPlansSection({ ws }: { ws: Workstation }) {
             </Button>
         </Stack>
     );
+}
+
+// ────── Sección: Top / Bottom Performers ──────
+// Configuración del bloque PERFORMERS: qué KPI usar, cuántos mostrar, período.
+
+function PerformersSection({ ws }: { ws: Workstation }) {
+    const block = findUniqueBlock(ws, 'PERFORMERS');
+    const cfg = (block?.config || {}) as PerformersBlockConfig;
+    const save = useUniqueBlockSaver(ws, 'PERFORMERS');
+
+    const { data } = useGetAvailableKpisQuery(ws.id);
+    const availableKpis = data?.items || [];
+    const diag = data?.diagnostics;
+
+    const [metricCode, setMetricCode] = useState<string>(cfg.metric_code || '');
+    const [topCount, setTopCount] = useState<number>(cfg.top_count ?? 3);
+    const [bottomCount, setBottomCount] = useState<number>(cfg.bottom_count ?? 3);
+    const [period, setPeriod] = useState<'today' | 'week'>(cfg.period ?? 'today');
+
+    useEffect(() => {
+        setMetricCode(cfg.metric_code || '');
+        setTopCount(cfg.top_count ?? 3);
+        setBottomCount(cfg.bottom_count ?? 3);
+        setPeriod(cfg.period ?? 'today');
+    }, [block]);
+
+    const onSave = async () => {
+        await save({
+            ...cfg,
+            metric_code: metricCode || undefined,
+            top_count: clamp(topCount, 1, 10),
+            bottom_count: clamp(bottomCount, 1, 10),
+            period,
+        });
+        toast.success('Performers guardados');
+    };
+
+    return (
+        <Stack spacing={1.5}>
+            <Alert severity="info" sx={{ borderRadius: 1 }}>
+                Mostra el ranking de personal del CD según un KPI. La data se actualiza cada
+                minuto. La dirección (mayor o menor es mejor) se respeta automáticamente —
+                top y bottom se calculan en consecuencia.
+            </Alert>
+
+            {availableKpis.length === 0 ? (
+                <KpiEmptyAlert diag={diag} ws={ws} />
+            ) : (
+                <>
+                    <TextField
+                        select
+                        size="small"
+                        label="KPI para rankear"
+                        value={metricCode}
+                        onChange={e => setMetricCode(e.target.value)}
+                        SelectProps={{ native: true }}
+                    >
+                        <option value="">— Sin KPI configurado —</option>
+                        {availableKpis.map(k => (
+                            <option key={k.code} value={k.code}>
+                                {k.name}{k.unit ? ` (${k.unit})` : ''}
+                            </option>
+                        ))}
+                    </TextField>
+
+                    <Stack direction="row" spacing={1.5}>
+                        <TextField
+                            size="small" type="number" label="Top (1-10)"
+                            value={topCount}
+                            onChange={e => setTopCount(Number(e.target.value) || 3)}
+                            inputProps={{ min: 1, max: 10 }}
+                            sx={{ flex: 1 }}
+                        />
+                        <TextField
+                            size="small" type="number" label="Bottom (1-10)"
+                            value={bottomCount}
+                            onChange={e => setBottomCount(Number(e.target.value) || 3)}
+                            inputProps={{ min: 1, max: 10 }}
+                            sx={{ flex: 1 }}
+                        />
+                        <TextField
+                            select size="small" label="Período"
+                            value={period}
+                            onChange={e => setPeriod(e.target.value as 'today' | 'week')}
+                            SelectProps={{ native: true }}
+                            sx={{ flex: 1 }}
+                        >
+                            <option value="today">Hoy</option>
+                            <option value="week">Últimos 7 días</option>
+                        </TextField>
+                    </Stack>
+                </>
+            )}
+
+            <Button startIcon={<SaveIcon />} variant="contained" size="small"
+                onClick={onSave} disabled={availableKpis.length === 0}
+                sx={{ textTransform: 'none', alignSelf: 'flex-start' }}>
+                Guardar performers
+            </Button>
+        </Stack>
+    );
+}
+
+function clamp(v: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, v));
 }
 
 // ────── Sección: QRs · Documentos PDF ──────
