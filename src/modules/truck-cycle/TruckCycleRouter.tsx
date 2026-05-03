@@ -8,7 +8,6 @@ import CountingPage from './pages/CountingPage';
 import CheckoutPage from './pages/CheckoutPage';
 import WorkstationPage from './pages/WorkstationPage';
 import WorkstationStatusDetailPage from './pages/WorkstationStatusDetailPage';
-import KPIConfigPage from './pages/KPIConfigPage';
 import KPIReportPage from './pages/KPIReportPage';
 import OperationsPage from './pages/OperationsPage';
 import VerificationPage from './pages/VerificationPage';
@@ -28,7 +27,7 @@ function TruckCycleRouter() {
       <Route path="/checkout" element={<CheckoutPage />} />
       <Route path="/workstation" element={<WorkstationPage />} />
       <Route path="/workstation/status/:status" element={<WorkstationStatusDetailPage />} />
-      <Route path="/kpi/config" element={<KPIConfigPage />} />
+      <Route path="/kpi/config" element={<Navigate to="/maintenance/kpi-config" replace />} />
       <Route path="/kpi/report" element={<KPIReportPage />} />
       <Route path="/trucks" element={<Navigate to="/maintenance/trucks" replace />} />
       <Route path="/bays" element={<Navigate to="/maintenance/bays" replace />} />

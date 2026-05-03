@@ -8,6 +8,7 @@ import {OvertimeTypesPage} from "./page/OvertimeTypesPage.tsx";
 import {OvertimeReasonsPage} from "./page/OvertimeReasonsPage.tsx";
 import TruckCatalogPage from "../truck-cycle/pages/TruckCatalogPage.tsx";
 import BayManagementPage from "../truck-cycle/pages/BayManagementPage.tsx";
+import KPIConfigPage from "../truck-cycle/pages/KPIConfigPage.tsx";
 
 function MaintenanceRouter() {
     return (
@@ -50,6 +51,11 @@ function MaintenanceRouter() {
             <Route
                 element={<OvertimeReasonsPage />}
                 path="/overtime-reasons"
+                />
+
+            <Route
+                element={<KPIConfigPage />}
+                path="/kpi-config"
                 />
 
             <Route path="*" element={<Navigate to="/maintenance/distributor-center" />} />

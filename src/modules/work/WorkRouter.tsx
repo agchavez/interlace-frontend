@@ -14,6 +14,7 @@ import VendorHome from './pages/VendorHome';
 import VendorPautaDetail from './pages/VendorPautaDetail';
 import WorkRoleGuard from './components/WorkRoleGuard';
 import RoleWorkstationPage from './pages/RoleWorkstationPage';
+import RepackHomePage from '../repack/pages/RepackHomePage';
 
 export default function WorkRouter() {
     return (
@@ -32,6 +33,7 @@ export default function WorkRouter() {
             <Route path="/yard"       element={<WorkRoleGuard role="YARD_DRIVER"><YardHome /></WorkRoleGuard>} />
             <Route path="/yard/workstation" element={<RoleWorkstationPage role="yard" />} />
             <Route path="/yard/:id"   element={<WorkRoleGuard role="YARD_DRIVER"><YardPautaDetail /></WorkRoleGuard>} />
+            <Route path="/repack" element={<RepackHomePage />} />
             <Route path="/repack/workstation" element={<RoleWorkstationPage role="repack" />} />
             <Route path="/vendor"     element={<WorkRoleGuard role="VENDOR"><VendorHome /></WorkRoleGuard>} />
             <Route path="/vendor/:id" element={<WorkRoleGuard role="VENDOR"><VendorPautaDetail /></WorkRoleGuard>} />

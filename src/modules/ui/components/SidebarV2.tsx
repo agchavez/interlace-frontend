@@ -260,10 +260,10 @@ const SidebarV2: React.FC = () => {
       //   id: 'claim',
       // },
       {
-        text: 'Ciclo del Camión',
+        text: 'Almacén',
         icon: <LocalShippingIcon fontSize="small" />,
         subItems: [
-          { text: 'Dashboard', href: '/truck-cycle', id: 'tc-dashboard' },
+          { text: 'Ciclo del Camión T2', href: '/truck-cycle', id: 'tc-dashboard' },
           { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
           { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
           { text: 'Operaciones del Día', href: '/truck-cycle/operations', id: 'tc-operations' },
@@ -273,10 +273,10 @@ const SidebarV2: React.FC = () => {
           { text: 'Operaciones', href: '/work/ops', id: 'tc-ops', visible: canOps },
           { text: 'Chofer de Patio', href: '/work/yard', id: 'tc-yard', visible: canYard },
           { text: 'Chofer Vendedor', href: '/work/vendor', id: 'tc-vendor', visible: canVendor },
+          { text: 'Reempaque', href: '/work/repack', id: 'tc-repack' },
           { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
-          { text: 'Metas KPI', href: '/truck-cycle/kpi/config', id: 'tc-kpi-config' },
         ],
-        id: 'truck-cycle',
+        id: 'almacen',
       },
       {
         text: 'Workstations',
@@ -309,6 +309,7 @@ const SidebarV2: React.FC = () => {
           { text: 'Camiones', href: '/maintenance/trucks', id: 'mt-trucks' },
           { text: 'Bahías', href: '/maintenance/bays', id: 'mt-bays' },
           { text: 'Métricas de Desempeño', href: '/maintenance/metric-types', id: 'metric-types' },
+          { text: 'Metas KPI', href: '/maintenance/kpi-config', id: 'kpi-config' },
           { text: 'Productos', href: '/maintenance/products', id: 'products' },
           { text: 'Materiales', href: '/tokens/materials', id: 'materials' },
           { text: 'Personas Externas', href: '/tokens/external-persons', id: 'external-persons' },
