@@ -283,6 +283,7 @@ const SidebarV2: React.FC = () => {
         icon: <Inventory2Icon fontSize="small" />,
         subItems: [
           { text: 'Reempaque', href: '/work/repack', id: 'al-repack' },
+          { text: 'Operaciones · Reempaque', href: '/work/repack/operations', id: 'al-repack-ops' },
         ],
         id: 'almacen',
       },

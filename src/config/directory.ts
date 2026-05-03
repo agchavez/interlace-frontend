@@ -692,6 +692,10 @@ export const permisions = [
         permissions: ["any"],
     },
     {
+        url: "/work/repack/operations",
+        permissions: ["any"],
+    },
+    {
         url: "/work/repack/workstation",
         permissions: ["any"],
     },
