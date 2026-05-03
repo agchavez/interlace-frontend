@@ -40,6 +40,7 @@ import type {
     Workstation, WorkstationBlock,
 } from '../interfaces/workstation';
 import WorkstationFixedLayout, { type WorkstationZone } from './WorkstationFixedLayout';
+import MetricCategoryChip, { getMetricCategory } from '../../ui/components/MetricCategoryChip';
 
 /** Mapping de la key del accordion → zona a resaltar en el preview. */
 const SECTION_TO_ZONE: Record<string, WorkstationZone | null> = {
@@ -580,9 +581,10 @@ function TriggersSection({ ws }: { ws: Workstation }) {
                                 color={on ? 'primary' : 'default'}
                                 variant={on ? 'filled' : 'outlined'}
                                 label={
-                                    <Box component="span">
+                                    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                                        <MetricCategoryChip code={k.code} />
                                         <b>{k.name}</b>
-                                        <Box component="span" sx={{ opacity: 0.85, ml: 0.5 }}>
+                                        <Box component="span" sx={{ opacity: 0.85 }}>
                                             · {k.meta}{k.disparador ? ` → ${k.disparador}` : ''}{k.unit ? ` ${k.unit}` : ''}
                                         </Box>
                                     </Box>
@@ -755,9 +757,10 @@ function SicSection({ ws }: { ws: Workstation }) {
                                     color={on ? 'primary' : 'default'}
                                     variant={on ? 'filled' : 'outlined'}
                                     label={
-                                        <Box component="span">
+                                        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                                            <MetricCategoryChip code={k.code} />
                                             <b>{k.name}</b>
-                                            <Box component="span" sx={{ opacity: 0.85, ml: 0.5 }}>
+                                            <Box component="span" sx={{ opacity: 0.85 }}>
                                                 · {k.meta}{k.disparador ? ` → ${k.disparador}` : ''}{k.unit ? ` ${k.unit}` : ''}
                                             </Box>
                                         </Box>
@@ -890,11 +893,15 @@ function PerformersSection({ ws }: { ws: Workstation }) {
                         SelectProps={{ native: true }}
                     >
                         <option value="">— Sin KPI configurado —</option>
-                        {availableKpis.map(k => (
-                            <option key={k.code} value={k.code}>
-                                {k.name}{k.unit ? ` (${k.unit})` : ''}
-                            </option>
-                        ))}
+                        {availableKpis.map(k => {
+                            const cat = getMetricCategory(k.code);
+                            const prefix = cat ? `[${cat.label}] ` : '';
+                            return (
+                                <option key={k.code} value={k.code}>
+                                    {prefix}{k.name}{k.unit ? ` (${k.unit})` : ''}
+                                </option>
+                            );
+                        })}
                     </TextField>
 
                     <Stack direction="row" spacing={1.5}>

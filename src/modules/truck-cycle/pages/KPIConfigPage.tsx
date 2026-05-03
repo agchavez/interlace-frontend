@@ -22,6 +22,7 @@ import {
 } from '@mui/material';
 import { Add as AddIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import MetricCategoryChip from '../../ui/components/MetricCategoryChip';
 import { DatePicker } from '@mui/x-date-pickers';
 import { format, isValid, parseISO } from 'date-fns';
 import {
@@ -167,8 +168,10 @@ export default function KPIConfigPage() {
                 const row = params.row as KPITarget;
                 const label = params.value;
                 const isLegacy = !row.metric_type && row.kpi_type;
+                const code = row.metric_type ? metricTypeById[row.metric_type]?.code : null;
                 return (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <MetricCategoryChip code={code} />
                         {label}
                         {isLegacy && <Chip size="small" label="legacy" variant="outlined" />}
                     </Box>
