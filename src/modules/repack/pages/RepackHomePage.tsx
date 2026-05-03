@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react';
 import {
     Alert,
-    Autocomplete,
     Avatar,
     Box,
     Button,
@@ -20,12 +19,12 @@ import {
     Divider,
     Grid,
     IconButton,
-    Snackbar,
     Stack,
     TextField,
     Tooltip,
     Typography,
 } from '@mui/material';
+import { toast } from 'sonner';
 import {
     PlayArrow as StartIcon,
     Stop as StopIcon,
@@ -64,18 +63,40 @@ export default function RepackHomePage() {
     const { data: active, isLoading } = useGetActiveSessionQuery();
 
     return (
-        <Container maxWidth="md" sx={{ py: 3 }}>
+        <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
             <Header />
             {isLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
                     <CircularProgress />
                 </Box>
             ) : active ? (
-                <ActiveSessionView session={active} />
+                <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+                    gap: 3,
+                    alignItems: 'flex-start',
+                }}>
+                    {/* Columna izquierda: sesión + agregar lote */}
+                    <Box>
+                        <ActiveSessionCard session={active} />
+                        <AddEntryForm sessionId={active.id} />
+                    </Box>
+                    {/* Columna derecha: lotes + historial */}
+                    <Box>
+                        <EntriesList session={active} />
+                        <RecentSessions />
+                    </Box>
+                </Box>
             ) : (
-                <NoSessionView />
+                <Box sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', lg: '1.4fr 1fr' },
+                    gap: 3,
+                }}>
+                    <NoSessionView />
+                    <RecentSessions />
+                </Box>
             )}
-            <RecentSessions />
         </Container>
     );
 }
@@ -179,12 +200,9 @@ function useElapsed(startedAt: string) {
 }
 
 
-function ActiveSessionView({ session }: { session: RepackSession }) {
+function ActiveSessionCard({ session }: { session: RepackSession }) {
     const [finish, { isLoading: finishing }] = useFinishSessionMutation();
     const [cancel, { isLoading: cancelling }] = useCancelSessionMutation();
-    const [snackbar, setSnackbar] = useState<{ open: boolean; msg: string; severity: 'success' | 'error' }>({
-        open: false, msg: '', severity: 'success',
-    });
 
     const elapsed = useElapsed(session.started_at);
     const totalBoxes = (session.entries || []).reduce((s, e) => s + e.box_count, 0);
@@ -194,9 +212,9 @@ function ActiveSessionView({ session }: { session: RepackSession }) {
         if (!window.confirm('¿Cerrar la sesión de reempaque? Se calculará la métrica final.')) return;
         try {
             await finish(session.id).unwrap();
-            setSnackbar({ open: true, msg: 'Sesión cerrada y métrica registrada.', severity: 'success' });
+            toast.success('Sesión cerrada y métrica registrada.');
         } catch (err: any) {
-            setSnackbar({ open: true, msg: err?.data?.error || 'Error al cerrar sesión', severity: 'error' });
+            toast.error(err?.data?.error || 'Error al cerrar sesión');
         }
     };
 
@@ -204,72 +222,55 @@ function ActiveSessionView({ session }: { session: RepackSession }) {
         if (!window.confirm('¿Cancelar la sesión? No se registrará la métrica.')) return;
         try {
             await cancel(session.id).unwrap();
-            setSnackbar({ open: true, msg: 'Sesión cancelada.', severity: 'success' });
+            toast.success('Sesión cancelada.');
         } catch (err: any) {
-            setSnackbar({ open: true, msg: err?.data?.error || 'Error al cancelar', severity: 'error' });
+            toast.error(err?.data?.error || 'Error al cancelar');
         }
     };
 
     return (
-        <>
-            <Card sx={{ borderRadius: 3, mb: 3, border: `2px solid ${C.primary}` }}>
-                <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-                        <Box>
-                            <Chip
-                                size="small"
-                                label="Sesión Activa"
-                                sx={{ bgcolor: C.primary, color: '#fff', fontWeight: 700, mb: 1 }}
-                            />
-                            <Typography variant="body2" color="text.secondary">
-                                Iniciada: {format(new Date(session.started_at), 'dd MMM yyyy · HH:mm')}
-                            </Typography>
-                        </Box>
-                        <Stack direction="row" spacing={1}>
-                            <Button
-                                variant="outlined" color="error" size="small"
-                                startIcon={cancelling ? <CircularProgress size={14} /> : <CancelIcon />}
-                                onClick={onCancel}
-                                disabled={cancelling || finishing}
-                                sx={{ textTransform: 'none' }}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                variant="contained" color="success" size="small"
-                                startIcon={finishing ? <CircularProgress size={14} color="inherit" /> : <StopIcon />}
-                                onClick={onFinish}
-                                disabled={cancelling || finishing}
-                                sx={{ textTransform: 'none', fontWeight: 700 }}
-                            >
-                                Finalizar
-                            </Button>
-                        </Stack>
+        <Card sx={{ borderRadius: 3, mb: 3, border: `2px solid ${C.primary}` }}>
+            <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexWrap: 'wrap', gap: 2 }}>
+                    <Box>
+                        <Chip
+                            size="small"
+                            label="Sesión Activa"
+                            sx={{ bgcolor: C.primary, color: '#fff', fontWeight: 700, mb: 1 }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                            Iniciada: {format(new Date(session.started_at), 'dd MMM yyyy · HH:mm')}
+                        </Typography>
                     </Box>
+                    <Stack direction="row" spacing={1}>
+                        <Button
+                            variant="outlined" color="error" size="small"
+                            startIcon={cancelling ? <CircularProgress size={14} /> : <CancelIcon />}
+                            onClick={onCancel}
+                            disabled={cancelling || finishing}
+                            sx={{ textTransform: 'none' }}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="contained" color="success" size="small"
+                            startIcon={finishing ? <CircularProgress size={14} color="inherit" /> : <StopIcon />}
+                            onClick={onFinish}
+                            disabled={cancelling || finishing}
+                            sx={{ textTransform: 'none', fontWeight: 700 }}
+                        >
+                            Finalizar
+                        </Button>
+                    </Stack>
+                </Box>
 
-                    <Grid container spacing={1.5}>
-                        <StatItem icon={<ClockIcon />} label="Tiempo" value={elapsed.text} mono />
-                        <StatItem icon={<BoxIcon />} label="Cajas" value={String(totalBoxes)} />
-                        <StatItem icon={<BoxIcon />} label="Cajas / hora" value={livePerHour ? `${livePerHour}` : '—'} highlight />
-                    </Grid>
-                </CardContent>
-            </Card>
-
-            <AddEntryForm sessionId={session.id} onAdded={() => setSnackbar({ open: true, msg: 'Lote registrado', severity: 'success' })} />
-
-            <EntriesList session={session} />
-
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3500}
-                onClose={() => setSnackbar((p) => ({ ...p, open: false }))}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert severity={snackbar.severity} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} variant="filled">
-                    {snackbar.msg}
-                </Alert>
-            </Snackbar>
-        </>
+                <Grid container spacing={1.5}>
+                    <StatItem icon={<ClockIcon />} label="Tiempo" value={elapsed.text} mono />
+                    <StatItem icon={<BoxIcon />} label="Cajas" value={String(totalBoxes)} />
+                    <StatItem icon={<BoxIcon />} label="Cajas / hora" value={livePerHour ? `${livePerHour}` : '—'} highlight />
+                </Grid>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -307,7 +308,7 @@ function StatItem({
 }
 
 
-function AddEntryForm({ sessionId, onAdded }: { sessionId: number; onAdded: () => void }) {
+function AddEntryForm({ sessionId }: { sessionId: number }) {
     const [add, { isLoading }] = useAddEntryMutation();
     const [materialCode, setMaterialCode] = useState('');
     const [productName, setProductName] = useState('');
@@ -334,7 +335,7 @@ function AddEntryForm({ sessionId, onAdded }: { sessionId: number; onAdded: () =
                 expiration_date: exp,
             }).unwrap();
             reset();
-            onAdded();
+            toast.success('Lote registrado');
         } catch (err: any) {
             setError(err?.data?.error || err?.data?.detail || 'Error al registrar el lote');
         }

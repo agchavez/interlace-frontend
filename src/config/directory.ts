@@ -685,6 +685,26 @@ export const permisions = [
         reg: /\/wd\/[a-f0-9-]+/i,
         permissions: ["any"],
     },
+    // Reempaque — tarea de almacén abierta a cualquier usuario autenticado.
+    // Si más adelante se quiere restringir, cambiar a un permiso específico.
+    {
+        url: "/work/repack",
+        permissions: ["any"],
+    },
+    {
+        url: "/work/repack/workstation",
+        permissions: ["any"],
+    },
+    {
+        url: "/work/repack/:id",
+        reg: /\/work\/repack\/\d+/,
+        permissions: ["any"],
+    },
+    // Metas KPI — movido de /truck-cycle/kpi/config a /maintenance/kpi-config.
+    {
+        url: "/maintenance/kpi-config",
+        permissions: ["truck_cycle.change_kpitargetmodel"],
+    },
 ]
 
 const directory: RoutePermissions = {}

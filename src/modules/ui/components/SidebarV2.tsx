@@ -41,6 +41,7 @@ import AssignmentLateTwoToneIcon from '@mui/icons-material/AssignmentLateTwoTone
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { useSidebar } from '../context/SidebarContext';
 import SidebarItemV2, { SidebarSubItem } from './SidebarItemV2';
@@ -260,10 +261,10 @@ const SidebarV2: React.FC = () => {
       //   id: 'claim',
       // },
       {
-        text: 'Almacén',
+        text: 'Ciclo del Camión',
         icon: <LocalShippingIcon fontSize="small" />,
         subItems: [
-          { text: 'Ciclo del Camión T2', href: '/truck-cycle', id: 'tc-dashboard' },
+          { text: 'Dashboard', href: '/truck-cycle', id: 'tc-dashboard' },
           { text: 'Cargar Pallet Complex', href: '/truck-cycle/upload', id: 'tc-upload' },
           { text: 'Pautas', href: '/truck-cycle/pautas', id: 'tc-pautas' },
           { text: 'Operaciones del Día', href: '/truck-cycle/operations', id: 'tc-operations' },
@@ -273,8 +274,15 @@ const SidebarV2: React.FC = () => {
           { text: 'Operaciones', href: '/work/ops', id: 'tc-ops', visible: canOps },
           { text: 'Chofer de Patio', href: '/work/yard', id: 'tc-yard', visible: canYard },
           { text: 'Chofer Vendedor', href: '/work/vendor', id: 'tc-vendor', visible: canVendor },
-          { text: 'Reempaque', href: '/work/repack', id: 'tc-repack' },
           { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
+        ],
+        id: 'truck-cycle',
+      },
+      {
+        text: 'Almacén',
+        icon: <Inventory2Icon fontSize="small" />,
+        subItems: [
+          { text: 'Reempaque', href: '/work/repack', id: 'al-repack' },
         ],
         id: 'almacen',
       },
