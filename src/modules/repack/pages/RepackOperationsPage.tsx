@@ -49,6 +49,7 @@ import {
     useFinishSessionMutation,
     useCancelSessionMutation,
 } from '../services/repackApi';
+import { useConfirm } from '../../ui/components/ConfirmDialog';
 import type { RepackSession, RepackStatus } from '../interfaces/repack';
 import {
     useGetPersonnelAutocompleteQuery,
@@ -244,9 +245,17 @@ function StatsRow({
 function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loading: boolean }) {
     const [finish, { isLoading: finishing }] = useFinishSessionMutation();
     const [cancel, { isLoading: cancelling }] = useCancelSessionMutation();
+    const confirm = useConfirm();
 
     const onFinish = async (id: number) => {
-        if (!window.confirm('¿Cerrar esta sesión? Se calculará la métrica final.')) return;
+        const ok = await confirm({
+            title: 'Cerrar sesión de reempaque',
+            message: 'Se calculará la métrica final (cajas/hora) y la sesión quedará registrada.',
+            confirmText: 'Cerrar sesión',
+            confirmColor: 'success',
+            severity: 'success',
+        });
+        if (!ok) return;
         try {
             await finish(id).unwrap();
             toast.success('Sesión cerrada.');
@@ -255,7 +264,14 @@ function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loadi
         }
     };
     const onCancel = async (id: number) => {
-        if (!window.confirm('¿Cancelar esta sesión? No se registrará la métrica.')) return;
+        const ok = await confirm({
+            title: 'Cancelar sesión',
+            message: 'La sesión se cerrará sin registrar la métrica de cajas/hora.',
+            confirmText: 'Cancelar sesión',
+            confirmColor: 'error',
+            severity: 'danger',
+        });
+        if (!ok) return;
         try {
             await cancel(id).unwrap();
             toast.success('Sesión cancelada.');

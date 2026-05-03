@@ -15,6 +15,7 @@ import { LocalizationProvider, esES } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { es } from 'date-fns/locale';
 import { SidebarProvider } from './modules/ui/context/SidebarContext';
+import { ConfirmProvider } from './modules/ui/components/ConfirmDialog';
 import { useEffect } from 'react';
 
 
@@ -37,11 +38,13 @@ function App() {
       <LocalizationProvider dateAdapter={AdapterDateFns} localeText={esES.components.MuiLocalizationProvider.defaultProps.localeText} adapterLocale={es}>
         <BrowserRouter>
         <SidebarProvider defaultCollapsed={false}>
+        <ConfirmProvider>
         <Toaster duration={3000} position="top-right" richColors closeButton />
           <AppRouter />
 
           {/* PWA: Instalación y Notificaciones Push */}
           <PWANotificationManager />
+        </ConfirmProvider>
         </SidebarProvider>
         </BrowserRouter>
         </LocalizationProvider>

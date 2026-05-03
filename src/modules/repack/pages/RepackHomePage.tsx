@@ -5,9 +5,10 @@
  * Si hay sesión activa: muestra cronómetro vivo, lista de entries con
  * total acumulado, formulario para agregar lote y botón "Finalizar".
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Alert,
+    Autocomplete,
     Avatar,
     Box,
     Button,
@@ -25,6 +26,9 @@ import {
     Typography,
 } from '@mui/material';
 import { toast } from 'sonner';
+import { useConfirm } from '../../ui/components/ConfirmDialog';
+import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
+import type { Product } from '../../../interfaces/tracking';
 import {
     PlayArrow as StartIcon,
     Stop as StopIcon,
@@ -203,13 +207,21 @@ function useElapsed(startedAt: string) {
 function ActiveSessionCard({ session }: { session: RepackSession }) {
     const [finish, { isLoading: finishing }] = useFinishSessionMutation();
     const [cancel, { isLoading: cancelling }] = useCancelSessionMutation();
+    const confirm = useConfirm();
 
     const elapsed = useElapsed(session.started_at);
     const totalBoxes = (session.entries || []).reduce((s, e) => s + e.box_count, 0);
     const livePerHour = elapsed.seconds > 0 ? Math.round((totalBoxes * 3600 / elapsed.seconds) * 10) / 10 : 0;
 
     const onFinish = async () => {
-        if (!window.confirm('¿Cerrar la sesión de reempaque? Se calculará la métrica final.')) return;
+        const ok = await confirm({
+            title: 'Cerrar sesión de reempaque',
+            message: 'Se calculará la métrica final (cajas/hora) y la sesión quedará registrada.',
+            confirmText: 'Cerrar sesión',
+            confirmColor: 'success',
+            severity: 'success',
+        });
+        if (!ok) return;
         try {
             await finish(session.id).unwrap();
             toast.success('Sesión cerrada y métrica registrada.');
@@ -219,7 +231,14 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
     };
 
     const onCancel = async () => {
-        if (!window.confirm('¿Cancelar la sesión? No se registrará la métrica.')) return;
+        const ok = await confirm({
+            title: 'Cancelar sesión',
+            message: 'La sesión se cerrará sin registrar la métrica de cajas/hora.',
+            confirmText: 'Cancelar sesión',
+            confirmColor: 'error',
+            severity: 'danger',
+        });
+        if (!ok) return;
         try {
             await cancel(session.id).unwrap();
             toast.success('Sesión cancelada.');
@@ -400,7 +419,19 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
 
 function EntriesList({ session }: { session: RepackSession }) {
     const [del] = useDeleteEntryMutation();
+    const confirm = useConfirm();
     const entries = session.entries || [];
+
+    const onDelete = async (entryId: number, summary: string) => {
+        const ok = await confirm({
+            title: 'Eliminar lote',
+            message: `Se eliminará el lote: ${summary}`,
+            confirmText: 'Eliminar',
+            severity: 'danger',
+        });
+        if (!ok) return;
+        del({ id: entryId, sessionId: session.id });
+    };
 
     if (entries.length === 0) {
         return (
@@ -447,11 +478,10 @@ function EntriesList({ session }: { session: RepackSession }) {
                             <Tooltip title="Eliminar lote">
                                 <IconButton
                                     size="small" color="error"
-                                    onClick={() => {
-                                        if (window.confirm('¿Eliminar este lote?')) {
-                                            del({ id: e.id, sessionId: session.id });
-                                        }
-                                    }}
+                                    onClick={() => onDelete(
+                                        e.id,
+                                        `${e.material_code}${e.product_name ? ' · ' + e.product_name : ''} (${e.box_count} cajas)`,
+                                    )}
                                 >
                                     <DeleteIcon fontSize="small" />
                                 </IconButton>
