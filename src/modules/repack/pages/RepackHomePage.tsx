@@ -39,7 +39,8 @@ import {
     Cancel as CancelIcon,
     History as HistoryIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers';
 
 import {
     useGetActiveSessionQuery,
@@ -427,11 +428,11 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
                         />
                     </Grid>
                     <Grid item xs={6} sm={6}>
-                        <TextField
-                            fullWidth size="small" type="date" label="Vencimiento *"
-                            InputLabelProps={{ shrink: true }}
-                            value={exp}
-                            onChange={(e) => setExp(e.target.value)}
+                        <DatePicker
+                            label="Vencimiento *"
+                            value={exp ? parseISO(exp) : null}
+                            onChange={(v) => setExp(v && isValid(v) ? format(v, 'yyyy-MM-dd') : '')}
+                            slotProps={{ textField: { size: 'small', fullWidth: true } }}
                         />
                     </Grid>
                 </Grid>
