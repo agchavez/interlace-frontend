@@ -53,12 +53,18 @@ export const workstationApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${API_URL}/api`,
         prepareHeaders: (headers, { getState }) => {
-            // En modo TV el usuario humano no existe — autenticamos con
-            // X-TV-Token para que el backend resuelva la sesión TV.
-            const tvToken = getTvToken();
-            if (tvToken) {
-                headers.set('X-TV-Token', tvToken);
-                return headers;
+            // Solo usamos X-TV-Token cuando la URL actual es de la app TV.
+            // Si miramos solo la presencia del token en localStorage, todo
+            // browser que alguna vez vinculó una TV pasa X-TV-Token incluso
+            // desde la app humana y rompe los endpoints con JWT.
+            const onTvRoute = typeof window !== 'undefined'
+                && window.location.pathname.startsWith('/tv/');
+            if (onTvRoute) {
+                const tvToken = getTvToken();
+                if (tvToken) {
+                    headers.set('X-TV-Token', tvToken);
+                    return headers;
+                }
             }
             const token = (getState() as RootState).auth.token;
             if (token) headers.set('Authorization', `Bearer ${token}`);
