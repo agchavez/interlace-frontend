@@ -1,8 +1,8 @@
 /**
  * Página principal del operario de Reempaque.
  *
- * Si no hay sesión activa: card grande con botón "Iniciar Reempaque".
- * Si hay sesión activa: muestra cronómetro vivo, lista de entries con
+ * Si no hay jornada activa: card grande con botón "Iniciar Reempaque".
+ * Si hay jornada activa: muestra cronómetro vivo, lista de entries con
  * total acumulado, formulario para agregar lote y botón "Finalizar".
  */
 import { useEffect, useMemo, useState } from 'react';
@@ -80,7 +80,7 @@ export default function RepackHomePage() {
                     gap: 3,
                     alignItems: 'flex-start',
                 }}>
-                    {/* Columna izquierda: sesión + agregar lote */}
+                    {/* Columna izquierda: jornada + agregar lote */}
                     <Box>
                         <ActiveSessionCard session={active} />
                         <AddEntryForm sessionId={active.id} />
@@ -117,7 +117,7 @@ function Header() {
                     Reempaque
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Tarea de almacén · medición de cajas / hora por sesión
+                    Tarea de almacén · medición de cajas / hora por jornada
                 </Typography>
             </Box>
         </Box>
@@ -135,7 +135,7 @@ function NoSessionView() {
         try {
             await start({ notes }).unwrap();
         } catch (err: any) {
-            setError(err?.data?.error || err?.data?.detail || 'No se pudo iniciar la sesión.');
+            setError(err?.data?.error || err?.data?.detail || 'No se pudo iniciar la jornada.');
         }
     };
 
@@ -146,10 +146,10 @@ function NoSessionView() {
                     <StartIcon sx={{ fontSize: 40 }} />
                 </Avatar>
                 <Typography variant="h6" fontWeight={700} gutterBottom>
-                    Sin sesión activa
+                    Sin jornada activa
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Iniciá una sesión para empezar a digitar los lotes reempacados.
+                    Iniciá una jornada para empezar a digitar los lotes reempacados.
                 </Typography>
 
                 {error && <Alert severity="error" sx={{ mb: 2, textAlign: 'left' }}>{error}</Alert>}
@@ -215,33 +215,33 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
 
     const onFinish = async () => {
         const ok = await confirm({
-            title: 'Cerrar sesión de reempaque',
-            message: 'Se calculará la métrica final (cajas/hora) y la sesión quedará registrada.',
-            confirmText: 'Cerrar sesión',
+            title: 'Cerrar jornada de reempaque',
+            message: 'Se calculará la métrica final (cajas/hora) y la jornada quedará registrada.',
+            confirmText: 'Cerrar jornada',
             confirmColor: 'success',
             severity: 'success',
         });
         if (!ok) return;
         try {
             await finish(session.id).unwrap();
-            toast.success('Sesión cerrada y métrica registrada.');
+            toast.success('Jornada cerrada y métrica registrada.');
         } catch (err: any) {
-            toast.error(err?.data?.error || 'Error al cerrar sesión');
+            toast.error(err?.data?.error || 'Error al cerrar jornada');
         }
     };
 
     const onCancel = async () => {
         const ok = await confirm({
-            title: 'Cancelar sesión',
-            message: 'La sesión se cerrará sin registrar la métrica de cajas/hora.',
-            confirmText: 'Cancelar sesión',
+            title: 'Cancelar jornada',
+            message: 'La jornada se cerrará sin registrar la métrica de cajas/hora.',
+            confirmText: 'Cancelar jornada',
             confirmColor: 'error',
             severity: 'danger',
         });
         if (!ok) return;
         try {
             await cancel(session.id).unwrap();
-            toast.success('Sesión cancelada.');
+            toast.success('Jornada cancelada.');
         } catch (err: any) {
             toast.error(err?.data?.error || 'Error al cancelar');
         }
@@ -254,7 +254,7 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
                     <Box>
                         <Chip
                             size="small"
-                            label="Sesión Activa"
+                            label="Jornada Activa"
                             sx={{ bgcolor: C.primary, color: '#fff', fontWeight: 700, mb: 1 }}
                         />
                         <Typography variant="body2" color="text.secondary">
@@ -329,27 +329,34 @@ function StatItem({
 
 function AddEntryForm({ sessionId }: { sessionId: number }) {
     const [add, { isLoading }] = useAddEntryMutation();
-    const [materialCode, setMaterialCode] = useState('');
-    const [productName, setProductName] = useState('');
+    const [product, setProduct] = useState<Product | null>(null);
+    const [productSearch, setProductSearch] = useState('');
     const [boxCount, setBoxCount] = useState<string>('');
     const [exp, setExp] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
 
+    const debouncedSearch = useMemo(() => productSearch.trim(), [productSearch]);
+    const { data: productsData, isFetching } = useGetProductQuery(
+        { search: debouncedSearch, limit: 30, offset: 0, id: null } as any,
+        { skip: debouncedSearch.length < 2 },
+    );
+    const productOptions: Product[] = productsData?.results || [];
+
     const reset = () => {
-        setMaterialCode(''); setProductName(''); setBoxCount(''); setExp('');
+        setProduct(null); setProductSearch(''); setBoxCount(''); setExp('');
     };
 
     const onSubmit = async () => {
         setError(null);
-        if (!materialCode.trim() || !boxCount || !exp) {
-            setError('Código, cajas y vencimiento son requeridos.');
-            return;
-        }
+        if (!product) { setError('Seleccioná un producto del catálogo.'); return; }
+        if (!boxCount) { setError('Ingresá la cantidad de cajas.'); return; }
+        if (!exp) { setError('Ingresá la fecha de vencimiento.'); return; }
         try {
             await add({
                 session: sessionId,
-                material_code: materialCode.trim(),
-                product_name: productName.trim(),
+                product: product.id,
+                material_code: product.sap_code || String(product.id),
+                product_name: product.name,
                 box_count: Number(boxCount),
                 expiration_date: exp,
             }).unwrap();
@@ -368,21 +375,50 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
                 </Typography>
                 {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
                 <Grid container spacing={1.5}>
-                    <Grid item xs={6} sm={4}>
-                        <TextField
-                            fullWidth size="small" label="Código de material *"
-                            value={materialCode}
-                            onChange={(e) => setMaterialCode(e.target.value)}
+                    <Grid item xs={12}>
+                        <Autocomplete
+                            options={productOptions}
+                            value={product}
+                            onChange={(_, val) => setProduct(val)}
+                            inputValue={productSearch}
+                            onInputChange={(_, val) => setProductSearch(val)}
+                            getOptionLabel={(o) => `${o.sap_code || '—'} · ${o.name}`}
+                            isOptionEqualToValue={(a, b) => a.id === b.id}
+                            loading={isFetching}
+                            filterOptions={(x) => x}
+                            noOptionsText={debouncedSearch.length < 2 ? 'Escriba código o nombre…' : 'Sin resultados'}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                    <Box>
+                                        <Typography variant="body2" fontWeight={600}>
+                                            {option.name}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">
+                                            SAP: {option.sap_code || '—'}{option.brand ? ` · ${option.brand}` : ''}
+                                        </Typography>
+                                    </Box>
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Producto *"
+                                    size="small"
+                                    placeholder="Buscar por código SAP o nombre…"
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {isFetching ? <CircularProgress size={16} /> : null}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <TextField
-                            fullWidth size="small" label="Producto (opcional)"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                        />
-                    </Grid>
-                    <Grid item xs={6} sm={2}>
+                    <Grid item xs={6} sm={6}>
                         <TextField
                             fullWidth size="small" type="number" label="Cajas *"
                             value={boxCount}
@@ -390,7 +426,7 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
                             inputProps={{ min: 1 }}
                         />
                     </Grid>
-                    <Grid item xs={6} sm={2}>
+                    <Grid item xs={6} sm={6}>
                         <TextField
                             fullWidth size="small" type="date" label="Vencimiento *"
                             InputLabelProps={{ shrink: true }}
@@ -507,7 +543,7 @@ function RecentSessions() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
                     <HistoryIcon fontSize="small" sx={{ color: C.soft }} />
                     <Typography variant="subtitle2" fontWeight={700}>
-                        Sesiones de hoy
+                        Jornadas de hoy
                     </Typography>
                 </Box>
                 <Divider sx={{ mb: 1.5 }} />
