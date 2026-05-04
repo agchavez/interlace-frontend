@@ -16,6 +16,7 @@ import WorkRoleGuard from './components/WorkRoleGuard';
 import RoleWorkstationPage from './pages/RoleWorkstationPage';
 import RepackHomePage from '../repack/pages/RepackHomePage';
 import RepackOperationsPage from '../repack/pages/RepackOperationsPage';
+import RepackSessionDetailPage from '../repack/pages/RepackSessionDetailPage';
 
 export default function WorkRouter() {
     return (
@@ -37,6 +38,7 @@ export default function WorkRouter() {
             <Route path="/repack" element={<RepackHomePage />} />
             <Route path="/repack/operations" element={<RepackOperationsPage />} />
             <Route path="/repack/workstation" element={<RoleWorkstationPage role="repack" />} />
+            <Route path="/repack/:id" element={<RepackSessionDetailPage />} />
             <Route path="/vendor"     element={<WorkRoleGuard role="VENDOR"><VendorHome /></WorkRoleGuard>} />
             <Route path="/vendor/:id" element={<WorkRoleGuard role="VENDOR"><VendorPautaDetail /></WorkRoleGuard>} />
             <Route path="*" element={<Navigate to="/work" replace />} />

@@ -1,7 +1,7 @@
 /**
  * Operaciones del Día · Almacén · Reempaque.
  *
- * Vista del supervisor: ve todas las sesiones del día (activas + cerradas),
+ * Vista del supervisor: ve todas las jornadas del día (activas + cerradas),
  * puede iniciar una nueva asignándole un operario (filtrado por
  * WAREHOUSE_ASSISTANT/LOADER), y puede finalizar o cancelar las activas.
  */
@@ -42,6 +42,7 @@ import {
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 import {
     useListSessionsQuery,
@@ -150,7 +151,7 @@ function Header({
                         Operaciones · Reempaque
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Sesiones activas y cerradas del día · supervisar y asignar operarios
+                        Jornadas activas y cerradas del día · supervisar y asignar operarios
                     </Typography>
                 </Box>
             </Box>
@@ -164,7 +165,7 @@ function Header({
                         '&:hover': { bgcolor: C.primaryDark },
                     }}
                 >
-                    Iniciar sesión
+                    Iniciar jornada
                 </Button>
             </Stack>
         </Box>
@@ -246,35 +247,36 @@ function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loadi
     const [finish, { isLoading: finishing }] = useFinishSessionMutation();
     const [cancel, { isLoading: cancelling }] = useCancelSessionMutation();
     const confirm = useConfirm();
+    const navigate = useNavigate();
 
     const onFinish = async (id: number) => {
         const ok = await confirm({
-            title: 'Cerrar sesión de reempaque',
-            message: 'Se calculará la métrica final (cajas/hora) y la sesión quedará registrada.',
-            confirmText: 'Cerrar sesión',
+            title: 'Cerrar jornada de reempaque',
+            message: 'Se calculará la métrica final (cajas/hora) y la jornada quedará registrada.',
+            confirmText: 'Cerrar jornada',
             confirmColor: 'success',
             severity: 'success',
         });
         if (!ok) return;
         try {
             await finish(id).unwrap();
-            toast.success('Sesión cerrada.');
+            toast.success('Jornada cerrada.');
         } catch (err: any) {
-            toast.error(err?.data?.error || 'Error al cerrar sesión');
+            toast.error(err?.data?.error || 'Error al cerrar jornada');
         }
     };
     const onCancel = async (id: number) => {
         const ok = await confirm({
-            title: 'Cancelar sesión',
-            message: 'La sesión se cerrará sin registrar la métrica de cajas/hora.',
-            confirmText: 'Cancelar sesión',
+            title: 'Cancelar jornada',
+            message: 'La jornada se cerrará sin registrar la métrica de cajas/hora.',
+            confirmText: 'Cancelar jornada',
             confirmColor: 'error',
             severity: 'danger',
         });
         if (!ok) return;
         try {
             await cancel(id).unwrap();
-            toast.success('Sesión cancelada.');
+            toast.success('Jornada cancelada.');
         } catch (err: any) {
             toast.error(err?.data?.error || 'Error al cancelar');
         }
@@ -371,12 +373,12 @@ function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loadi
         {
             field: 'actions',
             headerName: 'Acciones',
-            width: 130, align: 'center', headerAlign: 'center', sortable: false,
+            width: 160, align: 'center', headerAlign: 'center', sortable: false,
             renderCell: (p: GridRenderCellParams) => {
                 if (p.row.status !== 'ACTIVE') {
                     return (
                         <Tooltip title="Ver detalle">
-                            <IconButton size="small">
+                            <IconButton size="small" onClick={() => navigate(`/work/repack/${p.row.id}`)}>
                                 <ViewIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
@@ -384,7 +386,12 @@ function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loadi
                 }
                 return (
                     <Stack direction="row" spacing={0.5}>
-                        <Tooltip title="Finalizar sesión">
+                        <Tooltip title="Ver detalle">
+                            <IconButton size="small" onClick={() => navigate(`/work/repack/${p.row.id}`)}>
+                                <ViewIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Finalizar jornada">
                             <span>
                                 <IconButton
                                     size="small" color="success"
@@ -422,7 +429,7 @@ function SessionsTable({ sessions, loading }: { sessions: RepackSession[]; loadi
             pageSizeOptions={[10, 25, 50]}
             initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
             sx={{ border: 0 }}
-            localeText={{ noRowsLabel: 'Sin sesiones para esta fecha.' }}
+            localeText={{ noRowsLabel: 'Sin jornadas para esta fecha.' }}
         />
     );
 }
@@ -456,10 +463,10 @@ function StartSessionDialog({
                 notes,
                 operational_date: operationalDate,
             }).unwrap();
-            toast.success(`Sesión iniciada para ${personnel.full_name}`);
+            toast.success(`Jornada iniciada para ${personnel.full_name}`);
             onClose();
         } catch (err: any) {
-            setError(err?.data?.error || err?.data?.detail || 'No se pudo iniciar la sesión');
+            setError(err?.data?.error || err?.data?.detail || 'No se pudo iniciar la jornada');
         }
     };
 
@@ -471,7 +478,7 @@ function StartSessionDialog({
                 </Avatar>
                 <Box>
                     <Typography variant="subtitle1" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                        Iniciar sesión de Reempaque
+                        Iniciar jornada de Reempaque
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                         Asignar a un operario · {operationalDate}
@@ -547,7 +554,7 @@ function StartSessionDialog({
                         '&:hover': { bgcolor: C.primaryDark },
                     }}
                 >
-                    Iniciar sesión
+                    Iniciar jornada
                 </Button>
             </DialogActions>
         </Dialog>
