@@ -29,6 +29,7 @@ import {
     EventAvailable as DateIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useGetSessionQuery } from '../services/repackApi';
@@ -96,7 +97,7 @@ export default function RepackSessionDetailPage() {
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <StatCard
                     icon={<DateIcon />} label="Fecha operativa"
-                    value={format(new Date(session.operational_date), 'dd MMM yyyy')}
+                    value={format(new Date(session.operational_date), 'dd MMM yyyy', { locale: es })}
                 />
                 <StatCard
                     icon={<ClockIcon />} label="Inicio"
@@ -168,31 +169,49 @@ export default function RepackSessionDetailPage() {
                         </Box>
                     ) : (
                         <Stack spacing={1}>
-                            {session.entries!.map((e) => (
-                                <Box
-                                    key={e.id}
-                                    sx={{
-                                        display: 'flex', alignItems: 'center', gap: 2,
-                                        p: 1.5, borderRadius: 2,
-                                        bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider',
-                                    }}
-                                >
-                                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                                        <Typography variant="body2" fontWeight={700} noWrap>
-                                            {e.product_name || '—'}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">
-                                            SAP: {e.material_code} · Vence: {format(new Date(e.expiration_date), 'dd MMM yyyy')}
-                                        </Typography>
+                            {session.entries!.map((e) => {
+                                const isNegative = e.box_count < 0;
+                                const valueColor = isNegative ? C.danger : C.primary;
+                                const expLabel = e.expiration_date
+                                    ? `Vence: ${format(new Date(e.expiration_date), 'dd MMM yyyy', { locale: es })}`
+                                    : null;
+                                const hourLabel = e.created_at
+                                    ? format(new Date(e.created_at), 'HH:mm')
+                                    : null;
+                                return (
+                                    <Box
+                                        key={e.id}
+                                        sx={{
+                                            display: 'flex', alignItems: 'center', gap: 2,
+                                            p: 1.5, borderRadius: 2,
+                                            bgcolor: isNegative ? 'rgba(220,38,38,0.06)' : 'grey.50',
+                                            border: '1px solid',
+                                            borderColor: isNegative ? 'rgba(220,38,38,0.25)' : 'divider',
+                                        }}
+                                    >
+                                        {hourLabel && (
+                                            <Chip
+                                                size="small" label={hourLabel}
+                                                sx={{ fontFamily: 'monospace', fontWeight: 700, height: 22 }}
+                                            />
+                                        )}
+                                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                                            <Typography variant="body2" fontWeight={700} noWrap>
+                                                {e.product_name || '—'}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">
+                                                SAP: {e.material_code}{expLabel ? ` · ${expLabel}` : ''}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+                                            <Typography sx={{ fontWeight: 800, color: valueColor, fontFamily: 'monospace' }}>
+                                                {e.box_count > 0 ? `+${e.box_count}` : e.box_count}
+                                            </Typography>
+                                            <Typography variant="caption" color="text.secondary">cajas</Typography>
+                                        </Box>
                                     </Box>
-                                    <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
-                                        <Typography sx={{ fontWeight: 800, color: C.primary, fontFamily: 'monospace' }}>
-                                            {e.box_count}
-                                        </Typography>
-                                        <Typography variant="caption" color="text.secondary">cajas</Typography>
-                                    </Box>
-                                </Box>
-                            ))}
+                                );
+                            })}
                         </Stack>
                     )}
                 </CardContent>

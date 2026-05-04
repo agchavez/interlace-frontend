@@ -3,6 +3,7 @@
  */
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { RootState } from '../../../store/store';
+import { getTvToken } from '../../tv/utils/tvToken';
 import type {
     ProhibitionCatalogItem,
     RiskCatalogItem,
@@ -52,6 +53,13 @@ export const workstationApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${API_URL}/api`,
         prepareHeaders: (headers, { getState }) => {
+            // En modo TV el usuario humano no existe — autenticamos con
+            // X-TV-Token para que el backend resuelva la sesión TV.
+            const tvToken = getTvToken();
+            if (tvToken) {
+                headers.set('X-TV-Token', tvToken);
+                return headers;
+            }
             const token = (getState() as RootState).auth.token;
             if (token) headers.set('Authorization', `Bearer ${token}`);
             return headers;

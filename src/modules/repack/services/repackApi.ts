@@ -58,13 +58,16 @@ export const repackApi = createApi({
         }),
 
         // ──── Entries ────
+        // box_count > 0 = registro de lote real (product + expiration_date).
+        // box_count < 0 = ajuste rápido (product/expiration opcionales).
+        // El backend valida y rechaza box_count == 0.
         addEntry: builder.mutation<RepackEntry, {
             session: number;
             product?: number | null;
-            material_code: string;
+            material_code?: string;
             product_name?: string;
             box_count: number;
-            expiration_date: string;
+            expiration_date?: string | null;
             notes?: string;
         }>({
             query: (body) => ({ url: '/repack-entry/', method: 'POST', body }),

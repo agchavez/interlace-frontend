@@ -33,6 +33,7 @@ import {
     PlayArrow as StartIcon,
     Stop as StopIcon,
     Add as AddIcon,
+    Remove as RemoveIcon,
     Inventory2 as BoxIcon,
     Schedule as ClockIcon,
     Delete as DeleteIcon,
@@ -40,6 +41,7 @@ import {
     History as HistoryIcon,
 } from '@mui/icons-material';
 import { format, isValid, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { DatePicker } from '@mui/x-date-pickers';
 
 import {
@@ -64,6 +66,7 @@ const C = {
 };
 
 
+
 export default function RepackHomePage() {
     const { data: active, isLoading } = useGetActiveSessionQuery();
 
@@ -81,12 +84,12 @@ export default function RepackHomePage() {
                     gap: 3,
                     alignItems: 'flex-start',
                 }}>
-                    {/* Columna izquierda: jornada + agregar lote */}
+                    {/* Columna izquierda: jornada + agregar lote nuevo */}
                     <Box>
                         <ActiveSessionCard session={active} />
                         <AddEntryForm sessionId={active.id} />
                     </Box>
-                    {/* Columna derecha: lotes + historial */}
+                    {/* Columna derecha: lista con +/- inline + historial */}
                     <Box>
                         <EntriesList session={active} />
                         <RecentSessions />
@@ -259,7 +262,7 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
                             sx={{ bgcolor: C.primary, color: '#fff', fontWeight: 700, mb: 1 }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                            Iniciada: {format(new Date(session.started_at), 'dd MMM yyyy · HH:mm')}
+                            Iniciada: {format(new Date(session.started_at), 'dd MMM yyyy · HH:mm', { locale: es })}
                         </Typography>
                     </Box>
                     <Stack direction="row" spacing={1}>
@@ -454,15 +457,30 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
 }
 
 
+/**
+ * Lista de movimientos con +/- inline.
+ *
+ * El operario tap en un item con SKU → se expande mostrando 5 botones:
+ * +1, +5, +10, -1, -5. Cada click crea un nuevo entry con `created_at=now()`
+ * y conserva el producto + fecha de vencimiento del lote tocado, para que
+ * los ajustes mantengan trazabilidad por lote.
+ *
+ * Para mobile esto evita scrollear hasta arriba: los botones aparecen
+ * exactamente al lado del lote que querés ajustar.
+ */
 function EntriesList({ session }: { session: RepackSession }) {
     const [del] = useDeleteEntryMutation();
+    const [add, { isLoading: adjusting }] = useAddEntryMutation();
     const confirm = useConfirm();
     const entries = session.entries || [];
 
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
     const onDelete = async (entryId: number, summary: string) => {
         const ok = await confirm({
-            title: 'Eliminar lote',
-            message: `Se eliminará el lote: ${summary}`,
+            title: 'Eliminar registro',
+            message: `Se eliminará: ${summary}. La columna del SIC en esa hora se ajustará.`,
             confirmText: 'Eliminar',
             severity: 'danger',
         });
@@ -470,12 +488,35 @@ function EntriesList({ session }: { session: RepackSession }) {
         del({ id: entryId, sessionId: session.id });
     };
 
+    const adjust = async (e: typeof entries[number], delta: number) => {
+        if (!e.product) return;
+        setError(null);
+        try {
+            await add({
+                session: session.id,
+                box_count: delta,
+                product: e.product,
+                material_code: e.material_code,
+                product_name: e.product_name,
+                ...(e.expiration_date ? { expiration_date: e.expiration_date } : {}),
+            }).unwrap();
+            const sign = delta > 0 ? '+' : '';
+            toast.success(`${sign}${delta} ${Math.abs(delta) === 1 ? 'caja' : 'cajas'} registradas`);
+        } catch (err: any) {
+            setError(err?.data?.error || err?.data?.detail || 'Error al registrar el ajuste');
+        }
+    };
+
+    const toggleSelect = (id: number) => {
+        setSelectedId((curr) => (curr === id ? null : id));
+    };
+
     if (entries.length === 0) {
         return (
             <Card sx={{ borderRadius: 3, mb: 3 }}>
                 <CardContent sx={{ textAlign: 'center', py: 4 }}>
                     <Typography variant="body2" color="text.secondary">
-                        Sin lotes registrados todavía. Agregá el primero arriba.
+                        Sin movimientos todavía. Agregá un lote desde el formulario de la izquierda.
                     </Typography>
                 </CardContent>
             </Card>
@@ -484,52 +525,165 @@ function EntriesList({ session }: { session: RepackSession }) {
 
     return (
         <Card sx={{ borderRadius: 3, mb: 3 }}>
-            <CardContent>
-                <Typography variant="subtitle1" fontWeight={700} gutterBottom>
-                    Lotes ({entries.length})
-                </Typography>
-                <Stack spacing={1}>
-                    {entries.map((e) => (
-                        <Box
-                            key={e.id}
-                            sx={{
-                                display: 'flex', alignItems: 'center', gap: 1.5,
-                                p: 1.5, borderRadius: 2,
-                                bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider',
-                            }}
-                        >
-                            <Box sx={{ flex: 1, minWidth: 0 }}>
-                                <Typography variant="body2" fontWeight={700} noWrap>
-                                    {e.material_code}{e.product_name ? ` · ${e.product_name}` : ''}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                    Vence: {format(new Date(e.expiration_date), 'dd MMM yyyy')}
-                                </Typography>
-                            </Box>
-                            <Box sx={{ textAlign: 'right' }}>
-                                <Typography sx={{ fontWeight: 800, color: C.primary, fontFamily: 'monospace' }}>
-                                    {e.box_count}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">cajas</Typography>
-                            </Box>
-                            <Tooltip title="Eliminar lote">
-                                <IconButton
-                                    size="small" color="error"
-                                    onClick={() => onDelete(
-                                        e.id,
-                                        `${e.material_code}${e.product_name ? ' · ' + e.product_name : ''} (${e.box_count} cajas)`,
+            <CardContent sx={{ pb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                        Movimientos ({entries.length})
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        · tocá un lote para sumar o restar cajas
+                    </Typography>
+                </Box>
+                {error && <Alert severity="error" sx={{ mb: 1.5 }}>{error}</Alert>}
+                <Stack
+                    spacing={1}
+                    sx={{
+                        maxHeight: { xs: 420, md: 600 },
+                        overflowY: 'auto',
+                        pr: 0.5,
+                    }}
+                >
+                    {entries.map((e) => {
+                        const isNegative = e.box_count < 0;
+                        const isSelectable = !!e.product;
+                        const isSelected = isSelectable && selectedId === e.id;
+                        const valueColor = isNegative ? '#dc2626' : C.primary;
+                        const expDate = e.expiration_date
+                            ? format(new Date(e.expiration_date), 'dd MMM yyyy', { locale: es })
+                            : null;
+                        const hourLabel = e.created_at
+                            ? format(new Date(e.created_at), 'HH:mm')
+                            : null;
+                        return (
+                            <Box
+                                key={e.id}
+                                onClick={isSelectable ? () => toggleSelect(e.id) : undefined}
+                                sx={{
+                                    p: 1.25, borderRadius: 2,
+                                    cursor: isSelectable ? 'pointer' : 'default',
+                                    bgcolor: isSelected
+                                        ? C.primaryBg
+                                        : isNegative ? 'rgba(220,38,38,0.06)' : 'grey.50',
+                                    border: '2px solid',
+                                    borderColor: isSelected
+                                        ? C.primary
+                                        : isNegative ? 'rgba(220,38,38,0.25)' : 'transparent',
+                                    transition: 'background-color .15s, border-color .15s',
+                                    '&:hover': isSelectable && !isSelected
+                                        ? { bgcolor: 'rgba(123,31,162,0.04)' }
+                                        : undefined,
+                                }}
+                            >
+                                {/* Fila 1 — info del entry */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                                    {hourLabel && (
+                                        <Chip
+                                            label={hourLabel} size="small"
+                                            sx={{
+                                                fontFamily: 'monospace', fontWeight: 700,
+                                                bgcolor: '#1f293720', color: '#1f2937', height: 22,
+                                                flexShrink: 0,
+                                            }}
+                                        />
                                     )}
-                                >
-                                    <DeleteIcon fontSize="small" />
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                    ))}
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Typography variant="body2" fontWeight={700} noWrap>
+                                            {e.material_code}{e.product_name ? ` · ${e.product_name}` : ''}
+                                        </Typography>
+                                        {expDate ? (
+                                            <Chip
+                                                label={`Vence ${expDate}`}
+                                                size="small"
+                                                sx={{
+                                                    mt: 0.25, height: 18,
+                                                    bgcolor: isSelected ? C.primary : 'rgba(123,31,162,0.12)',
+                                                    color: isSelected ? '#fff' : C.primary,
+                                                    fontWeight: 700,
+                                                    '& .MuiChip-label': { fontSize: '0.65rem', px: 0.75 },
+                                                }}
+                                            />
+                                        ) : (
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                                sin lote
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    <Box sx={{ textAlign: 'right', minWidth: 56, flexShrink: 0 }}>
+                                        <Typography sx={{ fontWeight: 800, color: valueColor, fontFamily: 'monospace' }}>
+                                            {e.box_count > 0 ? `+${e.box_count}` : e.box_count}
+                                        </Typography>
+                                        <Typography variant="caption" color="text.secondary">cajas</Typography>
+                                    </Box>
+                                    <Tooltip title="Eliminar movimiento">
+                                        <IconButton
+                                            size="small" color="error"
+                                            onClick={(ev) => {
+                                                ev.stopPropagation();
+                                                onDelete(
+                                                    e.id,
+                                                    `${e.material_code}${e.product_name ? ' · ' + e.product_name : ''} (${e.box_count > 0 ? '+' : ''}${e.box_count} cajas)`,
+                                                );
+                                            }}
+                                        >
+                                            <DeleteIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
+                                </Box>
+
+                                {/* Fila 2 — botones +/- inline cuando está seleccionado */}
+                                {isSelected && (
+                                    <Box
+                                        onClick={(ev) => ev.stopPropagation()}
+                                        sx={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'repeat(5, 1fr)',
+                                            gap: 0.75,
+                                            mt: 1.25,
+                                        }}
+                                    >
+                                        <AdjustButton delta={1}  color="primary" disabled={adjusting} onClick={() => adjust(e, 1)} />
+                                        <AdjustButton delta={5}  color="primary" disabled={adjusting} onClick={() => adjust(e, 5)} />
+                                        <AdjustButton delta={10} color="primary" disabled={adjusting} onClick={() => adjust(e, 10)} />
+                                        <AdjustButton delta={-1} color="error"   disabled={adjusting} onClick={() => adjust(e, -1)} />
+                                        <AdjustButton delta={-5} color="error"   disabled={adjusting} onClick={() => adjust(e, -5)} />
+                                    </Box>
+                                )}
+                            </Box>
+                        );
+                    })}
                 </Stack>
             </CardContent>
         </Card>
     );
 }
+
+
+function AdjustButton({
+    delta, color, disabled, onClick,
+}: {
+    delta: number;
+    color: 'primary' | 'error';
+    disabled: boolean;
+    onClick: () => void;
+}) {
+    return (
+        <Button
+            variant="contained"
+            color={color}
+            onClick={onClick}
+            disabled={disabled}
+            startIcon={delta > 0 ? <AddIcon /> : <RemoveIcon />}
+            sx={{
+                textTransform: 'none', fontWeight: 800, minWidth: 0,
+                px: 0, py: 1, fontSize: '0.95rem',
+            }}
+        >
+            {Math.abs(delta)}
+        </Button>
+    );
+}
+
+
 
 
 function RecentSessions() {

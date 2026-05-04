@@ -74,14 +74,15 @@ export default function PerformersBlock({ workstationId, config, variant }: Prop
                             sx={{
                                 display: 'flex', alignItems: 'center', gap: 0.75,
                                 bgcolor: C.white, borderRadius: 0.75,
-                                px: 0.75, py: 0.4,
+                                px: 0.75, py: 0.5,
                                 border: `1px solid rgba(236,72,153,0.25)`,
+                                minWidth: 0,
                             }}
                         >
                             <Box sx={{
-                                width: 18, height: 18, borderRadius: '50%',
+                                width: 20, height: 20, borderRadius: '50%',
                                 bgcolor: C.pink, color: C.white,
-                                fontSize: '0.65rem', fontWeight: 800,
+                                fontSize: '0.7rem', fontWeight: 800,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 flexShrink: 0,
                             }}>
@@ -89,26 +90,28 @@ export default function PerformersBlock({ workstationId, config, variant }: Prop
                             </Box>
                             <Avatar
                                 src={p.photo_url || undefined}
-                                sx={{ width: 22, height: 22, fontSize: '0.6rem' }}
+                                sx={{ width: 24, height: 24, fontSize: '0.65rem', flexShrink: 0 }}
                             >
                                 {(p.name || '?').charAt(0)}
                             </Avatar>
-                            <Typography
-                                title={p.name}
-                                sx={{
-                                    fontSize: '0.7rem', fontWeight: 600, color: C.text,
-                                    flex: 1, minWidth: 0,
+                            <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                                <Typography
+                                    title={p.name}
+                                    sx={{
+                                        fontSize: '0.72rem', fontWeight: 700, color: C.text,
+                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {p.name}
+                                </Typography>
+                                <Typography sx={{
+                                    fontSize: '0.7rem', fontWeight: 800, color: C.pink,
+                                    fontFamily: 'monospace',
                                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {p.name}
-                            </Typography>
-                            <Typography sx={{
-                                fontSize: '0.78rem', fontWeight: 800, color: C.pink,
-                                fontFamily: 'monospace', flexShrink: 0,
-                            }}>
-                                {fmtValue(p.value)}{unit ? ` ${unit}` : ''}
-                            </Typography>
+                                }}>
+                                    {fmtValue(p.value)}{unit ? ` ${unit}` : ''}
+                                </Typography>
+                            </Box>
                         </Box>
                     ))}
                 </Box>

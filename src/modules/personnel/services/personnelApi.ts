@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../../../store';
+import { getTvToken } from '../../tv/utils/tvToken';
 import type {
   PersonnelProfile,
   PersonnelProfileList,
@@ -32,6 +33,12 @@ export const personnelApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_JS_APP_API_URL + '/api',
     prepareHeaders: (headers, { getState }) => {
+      // En modo TV no hay user humano — autenticamos con X-TV-Token.
+      const tvToken = getTvToken();
+      if (tvToken) {
+        headers.set('X-TV-Token', tvToken);
+        return headers;
+      }
       const token = (getState() as RootState).auth.token;
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
@@ -858,6 +865,16 @@ export interface MetricsLiveResponse {
     avg_total_move_min: MetricValueWithBand;
     samples_count: number;
   };
+  repack?: {
+    boxes_per_hour: MetricValueWithBand;
+    total_boxes_shift: MetricValueWithBand;
+    skus_per_session: MetricValueWithBand;
+    sessions_count: number;
+  };
+  /** Dict plano por metric_code → valor actual + bandas. Data-driven: se
+   *  popula automáticamente con cualquier PerformanceMetricType activo que
+   *  tenga samples del día. Lo consumen TriggersBlock / SicChartBlock. */
+  metrics_by_code?: Record<string, MetricValueWithBand & { code: string; label: string }>;
 }
 
 export interface PersonnelAutocompleteItem {

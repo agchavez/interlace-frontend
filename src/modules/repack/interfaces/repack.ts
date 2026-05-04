@@ -7,7 +7,7 @@ export interface RepackEntry {
     material_code: string;
     product_name: string;
     box_count: number;
-    expiration_date: string;
+    expiration_date: string | null;
     notes: string;
     created_at: string;
 }

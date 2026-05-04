@@ -66,6 +66,10 @@ interface Props {
     mode?: 'tv' | 'preview' | 'embedded';
     /** En modo preview/embedded: resalta la zona correspondiente con un glow */
     highlight?: WorkstationZone | null;
+    /** Vista individual: restringe la Carta SIC a esta persona. */
+    personnelId?: number;
+    /** YYYY-MM-DD; si se omite, el bloque resuelve hoy en HN. */
+    operationalDate?: string;
 }
 
 const ROLE_TITLE: Record<string, string> = {
@@ -97,7 +101,9 @@ const HIGHLIGHT_SX = {
 const isOn = (zone: WorkstationZone, highlight: WorkstationZone | null | undefined) =>
     highlight === zone ? HIGHLIGHT_SX : {};
 
-export default function WorkstationFixedLayout({ workstation, mode = 'tv', highlight }: Props) {
+export default function WorkstationFixedLayout({
+    workstation, mode = 'tv', highlight, personnelId, operationalDate,
+}: Props) {
     const clock = useClock();
     const hnClock = useMemo(
         () => clock.toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', timeZone: HN_TIMEZONE }),
@@ -212,7 +218,12 @@ export default function WorkstationFixedLayout({ workstation, mode = 'tv', highl
                     ...isOn('SIC_CHART', highlight),
                 }}>
                     {sic
-                        ? <SicChartBlock config={sic.config as SicChartBlockConfig} />
+                        ? <SicChartBlock
+                            config={sic.config as SicChartBlockConfig}
+                            distributorCenterId={workstation.distributor_center}
+                            personnelId={personnelId}
+                            operationalDate={operationalDate}
+                        />
                         : <EmptySlot label="Carta SIC sin configurar" tall />}
                 </Box>
 
