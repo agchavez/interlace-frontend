@@ -32,15 +32,27 @@ export default function RisksBlock({ config }: { config: RisksBlockConfig }) {
                     gridTemplateColumns: items.length <= 3
                         ? `repeat(${items.length}, 1fr)`
                         : 'repeat(3, 1fr)',
-                    gap: 1, height: '100%', alignContent: 'center',
+                    gap: 0.75,
+                    height: '100%', minHeight: 0,
+                    placeItems: 'center',
+                    overflow: 'hidden',
                 }}>
                     {items.map(r => {
                         const Icon = ICON_MAP[r.icon_name] || HazardIcon;
                         return (
-                            <Box key={r.id} sx={{ textAlign: 'center', p: 0.5 }}>
+                            <Box key={r.id} sx={{
+                                display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', justifyContent: 'center',
+                                width: '100%', height: '100%',
+                                minHeight: 0, p: 0.25, gap: 0.25,
+                                overflow: 'hidden',
+                            }}>
                                 <Box sx={{
-                                    position: 'relative', mx: 'auto',
-                                    width: { xs: 44, md: 60, lg: 72 }, height: { xs: 44, md: 60, lg: 72 },
+                                    position: 'relative',
+                                    width: '100%',
+                                    maxWidth: { xs: 40, md: 52, lg: 64 },
+                                    aspectRatio: '1',
+                                    minHeight: 0, flexShrink: 1,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 }}>
                                     <HazardIcon sx={{
@@ -48,13 +60,15 @@ export default function RisksBlock({ config }: { config: RisksBlockConfig }) {
                                         color: '#fbbf24', stroke: '#1f2937', strokeWidth: 0.5,
                                     }} />
                                     <Icon sx={{
-                                        color: '#1f2937', mt: 0.4, zIndex: 1,
-                                        fontSize: { xs: '1.1rem', md: '1.5rem', lg: '1.8rem' },
+                                        color: '#1f2937', zIndex: 1,
+                                        width: '45%', height: '45%',
+                                        mt: '8%',
                                     }} />
                                 </Box>
                                 <Typography sx={{
-                                    fontSize: { xs: '0.65rem', md: '0.78rem', lg: '0.88rem' },
-                                    color: '#1f2937', fontWeight: 600, mt: 0.5, lineHeight: 1.1,
+                                    fontSize: { xs: '0.6rem', md: '0.72rem', lg: '0.8rem' },
+                                    color: '#1f2937', fontWeight: 600, lineHeight: 1.1,
+                                    textAlign: 'center',
                                 }}>
                                     {r.name}
                                 </Typography>

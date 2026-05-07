@@ -32,15 +32,27 @@ export default function ProhibitionsBlock({ config }: { config: ProhibitionsBloc
                 <Box sx={{
                     display: 'grid',
                     gridTemplateColumns: items.length <= 2 ? `repeat(${items.length}, 1fr)` : 'repeat(2, 1fr)',
-                    gap: 1, height: '100%', alignContent: 'center',
+                    gap: 0.75,
+                    height: '100%', minHeight: 0,
+                    placeItems: 'center',
+                    overflow: 'hidden',
                 }}>
                     {items.map(p => {
                         const Icon = ICON_MAP[p.icon_name] || BlockIcon;
                         return (
-                            <Box key={p.id} sx={{ textAlign: 'center', p: 0.5 }}>
+                            <Box key={p.id} sx={{
+                                display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', justifyContent: 'center',
+                                width: '100%', height: '100%',
+                                minHeight: 0, p: 0.25, gap: 0.25,
+                                overflow: 'hidden',
+                            }}>
                                 <Box sx={{
-                                    position: 'relative', mx: 'auto',
-                                    width: { xs: 44, md: 60, lg: 72 }, height: { xs: 44, md: 60, lg: 72 },
+                                    position: 'relative',
+                                    width: '100%',
+                                    maxWidth: { xs: 40, md: 52, lg: 64 },
+                                    aspectRatio: '1',
+                                    minHeight: 0, flexShrink: 1,
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     borderRadius: '50%', border: `4px solid #dc2626`,
                                     '&::after': {
@@ -49,11 +61,12 @@ export default function ProhibitionsBlock({ config }: { config: ProhibitionsBloc
                                         transform: 'rotate(45deg)',
                                     },
                                 }}>
-                                    <Icon sx={{ color: '#1f2937', fontSize: { xs: '1.2rem', md: '1.55rem', lg: '1.85rem' } }} />
+                                    <Icon sx={{ color: '#1f2937', width: '55%', height: '55%' }} />
                                 </Box>
                                 <Typography sx={{
-                                    fontSize: { xs: '0.65rem', md: '0.78rem', lg: '0.88rem' },
-                                    color: '#1f2937', fontWeight: 600, mt: 0.5, lineHeight: 1.1,
+                                    fontSize: { xs: '0.6rem', md: '0.72rem', lg: '0.8rem' },
+                                    color: '#1f2937', fontWeight: 600, lineHeight: 1.1,
+                                    textAlign: 'center',
                                 }}>
                                     {p.name}
                                 </Typography>

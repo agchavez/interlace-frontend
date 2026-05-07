@@ -5,7 +5,7 @@
  * Si hay jornada activa: muestra cronómetro vivo, lista de entries con
  * total acumulado, formulario para agregar lote y botón "Finalizar".
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Alert,
     Autocomplete,
@@ -29,6 +29,10 @@ import { toast } from 'sonner';
 import { useConfirm } from '../../ui/components/ConfirmDialog';
 import { useGetProductQuery } from '../../../store/maintenance/maintenanceApi';
 import type { Product } from '../../../interfaces/tracking';
+import {
+    useGetPersonnelAutocompleteQuery,
+    type PersonnelAutocompleteItem,
+} from '../../personnel/services/personnelApi';
 import {
     PlayArrow as StartIcon,
     Stop as StopIcon,
@@ -129,15 +133,49 @@ function Header() {
 }
 
 
+const HELPER_POSITION_TYPES = 'WAREHOUSE_ASSISTANT,LOADER';
+const SUPERVISOR_HIERARCHY = 'SUPERVISOR,AREA_MANAGER,CD_MANAGER';
+
+
 function NoSessionView() {
     const [start, { isLoading }] = useStartSessionMutation();
     const [error, setError] = useState<string | null>(null);
     const [notes, setNotes] = useState('');
 
+    const [supervisor, setSupervisor] = useState<PersonnelAutocompleteItem | null>(null);
+    const [supervisorSearch, setSupervisorSearch] = useState('');
+    const [helpers, setHelpers] = useState<PersonnelAutocompleteItem[]>([]);
+    const [helperSearch, setHelperSearch] = useState('');
+
+    const { data: supervisorOptions = [], isFetching: loadingSup } = useGetPersonnelAutocompleteQuery({
+        search: supervisorSearch,
+        hierarchy_level: SUPERVISOR_HIERARCHY,
+        is_active: true,
+        limit: 30,
+    });
+    const { data: helperOptions = [], isFetching: loadingHelpers } = useGetPersonnelAutocompleteQuery({
+        search: helperSearch,
+        position_type: HELPER_POSITION_TYPES,
+        is_active: true,
+        limit: 50,
+    });
+
     const onStart = async () => {
         setError(null);
+        if (!supervisor) {
+            setError('Seleccioná el supervisor del turno.');
+            return;
+        }
+        if (helpers.length === 0) {
+            setError('Seleccioná al menos un ayudante.');
+            return;
+        }
         try {
-            await start({ notes }).unwrap();
+            await start({
+                notes,
+                supervisor_id: supervisor.id,
+                helper_ids: helpers.map((h) => h.id),
+            }).unwrap();
         } catch (err: any) {
             setError(err?.data?.error || err?.data?.detail || 'No se pudo iniciar la jornada.');
         }
@@ -145,43 +183,139 @@ function NoSessionView() {
 
     return (
         <Card sx={{ borderRadius: 3, mb: 3 }}>
-            <CardContent sx={{ textAlign: 'center', py: 6 }}>
-                <Avatar sx={{ bgcolor: C.primaryBg, color: C.primary, width: 80, height: 80, mx: 'auto', mb: 2 }}>
-                    <StartIcon sx={{ fontSize: 40 }} />
-                </Avatar>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                    Sin jornada activa
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Iniciá una jornada para empezar a digitar los lotes reempacados.
-                </Typography>
-
-                {error && <Alert severity="error" sx={{ mb: 2, textAlign: 'left' }}>{error}</Alert>}
-
-                <TextField
-                    label="Notas (opcional)"
-                    fullWidth
-                    size="small"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    sx={{ mb: 2, maxWidth: 420 }}
-                />
-                <Box>
-                    <Button
-                        variant="contained"
-                        size="large"
-                        startIcon={isLoading ? <CircularProgress size={18} color="inherit" /> : <StartIcon />}
-                        onClick={onStart}
-                        disabled={isLoading}
-                        sx={{
-                            bgcolor: C.primary, textTransform: 'none', fontWeight: 700,
-                            px: 4, py: 1.25, borderRadius: 2,
-                            '&:hover': { bgcolor: '#5e1782' },
-                        }}
-                    >
-                        Iniciar Reempaque
-                    </Button>
+            <CardContent sx={{ py: { xs: 4, md: 5 }, px: { xs: 2.5, md: 4 } }}>
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                    <Avatar sx={{ bgcolor: C.primaryBg, color: C.primary, width: 72, height: 72, mx: 'auto', mb: 2 }}>
+                        <StartIcon sx={{ fontSize: 36 }} />
+                    </Avatar>
+                    <Typography variant="h6" fontWeight={700} gutterBottom>
+                        Sin jornada activa
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Antes de iniciar, indicá quién supervisa y qué ayudantes están en el turno.
+                    </Typography>
                 </Box>
+
+                {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+                <Stack spacing={2} sx={{ maxWidth: 520, mx: 'auto' }}>
+                    <Autocomplete
+                        options={supervisorOptions}
+                        value={supervisor}
+                        onChange={(_, val) => setSupervisor(val)}
+                        inputValue={supervisorSearch}
+                        onInputChange={(_, val) => setSupervisorSearch(val)}
+                        getOptionLabel={(o) => `${o.full_name} (${o.employee_code})`}
+                        isOptionEqualToValue={(a, b) => a.id === b.id}
+                        loading={loadingSup}
+                        filterOptions={(x) => x}
+                        noOptionsText={supervisorSearch ? 'Sin resultados' : 'Escriba para buscar'}
+                        renderOption={(props, option) => (
+                            <li {...props} key={option.id}>
+                                <Box>
+                                    <Typography variant="body2" fontWeight={600}>{option.full_name}</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        #{option.employee_code} · {option.position}
+                                    </Typography>
+                                </Box>
+                            </li>
+                        )}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Supervisor del turno *"
+                                size="small"
+                                placeholder="Buscar supervisor…"
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <>
+                                            {loadingSup ? <CircularProgress color="inherit" size={16} /> : null}
+                                            {params.InputProps.endAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
+
+                    <Autocomplete
+                        multiple
+                        options={helperOptions}
+                        value={helpers}
+                        onChange={(_, val) => setHelpers(val)}
+                        inputValue={helperSearch}
+                        onInputChange={(_, val) => setHelperSearch(val)}
+                        getOptionLabel={(o) => `${o.full_name} (${o.employee_code})`}
+                        isOptionEqualToValue={(a, b) => a.id === b.id}
+                        loading={loadingHelpers}
+                        filterOptions={(x) => x}
+                        noOptionsText={helperSearch ? 'Sin resultados' : 'Escriba para buscar'}
+                        renderOption={(props, option) => (
+                            <li {...props} key={option.id}>
+                                <Box>
+                                    <Typography variant="body2" fontWeight={600}>{option.full_name}</Typography>
+                                    <Typography variant="caption" color="text.secondary">
+                                        #{option.employee_code} · {option.position}
+                                    </Typography>
+                                </Box>
+                            </li>
+                        )}
+                        renderTags={(value, getTagProps) =>
+                            value.map((option, index) => (
+                                <Chip
+                                    {...getTagProps({ index })}
+                                    key={option.id}
+                                    size="small"
+                                    label={option.full_name}
+                                    sx={{ bgcolor: C.primaryBg, color: C.primary, fontWeight: 600 }}
+                                />
+                            ))
+                        }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Ayudantes del turno *"
+                                size="small"
+                                placeholder={helpers.length === 0 ? 'Buscar ayudante de almacén o cargador…' : ''}
+                                helperText="Podés seleccionar varios"
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <>
+                                            {loadingHelpers ? <CircularProgress color="inherit" size={16} /> : null}
+                                            {params.InputProps.endAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
+
+                    <TextField
+                        label="Notas (opcional)"
+                        fullWidth size="small"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                    />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                        <Button
+                            variant="contained"
+                            size="large"
+                            startIcon={isLoading ? <CircularProgress size={18} color="inherit" /> : <StartIcon />}
+                            onClick={onStart}
+                            disabled={isLoading || !supervisor || helpers.length === 0}
+                            sx={{
+                                bgcolor: C.primary, textTransform: 'none', fontWeight: 700,
+                                px: 4, py: 1.25, borderRadius: 2,
+                                '&:hover': { bgcolor: '#5e1782' },
+                            }}
+                        >
+                            Iniciar Reempaque
+                        </Button>
+                    </Box>
+                </Stack>
             </CardContent>
         </Card>
     );
@@ -255,7 +389,7 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
         <Card sx={{ borderRadius: 3, mb: 3, border: `2px solid ${C.primary}` }}>
             <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-                    <Box>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Chip
                             size="small"
                             label="Jornada Activa"
@@ -264,6 +398,25 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
                         <Typography variant="body2" color="text.secondary">
                             Iniciada: {format(new Date(session.started_at), 'dd MMM yyyy · HH:mm', { locale: es })}
                         </Typography>
+                        {(session.supervisor_name || (session.helpers_detail || []).length > 0) && (
+                            <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5, alignItems: 'center' }}>
+                                {session.supervisor_name && (
+                                    <Chip
+                                        size="small"
+                                        label={`Supervisor: ${session.supervisor_name}`}
+                                        sx={{ bgcolor: C.primaryBg, color: C.primary, fontWeight: 600 }}
+                                    />
+                                )}
+                                {(session.helpers_detail || []).map((h) => (
+                                    <Chip
+                                        key={h.id} size="small"
+                                        label={h.full_name}
+                                        variant="outlined"
+                                        sx={{ borderColor: C.border, color: C.text }}
+                                    />
+                                ))}
+                            </Box>
+                        )}
                     </Box>
                     <Stack direction="row" spacing={1}>
                         <Button
@@ -460,22 +613,31 @@ function AddEntryForm({ sessionId }: { sessionId: number }) {
 /**
  * Lista de movimientos con +/- inline.
  *
- * El operario tap en un item con SKU → se expande mostrando 5 botones:
- * +1, +5, +10, -1, -5. Cada click crea un nuevo entry con `created_at=now()`
- * y conserva el producto + fecha de vencimiento del lote tocado, para que
- * los ajustes mantengan trazabilidad por lote.
- *
- * Para mobile esto evita scrollear hasta arriba: los botones aparecen
- * exactamente al lado del lote que querés ajustar.
+ * El operario tap en un item con SKU → se expande mostrando dos botones
+ * (+ y -). Cada tap suma o resta una caja en un buffer en memoria; tras
+ * 2s sin actividad para ese lote se envía un único entry con la suma neta
+ * (evita ráfagas de N requests cuando el operario aprieta + varias veces).
  */
+const DEBOUNCE_MS = 2000;
+
 function EntriesList({ session }: { session: RepackSession }) {
     const [del] = useDeleteEntryMutation();
-    const [add, { isLoading: adjusting }] = useAddEntryMutation();
+    const [add] = useAddEntryMutation();
     const confirm = useConfirm();
     const entries = session.entries || [];
 
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    const pendingRef = useRef<Map<number, number>>(new Map());
+    const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+    const [, forceTick] = useState(0);
+    const bumpRender = () => forceTick((x) => x + 1);
+
+    useEffect(() => () => {
+        timersRef.current.forEach((t) => clearTimeout(t));
+        timersRef.current.clear();
+    }, []);
 
     const onDelete = async (entryId: number, summary: string) => {
         const ok = await confirm({
@@ -488,8 +650,15 @@ function EntriesList({ session }: { session: RepackSession }) {
         del({ id: entryId, sessionId: session.id });
     };
 
-    const adjust = async (e: typeof entries[number], delta: number) => {
-        if (!e.product) return;
+    const flush = async (e: typeof entries[number]) => {
+        const delta = pendingRef.current.get(e.id) ?? 0;
+        pendingRef.current.delete(e.id);
+        bumpRender();
+        if (delta === 0) return;
+        if (!e.product) {
+            setError('No se puede ajustar un movimiento sin producto.');
+            return;
+        }
         setError(null);
         try {
             await add({
@@ -505,6 +674,20 @@ function EntriesList({ session }: { session: RepackSession }) {
         } catch (err: any) {
             setError(err?.data?.error || err?.data?.detail || 'Error al registrar el ajuste');
         }
+    };
+
+    const queueDelta = (e: typeof entries[number], step: 1 | -1) => {
+        const id = e.id;
+        const next = (pendingRef.current.get(id) ?? 0) + step;
+        pendingRef.current.set(id, next);
+        const existing = timersRef.current.get(id);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => {
+            timersRef.current.delete(id);
+            flush(e);
+        }, DEBOUNCE_MS);
+        timersRef.current.set(id, t);
+        bumpRender();
     };
 
     const toggleSelect = (id: number) => {
@@ -632,21 +815,11 @@ function EntriesList({ session }: { session: RepackSession }) {
 
                                 {/* Fila 2 — botones +/- inline cuando está seleccionado */}
                                 {isSelected && (
-                                    <Box
-                                        onClick={(ev) => ev.stopPropagation()}
-                                        sx={{
-                                            display: 'grid',
-                                            gridTemplateColumns: 'repeat(5, 1fr)',
-                                            gap: 0.75,
-                                            mt: 1.25,
-                                        }}
-                                    >
-                                        <AdjustButton delta={1}  color="primary" disabled={adjusting} onClick={() => adjust(e, 1)} />
-                                        <AdjustButton delta={5}  color="primary" disabled={adjusting} onClick={() => adjust(e, 5)} />
-                                        <AdjustButton delta={10} color="primary" disabled={adjusting} onClick={() => adjust(e, 10)} />
-                                        <AdjustButton delta={-1} color="error"   disabled={adjusting} onClick={() => adjust(e, -1)} />
-                                        <AdjustButton delta={-5} color="error"   disabled={adjusting} onClick={() => adjust(e, -5)} />
-                                    </Box>
+                                    <PendingAdjuster
+                                        pending={pendingRef.current.get(e.id) ?? 0}
+                                        onPlus={() => queueDelta(e, 1)}
+                                        onMinus={() => queueDelta(e, -1)}
+                                    />
                                 )}
                             </Box>
                         );
@@ -658,28 +831,63 @@ function EntriesList({ session }: { session: RepackSession }) {
 }
 
 
-function AdjustButton({
-    delta, color, disabled, onClick,
+function PendingAdjuster({
+    pending, onPlus, onMinus,
 }: {
-    delta: number;
-    color: 'primary' | 'error';
-    disabled: boolean;
-    onClick: () => void;
+    pending: number;
+    onPlus: () => void;
+    onMinus: () => void;
 }) {
+    const sign = pending > 0 ? '+' : '';
     return (
-        <Button
-            variant="contained"
-            color={color}
-            onClick={onClick}
-            disabled={disabled}
-            startIcon={delta > 0 ? <AddIcon /> : <RemoveIcon />}
+        <Box
+            onClick={(ev) => ev.stopPropagation()}
             sx={{
-                textTransform: 'none', fontWeight: 800, minWidth: 0,
-                px: 0, py: 1, fontSize: '0.95rem',
+                display: 'grid',
+                gridTemplateColumns: '1fr auto 1fr',
+                alignItems: 'center',
+                gap: 1, mt: 1.25,
             }}
         >
-            {Math.abs(delta)}
-        </Button>
+            <Button
+                variant="contained" color="error"
+                onClick={onMinus}
+                startIcon={<RemoveIcon />}
+                sx={{ textTransform: 'none', fontWeight: 800, py: 1.25, fontSize: '1.1rem' }}
+            >
+                Restar
+            </Button>
+            <Box sx={{ minWidth: 88, textAlign: 'center' }}>
+                {pending !== 0 ? (
+                    <>
+                        <Typography sx={{
+                            fontWeight: 800, fontFamily: 'monospace', fontSize: '1.4rem',
+                            color: pending > 0 ? C.primary : '#dc2626', lineHeight: 1.1,
+                        }}>
+                            {sign}{pending}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                            esperando 2s…
+                        </Typography>
+                    </>
+                ) : (
+                    <Typography variant="caption" color="text.secondary">
+                        +1 / -1 por toque
+                    </Typography>
+                )}
+            </Box>
+            <Button
+                variant="contained" color="primary"
+                onClick={onPlus}
+                startIcon={<AddIcon />}
+                sx={{
+                    textTransform: 'none', fontWeight: 800, py: 1.25, fontSize: '1.1rem',
+                    bgcolor: C.primary, '&:hover': { bgcolor: '#5e1782' },
+                }}
+            >
+                Sumar
+            </Button>
+        </Box>
     );
 }
 

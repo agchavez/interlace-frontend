@@ -12,6 +12,12 @@ export interface RepackEntry {
     created_at: string;
 }
 
+export interface RepackHelperMini {
+    id: number;
+    full_name: string;
+    employee_code: string;
+}
+
 export interface RepackSession {
     id: number;
     personnel: number;
@@ -24,6 +30,10 @@ export interface RepackSession {
     status: RepackStatus;
     status_display: string;
     notes: string;
+    supervisor: number | null;
+    supervisor_name: string | null;
+    helpers: number[];
+    helpers_detail: RepackHelperMini[];
     total_boxes: number;
     duration_seconds: number;
     boxes_per_hour: number;

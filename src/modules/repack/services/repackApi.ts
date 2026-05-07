@@ -40,7 +40,13 @@ export const repackApi = createApi({
             query: () => '/repack-session/active/',
             providesTags: ['RepackActiveSession'],
         }),
-        startSession: builder.mutation<RepackSession, { personnel_id?: number; notes?: string; operational_date?: string }>({
+        startSession: builder.mutation<RepackSession, {
+            personnel_id?: number;
+            notes?: string;
+            operational_date?: string;
+            supervisor_id?: number;
+            helper_ids?: number[];
+        }>({
             query: (body) => ({ url: '/repack-session/start/', method: 'POST', body }),
             invalidatesTags: ['RepackSession', 'RepackActiveSession'],
         }),
