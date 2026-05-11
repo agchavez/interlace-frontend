@@ -10,14 +10,27 @@ import {
 import type { PerformersBlockConfig } from '../../interfaces/workstation';
 import { useGetPerformersQuery } from '../../services/workstationApi';
 
-const C = {
-    pink:      '#db2777',
-    pinkSoft:  'rgba(236,72,153,0.10)',
-    pinkBg:    '#ec4899',
-    text:      '#1f2937',
-    soft:      '#831843',
-    white:     '#ffffff',
-};
+// Paleta por variant. Top usa verde (positivo), bottom usa rojo (negativo).
+// Reemplaza la paleta fija magenta original. Si querés volver a magenta para
+// un caso puntual, basta con sobreescribir el color en el config del bloque.
+const PALETTES = {
+    top: {
+        accent:    '#16a34a',
+        accentSoft:'rgba(22,163,74,0.10)',
+        accentBg:  '#22c55e',
+        text:      '#1f2937',
+        soft:      '#14532d',
+        white:     '#ffffff',
+    },
+    bottom: {
+        accent:    '#dc2626',
+        accentSoft:'rgba(220,38,38,0.10)',
+        accentBg:  '#ef4444',
+        text:      '#1f2937',
+        soft:      '#7f1d1d',
+        white:     '#ffffff',
+    },
+} as const;
 
 interface Props {
     workstationId: number;
@@ -40,19 +53,20 @@ export default function PerformersBlock({ workstationId, config, variant, operat
         { skip: !metricCode, pollingInterval: 60_000 },
     );
 
-    const title = config.title ?? (variant === 'top' ? 'Top performers' : 'Bottom performers');
+    const C = PALETTES[variant];
+    const title = config.title ?? (variant === 'top' ? 'Top Pickers' : 'Bottom Pickers');
     const rows = variant === 'top' ? data?.top : data?.bottom;
     const Icon = variant === 'top' ? TrophyIcon : DownIcon;
     const unit = data?.metric?.unit || '';
 
     return (
         <Box sx={{
-            bgcolor: C.pinkSoft, border: `2px solid ${C.pinkBg}`, borderRadius: 2,
+            bgcolor: C.accentSoft, border: `2px solid ${C.accentBg}`, borderRadius: 2,
             p: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: 0,
         }}>
             <Box sx={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5,
-                bgcolor: C.pink, color: C.white, borderRadius: 0.75, py: 0.5, mb: 1,
+                bgcolor: C.accent, color: C.white, borderRadius: 0.75, py: 0.5, mb: 1,
             }}>
                 <Icon sx={{ fontSize: '0.9rem' }} />
                 <Typography sx={{ fontSize: '0.78rem', fontWeight: 800 }}>
@@ -61,13 +75,13 @@ export default function PerformersBlock({ workstationId, config, variant, operat
             </Box>
 
             {!metricCode ? (
-                <CenterText soft>Configurá el KPI para ranquear desde el editor</CenterText>
+                <CenterText soft palette={C}>Configurá el KPI para ranquear desde el editor</CenterText>
             ) : isLoading ? (
                 <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CircularProgress size={18} sx={{ color: C.pink }} />
+                    <CircularProgress size={18} sx={{ color: C.accent }} />
                 </Box>
             ) : !rows || rows.length === 0 ? (
-                <CenterText soft>Sin datos por ahora</CenterText>
+                <CenterText soft palette={C}>Sin datos por ahora</CenterText>
             ) : (
                 <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5, minHeight: 0, overflow: 'auto' }}>
                     {rows.map((p, idx) => (
@@ -77,13 +91,13 @@ export default function PerformersBlock({ workstationId, config, variant, operat
                                 display: 'flex', alignItems: 'center', gap: 0.75,
                                 bgcolor: C.white, borderRadius: 0.75,
                                 px: 0.75, py: 0.5,
-                                border: `1px solid rgba(236,72,153,0.25)`,
+                                border: `1px solid ${C.accentBg}40`,
                                 minWidth: 0,
                             }}
                         >
                             <Box sx={{
                                 width: 20, height: 20, borderRadius: '50%',
-                                bgcolor: C.pink, color: C.white,
+                                bgcolor: C.accent, color: C.white,
                                 fontSize: '0.7rem', fontWeight: 800,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 flexShrink: 0,
@@ -107,7 +121,7 @@ export default function PerformersBlock({ workstationId, config, variant, operat
                                     {p.name}
                                 </Typography>
                                 <Typography sx={{
-                                    fontSize: '0.7rem', fontWeight: 800, color: C.pink,
+                                    fontSize: '0.7rem', fontWeight: 800, color: C.accent,
                                     fontFamily: 'monospace',
                                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                 }}>
@@ -122,11 +136,14 @@ export default function PerformersBlock({ workstationId, config, variant, operat
     );
 }
 
-function CenterText({ children, soft }: { children: React.ReactNode; soft?: boolean }) {
+function CenterText({ children, soft, palette }: {
+    children: React.ReactNode; soft?: boolean;
+    palette: typeof PALETTES[keyof typeof PALETTES];
+}) {
     return (
         <Box sx={{
             flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: soft ? C.soft : C.text, fontStyle: 'italic',
+            color: soft ? palette.soft : palette.text, fontStyle: 'italic',
         }}>
             <Typography sx={{ fontSize: '0.7rem', textAlign: 'center', px: 1 }}>
                 {children}
