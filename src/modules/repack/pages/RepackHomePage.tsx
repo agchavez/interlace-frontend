@@ -349,7 +349,20 @@ function ActiveSessionCard({ session }: { session: RepackSession }) {
 
     const elapsed = useElapsed(session.started_at);
     const totalBoxes = (session.entries || []).reduce((s, e) => s + e.box_count, 0);
-    const livePerHour = elapsed.seconds > 0 ? Math.round((totalBoxes * 3600 / elapsed.seconds) * 10) / 10 : 0;
+    // Cajas / hora = SUMA de box_count de los entries registrados en la HORA
+    // actual del reloj (HN). No extrapola — se reinicia cuando el reloj cambia
+    // de hora hasta que se registra un entry nuevo en la hora siguiente.
+    const livePerHour = (() => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentDay = now.toDateString();
+        return (session.entries || [])
+            .filter((e) => {
+                const ts = new Date(e.created_at);
+                return ts.getHours() === currentHour && ts.toDateString() === currentDay;
+            })
+            .reduce((s, e) => s + e.box_count, 0);
+    })();
 
     const onFinish = async () => {
         const ok = await confirm({
