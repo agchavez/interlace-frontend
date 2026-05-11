@@ -235,7 +235,9 @@ export default function RoleWorkstationPage({ role }: Props) {
             color: C.text,
             p: { xs: 1, md: 1.25 },
             display: 'flex', flexDirection: 'column',
-            height: 'calc(100vh - 60px)',
+            // Ahora la ruta /work/<role>/workstation se monta sin shell (sin
+            // navbar de 60px), así que el dashboard ocupa 100vh completos.
+            height: '100vh',
             overflow: 'hidden',
         }}>
             {/* ─────────── Header naranja ─────────── */}
