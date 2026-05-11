@@ -102,13 +102,24 @@ export function AppRouter() {
 
     const next = queryParams.get('next')
 
+    // En rutas /tv/* (pantallas kiosko/TV) NO renderizamos el shell:
+    // sidebar, change-DC modal, dev role switcher y notification manager
+    // tapan el contenido full-screen de la TV. La TV maneja su propio
+    // layout y su propia auth (TV token).
+    const onTvRoute = location.pathname.startsWith('/tv');
     return <>
-        {status === 'authenticated' && <ChangeDistributorCenter />}
-        {status === 'authenticated' && <SidebarV2 />}
-        {status === 'authenticated' && <DevRoleSwitcher />}
-        <NotificationManager/>
-        <LogOutTimer />
-        <div className={status === 'authenticated' ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}${location.pathname.startsWith('/work') ? ' work-mode' : ''}` : 'ui__container__auth'}>
+        {status === 'authenticated' && !onTvRoute && <ChangeDistributorCenter />}
+        {status === 'authenticated' && !onTvRoute && <SidebarV2 />}
+        {status === 'authenticated' && !onTvRoute && <DevRoleSwitcher />}
+        {!onTvRoute && <NotificationManager/>}
+        {!onTvRoute && <LogOutTimer />}
+        <div className={
+            onTvRoute
+                ? 'ui__container__tv'
+                : status === 'authenticated'
+                    ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}${location.pathname.startsWith('/work') ? ' work-mode' : ''}`
+                    : 'ui__container__auth'
+        }>
             <Routes>
                 <Route path="/auth/*" element={
                     // Si ya estás autenticado y el enlace trae ?next=..., te mandamos
