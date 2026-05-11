@@ -23,9 +23,10 @@ interface Props {
     workstationId: number;
     config: PerformersBlockConfig;
     variant: 'top' | 'bottom';
+    operationalDate?: string;
 }
 
-export default function PerformersBlock({ workstationId, config, variant }: Props) {
+export default function PerformersBlock({ workstationId, config, variant, operationalDate }: Props) {
     const metricCode = config.metric_code || '';
     const { data, isLoading } = useGetPerformersQuery(
         {
@@ -34,6 +35,7 @@ export default function PerformersBlock({ workstationId, config, variant }: Prop
             top_count: config.top_count ?? 3,
             bottom_count: config.bottom_count ?? 3,
             period: config.period ?? 'today',
+            ...(operationalDate ? { operational_date: operationalDate } : {}),
         },
         { skip: !metricCode, pollingInterval: 60_000 },
     );

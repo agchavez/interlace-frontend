@@ -95,12 +95,12 @@ export const workstationApi = createApi({
         }),
         // Top / Bottom performers para el bloque PERFORMERS de la TV.
         getPerformers: builder.query<{
-            metric: { code: string; name: string; unit: string; direction: string } | null;
+            metric: { code: string; name: string; unit: string; direction: string; target: number | null } | null;
             top: Array<{ personnel_id: number; name: string; photo_url: string | null; value: number }>;
             bottom: Array<{ personnel_id: number; name: string; photo_url: string | null; value: number }>;
             period?: string;
             error?: string;
-        }, { workstationId: number; metric_code: string; top_count?: number; bottom_count?: number; period?: 'today' | 'week' }>({
+        }, { workstationId: number; metric_code: string; top_count?: number; bottom_count?: number; period?: 'today' | 'week'; operational_date?: string }>({
             query: ({ workstationId, ...params }) => ({
                 url: `/workstations/${workstationId}/performers/`,
                 params,
