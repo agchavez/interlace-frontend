@@ -29,7 +29,7 @@ const ROLE_CARDS: Array<{ code: string; label: string; path: string; icon: React
     { code: 'PICKER',       label: 'Picker',            path: '/work/picker',   icon: <PickerIcon />,   color: '#1976d2', enabled: true },
     { code: 'COUNTER',      label: 'Contador',          path: '/work/counter',  icon: <CounterIcon />,  color: '#0288d1', enabled: true },
     { code: 'SECURITY',     label: 'Seguridad',         path: '/work/security', icon: <SecurityIcon />, color: '#9c27b0', enabled: true },
-    { code: 'OPS',          label: 'Operaciones',       path: '/work/ops',      icon: <OpsIcon />,      color: '#6a1b9a', enabled: true },
+    { code: 'OPS',          label: 'Verificación',      path: '/work/ops',      icon: <OpsIcon />,      color: '#6a1b9a', enabled: true },
     { code: 'YARD_DRIVER',  label: 'Chofer de Patio',   path: '/work/yard',     icon: <YardIcon />,     color: '#ed6c02', enabled: true },
     { code: 'VENDOR',       label: 'Chofer Vendedor',   path: '/work/vendor',   icon: <VendorIcon />,   color: '#2e7d32', enabled: true },
 ];

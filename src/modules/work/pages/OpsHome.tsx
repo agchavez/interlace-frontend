@@ -74,7 +74,7 @@ export default function OpsHome() {
                 <Container maxWidth="xl" sx={{ display: 'flex', alignItems: 'center', gap: 1, py: { xs: 1.5, sm: 2 } }}>
                     <Box sx={{ flex: 1 }}>
                         <Typography variant={isMobile ? 'subtitle1' : 'h5'} fontWeight={800} sx={{ lineHeight: 1.1 }}>
-                            Operaciones
+                            Verificación
                         </Typography>
                         <Typography variant="caption" sx={{ opacity: 0.85 }}>
                             {user?.first_name ? `Hola, ${user.first_name}` : ''} · {today}

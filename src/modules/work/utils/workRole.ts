@@ -13,7 +13,7 @@ export const WORK_ROLE_LABEL: Record<WorkRoleCode, string> = {
     PICKER: 'Picker',
     COUNTER: 'Contador',
     SECURITY: 'Seguridad',
-    OPS: 'Operaciones',
+    OPS: 'Verificación',
     YARD_DRIVER: 'Chofer de Patio',
     VENDOR: 'Chofer Vendedor',
 };

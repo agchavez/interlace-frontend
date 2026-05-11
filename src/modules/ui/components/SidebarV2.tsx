@@ -271,7 +271,7 @@ const SidebarV2: React.FC = () => {
           { text: 'Picking', href: '/work/picker', id: 'tc-picking', visible: canPicker },
           { text: 'Conteo', href: '/work/counter', id: 'tc-counting', visible: canCounter },
           { text: 'Seguridad', href: '/work/security', id: 'tc-security', visible: canSecurity },
-          { text: 'Operaciones', href: '/work/ops', id: 'tc-ops', visible: canOps },
+          { text: 'Verificación', href: '/work/ops', id: 'tc-ops', visible: canOps },
           { text: 'Chofer de Patio', href: '/work/yard', id: 'tc-yard', visible: canYard },
           { text: 'Chofer Vendedor', href: '/work/vendor', id: 'tc-vendor', visible: canVendor },
           { text: 'KPI', href: '/truck-cycle/kpi/report', id: 'tc-kpi' },
