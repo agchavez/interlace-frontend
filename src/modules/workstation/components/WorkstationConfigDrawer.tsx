@@ -829,6 +829,11 @@ function ReactionPlansSection({ ws }: { ws: Workstation }) {
                 value={form.red?.title || ''} onChange={e => setRed('title', e.target.value)} />
             <TextField size="small" multiline minRows={2} label="Descripción"
                 value={form.red?.description || ''} onChange={e => setRed('description', e.target.value)} />
+            <TextField size="small" label="URL del QR (opcional, ej: Forms del Relato de Anomalía)"
+                value={form.red?.qr_url || ''} onChange={e => setRed('qr_url', e.target.value)} />
+            <TextField size="small" label="Etiqueta debajo del QR"
+                value={form.red?.qr_label || ''} onChange={e => setRed('qr_label', e.target.value)}
+                placeholder="RELATO" />
             <Button startIcon={<SaveIcon />} variant="contained" size="small" onClick={onSave}
                 sx={{ textTransform: 'none', alignSelf: 'flex-start' }}>
                 Guardar planes

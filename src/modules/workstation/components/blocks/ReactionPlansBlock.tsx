@@ -23,9 +23,10 @@ export default function ReactionPlansBlock({ config }: { config: ReactionPlansBl
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 0.75 }}>
                 {/* Header KPI */}
                 {config.kpi_label && (
-                    <Box sx={{ bgcolor: C.blue, px: 1.5, py: 0.6, borderRadius: 0.75 }}>
+                    <Box sx={{ bgcolor: C.blue, px: 1.25, py: 0.45, borderRadius: 0.75 }}>
                         <Typography fontWeight={800} sx={{
-                            color: C.white, fontSize: { xs: '0.75rem', md: '0.9rem' }, letterSpacing: '0.02em',
+                            color: C.white, fontSize: { xs: '0.65rem', md: '0.78rem' }, letterSpacing: '0.02em',
+                            lineHeight: 1.2,
                         }}>
                             KPI: {config.kpi_label.toUpperCase()}
                         </Typography>
@@ -34,21 +35,21 @@ export default function ReactionPlansBlock({ config }: { config: ReactionPlansBl
 
                 {/* Zona amarilla */}
                 <Box>
-                    <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: C.text, mb: 0.4 }}>
+                    <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: C.text, mb: 0.3 }}>
                         1. ZONA AMARILLA (alerta)
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'stretch' }}>
                         <Box sx={{
                             flex: 1, bgcolor: C.yellow, color: C.text,
-                            p: 1.25, borderRadius: 1,
+                            p: 1, borderRadius: 1,
                             display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                            minHeight: 60,
+                            minHeight: 56,
                         }}>
-                            <Typography sx={{ fontSize: { xs: '0.85rem', md: '1rem' }, fontWeight: 800 }}>
+                            <Typography sx={{ fontSize: { xs: '0.72rem', md: '0.82rem' }, fontWeight: 800, lineHeight: 1.15 }}>
                                 {config.yellow?.title || 'Ejecutar 5 Porqué'}
                             </Typography>
                             {config.yellow?.description && (
-                                <Typography sx={{ fontSize: '0.7rem', color: C.text, mt: 0.4 }}>
+                                <Typography sx={{ fontSize: '0.62rem', color: C.text, mt: 0.3, lineHeight: 1.2 }}>
                                     {config.yellow.description}
                                 </Typography>
                             )}
@@ -70,21 +71,35 @@ export default function ReactionPlansBlock({ config }: { config: ReactionPlansBl
 
                 {/* Zona roja */}
                 <Box>
-                    <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: C.text, mb: 0.4 }}>
+                    <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: C.text, mb: 0.3 }}>
                         2. ZONA ROJA (crítica)
                     </Typography>
-                    <Box sx={{
-                        bgcolor: C.red, color: C.white, p: 1.25, borderRadius: 1,
-                        display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                        textAlign: 'center', minHeight: 60,
-                    }}>
-                        <Typography sx={{ fontSize: { xs: '0.9rem', md: '1.1rem' }, fontWeight: 800 }}>
-                            {config.red?.title || 'RELATO DE ANOMALÍA'}
-                        </Typography>
-                        {config.red?.description && (
-                            <Typography sx={{ fontSize: '0.7rem', color: C.white, mt: 0.4 }}>
-                                {config.red.description}
+                    <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'stretch' }}>
+                        <Box sx={{
+                            flex: 1, bgcolor: C.red, color: C.white, p: 1, borderRadius: 1,
+                            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+                            textAlign: 'center', minHeight: 56,
+                        }}>
+                            <Typography sx={{ fontSize: { xs: '0.78rem', md: '0.9rem' }, fontWeight: 800, lineHeight: 1.15 }}>
+                                {config.red?.title || 'RELATO DE ANOMALÍA'}
                             </Typography>
+                            {config.red?.description && (
+                                <Typography sx={{ fontSize: '0.62rem', color: C.white, mt: 0.3, lineHeight: 1.2 }}>
+                                    {config.red.description}
+                                </Typography>
+                            )}
+                        </Box>
+                        {config.red?.qr_url && (
+                            <Box sx={{
+                                bgcolor: C.white, border: `2px solid ${C.red}`, borderRadius: 1,
+                                p: 0.75, display: 'flex', flexDirection: 'column',
+                                alignItems: 'center', justifyContent: 'center', gap: 0.4, minWidth: 100,
+                            }}>
+                                <QRCode value={config.red.qr_url} size={80} level="M" includeMargin={false} />
+                                <Typography sx={{ fontSize: '0.65rem', fontWeight: 800, color: C.text, lineHeight: 1 }}>
+                                    {config.red.qr_label || 'RELATO'}
+                                </Typography>
+                            </Box>
                         )}
                     </Box>
                 </Box>

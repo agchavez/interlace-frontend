@@ -57,17 +57,19 @@ interface Props {
     operationalDate: string;
     distributorCenterId?: number;
     personnelId?: number;
+    shiftId?: number | null;
 }
 
 export default function SicHourlyChart({
-    metricCode, operationalDate, distributorCenterId, personnelId,
+    metricCode, operationalDate, distributorCenterId, personnelId, shiftId,
 }: Props) {
     const { data: hourly } = useGetMetricsHourlyQuery(
         {
             metric_code: metricCode,
             operational_date: operationalDate,
             ...(distributorCenterId ? { distributor_center: distributorCenterId } : {}),
-            ...(personnelId ? { personnel_id: personnelId } : {}),
+            ...(personnelId ? { personnel_ids: [personnelId] } : {}),
+            ...(shiftId ? { shift_id: shiftId } : {}),
         },
         { pollingInterval: 30_000 },
     );

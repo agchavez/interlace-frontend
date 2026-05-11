@@ -70,6 +70,8 @@ interface Props {
     personnelId?: number;
     /** YYYY-MM-DD; si se omite, el bloque resuelve hoy en HN. */
     operationalDate?: string;
+    /** Turno explícito del CD; si se omite, usa el turno vigente. */
+    shiftId?: number | null;
 }
 
 const ROLE_TITLE: Record<string, string> = {
@@ -102,7 +104,7 @@ const isOn = (zone: WorkstationZone, highlight: WorkstationZone | null | undefin
     highlight === zone ? HIGHLIGHT_SX : {};
 
 export default function WorkstationFixedLayout({
-    workstation, mode = 'tv', highlight, personnelId, operationalDate,
+    workstation, mode = 'tv', highlight, personnelId, operationalDate, shiftId,
 }: Props) {
     const clock = useClock();
     const hnClock = useMemo(
@@ -223,6 +225,7 @@ export default function WorkstationFixedLayout({
                             distributorCenterId={workstation.distributor_center}
                             personnelId={personnelId}
                             operationalDate={operationalDate}
+                            shiftId={shiftId}
                         />
                         : <EmptySlot label="Carta SIC sin configurar" tall />}
                 </Box>

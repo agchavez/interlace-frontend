@@ -354,7 +354,7 @@ export const distributorCenterApi = createApi({
     }),
 
     // ───── DC Shifts (turnos del CD) ─────
-    getDcShifts: builder.query<BaseApiResponse<DCShift>, { distributor_center?: number; limit?: number; offset?: number }>({
+    getDcShifts: builder.query<BaseApiResponse<DCShift>, { distributor_center?: number; day_of_week?: DCShift['day_of_week']; is_active?: boolean; limit?: number; offset?: number }>({
       query: (params) => ({ url: 'dc-shift/', params }),
       providesTags: (result) => result
         ? [...result.results.map(({ id }) => ({ type: 'dc-shift' as const, id })), { type: 'dc-shift' as const, id: 'LIST' }]

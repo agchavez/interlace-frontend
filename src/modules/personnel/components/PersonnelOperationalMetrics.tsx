@@ -184,7 +184,7 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
     const sevenDaysAgo = rangeFrom;
 
     const { data: live } = useGetMetricsLiveQuery(
-        { personnel_id: personnelId, operational_date: selectedDate },
+        { personnel_ids: [personnelId], operational_date: selectedDate },
     );
 
     const { data: samplesData } = useGetMetricSamplesQuery({

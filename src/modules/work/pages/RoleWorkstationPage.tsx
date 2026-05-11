@@ -7,9 +7,8 @@
  * monitorear el desempeño del rol en el CD hoy.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, alpha, Chip, CircularProgress, ToggleButton, ToggleButtonGroup, Button, Drawer, IconButton, Divider } from '@mui/material';
-import { Close as CloseIcon, Groups as GroupsIcon, Person as PersonIcon, Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
+import { Box, Typography, alpha, CircularProgress, Button, IconButton } from '@mui/material';
+import { Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
 import {
     Warning as HazardIcon,
     DirectionsRun as TropiezoIcon,
@@ -35,6 +34,7 @@ import {
     useGetWorkstationQuery,
 } from '../../workstation/services/workstationApi';
 import WorkstationFixedLayout from '../../workstation/components/WorkstationFixedLayout';
+import WorkstationFiltersBar, { type PersonOption } from '../components/WorkstationFiltersBar';
 import type { SicChartBlockConfig } from '../../workstation/interfaces/workstation';
 
 type Role = 'picker' | 'counter' | 'yard' | 'repack';
@@ -106,15 +106,14 @@ function useClock() {
 type Props = { role: Role };
 
 export default function RoleWorkstationPage({ role }: Props) {
-    const navigate = useNavigate();
     const clock = useClock();
     const dcId = useAppSelector((s) => s.auth.user?.centro_distribucion);
-    const operationalDate = useMemo(() => todayInHonduras(), []);
+    const today = useMemo(() => todayInHonduras(), []);
 
-    const [view, setView] = useState<'group' | 'individual'>('group');
-    const [selectedPerson, setSelectedPerson] = useState<{ id: number; name: string; code: string } | null>(null);
+    const [operationalDate, setOperationalDate] = useState<string>(today);
+    const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<number[]>([]);
+    const [selectedShiftId, setSelectedShiftId] = useState<number | null>(null);
     const [selectedMetricCode, setSelectedMetricCode] = useState<string | null>(null);
-    const [personDrawerOpen, setPersonDrawerOpen] = useState(false);
     const [autoRotate, setAutoRotate] = useState(true);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -138,12 +137,21 @@ export default function RoleWorkstationPage({ role }: Props) {
     const { data: live, isLoading: loadingLive } = useGetMetricsLiveQuery({
         operational_date: operationalDate,
         ...(dcId ? { distributor_center: dcId } : {}),
-        ...(view === 'individual' && selectedPerson ? { personnel_id: selectedPerson.id } : {}),
+        ...(selectedPersonnelIds.length > 0 ? { personnel_ids: selectedPersonnelIds } : {}),
+        ...(selectedShiftId ? { shift_id: selectedShiftId } : {}),
     });
+    // ws siempre trae el roster completo del rol para esa fecha/turno (sin filtrar
+    // por personnel_ids) para que el Autocomplete del filtro siempre tenga las
+    // opciones disponibles. El filtrado por persona se hace luego en cliente.
     const { data: ws, isLoading: loadingWs } = useGetRoleWorkstationQuery({
         role, operational_date: operationalDate,
         ...(dcId ? { distributor_center: dcId } : {}),
+        ...(selectedShiftId ? { shift_id: selectedShiftId } : {}),
     });
+    const personnelOptions: PersonOption[] = useMemo(
+        () => (ws?.personnel ?? []).map((p) => ({ id: p.id, name: p.name, code: p.code })),
+        [ws],
+    );
 
     // Workstation config (riesgos, prohibiciones, planes, QRs) configurada
     // desde el CD. Mapea role → CHOICES del backend (PICKER, COUNTER, YARD).
@@ -264,33 +272,20 @@ export default function RoleWorkstationPage({ role }: Props) {
                 </Box>
             </Box>
 
-            {/* ─────────── Barra de toggle Grupo/Individual ─────────── */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexShrink: 0, flexWrap: 'wrap' }}>
-                <ToggleButtonGroup
-                    value={view}
-                    exclusive
-                    size="small"
-                    onChange={(_, v) => {
-                        if (!v) return;
-                        setView(v);
-                        if (v === 'individual' && !selectedPerson) setPersonDrawerOpen(true);
-                    }}
-                    sx={{ bgcolor: C.white, '& .MuiToggleButton-root.Mui-selected': { bgcolor: C.orangeDark, color: C.white, '&:hover': { bgcolor: C.orangeDark } } }}
-                >
-                    <ToggleButton value="group"><GroupsIcon sx={{ fontSize: 16, mr: 0.5 }} /> Grupo</ToggleButton>
-                    <ToggleButton value="individual"><PersonIcon sx={{ fontSize: 16, mr: 0.5 }} /> Individual</ToggleButton>
-                </ToggleButtonGroup>
-                {view === 'individual' && (
-                    <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => setPersonDrawerOpen(true)}
-                        sx={{ bgcolor: C.white, color: C.text, '&:hover': { bgcolor: alpha(C.white, 0.9) } }}
-                    >
-                        {selectedPerson ? `${selectedPerson.name.split(' ').slice(0, 2).join(' ')} · ${selectedPerson.code}` : 'Elegir persona'}
-                    </Button>
-                )}
-                <Box sx={{ flex: 1 }} />
+            {/* ─────────── Filtros (personal, fecha, turno) ─────────── */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1, flexShrink: 0 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <WorkstationFiltersBar
+                        personnelOptions={personnelOptions}
+                        selectedPersonnelIds={selectedPersonnelIds}
+                        onPersonnelChange={setSelectedPersonnelIds}
+                        date={operationalDate}
+                        onDateChange={setOperationalDate}
+                        dcId={dcId}
+                        shiftId={selectedShiftId}
+                        onShiftChange={setSelectedShiftId}
+                    />
+                </Box>
                 <Button
                     size="small"
                     onClick={() => setAutoRotate((v) => !v)}
@@ -298,7 +293,7 @@ export default function RoleWorkstationPage({ role }: Props) {
                         bgcolor: autoRotate ? C.orangeDark : C.white,
                         color: autoRotate ? C.white : C.text,
                         '&:hover': { bgcolor: autoRotate ? C.orangeDark : alpha(C.white, 0.9) },
-                        fontWeight: 700, fontSize: '0.7rem',
+                        fontWeight: 700, fontSize: '0.7rem', flexShrink: 0,
                     }}
                 >
                     {autoRotate ? '⏯ Auto 10s · ON' : '⏯ Auto · OFF'}
@@ -313,7 +308,13 @@ export default function RoleWorkstationPage({ role }: Props) {
                 Si no hay workstation configurada para este (CD, rol) mostramos un hint. */}
             <Box sx={{ flex: 1, minHeight: 0, position: 'relative' }}>
                 {configuredWs ? (
-                    <WorkstationFixedLayout workstation={configuredWs} mode="embedded" />
+                    <WorkstationFixedLayout
+                        workstation={configuredWs}
+                        mode="embedded"
+                        operationalDate={operationalDate}
+                        personnelId={selectedPersonnelIds.length === 1 ? selectedPersonnelIds[0] : undefined}
+                        shiftId={selectedShiftId}
+                    />
                 ) : wsConfigLoading ? (
                     <Box sx={{
                         height: '100%', display: 'flex',
@@ -344,84 +345,6 @@ export default function RoleWorkstationPage({ role }: Props) {
                 )}
             </Box>
 
-            {/* Drawer para elegir persona (vista individual) */}
-            <Drawer
-                anchor="right"
-                open={personDrawerOpen}
-                onClose={() => setPersonDrawerOpen(false)}
-                PaperProps={{ sx: { width: { xs: '100%', sm: 420 } } }}
-            >
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1, borderBottom: `1px solid ${C.border}` }}>
-                    <PersonIcon sx={{ color: C.orangeDark }} />
-                    <Typography variant="h6" fontWeight={800} sx={{ flex: 1 }}>
-                        Elegir persona
-                    </Typography>
-                    <IconButton size="small" onClick={() => setPersonDrawerOpen(false)}>
-                        <CloseIcon />
-                    </IconButton>
-                </Box>
-                <Box sx={{ p: 2, overflowY: 'auto', flex: 1 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-                        {ws?.personnel.length ?? 0} persona(s) con datos hoy en {ROLE_TITLE[role]}.
-                    </Typography>
-                    {(ws?.personnel ?? []).map((p: any) => (
-                        <Box
-                            key={p.id}
-                            onClick={() => {
-                                setSelectedPerson({ id: p.id, name: p.name, code: p.code });
-                                setPersonDrawerOpen(false);
-                            }}
-                            sx={{
-                                p: 1.5, mb: 1, borderRadius: 1, cursor: 'pointer',
-                                border: `1px solid ${selectedPerson?.id === p.id ? C.orangeDark : C.border}`,
-                                bgcolor: selectedPerson?.id === p.id ? alpha(C.orange, 0.08) : C.white,
-                                '&:hover': { bgcolor: alpha(C.orange, 0.12) },
-                            }}
-                        >
-                            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: C.text }}>
-                                {p.name}
-                            </Typography>
-                            <Typography sx={{ fontSize: '0.7rem', color: C.textSoft, mb: 0.75 }}>
-                                {p.code}
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {ws?.metrics.map((m: any) => {
-                                    const v = p.values[m.code];
-                                    if (v?.value === null || v?.value === undefined) return null;
-                                    const bg = v.band === 'GREEN' ? C.green : v.band === 'YELLOW' ? C.yellow : v.band === 'RED' ? C.red : '#9ca3af';
-                                    return (
-                                        <Box key={m.code} sx={{
-                                            px: 0.75, py: 0.25, bgcolor: bg, color: v.band === 'YELLOW' ? C.text : C.white,
-                                            borderRadius: 0.5, fontSize: '0.65rem', fontWeight: 700,
-                                        }}>
-                                            {m.name.split(' ')[0]} {v.value}{m.unit ? ` ${m.unit}` : ''}
-                                        </Box>
-                                    );
-                                })}
-                            </Box>
-                        </Box>
-                    ))}
-                    {(!ws || ws.personnel.length === 0) && (
-                        <Typography sx={{ textAlign: 'center', color: C.textSoft, py: 4 }}>
-                            No hay personas con datos hoy.
-                        </Typography>
-                    )}
-                </Box>
-                <Divider />
-                <Box sx={{ p: 2 }}>
-                    <Button
-                        fullWidth
-                        variant="outlined"
-                        onClick={() => {
-                            setSelectedPerson(null);
-                            setView('group');
-                            setPersonDrawerOpen(false);
-                        }}
-                    >
-                        Ver grupo completo
-                    </Button>
-                </Box>
-            </Drawer>
         </Box>
     );
 }
@@ -615,7 +538,7 @@ function SicPiChart({ operationalDate, metricCode, distributorCenterId, personne
             metric_code: metricCode,
             operational_date: operationalDate,
             ...(distributorCenterId ? { distributor_center: distributorCenterId } : {}),
-            ...(personnelId ? { personnel_id: personnelId } : {}),
+            ...(personnelId ? { personnel_ids: [personnelId] } : {}),
         },
         { pollingInterval: 30_000 },
     );

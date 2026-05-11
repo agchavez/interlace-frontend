@@ -727,36 +727,68 @@ export const personnelApi = createApi({
 
     getMetricsLive: builder.query<
       MetricsLiveResponse,
-      { personnel_id?: number; operational_date?: string; distributor_center?: number }
+      {
+        personnel_ids?: number[];
+        operational_date?: string;
+        distributor_center?: number;
+        shift_id?: number;
+      }
     >({
-      query: (params) => ({
+      query: ({ personnel_ids, ...rest }) => ({
         url: '/metric-samples/live/',
         method: 'GET',
-        params,
+        params: {
+          ...rest,
+          ...(personnel_ids && personnel_ids.length > 0
+            ? { personnel_ids: personnel_ids.join(',') }
+            : {}),
+        },
       }),
       providesTags: ['MetricsLive'],
     }),
 
     getRoleWorkstation: builder.query<
       WorkstationResponse,
-      { role: 'picker' | 'counter' | 'yard' | 'repack'; operational_date?: string; distributor_center?: number }
+      {
+        role: 'picker' | 'counter' | 'yard' | 'repack';
+        operational_date?: string;
+        distributor_center?: number;
+        shift_id?: number;
+        personnel_ids?: number[];
+      }
     >({
-      query: (params) => ({
+      query: ({ personnel_ids, ...rest }) => ({
         url: '/metric-samples/workstation/',
         method: 'GET',
-        params,
+        params: {
+          ...rest,
+          ...(personnel_ids && personnel_ids.length > 0
+            ? { personnel_ids: personnel_ids.join(',') }
+            : {}),
+        },
       }),
       providesTags: ['MetricsWorkstation'],
     }),
 
     getMetricsHourly: builder.query<
       MetricsHourlyResponse,
-      { metric_code: string; operational_date?: string; distributor_center?: number; personnel_id?: number }
+      {
+        metric_code: string;
+        operational_date?: string;
+        distributor_center?: number;
+        personnel_ids?: number[];
+        shift_id?: number;
+      }
     >({
-      query: (params) => ({
+      query: ({ personnel_ids, ...rest }) => ({
         url: '/metric-samples/hourly/',
         method: 'GET',
-        params,
+        params: {
+          ...rest,
+          ...(personnel_ids && personnel_ids.length > 0
+            ? { personnel_ids: personnel_ids.join(',') }
+            : {}),
+        },
       }),
       providesTags: ['MetricsHourly'],
     }),

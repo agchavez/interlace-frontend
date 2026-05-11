@@ -31,10 +31,12 @@ interface Props {
     personnelId?: number;
     /** YYYY-MM-DD; default: hoy en HN. */
     operationalDate?: string;
+    /** Turno explícito del CD; si se omite, usa el turno vigente. */
+    shiftId?: number | null;
 }
 
 export default function SicChartBlock({
-    config, distributorCenterId, personnelId, operationalDate,
+    config, distributorCenterId, personnelId, operationalDate, shiftId,
 }: Props) {
     const kpis = (config.kpis || []).filter(k => !!k.metric_code);
     const [activeIdx, setActiveIdx] = useState(0);
@@ -90,6 +92,7 @@ export default function SicChartBlock({
                             operationalDate={opDate}
                             distributorCenterId={distributorCenterId}
                             personnelId={personnelId}
+                            shiftId={shiftId}
                         />
                     ) : (
                         <Box sx={{
