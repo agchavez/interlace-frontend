@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import useWebSocket from 'react-use-websocket';
 import { toast } from 'sonner';
 import DescriptionTwoToneIcon from '@mui/icons-material/DescriptionTwoTone';
@@ -27,6 +28,10 @@ const NotificationManager: React.FC = () => {
     const [notifications, setNotifications] = useState<Notificacion[]>([]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const { token, user } = useAppSelector(state => state.auth);
+    const location = useLocation();
+    // En rutas /tv/* (modo kiosko/TV) NO renderizamos el Navbar — la pantalla
+    // es full-screen y el navbar tapaba el contenido (barra de filtros).
+    const hideNavbar = location.pathname.startsWith('/tv');
     const tokenPayload = token;
     const isAuthenticated = !!token && !!user?.id;
 
@@ -177,7 +182,9 @@ const NotificationManager: React.FC = () => {
 
     return (
         <>
-            <Navbar notificationCount={notifications.length} onDrawerOpen={() => setDrawerOpen(true)} />
+            {!hideNavbar && (
+                <Navbar notificationCount={notifications.length} onDrawerOpen={() => setDrawerOpen(true)} />
+            )}
             <NotificationsDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} notifications={notifications} />
         </>
     );
