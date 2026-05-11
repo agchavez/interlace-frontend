@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "..";
+import { getTvToken } from "../../modules/tv/utils/tvToken";
 import { BaseApiResponse } from "../../interfaces/api";
 import {
   Trailer,
@@ -284,6 +285,18 @@ export const distributorCenterApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_JS_APP_API_URL + "/api",
     prepareHeaders: (headers, { getState }) => {
+      // En rutas /tv/* usamos X-TV-Token (TvTokenAuthentication del backend).
+      // Si la TV no tiene JWT, ese es el único auth disponible — sin esto el
+      // dropdown de Turnos del filtro queda vacío con 401.
+      const onTvRoute = typeof window !== 'undefined'
+        && window.location.pathname.startsWith('/tv/');
+      if (onTvRoute) {
+        const tvToken = getTvToken();
+        if (tvToken) {
+          headers.set('X-TV-Token', tvToken);
+          return headers;
+        }
+      }
       const token = (getState() as RootState).auth.token;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);

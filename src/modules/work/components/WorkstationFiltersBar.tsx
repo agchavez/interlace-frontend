@@ -65,6 +65,30 @@ export default function WorkstationFiltersBar({
         [shifts, shiftId],
     );
 
+    /** Turno actualmente aplicado al SIC/agregados:
+     *  - Si el usuario eligió uno explícito → ese.
+     *  - Si no y es hoy → el turno cuyo rango horario contiene la hora actual.
+     *  - Si no se puede inferir → null. */
+    const activeShift = useMemo(() => {
+        if (selectedShift) return selectedShift;
+        if (date !== today || shifts.length === 0) return null;
+        const now = new Date();
+        const minutesNow = now.getHours() * 60 + now.getMinutes();
+        const toMinutes = (hhmmss: string) => {
+            const [h, m] = hhmmss.split(':');
+            return parseInt(h, 10) * 60 + parseInt(m, 10);
+        };
+        for (const s of shifts) {
+            const start = toMinutes(s.start_time);
+            const end = toMinutes(s.end_time);
+            const inRange = end > start
+                ? (minutesNow >= start && minutesNow < end)
+                : (minutesNow >= start || minutesNow < end); // cruza medianoche
+            if (inRange) return s;
+        }
+        return null;
+    }, [selectedShift, date, today, shifts]);
+
     // Si el turno seleccionado deja de estar disponible (al cambiar el día),
     // limpiamos la selección para no enviar un shift_id inválido al backend.
     useEffect(() => {
@@ -116,6 +140,24 @@ export default function WorkstationFiltersBar({
 
     return (
         <Stack spacing={1} sx={{ width: '100%' }}>
+            {/* Banner del turno actual — siempre visible para que el usuario sepa
+                qué turno está viendo. Si seleccionó uno, lo muestra; si no y es
+                hoy, deduce el turno cuya franja horaria contiene la hora actual. */}
+            {activeShift && (
+                <Box sx={{
+                    display: 'inline-flex', alignItems: 'center', alignSelf: 'flex-start',
+                    bgcolor: 'rgba(255,255,255,0.92)', color: '#1f2937',
+                    borderRadius: 1, px: 1, py: 0.4,
+                    border: '2px solid #d97706', gap: 0.6,
+                    fontSize: '0.75rem', fontWeight: 800,
+                }}>
+                    <span style={{ opacity: 0.7 }}>TURNO ACTUAL:</span>
+                    <span>{activeShift.shift_name}</span>
+                    <span style={{ opacity: 0.7, fontFamily: 'monospace', fontWeight: 700 }}>
+                        {activeShift.start_time.slice(0, 5)}–{activeShift.end_time.slice(0, 5)}
+                    </span>
+                </Box>
+            )}
             <Box sx={{
                 display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap',
                 bgcolor: 'rgba(255,255,255,0.85)', borderRadius: 1, p: 0.75,
