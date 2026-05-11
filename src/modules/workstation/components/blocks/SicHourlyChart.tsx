@@ -124,20 +124,42 @@ export default function SicHourlyChart({
         activeBand === 'red' ? C.red : '#9ca3af';
 
     // Para cada hora, cuántas filas (de abajo hacia arriba) se "llenan" en
-    // esa columna. La barra crece con la performance: bar lleno = meta cumplida
-    // (alcanza el verde de arriba); bar vacío = lejos de la meta.
+    // esa columna. El llenado se alinea con la BANDA del backend para que
+    // sea consistente con el color del badge:
+    //   GREEN  → llenado dentro de la zona verde (10-12 filas)
+    //   YELLOW → llenado dentro de la zona amarilla (6-10 filas)
+    //   RED    → llenado dentro de la zona roja (0-6 filas, según severidad)
+    // SIC_ZONES tiene 6 verdes arriba, 4 amarillas medio, 2 rojas abajo.
+    // Como el bar crece desde abajo, llenar N filas equivale a "row >= 12-N":
+    //   N=12 → todas pintadas (alcanzaste la meta verde)
+    //   N=6  → solo las 6 inferiores (rojas+amarillas) pintadas, verde queda vacío
+    //   N=2  → solo las 2 rojas pintadas
     const totalRows = SIC_ZONES.length; // 12
-    const fillRows = (hourValue: number | null): number => {
+    const fillRowsForBand = (hourValue: number | null, band: string | null): number => {
         if (hourValue === null || target === null || hourValue < 0) return 0;
         const t = Number(target);
         if (t <= 0) return 0;
+
+        if (band === 'GREEN') {
+            // En zona verde, llenamos toda la columna. Si quisiéramos variar
+            // entre 10 y 12 según qué tan dentro estamos, podríamos. Por ahora
+            // un bar lleno = meta cumplida.
+            return totalRows;
+        }
+        if (band === 'YELLOW') {
+            // Llena hasta el borde verde/amarillo. Visualmente queda la zona
+            // verde superior "vacía" → coincide con badge amarillo.
+            return totalRows - 6; // = 6 (las 4 amarillas + 2 rojas)
+        }
+        if (band === 'RED') {
+            // Solo las 2 rojas iluminadas → consistente con badge rojo.
+            return 2;
+        }
+        // Sin banda (GRAY o desconocida): fallback al cálculo proporcional.
         let score: number;
         if (direction === 'LOWER_IS_BETTER') {
-            // Mejor = más bajo. value=0 o value<=target → score=1 (bar lleno).
-            // value=2*target → score=0.5 (medio bar).
             score = hourValue <= t ? 1 : t / hourValue;
         } else {
-            // HIGHER_IS_BETTER: value>=target → score=1; value=0 → score=0.
             score = Math.min(1, hourValue / t);
         }
         return Math.max(0, Math.min(totalRows, Math.round(score * totalRows)));
@@ -214,7 +236,7 @@ export default function SicHourlyChart({
                 }}>
                     {SIC_ZONES.map((zone, row) =>
                         visibleHours.map((h, col) => {
-                            const rows = fillRows(h.value);
+                            const rows = fillRowsForBand(h.value, h.band);
                             const filled = row >= totalRows - rows;
                             const baseColor = zone === 'green' ? C.green : zone === 'yellow' ? C.yellow : C.red;
                             const isCurrent = h.hour === currentHour;
@@ -237,7 +259,7 @@ export default function SicHourlyChart({
 
                     <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none', display: 'flex', gap: '2px', p: 0.5 }}>
                         {visibleHours.map((h) => {
-                            const rows = fillRows(h.value);
+                            const rows = fillRowsForBand(h.value, h.band);
                             const rawBottomPct = (rows / totalRows) * 100;
                             const bottomPct = Math.min(82, rawBottomPct);
                             const insideCap = rawBottomPct > 82;
