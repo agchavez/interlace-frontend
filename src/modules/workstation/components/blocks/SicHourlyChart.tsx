@@ -98,30 +98,26 @@ export default function SicHourlyChart({
     })();
     const cols = Math.max(1, visibleHours.length);
 
-    // Badge grande con el valor de la hora actual.
+    // Hora actual (se usa para resaltar la columna correspondiente en el grid
+    // y la banda activa en la leyenda lateral).
     const currentHour = shift?.current_hour ?? new Date().getHours();
     const currentHourData = visibleHours.find((h) => h.hour === currentHour);
-    const bigValue = currentHourData?.value ?? null;
-    const bigBand = currentHourData?.band ?? null;
-
+    const currentBand = currentHourData?.band ?? null;
+    const currentValue = currentHourData?.value ?? null;
     const activeBand: 'green' | 'yellow' | 'red' | null = (() => {
-        if (bigBand === 'GREEN') return 'green';
-        if (bigBand === 'YELLOW') return 'yellow';
-        if (bigBand === 'RED') return 'red';
-        if (bigValue === null || target === null) return null;
+        if (currentBand === 'GREEN') return 'green';
+        if (currentBand === 'YELLOW') return 'yellow';
+        if (currentBand === 'RED') return 'red';
+        if (currentValue === null || target === null) return null;
         if (direction === 'LOWER_IS_BETTER') {
-            if (bigValue <= Number(target)) return 'green';
-            if (trigger !== null && bigValue <= Number(trigger)) return 'yellow';
+            if (currentValue <= Number(target)) return 'green';
+            if (trigger !== null && currentValue <= Number(trigger)) return 'yellow';
             return 'red';
         }
-        if (bigValue >= Number(target)) return 'green';
-        if (trigger !== null && bigValue >= Number(trigger)) return 'yellow';
+        if (currentValue >= Number(target)) return 'green';
+        if (trigger !== null && currentValue >= Number(trigger)) return 'yellow';
         return 'red';
     })();
-    const activeColor =
-        activeBand === 'green' ? C.green :
-        activeBand === 'yellow' ? C.yellow :
-        activeBand === 'red' ? C.red : '#9ca3af';
 
     // ── Escala Y según target/trigger y valores observados ──────────────
     const values = visibleHours
@@ -136,15 +132,36 @@ export default function SicHourlyChart({
     yMin = Math.max(0, yMin - rawSpan * 0.20);
     yMax = yMax + rawSpan * 0.25;
 
+    /** Eje Y "natural": valor bajo = abajo (top%=100), valor alto = arriba (top%=0).
+     *  La interpretación de banda (verde/amarillo/rojo) depende de la dirección,
+     *  pero la orientación del eje no cambia — las barras siempre crecen desde
+     *  abajo hacia arriba. */
     const toTopPct = (v: number): number => {
         const normalized = (v - yMin) / (yMax - yMin);
         const clamped = Math.max(0, Math.min(1, normalized));
-        return direction === 'LOWER_IS_BETTER' ? clamped * 100 : (1 - clamped) * 100;
+        return (1 - clamped) * 100;
     };
 
-    // Bandas de fondo según target/trigger.
-    const bandHi = t !== null && tr !== null
-        ? { greenEnd: toTopPct(t), yellowEnd: toTopPct(tr) }
+    // Posición Y de target/trigger en el chart.
+    const pctOfTarget = t !== null ? toTopPct(t) : null;
+    const pctOfTrigger = tr !== null ? toTopPct(tr) : null;
+
+    /** Bandas de fondo. Para HIGHER_IS_BETTER, verde arriba (valores altos = bueno);
+     *  para LOWER_IS_BETTER, verde abajo (valores bajos = bueno). */
+    const bands = pctOfTarget !== null && pctOfTrigger !== null
+        ? (direction === 'LOWER_IS_BETTER'
+            ? {
+                // top→bottom: rojo, amarillo, verde
+                red:    { top: 0,             height: pctOfTrigger },
+                yellow: { top: pctOfTrigger,  height: pctOfTarget - pctOfTrigger },
+                green:  { top: pctOfTarget,   height: 100 - pctOfTarget },
+            }
+            : {
+                // top→bottom: verde, amarillo, rojo
+                green:  { top: 0,             height: pctOfTarget },
+                yellow: { top: pctOfTarget,   height: pctOfTrigger - pctOfTarget },
+                red:    { top: pctOfTrigger,  height: 100 - pctOfTrigger },
+            })
         : null;
 
     // Ticks del eje Y. Step adaptativo según el span.
@@ -168,71 +185,31 @@ export default function SicHourlyChart({
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '100%', minHeight: 0, position: 'relative', overflow: 'hidden' }}>
-            {bigValue !== null && (
-                <Box
-                    key={`${Number(bigValue).toFixed(1)}-${activeColor}`}
-                    sx={{
-                    position: 'absolute',
-                    top: 0, right: 0, zIndex: 5,
-                    bgcolor: C.white,
-                    border: `4px solid ${activeColor}`,
-                    borderRadius: 2,
-                    px: 2, py: 0.75,
-                    boxShadow: `0 4px 16px ${alpha(activeColor, 0.35)}`,
-                    textAlign: 'center',
-                    minWidth: 110,
-                    animation: 'badgeIn 0.5s ease, badgePulse 3s ease-in-out infinite 0.5s',
-                    '@keyframes badgeIn': {
-                        '0%':   { transform: 'scale(0.7)', opacity: 0 },
-                        '60%':  { transform: 'scale(1.08)' },
-                        '100%': { transform: 'scale(1)', opacity: 1 },
-                    },
-                    '@keyframes badgePulse': {
-                        '0%, 100%': { boxShadow: `0 4px 16px ${alpha(activeColor, 0.35)}` },
-                        '50%':      { boxShadow: `0 4px 24px ${alpha(activeColor, 0.7)}` },
-                    },
-                }}>
-                    <Typography sx={{ fontSize: '0.55rem', color: shift && !shift.is_active_now ? C.red : C.textSoft, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 700, lineHeight: 1.2 }}>
-                        {shift
-                            ? (shift.is_active_now
-                                ? `Turno ${shift.name} · ${String(currentHour).padStart(2, '0')}:00`
-                                : `Fuera de turno · ${String(currentHour).padStart(2, '0')}:00`)
-                            : 'Hora actual'}
-                    </Typography>
-                    <Typography sx={{ fontSize: '2rem', fontWeight: 900, color: activeColor, lineHeight: 1, fontFeatureSettings: '"tnum"', mt: 0.25 }}>
-                        {Number(bigValue).toFixed(1)}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.65rem', color: C.text, fontWeight: 700, lineHeight: 1 }}>
-                        {unit}
-                    </Typography>
-                </Box>
-            )}
-
             <Box sx={{ display: 'flex', gap: 0.5, flex: 1, minHeight: 0 }}>
-                {/* Leyenda zonas: Meta / Alerta / Fuera */}
+                {/* Leyenda zonas: Meta / Alerta / Fuera (orden y posición según dirección) */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: 80, position: 'relative' }}>
-                    {bandHi ? (
+                    {bands ? (
                         <>
                             <ZoneLabel
                                 active={activeBand === 'green'}
-                                top={0}
-                                height={`${bandHi.greenEnd}%`}
+                                top={`${bands.green.top}%`}
+                                height={`${bands.green.height}%`}
                                 bg={C.green}
                                 textColor={C.white}
                                 label={`Meta ${direction === 'LOWER_IS_BETTER' ? '≤' : '≥'}${t}`}
                             />
                             <ZoneLabel
                                 active={activeBand === 'yellow'}
-                                top={`${bandHi.greenEnd}%`}
-                                height={`${bandHi.yellowEnd - bandHi.greenEnd}%`}
+                                top={`${bands.yellow.top}%`}
+                                height={`${bands.yellow.height}%`}
                                 bg={C.yellow}
                                 textColor={C.text}
                                 label={`Alerta ${direction === 'LOWER_IS_BETTER' ? '≤' : '≥'}${tr}`}
                             />
                             <ZoneLabel
                                 active={activeBand === 'red'}
-                                top={`${bandHi.yellowEnd}%`}
-                                height={`${100 - bandHi.yellowEnd}%`}
+                                top={`${bands.red.top}%`}
+                                height={`${bands.red.height}%`}
                                 bg={C.red}
                                 textColor={C.white}
                                 label="Fuera meta"
@@ -277,22 +254,22 @@ export default function SicHourlyChart({
                     flex: 1, position: 'relative', bgcolor: '#f3f4f6',
                     borderRadius: 1, overflow: 'hidden',
                 }}>
-                    {/* Bandas verde/amarillo/rojo de fondo */}
-                    {bandHi && (
+                    {/* Bandas verde/amarillo/rojo de fondo (posición según dirección) */}
+                    {bands && (
                         <>
                             <Box sx={{
                                 position: 'absolute', left: 0, right: 0,
-                                top: 0, height: `${bandHi.greenEnd}%`,
+                                top: `${bands.green.top}%`, height: `${bands.green.height}%`,
                                 bgcolor: alpha(C.green, 0.18),
                             }} />
                             <Box sx={{
                                 position: 'absolute', left: 0, right: 0,
-                                top: `${bandHi.greenEnd}%`, height: `${bandHi.yellowEnd - bandHi.greenEnd}%`,
+                                top: `${bands.yellow.top}%`, height: `${bands.yellow.height}%`,
                                 bgcolor: alpha(C.yellow, 0.18),
                             }} />
                             <Box sx={{
                                 position: 'absolute', left: 0, right: 0,
-                                top: `${bandHi.yellowEnd}%`, height: `${100 - bandHi.yellowEnd}%`,
+                                top: `${bands.red.top}%`, height: `${bands.red.height}%`,
                                 bgcolor: alpha(C.red, 0.18),
                             }} />
                         </>
@@ -309,21 +286,21 @@ export default function SicHourlyChart({
                     ))}
 
                     {/* Líneas de target y trigger más marcadas */}
-                    {bandHi && (
-                        <>
-                            <Box sx={{
-                                position: 'absolute', left: 0, right: 0,
-                                top: `${bandHi.greenEnd}%`, height: 0,
-                                borderTop: `2px dashed ${C.green}`,
-                                pointerEvents: 'none', zIndex: 2,
-                            }} />
-                            <Box sx={{
-                                position: 'absolute', left: 0, right: 0,
-                                top: `${bandHi.yellowEnd}%`, height: 0,
-                                borderTop: `2px dashed ${C.red}`,
-                                pointerEvents: 'none', zIndex: 2,
-                            }} />
-                        </>
+                    {pctOfTarget !== null && (
+                        <Box sx={{
+                            position: 'absolute', left: 0, right: 0,
+                            top: `${pctOfTarget}%`, height: 0,
+                            borderTop: `2px dashed ${C.green}`,
+                            pointerEvents: 'none', zIndex: 2,
+                        }} />
+                    )}
+                    {pctOfTrigger !== null && (
+                        <Box sx={{
+                            position: 'absolute', left: 0, right: 0,
+                            top: `${pctOfTrigger}%`, height: 0,
+                            borderTop: `2px dashed ${C.red}`,
+                            pointerEvents: 'none', zIndex: 2,
+                        }} />
                     )}
 
                     {/* Barras por hora */}
@@ -348,14 +325,10 @@ export default function SicHourlyChart({
                                 h.band === 'GREEN'  ? C.green :
                                 h.band === 'YELLOW' ? C.yellow :
                                 h.band === 'RED'    ? C.red : '#9ca3af';
-                            // Para LOWER_IS_BETTER el bar crece desde el TOP hacia abajo
-                            // (mejor está arriba — el bar "indica hasta dónde llega").
-                            // Para HIGHER, crece desde el BOTTOM hacia arriba.
-                            const barHeight = direction === 'LOWER_IS_BETTER'
-                                ? `${yPct}%`
-                                : `${100 - yPct}%`;
-                            const barTop = direction === 'LOWER_IS_BETTER' ? 0 : undefined;
-                            const barBottom = direction === 'LOWER_IS_BETTER' ? undefined : 0;
+                            // Barras SIEMPRE crecen desde abajo hacia arriba, sin
+                            // importar la dirección del KPI. La interpretación de
+                            // banda (verde/amarillo/rojo) la hace `bandBg` arriba.
+                            const barHeight = `${100 - yPct}%`;
                             return (
                                 <Box key={`bar-${h.hour}`} sx={{
                                     position: 'relative',
@@ -366,7 +339,7 @@ export default function SicHourlyChart({
                                     <Box sx={{
                                         position: 'absolute',
                                         left: '12%', right: '12%',
-                                        top: barTop, bottom: barBottom,
+                                        bottom: 0,
                                         height: barHeight,
                                         bgcolor: bandBg,
                                         border: `1px solid ${alpha(bandBg, 0.85)}`,
@@ -395,9 +368,9 @@ export default function SicHourlyChart({
                         const pctOfTarget = t !== null
                             ? Math.round((Number(h.value) / t) * 100)
                             : null;
-                        // El badge cae justo sobre el extremo de la barra (top
-                        // de la barra para HIGHER, bottom para LOWER).
-                        const isLower = direction === 'LOWER_IS_BETTER';
+                        // Badge SIEMPRE arriba del extremo superior de la barra
+                        // (las barras crecen desde abajo). El extremo de la barra
+                        // está en top=yPct, así que el badge se ubica justo encima.
                         return (
                             <Box
                                 key={`badge-${h.hour}`}
@@ -405,9 +378,7 @@ export default function SicHourlyChart({
                                     position: 'absolute',
                                     left: `${xPct}%`,
                                     top: `${yPct}%`,
-                                    transform: isLower
-                                        ? 'translate(-50%, 4px)'
-                                        : 'translate(-50%, calc(-100% - 4px))',
+                                    transform: 'translate(-50%, calc(-100% - 4px))',
                                     zIndex: 4,
                                     pointerEvents: 'none',
                                 }}

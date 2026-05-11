@@ -3,9 +3,11 @@
  *
  * Maneja: token, heartbeat, WS de pareo (revocación / cambio de dashboard) y
  * delega el render al componente de layout V2 con la config recibida del
- * endpoint TV (`workstation_config`).
+ * endpoint TV (`workstation_config`). Incluye la misma barra de filtros que
+ * /work/<role>/workstation para que el operador en la TV pueda revisar data
+ * histórica (otra fecha/turno/persona) sin salir de la pantalla.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Alert, Button, Typography } from '@mui/material';
 import useWebSocket from 'react-use-websocket';
@@ -13,6 +15,8 @@ import { useGetTvWorkstationQuery, useHeartbeatMutation } from '../services/tvAp
 import { getTvToken, getTvCode, clearTvSession, updateTvDashboard } from '../utils/tvToken';
 import { todayInHonduras } from '../../../utils/timezone';
 import WorkstationFixedLayout from '../../workstation/components/WorkstationFixedLayout';
+import WorkstationFiltersBar, { type PersonOption } from '../../work/components/WorkstationFiltersBar';
+import { useGetRoleWorkstationQuery } from '../../personnel/services/personnelApi';
 import type { WorkstationRole } from '../../workstation/interfaces/workstation';
 
 const WS_URL = import.meta.env.VITE_JS_APP_API_URL_WS as string;
@@ -26,6 +30,15 @@ const ROLE_TO_DASHBOARD: Record<WorkstationRole, string> = {
     REPACK:  'WORKSTATION_REPACK',
 };
 
+/** Mapping role → role usado por /metric-samples/workstation/ */
+const ROLE_TO_METRICS_ROLE: Record<WorkstationRole, 'picker' | 'counter' | 'yard' | 'repack' | null> = {
+    PICKING: 'picker',
+    PICKER:  'picker',
+    COUNTER: 'counter',
+    YARD:    'yard',
+    REPACK:  'repack',
+};
+
 interface Props {
     role: WorkstationRole;
 }
@@ -36,10 +49,38 @@ export default function TvWorkstationDashboardBase({ role }: Props) {
     const code = getTvCode();
     const [heartbeat] = useHeartbeatMutation();
 
-    const operationalDate = useMemo(() => todayInHonduras(), []);
+    const today = useMemo(() => todayInHonduras(), []);
+
+    // Estado de filtros (mismo modelo que RoleWorkstationPage).
+    const [operationalDate, setOperationalDate] = useState<string>(today);
+    const [selectedPersonnelIds, setSelectedPersonnelIds] = useState<number[]>([]);
+    const [selectedShiftId, setSelectedShiftId] = useState<number | null>(null);
+
     const { data, refetch } = useGetTvWorkstationQuery(
         { operational_date: operationalDate },
         { pollingInterval: 60_000, skip: !token },
+    );
+
+    const ws = data?.workstation_config;
+    const dcId = ws?.distributor_center ?? null;
+    const metricsRole = ROLE_TO_METRICS_ROLE[role];
+
+    // Lista de personnel para el autocomplete del filtro (se carga del endpoint
+    // workstation con la fecha+shift+CD actuales). Sirve para resolver nombres
+    // sin filtrar la data — el filtrado por persona ocurre downstream en los
+    // bloques (SicChart, etc).
+    const { data: wsData } = useGetRoleWorkstationQuery(
+        {
+            role: metricsRole ?? 'picker',
+            operational_date: operationalDate,
+            ...(dcId ? { distributor_center: dcId } : {}),
+            ...(selectedShiftId ? { shift_id: selectedShiftId } : {}),
+        },
+        { skip: !metricsRole || !dcId },
+    );
+    const personnelOptions: PersonOption[] = useMemo(
+        () => (wsData?.personnel ?? []).map((p) => ({ id: p.id, name: p.name, code: p.code })),
+        [wsData],
     );
 
     // Heartbeat
@@ -71,8 +112,6 @@ export default function TvWorkstationDashboardBase({ role }: Props) {
                     navigate(`/tv/dashboard/${String(msg.dashboard).toLowerCase()}`, { replace: true });
                 }
             } else if (msg.type === 'workstation.config.updated') {
-                // Admin tocó el config del workstation o KpiTarget del CD —
-                // refetcheamos sin esperar al polling de 60s.
                 refetch();
             }
         } catch { /* ignore */ }
@@ -92,7 +131,6 @@ export default function TvWorkstationDashboardBase({ role }: Props) {
         );
     }
 
-    const ws = data?.workstation_config;
     if (!ws) {
         return (
             <Box sx={{
@@ -110,5 +148,35 @@ export default function TvWorkstationDashboardBase({ role }: Props) {
         );
     }
 
-    return <WorkstationFixedLayout workstation={ws} mode="tv" />;
+    return (
+        <Box sx={{
+            position: 'fixed', inset: 0,
+            bgcolor: '#f5a623',
+            display: 'flex', flexDirection: 'column',
+            overflow: 'auto',
+        }}>
+            {/* Barra de filtros encima del layout */}
+            <Box sx={{ p: 1.5, flexShrink: 0 }}>
+                <WorkstationFiltersBar
+                    personnelOptions={personnelOptions}
+                    selectedPersonnelIds={selectedPersonnelIds}
+                    onPersonnelChange={setSelectedPersonnelIds}
+                    date={operationalDate}
+                    onDateChange={setOperationalDate}
+                    dcId={dcId}
+                    shiftId={selectedShiftId}
+                    onShiftChange={setSelectedShiftId}
+                />
+            </Box>
+            <Box sx={{ flex: 1, minHeight: 0, position: 'relative' }}>
+                <WorkstationFixedLayout
+                    workstation={ws}
+                    mode="embedded"
+                    operationalDate={operationalDate}
+                    personnelId={selectedPersonnelIds.length === 1 ? selectedPersonnelIds[0] : undefined}
+                    shiftId={selectedShiftId}
+                />
+            </Box>
+        </Box>
+    );
 }
