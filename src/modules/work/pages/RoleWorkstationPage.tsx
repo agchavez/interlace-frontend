@@ -7,8 +7,9 @@
  * monitorear el desempeño del rol en el CD hoy.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, alpha, CircularProgress, Button, IconButton } from '@mui/material';
-import { Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon } from '@mui/icons-material';
+import { Fullscreen as FullscreenIcon, FullscreenExit as FullscreenExitIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import {
     Warning as HazardIcon,
     DirectionsRun as TropiezoIcon,
@@ -106,6 +107,7 @@ function useClock() {
 type Props = { role: Role };
 
 export default function RoleWorkstationPage({ role }: Props) {
+    const navigate = useNavigate();
     const clock = useClock();
     const dcId = useAppSelector((s) => s.auth.user?.centro_distribucion);
     const today = useMemo(() => todayInHonduras(), []);
@@ -238,6 +240,14 @@ export default function RoleWorkstationPage({ role }: Props) {
         }}>
             {/* ─────────── Header naranja ─────────── */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, flexShrink: 0 }}>
+                <IconButton
+                    size="small"
+                    onClick={() => navigate('/')}
+                    sx={{ color: C.white, bgcolor: 'rgba(0,0,0,0.1)', '&:hover': { bgcolor: 'rgba(0,0,0,0.2)' } }}
+                    title="Salir del workstation"
+                >
+                    <ArrowBackIcon />
+                </IconButton>
                 <Box sx={{ flex: 1, textAlign: 'center' }}>
                     <Typography variant="h5" fontWeight={900} sx={{
                         color: C.white, letterSpacing: '0.02em',

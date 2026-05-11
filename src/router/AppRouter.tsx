@@ -102,19 +102,23 @@ export function AppRouter() {
 
     const next = queryParams.get('next')
 
-    // En rutas /tv/* (pantallas kiosko/TV) NO renderizamos el shell:
-    // sidebar, change-DC modal, dev role switcher y notification manager
-    // tapan el contenido full-screen de la TV. La TV maneja su propio
-    // layout y su propia auth (TV token).
+    // Modo full-screen sin shell:
+    // - /tv/*  → pantallas kiosko de TV.
+    // - /work/<role>/workstation  → dashboard operativo (debe verse a pantalla
+    //   completa, sin sidebar/navbar/etc., tipo dialog).
+    // El shell normal (sidebar, change-DC modal, dev role switcher,
+    // notification manager) NO se monta para estas rutas.
     const onTvRoute = location.pathname.startsWith('/tv');
+    const onFullscreenWorkstation = /^\/work\/[^/]+\/workstation(\/|$)/.test(location.pathname);
+    const fullscreenMode = onTvRoute || onFullscreenWorkstation;
     return <>
-        {status === 'authenticated' && !onTvRoute && <ChangeDistributorCenter />}
-        {status === 'authenticated' && !onTvRoute && <SidebarV2 />}
-        {status === 'authenticated' && !onTvRoute && <DevRoleSwitcher />}
-        {!onTvRoute && <NotificationManager/>}
-        {!onTvRoute && <LogOutTimer />}
+        {status === 'authenticated' && !fullscreenMode && <ChangeDistributorCenter />}
+        {status === 'authenticated' && !fullscreenMode && <SidebarV2 />}
+        {status === 'authenticated' && !fullscreenMode && <DevRoleSwitcher />}
+        {!fullscreenMode && <NotificationManager/>}
+        {!fullscreenMode && <LogOutTimer />}
         <div className={
-            onTvRoute
+            fullscreenMode
                 ? 'ui__container__tv'
                 : status === 'authenticated'
                     ? `ui__container__v2 ${isCollapsed ? 'collapsed' : ''}${location.pathname.startsWith('/work') ? ' work-mode' : ''}`
