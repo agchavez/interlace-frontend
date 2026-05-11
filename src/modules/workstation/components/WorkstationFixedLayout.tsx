@@ -137,6 +137,8 @@ export default function WorkstationFixedLayout({
     const performersCfg: PerformersBlockConfig = (performers?.config || {}) as PerformersBlockConfig;
     const qrDocs = byType.lists.QR_DOCUMENT || [];
     const qrExts = byType.lists.QR_EXTERNAL || [];
+    const imgs   = byType.lists.IMAGE || [];
+    const hasExtras = qrDocs.length + qrExts.length + imgs.length > 0;
 
     return (
         <Box sx={{
@@ -149,7 +151,10 @@ export default function WorkstationFixedLayout({
             bgcolor: C.orange, color: C.text,
             p: { xs: 1, md: 1.5 },
             display: 'flex', flexDirection: 'column',
-            overflow: { xs: 'auto', md: 'hidden' },
+            // Si hay extras (QRs/imágenes) habilitamos scroll global para que
+            // el usuario pueda hacer scroll hacia abajo y verlos sin afectar
+            // el layout principal de arriba.
+            overflow: hasExtras ? 'auto' : { xs: 'auto', md: 'hidden' },
             zIndex: mode === 'tv' ? 9999 : undefined,
             borderRadius: mode === 'embedded' ? 2 : undefined,
         }}>
@@ -180,12 +185,15 @@ export default function WorkstationFixedLayout({
             )}
 
             {/* Body — orden Ricardo: Rojo · Amarillo · (Rosado + Verde)
-                En pantallas chicas se stackean verticalmente para legibilidad. */}
+                En pantallas chicas se stackean verticalmente para legibilidad.
+                Si hay extras (QRs/imágenes) damos al body la altura completa
+                del viewport para que esos extras queden estrictamente debajo
+                del fold y solo se accedan haciendo scroll. */}
             <Box sx={{
                 flex: 1, display: 'flex',
                 flexDirection: { xs: 'column', md: 'row' },
                 gap: { xs: 1, md: 1.25 },
-                minHeight: 0,
+                minHeight: hasExtras ? { xs: 'auto', md: 'calc(100vh - 140px)' } : 0,
                 overflow: { xs: 'auto', md: 'hidden' },
             }}>
                 {/* ── Columna ROJO: Riesgos + Prohibiciones + Disparadores (compactos) ── */}
@@ -262,7 +270,7 @@ export default function WorkstationFixedLayout({
                         )}
                     </Box>
 
-                    {/* Verde: Planes de Reacción + QRs */}
+                    {/* Verde: Planes de Reacción (QRs/imágenes van abajo en sección scroll) */}
                     <Box sx={{ flex: 1.6, minHeight: 0 }}>
                         <Box sx={{
                             height: '100%', display: 'flex', flexDirection: 'column', gap: 1,
@@ -272,33 +280,54 @@ export default function WorkstationFixedLayout({
                                 <Box sx={{ flex: 1, minHeight: 0, ...isOn('REACTION_PLANS', highlight) }}>
                                     <ReactionPlansBlock config={plans.config as ReactionPlansBlockConfig} />
                                 </Box>
-                            ) : (qrDocs.length === 0 && qrExts.length === 0) && (
-                                <EmptySlot label="Sin planes de reacción ni QRs" />
-                            )}
-                            {(qrDocs.length > 0 || qrExts.length > 0) && (
-                                <Box sx={{
-                                    // Altura fija para los QRs: no se inflan cuando no hay planes.
-                                    flex: '0 0 auto',
-                                    height: { xs: 140, md: 180, lg: 220 },
-                                    minHeight: 0,
-                                    display: 'grid',
-                                    gridTemplateColumns: `repeat(${Math.min(Math.max(qrDocs.length + qrExts.length, 1), 4)}, 1fr)`,
-                                    gap: 1,
-                                    ...isOn('QR_DOCUMENT', highlight),
-                                    ...isOn('QR_EXTERNAL', highlight),
-                                }}>
-                                    {qrDocs.map(b => (
-                                        <QrDocumentBlock key={b.id} config={b.config as any} ws={workstation} />
-                                    ))}
-                                    {qrExts.map(b => (
-                                        <QrExternalBlock key={b.id} config={b.config as any} />
-                                    ))}
-                                </Box>
+                            ) : (
+                                <EmptySlot label="Sin planes de reacción" />
                             )}
                         </Box>
                     </Box>
                 </Box>
             </Box>
+
+            {/* Sección inferior de extras: QRs y imágenes. Requiere scroll para
+                verlos — el dashboard principal de arriba se mantiene completo
+                sin que estos elementos compriman la grilla. */}
+            {hasExtras && (
+                <Box sx={{
+                    flexShrink: 0, mt: { xs: 1.5, md: 2 },
+                    bgcolor: 'rgba(255,255,255,0.85)', borderRadius: 2,
+                    p: { xs: 1, md: 1.5 },
+                }}>
+                    <Typography sx={{
+                        fontSize: { xs: '0.85rem', md: '1rem' }, fontWeight: 800,
+                        color: C.text, letterSpacing: '0.02em', mb: 1,
+                    }}>
+                        ADICIONALES · QRs e imágenes
+                    </Typography>
+                    <Box sx={{
+                        display: 'grid',
+                        gridTemplateColumns: {
+                            xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)', lg: 'repeat(5, 1fr)',
+                        },
+                        gap: { xs: 1, md: 1.5 },
+                    }}>
+                        {qrDocs.map(b => (
+                            <Box key={`qrd-${b.id}`} sx={{ height: { xs: 180, md: 220 }, ...isOn('QR_DOCUMENT', highlight) }}>
+                                <QrDocumentBlock config={b.config as any} ws={workstation} />
+                            </Box>
+                        ))}
+                        {qrExts.map(b => (
+                            <Box key={`qre-${b.id}`} sx={{ height: { xs: 180, md: 220 }, ...isOn('QR_EXTERNAL', highlight) }}>
+                                <QrExternalBlock config={b.config as any} />
+                            </Box>
+                        ))}
+                        {imgs.map(b => (
+                            <Box key={`img-${b.id}`} sx={{ height: { xs: 180, md: 220 } }}>
+                                <ImageBlock config={b.config as any} />
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+            )}
         </Box>
     );
 }
