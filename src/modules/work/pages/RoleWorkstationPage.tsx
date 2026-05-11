@@ -148,12 +148,27 @@ export default function RoleWorkstationPage({ role }: Props) {
     // Workstation config (riesgos, prohibiciones, planes, QRs) configurada
     // desde el CD. Mapea role → CHOICES del backend (PICKER, COUNTER, YARD).
     const wsRole = role.toUpperCase();  // 'picker' → 'PICKER'
-    const { data: wsList = [] } = useGetWorkstationsQuery(
+    const {
+        data: wsList = [],
+        isLoading: loadingWsList,
+        isFetching: fetchingWsList,
+    } = useGetWorkstationsQuery(
         { role: wsRole, ...(dcId ? { distributor_center: dcId } : {}), is_active: true },
         { skip: !dcId },
     );
     const configuredWsId = wsList[0]?.id;
-    const { data: configuredWs } = useGetWorkstationQuery(configuredWsId!, { skip: !configuredWsId });
+    const {
+        data: configuredWs,
+        isLoading: loadingConfiguredWs,
+        isFetching: fetchingConfiguredWs,
+    } = useGetWorkstationQuery(configuredWsId!, { skip: !configuredWsId });
+
+    // True mientras alguna query de workstation aún no resolvió (incluye refetches).
+    const wsConfigLoading =
+        !dcId
+        || loadingWsList
+        || fetchingWsList
+        || (!!configuredWsId && (loadingConfiguredWs || fetchingConfiguredWs));
 
     // Bloques que necesitamos para auto-rotación de KPI / data live.
     const sicBlock = configuredWs?.blocks.find(b => b.type === 'SIC_CHART' && b.is_active);
@@ -299,6 +314,18 @@ export default function RoleWorkstationPage({ role }: Props) {
             <Box sx={{ flex: 1, minHeight: 0, position: 'relative' }}>
                 {configuredWs ? (
                     <WorkstationFixedLayout workstation={configuredWs} mode="embedded" />
+                ) : wsConfigLoading ? (
+                    <Box sx={{
+                        height: '100%', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        bgcolor: 'rgba(255,255,255,0.6)', borderRadius: 2,
+                        color: C.textSoft, gap: 1.5,
+                    }}>
+                        <CircularProgress size={20} />
+                        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                            Cargando configuración de la estación…
+                        </Typography>
+                    </Box>
                 ) : (
                     <Box sx={{
                         height: '100%', display: 'flex',

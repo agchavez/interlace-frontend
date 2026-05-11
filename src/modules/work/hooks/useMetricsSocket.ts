@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
-import { useAppDispatch } from '../../../store/store';
+import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { personnelApi } from '../../personnel/services/personnelApi';
 
 /**
@@ -10,8 +10,14 @@ import { personnelApi } from '../../personnel/services/personnelApi';
  */
 export function useMetricsSocket(dcId: number | undefined | null) {
     const dispatch = useAppDispatch();
+    const token = useAppSelector((s) => s.auth?.token);
+    const status = useAppSelector((s) => s.auth?.status);
     const WS_URL = import.meta.env.VITE_JS_APP_API_URL_WS as string;
-    const url = dcId ? `${WS_URL}/ws/truck-cycle/${dcId}/` : null;
+    // El backend rechaza el WS si no llega `?token=` — el JwtAuthMiddleware
+    // necesita el JWT del query string para autenticar la conexión.
+    const url = dcId && token && status === 'authenticated'
+        ? `${WS_URL}/ws/truck-cycle/${dcId}/?token=${token}`
+        : null;
 
     const { lastMessage } = useWebSocket(
         url,
@@ -19,7 +25,7 @@ export function useMetricsSocket(dcId: number | undefined | null) {
             reconnectAttempts: 999,
             reconnectInterval: 3000,
             retryOnError: true,
-            shouldReconnect: () => true,
+            shouldReconnect: (closeEvent) => closeEvent.code !== 1000,
         },
         !!url,
     );

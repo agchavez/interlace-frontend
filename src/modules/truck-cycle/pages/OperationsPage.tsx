@@ -76,10 +76,12 @@ import BayGridPicker, { type BayOccupancy, type DockPosition } from '../componen
 
 // Position types used for each assignment dialog (backend filter).
 // Soporta lista separada por comas en el endpoint autocomplete.
+// Ayudante de Almacén puede hacer Picker, Contador y Reempacador (criterio
+// del cliente — el ayudante es el rol más versátil del piso).
 const POSITION_TYPE_BY_DIALOG: Record<string, string> = {
-    'assign-picker': 'PICKER,LOADER',
+    'assign-picker': 'PICKER,LOADER,WAREHOUSE_ASSISTANT',
     'assign-yard-driver': 'YARD_DRIVER',
-    'assign-counter': 'WAREHOUSE_ASSISTANT',
+    'assign-counter': 'COUNTER,WAREHOUSE_ASSISTANT',
     'checkout-security': 'SECURITY_GUARD',
     'checkout-ops': 'WAREHOUSE_ASSISTANT',
 };

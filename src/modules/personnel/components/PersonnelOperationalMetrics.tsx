@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
     Box,
     Paper,
@@ -7,6 +7,9 @@ import {
     CardContent,
     Chip,
     Divider,
+    Stack,
+    ToggleButton,
+    ToggleButtonGroup,
     useTheme,
     alpha,
 } from '@mui/material';
@@ -18,7 +21,8 @@ import {
     LocalShipping as TruckIcon,
     Inventory as BoxIcon,
 } from '@mui/icons-material';
-import { format, subDays } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers';
+import { format, subDays, isValid, parseISO } from 'date-fns';
 import {
     useGetMetricsLiveQuery,
     useGetMetricSamplesQuery,
@@ -39,6 +43,20 @@ function fmt(n: number | null | undefined, digits = 1): string {
 function fmtInt(n: number | null | undefined): string {
     if (n === null || n === undefined) return '—';
     return n.toLocaleString('es-HN');
+}
+
+function periodLabel(p: 'today' | 'yesterday' | 'last7' | 'custom', selected: string, from: string, to: string): string {
+    if (p === 'today') return 'HOY';
+    if (p === 'yesterday') return 'AYER';
+    if (p === 'last7') return 'ÚLTIMOS 7 DÍAS';
+    return selected.replace(/-/g, '/');
+}
+
+function periodLabelLower(p: 'today' | 'yesterday' | 'last7' | 'custom'): string {
+    if (p === 'today') return 'hoy';
+    if (p === 'yesterday') return 'ayer';
+    if (p === 'last7') return 'últimos 7 días';
+    return 'fecha seleccionada';
 }
 
 function MetricCard({
@@ -131,18 +149,47 @@ function RawStatCard({
     );
 }
 
+type Period = 'today' | 'yesterday' | 'last7' | 'custom';
+
 export default function PersonnelOperationalMetrics({ personnelId, positionType }: Props) {
     const theme = useTheme();
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const sevenDaysAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+    // Filtro de período. "today" es el default; "custom" habilita el DatePicker.
+    const [period, setPeriod] = useState<Period>('today');
+    const [customDate, setCustomDate] = useState<string>(todayStr);
+
+    // Resolver el rango efectivo según el período.
+    const { selectedDate, rangeFrom, rangeTo } = useMemo(() => {
+        const now = new Date();
+        if (period === 'today') {
+            const d = format(now, 'yyyy-MM-dd');
+            return { selectedDate: d, rangeFrom: d, rangeTo: d };
+        }
+        if (period === 'yesterday') {
+            const d = format(subDays(now, 1), 'yyyy-MM-dd');
+            return { selectedDate: d, rangeFrom: d, rangeTo: d };
+        }
+        if (period === 'last7') {
+            return {
+                selectedDate: format(now, 'yyyy-MM-dd'),
+                rangeFrom: format(subDays(now, 6), 'yyyy-MM-dd'),
+                rangeTo: format(now, 'yyyy-MM-dd'),
+            };
+        }
+        // custom
+        return { selectedDate: customDate, rangeFrom: customDate, rangeTo: customDate };
+    }, [period, customDate]);
+    const today = selectedDate;  // alias compat
+    const sevenDaysAgo = rangeFrom;
 
     const { data: live } = useGetMetricsLiveQuery(
-        { personnel_id: personnelId, operational_date: today },
+        { personnel_id: personnelId, operational_date: selectedDate },
     );
 
     const { data: samplesData } = useGetMetricSamplesQuery({
         personnel: personnelId,
-        operational_date__gte: sevenDaysAgo,
+        operational_date__gte: rangeFrom,
         limit: 50,
     });
 
@@ -169,9 +216,31 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
     const isPicker = ['PICKER', 'LOADER'].includes(positionType || '');
     const isCounter = positionType === 'COUNTER' || positionType === 'WAREHOUSE_ASSISTANT';
     const isYard = positionType === 'YARD_DRIVER';
-    const showAll = !isPicker && !isCounter && !isYard;
+    // Ayudantes y cargadores también hacen reempaque.
+    const isRepack = ['WAREHOUSE_ASSISTANT', 'LOADER'].includes(positionType || '');
+    const showAll = !isPicker && !isCounter && !isYard && !isRepack;
 
     const hasData = samples.length > 0 || live !== undefined;
+
+    // Métricas de Reempaque del día (calculadas desde samples — el endpoint `live`
+    // todavía no las agrega).
+    const repackToday = useMemo(() => {
+        const todaySamples = samples.filter(s => s.operational_date === today && s.metric_code.startsWith('repack_'));
+        if (todaySamples.length === 0) return null;
+        const byCode: Record<string, number[]> = {};
+        for (const s of todaySamples) {
+            (byCode[s.metric_code] = byCode[s.metric_code] || []).push(Number(s.numeric_value));
+        }
+        const avg = (arr?: number[]) => arr && arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : undefined;
+        const sum = (arr?: number[]) => arr && arr.length ? arr.reduce((a, b) => a + b, 0) : undefined;
+        return {
+            boxesPerHour: avg(byCode['repack_boxes_per_hour']),
+            totalBoxes:   sum(byCode['repack_total_boxes_shift']),
+            skus:         avg(byCode['repack_skus_per_session']),
+            sessions:     todaySamples.filter(s => s.metric_code === 'repack_boxes_per_hour').length,
+        };
+    }, [samples, today]);
+    const hasRepackToday = repackToday !== null;
 
     return (
         <Paper
@@ -183,15 +252,45 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
             }}
         >
             <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                <Box sx={{
+                    display: 'flex', alignItems: { xs: 'flex-start', md: 'center' },
+                    gap: 1.5, mb: 0.5, flexWrap: 'wrap',
+                }}>
                     <AutoIcon color="primary" />
                     <Typography variant="h6" fontWeight={700}>
                         Métricas Operativas Automáticas
                     </Typography>
-                    <Chip label="HOY" size="small" color="primary" sx={{ fontWeight: 700, fontSize: '0.65rem' }} />
+                    <Chip
+                        label={periodLabel(period, selectedDate, rangeFrom, rangeTo)}
+                        size="small" color="primary"
+                        sx={{ fontWeight: 700, fontSize: '0.65rem' }}
+                    />
+                    <Box sx={{ flex: 1 }} />
+
+                    {/* Filtros de período */}
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ flexWrap: 'wrap', gap: 1 }}>
+                        <ToggleButtonGroup
+                            size="small"
+                            exclusive
+                            value={period}
+                            onChange={(_, val) => val && setPeriod(val as Period)}
+                        >
+                            <ToggleButton value="today" sx={{ textTransform: 'none' }}>Hoy</ToggleButton>
+                            <ToggleButton value="yesterday" sx={{ textTransform: 'none' }}>Ayer</ToggleButton>
+                            <ToggleButton value="last7" sx={{ textTransform: 'none' }}>7 días</ToggleButton>
+                            <ToggleButton value="custom" sx={{ textTransform: 'none' }}>Fecha…</ToggleButton>
+                        </ToggleButtonGroup>
+                        {period === 'custom' && (
+                            <DatePicker
+                                value={customDate ? parseISO(customDate) : null}
+                                onChange={(v) => setCustomDate(v && isValid(v) ? format(v, 'yyyy-MM-dd') : todayStr)}
+                                slotProps={{ textField: { size: 'small' } }}
+                            />
+                        )}
+                    </Stack>
                 </Box>
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2.5 }}>
-                    Calculadas desde el Ciclo del Camión cuando la persona toma/completa pautas. Colores según metas del centro.
+                    Calculadas desde el Ciclo del Camión y las jornadas de Reempaque. Colores según metas del centro.
                 </Typography>
 
                 {!hasData && (
@@ -205,11 +304,11 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
                     </Box>
                 )}
 
-                {/* Picker */}
-                {hasData && (isPicker || showAll) && live?.picker && (
+                {/* Picker — solo si hay data del día */}
+                {hasData && (isPicker || showAll) && live?.picker && (live.picker.samples_count > 0 || (live.picker.loads_assembled?.value ?? 0) > 0) && (
                     <>
                         <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ mb: 1, mt: 1, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-                            Picker — hoy
+                            Picker — {periodLabelLower(period)}
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 1.5, mb: 2 }}>
                             <MetricCard icon={<SpeedIcon />} label="Pallets/HR" metric={live.picker.pallets_per_hour} />
@@ -220,11 +319,11 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
                     </>
                 )}
 
-                {/* Counter */}
-                {hasData && (isCounter || showAll) && live?.counter && (
+                {/* Counter — solo si hay data del día */}
+                {hasData && (isCounter || showAll) && live?.counter && live.counter.samples_count > 0 && (
                     <>
                         <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ mb: 1, mt: 1, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-                            Contador — hoy
+                            Contador — {periodLabelLower(period)}
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 1.5, mb: 2 }}>
                             <MetricCard icon={<SpeedIcon />} label="Pallets contados/h" metric={live.counter.pallets_per_hour} />
@@ -235,17 +334,43 @@ export default function PersonnelOperationalMetrics({ personnelId, positionType 
                     </>
                 )}
 
-                {/* Yard */}
-                {hasData && (isYard || showAll) && live?.yard && (
+                {/* Yard — solo si hay data del día */}
+                {hasData && (isYard || showAll) && live?.yard && (live.yard.samples_count > 0 || (live.yard.trucks_moved?.value ?? 0) > 0) && (
                     <>
                         <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ mb: 1, mt: 1, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
-                            Chofer de patio — hoy
+                            Chofer de patio — {periodLabelLower(period)}
                         </Typography>
                         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 1.5, mb: 2 }}>
                             <MetricCard icon={<TruckIcon />} label="Camiones movidos" metric={live.yard.trucks_moved} digits={0} />
                             <MetricCard icon={<TimerIcon />} label="Estac→Bahía" metric={live.yard.avg_park_to_bay_min} suffix=" min" digits={0} />
                             <MetricCard icon={<TimerIcon />} label="Bahía→Estac" metric={live.yard.avg_bay_to_park_min} suffix=" min" digits={0} />
                             <MetricCard icon={<TimerIcon />} label="Total movim." metric={live.yard.avg_total_move_min} suffix=" min" digits={0} />
+                        </Box>
+                    </>
+                )}
+
+                {/* Reempaque — solo si hay sesiones o samples del día */}
+                {hasData && (isRepack || showAll) && ((live?.repack && live.repack.sessions_count > 0) || hasRepackToday) && (
+                    <>
+                        <Typography variant="subtitle2" fontWeight={700} color="text.secondary" sx={{ mb: 1, mt: 1, textTransform: 'uppercase', fontSize: '0.7rem', letterSpacing: 1 }}>
+                            Reempaque — {periodLabelLower(period)}
+                        </Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', md: 'repeat(4, 1fr)' }, gap: 1.5, mb: 2 }}>
+                            {live?.repack ? (
+                                <>
+                                    <MetricCard icon={<SpeedIcon />} label="Cajas / hora" metric={live.repack.boxes_per_hour} />
+                                    <MetricCard icon={<BoxIcon />} label="Cajas totales" metric={live.repack.total_boxes_shift} digits={0} />
+                                    <MetricCard icon={<BoxIcon />} label="SKUs" metric={live.repack.skus_per_session} digits={0} />
+                                    <RawStatCard icon={<TimerIcon />} label="Jornadas hoy" value={fmtInt(live.repack.sessions_count)} color={theme.palette.primary.main} />
+                                </>
+                            ) : (
+                                <>
+                                    <RawStatCard icon={<SpeedIcon />} label="Cajas / hora" value={repackToday!.boxesPerHour !== undefined ? repackToday!.boxesPerHour.toFixed(1) : '—'} color={theme.palette.secondary.main} />
+                                    <RawStatCard icon={<BoxIcon />} label="Cajas totales" value={repackToday!.totalBoxes !== undefined ? fmtInt(repackToday!.totalBoxes) : '—'} color={theme.palette.secondary.main} />
+                                    <RawStatCard icon={<BoxIcon />} label="SKUs" value={repackToday!.skus !== undefined ? repackToday!.skus.toFixed(1) : '—'} color={theme.palette.secondary.main} />
+                                    <RawStatCard icon={<TimerIcon />} label="Jornadas hoy" value={fmtInt(repackToday!.sessions)} color={theme.palette.secondary.main} />
+                                </>
+                            )}
                         </Box>
                     </>
                 )}

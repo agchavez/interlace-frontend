@@ -140,7 +140,7 @@ export default function PickingPage() {
     const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery({
         search: personnelSearch || undefined,
         is_active: true,
-        position_type: 'PICKER,LOADER',
+        position_type: 'PICKER,LOADER,WAREHOUSE_ASSISTANT',
         limit: 50,
     }, { skip: !assignDialogOpen });
 

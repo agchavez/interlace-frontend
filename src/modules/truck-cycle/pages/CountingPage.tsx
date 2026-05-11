@@ -211,7 +211,7 @@ export default function CountingPage() {
     const { data: personnelData, isLoading: loadingPersonnel } = useGetPersonnelAutocompleteQuery({
         search: personnelSearch || undefined,
         is_active: true,
-        position_type: 'WAREHOUSE_ASSISTANT',
+        position_type: 'COUNTER,WAREHOUSE_ASSISTANT',
         limit: 50,
     }, { skip: !assignDialogOpen });
 
