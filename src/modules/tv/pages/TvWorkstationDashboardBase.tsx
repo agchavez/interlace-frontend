@@ -17,6 +17,7 @@ import { todayInHonduras } from '../../../utils/timezone';
 import WorkstationFixedLayout from '../../workstation/components/WorkstationFixedLayout';
 import WorkstationFiltersBar, { type PersonOption } from '../../work/components/WorkstationFiltersBar';
 import { useGetRoleWorkstationQuery } from '../../personnel/services/personnelApi';
+import { useMetricsSocket } from '../../work/hooks/useMetricsSocket';
 import type { WorkstationRole } from '../../workstation/interfaces/workstation';
 
 const WS_URL = import.meta.env.VITE_JS_APP_API_URL_WS as string;
@@ -82,6 +83,10 @@ export default function TvWorkstationDashboardBase({ role }: Props) {
         () => (wsData?.personnel ?? []).map((p) => ({ id: p.id, name: p.name, code: p.code })),
         [wsData],
     );
+
+    // WS de métricas — invalida queries del SIC/Performers/etc. al recibir
+    // 'metrics_updated' o 'pauta_updated'. Reemplaza el polling.
+    useMetricsSocket(dcId);
 
     // Heartbeat
     useEffect(() => {

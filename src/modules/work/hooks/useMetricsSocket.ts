@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import useWebSocket from 'react-use-websocket';
 import { useAppDispatch, useAppSelector } from '../../../store/store';
 import { personnelApi } from '../../personnel/services/personnelApi';
+import { workstationApi } from '../../workstation/services/workstationApi';
 
 /**
  * Escucha el WS de truck_cycle del CD y al recibir 'metrics_updated' (o
@@ -35,10 +36,18 @@ export function useMetricsSocket(dcId: number | undefined | null) {
         try {
             const msg = JSON.parse(lastMessage.data);
             if (msg.type === 'metrics_updated' || msg.type === 'pauta_updated') {
+                // Invalidamos los queries de métricas en ambos slices de RTK
+                // Query: personnelApi (live, workstation, hourly, samples) y
+                // workstationApi (performers). Así el SIC, las tablas y los
+                // top/bottom performers refrescan al instante sin esperar al
+                // polling.
                 dispatch(
                     personnelApi.util.invalidateTags([
                         'MetricsLive', 'MetricsWorkstation', 'MetricsHourly', 'MetricSamples',
                     ]),
+                );
+                dispatch(
+                    workstationApi.util.invalidateTags(['Performers']),
                 );
             }
         } catch {

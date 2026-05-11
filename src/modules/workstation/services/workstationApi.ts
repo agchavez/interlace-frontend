@@ -49,7 +49,7 @@ export interface BlockPayload {
 
 export const workstationApi = createApi({
     reducerPath: 'workstationApi',
-    tagTypes: ['Workstation', 'WorkstationList', 'RiskCatalog', 'ProhibitionCatalog'],
+    tagTypes: ['Workstation', 'WorkstationList', 'RiskCatalog', 'ProhibitionCatalog', 'Performers'],
     baseQuery: fetchBaseQuery({
         baseUrl: `${API_URL}/api`,
         prepareHeaders: (headers, { getState }) => {
@@ -105,6 +105,7 @@ export const workstationApi = createApi({
                 url: `/workstations/${workstationId}/performers/`,
                 params,
             }),
+            providesTags: ['Performers'],
         }),
         updateWorkstation: builder.mutation<Workstation, { id: number; data: Partial<Workstation> }>({
             query: ({ id, data }) => ({ url: `/workstations/${id}/`, method: 'PATCH', body: data }),
