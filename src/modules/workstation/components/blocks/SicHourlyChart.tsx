@@ -57,12 +57,42 @@ export default function SicHourlyChart({
     const direction = hourly?.direction ?? null;
     const unit = hourly?.unit ?? '';
 
-    // Rango de horas del turno vigente.
+    // Rango de horas a mostrar.
+    // 1) Si hay shift del backend, usamos start_hour..end_hour (con cruce de medianoche).
+    // 2) Si no hay shift pero hay data, usamos el rango real (min..max) de horas
+    //    con count>0. Esto evita el caso "fecha pasada sin turno seleccionado"
+    //    donde el default 6-19 escondía los samples de madrugada.
+    // 3) Si no hay ni shift ni data, fallback a 6-19 como antes.
     const allHours = hourly?.hours ?? [];
     const shift = hourly?.shift;
-    const firstHour = shift?.start_hour ?? 6;
-    const endHourRaw = shift ? Math.max(shift.start_hour, shift.end_hour - 1) : 19;
-    const crossesMidnight = endHourRaw >= 24;
+    const dataHours = allHours.filter((h) => h.count > 0).map((h) => h.hour);
+    const hasShift = !!shift;
+    const hasData = dataHours.length > 0;
+    let firstHour: number;
+    let endHourRaw: number;
+    let crossesMidnight = false;
+    if (hasShift) {
+        firstHour = shift.start_hour;
+        endHourRaw = Math.max(shift.start_hour, shift.end_hour - 1);
+        crossesMidnight = endHourRaw >= 24;
+    } else if (hasData) {
+        // Detectar si la data está partida en madrugada (0-5) y noche (20-23) —
+        // típico de un turno TC que cruzó medianoche.
+        const hasEarly = dataHours.some((h) => h <= 11);
+        const hasLate = dataHours.some((h) => h >= 18);
+        if (hasEarly && hasLate) {
+            firstHour = Math.min(...dataHours.filter((h) => h >= 18));
+            const maxEarly = Math.max(...dataHours.filter((h) => h <= 11));
+            endHourRaw = 24 + maxEarly;
+            crossesMidnight = true;
+        } else {
+            firstHour = Math.min(...dataHours);
+            endHourRaw = Math.max(...dataHours);
+        }
+    } else {
+        firstHour = 6;
+        endHourRaw = 19;
+    }
     const visibleHours = (() => {
         if (!crossesMidnight) {
             return allHours.filter((h) => h.hour >= firstHour && h.hour <= endHourRaw);
