@@ -37,9 +37,24 @@ interface Props {
     config: PerformersBlockConfig;
     variant: 'top' | 'bottom';
     operationalDate?: string;
+    /** Role del workstation — define el label default (Top Pickers / Top
+     *  Contadores / Top Choferes / Top / Bottom). Si el config trae `title`
+     *  explícito, ese tiene prioridad. */
+    role?: string;
 }
 
-export default function PerformersBlock({ workstationId, config, variant, operationalDate }: Props) {
+// Default por rol (el usuario puede sobreescribirlo desde el config drawer).
+function defaultLabel(variant: 'top' | 'bottom', role?: string): string {
+    const isTop = variant === 'top';
+    const r = (role || '').toUpperCase();
+    if (r === 'PICKER' || r === 'PICKING') return isTop ? 'Top Pickers' : 'Bottom Pickers';
+    if (r === 'COUNTER')                    return isTop ? 'Top Contadores' : 'Bottom Contadores';
+    if (r === 'YARD' || r === 'YARD_DRIVER')return isTop ? 'Top Choferes' : 'Bottom Choferes';
+    // REPACK u otros: genérico sin sustantivo (es agnóstico del rol del operario).
+    return isTop ? 'Top' : 'Bottom';
+}
+
+export default function PerformersBlock({ workstationId, config, variant, operationalDate, role }: Props) {
     const metricCode = config.metric_code || '';
     const { data, isLoading } = useGetPerformersQuery(
         {
@@ -54,7 +69,9 @@ export default function PerformersBlock({ workstationId, config, variant, operat
     );
 
     const C = PALETTES[variant];
-    const title = config.title ?? (variant === 'top' ? 'Top Pickers' : 'Bottom Pickers');
+    // Prioridad: top_label/bottom_label (nuevos) > title (legacy) > default por role.
+    const customLabel = variant === 'top' ? config.top_label : config.bottom_label;
+    const title = customLabel || config.title || defaultLabel(variant, role);
     const rows = variant === 'top' ? data?.top : data?.bottom;
     const Icon = variant === 'top' ? TrophyIcon : DownIcon;
     const unit = data?.metric?.unit || '';

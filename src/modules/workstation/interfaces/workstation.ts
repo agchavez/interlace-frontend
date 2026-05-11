@@ -21,7 +21,12 @@ export type BlockType =
     | 'DPO';
 
 export interface PerformersBlockConfig {
+    /** @deprecated Usar top_label/bottom_label. Si está, se aplica a ambos. */
     title?: string;
+    /** Label custom del bloque Top. Si no, usa default por role. */
+    top_label?: string;
+    /** Label custom del bloque Bottom. Si no, usa default por role. */
+    bottom_label?: string;
     /** Code del PerformanceMetricType para rankear. */
     metric_code?: string;
     /** Cuántos top mostrar (1-10, default 3). */

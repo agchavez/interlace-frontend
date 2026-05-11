@@ -254,12 +254,14 @@ export default function WorkstationFixedLayout({
                                     config={performersCfg}
                                     variant="top"
                                     operationalDate={operationalDate}
+                                    role={workstation.role}
                                 />
                                 <PerformersBlock
                                     workstationId={workstation.id}
                                     config={performersCfg}
                                     variant="bottom"
                                     operationalDate={operationalDate}
+                                    role={workstation.role}
                                 />
                             </>
                         ) : (

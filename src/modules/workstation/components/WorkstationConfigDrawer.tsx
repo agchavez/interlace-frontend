@@ -858,12 +858,16 @@ function PerformersSection({ ws }: { ws: Workstation }) {
     const [topCount, setTopCount] = useState<number>(cfg.top_count ?? 3);
     const [bottomCount, setBottomCount] = useState<number>(cfg.bottom_count ?? 3);
     const [period, setPeriod] = useState<'today' | 'week'>(cfg.period ?? 'today');
+    const [topLabel, setTopLabel] = useState<string>(cfg.top_label || '');
+    const [bottomLabel, setBottomLabel] = useState<string>(cfg.bottom_label || '');
 
     useEffect(() => {
         setMetricCode(cfg.metric_code || '');
         setTopCount(cfg.top_count ?? 3);
         setBottomCount(cfg.bottom_count ?? 3);
         setPeriod(cfg.period ?? 'today');
+        setTopLabel(cfg.top_label || '');
+        setBottomLabel(cfg.bottom_label || '');
     }, [block]);
 
     const onSave = async () => {
@@ -873,6 +877,8 @@ function PerformersSection({ ws }: { ws: Workstation }) {
             top_count: clamp(topCount, 1, 10),
             bottom_count: clamp(bottomCount, 1, 10),
             period,
+            top_label: topLabel.trim() || undefined,
+            bottom_label: bottomLabel.trim() || undefined,
         });
         toast.success('Performers guardados');
     };
@@ -934,6 +940,26 @@ function PerformersSection({ ws }: { ws: Workstation }) {
                             <option value="today">Hoy</option>
                             <option value="week">Últimos 7 días</option>
                         </TextField>
+                    </Stack>
+
+                    {/* Labels personalizados — opcionales, sobreescriben el default por rol. */}
+                    <Stack direction="row" spacing={1.5}>
+                        <TextField
+                            size="small"
+                            label="Label Top (opcional)"
+                            placeholder="Top Pickers / Top Contadores / …"
+                            value={topLabel}
+                            onChange={e => setTopLabel(e.target.value)}
+                            sx={{ flex: 1 }}
+                        />
+                        <TextField
+                            size="small"
+                            label="Label Bottom (opcional)"
+                            placeholder="Bottom Pickers / Bottom Contadores / …"
+                            value={bottomLabel}
+                            onChange={e => setBottomLabel(e.target.value)}
+                            sx={{ flex: 1 }}
+                        />
                     </Stack>
                 </>
             )}
