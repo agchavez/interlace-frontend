@@ -10,6 +10,7 @@ import { ValidateTokenPage } from './pages/ValidateTokenPage';
 import { CompleteDeliveryPage } from './pages/CompleteDeliveryPage';
 import { ExternalPersonListPage } from './pages/ExternalPersonListPage';
 import { MaterialListPage } from './pages/MaterialListPage';
+import { OvertimeDashboardPage } from './pages/OvertimeDashboardPage';
 
 function TokenRouter() {
   return (
@@ -18,6 +19,7 @@ function TokenRouter() {
       <Route path="/create" element={<TokenCreatePage />} />
       <Route path="/detail/:id" element={<TokenDetailPage />} />
       <Route path="/:id/complete-delivery" element={<CompleteDeliveryPage />} />
+      <Route path="/overtime-dashboard" element={<OvertimeDashboardPage />} />
       <Route path="/pending" element={<PendingApprovalPage />} />
       <Route path="/validate" element={<ValidateTokenPage />} />
       <Route path="/external-persons" element={<ExternalPersonListPage />} />

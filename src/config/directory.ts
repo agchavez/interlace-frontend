@@ -412,6 +412,12 @@ export const permisions = [
         ]
     },
     {
+        url: "/tokens/overtime-dashboard",
+        permissions: [
+            "tokens.view_tokenrequest"
+        ]
+    },
+    {
         url: "/tokens/:id/complete-delivery",
         reg: /\/tokens\/\d+\/complete-delivery/,
         permissions: [
