@@ -307,6 +307,7 @@ const SidebarV2: React.FC = () => {
           { text: 'Crear', href: '/tokens/create', id: 'create' },
           { text: 'Pendientes', href: '/tokens/pending', id: 'pending' },
           { text: 'Validar', href: '/tokens/validate', id: 'validate' },
+          { text: 'Dashboard Horas Extra', href: '/tokens/overtime-dashboard', id: 'overtime-dashboard' },
         ],
         id: 'tokens',
       },

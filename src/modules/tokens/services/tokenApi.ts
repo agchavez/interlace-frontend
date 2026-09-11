@@ -30,6 +30,10 @@ import {
   BulkOvertimeResult,
   ResolveEmployeeCodesResult,
 } from '../interfaces/token';
+import {
+  OvertimeDashboardParams,
+  OvertimeDashboardResponse,
+} from '../interfaces/overtimeDashboard';
 
 export const tokenApi = createApi({
   reducerPath: 'tokenApi',
@@ -43,7 +47,7 @@ export const tokenApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation', 'ExternalPersons', 'Materials', 'UnitsOfMeasure', 'OvertimeTypes', 'OvertimeReasons'],
+  tagTypes: ['Tokens', 'TokenDetail', 'PendingApprovals', 'MyTokens', 'PendingValidation', 'ExternalPersons', 'Materials', 'UnitsOfMeasure', 'OvertimeTypes', 'OvertimeReasons', 'OvertimeDashboard'],
   endpoints: (builder) => ({
     // List tokens with filters
     getTokens: builder.query<TokenListResponse, TokenFilterParams>({
@@ -540,6 +544,31 @@ export const tokenApi = createApi({
       }),
       invalidatesTags: [{ type: 'OvertimeReasons', id: 'LIST' }],
     }),
+
+    // ============ OVERTIME DASHBOARD ============
+
+    getOvertimeDashboard: builder.query<OvertimeDashboardResponse, OvertimeDashboardParams>({
+      query: (params) => ({
+        url: '/overtime_dashboard/',
+        params: {
+          date_from: params.date_from,
+          date_to: params.date_to,
+          ...(params.granularity && params.granularity !== 'auto'
+            ? { granularity: params.granularity }
+            : {}),
+          ...(params.distributor_center?.length
+            ? { distributor_center: params.distributor_center.join(',') }
+            : {}),
+          ...(params.reason?.length ? { reason: params.reason.join(',') } : {}),
+          ...(params.overtime_type?.length
+            ? { overtime_type: params.overtime_type.join(',') }
+            : {}),
+          ...(params.area?.length ? { area: params.area.join(',') } : {}),
+          ...(params.personnel?.length ? { personnel: params.personnel.join(',') } : {}),
+        },
+      }),
+      providesTags: [{ type: 'OvertimeDashboard', id: 'CURRENT' }],
+    }),
   }),
 });
 
@@ -592,4 +621,6 @@ export const {
   useCreateOvertimeReasonMutation,
   useUpdateOvertimeReasonMutation,
   useDeleteOvertimeReasonMutation,
+  // Overtime Dashboard
+  useGetOvertimeDashboardQuery,
 } = tokenApi;
